@@ -1,0 +1,1 @@
+structureJS.declare('modules/Auth');

@@ -1,0 +1,22 @@
+<div id="apl-hide" data-apl-hide="header"></div>
+
+<select>{{Auth.select}}</select>
+
+<ul>
+  <li id="items" data-apl-repeat="Auth.items">
+    <span id="start-{{$index}}">Buy {{title}} for ONLY </span>
+    <span style="color:{{color}};">{{price}}!!!!</span>  {{Auth.userName}}
+  </li>
+</ul>
+<br>
+
+<ul>
+  <li data-apl-repeat="Auth.list">
+    <span id="{{$index}}" style="color : {{Env.color}};">{{}} {{$index}}</span>
+  </li>
+</ul>
+
+
+<button id="btn-list1" >List 1</button>
+<button id="btn-list2">List 2</button>
+<button id="btn-update-footer" >Update Footer</button>
