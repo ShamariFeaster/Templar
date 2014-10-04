@@ -29,6 +29,7 @@ var TMP_Node = function(node, modelName, attribName, index){
   this.hasNonTerminals = false;
   this.embeddedControls = [];
   this.scope = '';
+  this.hasAttributes = false;
 };
 
 var ControlNode = function(node, id, modelName, attribName, index){
@@ -509,7 +510,8 @@ var Process = {
         baseRepeatNode = null,
         TMP_RepeatBase = null,
         TMP_select = null,
-        TMP_option = null;
+        TMP_option = null,
+        TMP_input = null;
     
     switch(type){
     
@@ -563,7 +565,7 @@ var Process = {
             Interpolate.interpolate(this.model, this.name, e.target.value );
           });
         }
-        
+        /*tmp_node is pushed during preProcessNodeAttributes()*/
         
         /*we don't push DOM_Node here because we can only bind to input using the value attribute
           which is a guarantee that DOM_Node will be pushed during preProcessNodeAttributes() */
@@ -638,12 +640,12 @@ var Interpolate = {
       for(var i = 0; i < elemAttributes.length; i++){
         elemAttribName = elemAttributes[i].name;
 
-        uninterpolatedString = (_isDef(node.symbolMap)) ? 
-                                  node.symbolMap[elemAttribName] :
+        uninterpolatedString = (_isDef(tmp_node.symbolMap[elemAttribName])) ? 
+                                  tmp_node.symbolMap[elemAttribName] :
                                   '';
         /*short circuit: is this model attribute's non-terminal in the node attributes string?
           during compilation, any node with a non-terminal is annotated w/ a symbol map*/
-        if(_isDef(node.symbolMap) && _isDef( uninterpolatedString ) 
+        if(_isDef( uninterpolatedString ) 
             && uninterpolatedString.match(new RegExp('{{' + modelName + '.' + attributeName + '}}'))){
           /*get each non-terminal then, using text replacement, we update the node attribute
             value*/
@@ -688,7 +690,7 @@ var Interpolate = {
     Map.forEach(modelName, attributeName, function(ctx, tmp_node){
       var node = tmp_node.node;
       if(ctx.hasAttributes == true)
-        updateObject = Interpolate.updateNodeAttributes(node, modelName, attributeName);
+        updateObject = Interpolate.updateNodeAttributes(tmp_node, modelName, attributeName);
         
         
       switch(node.tagName){

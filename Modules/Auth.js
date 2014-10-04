@@ -25,11 +25,23 @@ structureJS.module('Auth', function(require){
   
     console.log('partial-login-screen.html onload FIRED');
     
-    AuthModel.listen('select', function(data){
+    AuthModel.listen('countries', function(data){
       AuthModel.getSet('selected', data.text);
-      console.log(AuthModel.getSet('selected'));
+
+      if(AuthModel.getSet('selected') == 'CAN'){
+      
+        AuthModel.getSet('states', AuthModel.getSet('states', 'CAN_states') );
+      }
+      
+      switch(AuthModel.getSet('selected')){
+        case 'CAN':
+          COntrol('stateSelecyt').changeColor('red');
+         break;
+      }
+      
     });
     
+    /*
     document.getElementById('btn-list1').addEventListener('click', function(){
       AuthModel.getSet('select', AuthModel.getSet('select1'));
       EnvModel.getSet('host', 'http://cnet.com');
@@ -45,7 +57,7 @@ structureJS.module('Auth', function(require){
       EnvModel.getSet('footer', AuthModel.getSet('selected'));
       
     });
-    
+    */
   });
   
   return {
