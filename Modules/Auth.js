@@ -26,38 +26,32 @@ structureJS.module('Auth', function(require){
     console.log('partial-login-screen.html onload FIRED');
     
     AuthModel.listen('countries', function(data){
+    
       AuthModel.getSet('selected', data.text);
 
-      if(AuthModel.getSet('selected') == 'CAN'){
-      
-        AuthModel.getSet('states', AuthModel.getSet('states', 'CAN_states') );
-      }
-      
-      switch(AuthModel.getSet('selected')){
+      switch(data.text){
         case 'CAN':
-          COntrol('stateSelecyt').changeColor('red');
+          AuthModel.getSet('states', AuthModel.getSet('CAN_states') );
          break;
       }
       
     });
     
-    /*
+    
     document.getElementById('btn-list1').addEventListener('click', function(){
-      AuthModel.getSet('select', AuthModel.getSet('select1'));
       EnvModel.getSet('host', 'http://cnet.com');
     });
     
     document.getElementById('btn-list2').addEventListener('click',function(){
-      AuthModel.getSet('select', AuthModel.getSet('select2'));
       EnvModel.getSet('host', 'http://google.com');
     });
     
     document.getElementById('btn-update-footer').addEventListener('click',function(){
-      select(AuthModel, 'select', 'orig 1');
+      select(AuthModel, 'countries', 'US');
       EnvModel.getSet('footer', AuthModel.getSet('selected'));
       
     });
-    */
+    
   });
   
   return {

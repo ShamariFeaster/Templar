@@ -651,7 +651,7 @@ var Interpolate = {
             value*/
           while(  (match = regex.exec(uninterpolatedString)) != null){
             modelNameParts = Process.parseModelAttribName(match[2]);
-            currAttribVal = Map.getAttribute(modelName, attributeName);
+            currAttribVal = Map.getAttribute(modelNameParts[0], modelNameParts[1]);
             intermediateValue = uninterpolatedString.replace(match[1], currAttribVal );
             uninterpolatedString = intermediateValue;
           }
