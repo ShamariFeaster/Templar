@@ -394,12 +394,17 @@ var Process = {
     index = (_isDef(index)) ? '.' + index : '';
     return '|' + modelName + '.' +  modelAtrribName + index;
   },
+  buildRepeatNonTerminal : function(modelName, modelAtrribName, parentModel, parentAttrib, index){
+    var propertyName = (_isNullOrEmpty(propertyName)) ? '' : propertyName;
+    return '{{' + modelName + '.' + modelAtrribName + '[' + index + '].%TMP%DOT' + parentModel +'DOT' + parentAttrib + '}}';
+  },
   preProcessNodeAttributes : function(node){
     var attributes = null,
         match = null,
-        regex = /(\{\{(\w+\.\w+)\}\})/g,
+        regex = /(\{\{(\w+\.\w+)(\[\d+\]\.%TMP%Dot\w+)*\}\})/g,
         modelNameParts = null,
-        tmp_node = null;
+        tmp_node = null,
+        hasAttribNonTerminal = false;
     if(node.hasAttributes()){
       attributes = node.attributes;
       /*search node attributes for non-terminals*/
@@ -413,17 +418,21 @@ var Process = {
           modelNameParts = this.parseModelAttribName(match[2]); 
           tmp_node = new TMP_Node(node, modelNameParts[0], modelNameParts[1]);         
           tmp_node.symbolMap[attributes[i].name] = attributes[i].value;
-        
-          Map.pushNodes(tmp_node);
+          hasAttribNonTerminal = true;
+          //Map.pushNodes(tmp_node);
           /*annotate node with symbolMap and push it onto modelMap */
         }
+        
       }
+      if(hasAttribNonTerminal == true)
+          Map.pushNodes(tmp_node);
     }
   },
   
   preProcessRepeatNode : function(DOM_Node, modelName, attribName, index){
     var newId = null,
         repeatedProperties = null,
+        embeddedInterpolations = null,
         uncompiledTemplate = '',
         uncompiledTemplate = ''
         intraCompilation = '',
@@ -432,12 +441,21 @@ var Process = {
         newDomNode = document.createElement(DOM_Node.tagName.toLowerCase()),
         TMP_repeatedNode = new TMP_Node(newDomNode, modelName, attribName, index),
         ctrlRegexResults = null,
+        NONTERMINAL_REGEX = /(\{\{((\w+)\.(\w+))\}\})/g,
         Process = this;
 
     TMP_repeatedNode.node.innerHTML = DOM_Node.innerHTML;
     /*auto enumeration of existing id attribute*/
     newId = DOM_Node.getAttribute('id');
     newId = ( newId == null) ? '' : TMP_repeatedNode.node.setAttribute('id', newId + '-' + index); 
+    
+    /*Process embedded NTs belonging to other models*/
+    intraCompilation = TMP_repeatedNode.node.innerHTML;
+    if( (embeddedInterpolations = NONTERMINAL_REGEX.exec(TMP_repeatedNode.node.innerHTML)) != null){
+      nonTerminal = this.buildRepeatNonTerminal(embeddedInterpolations[3], embeddedInterpolations[4], modelName, attribName , index);
+            TMP_repeatedNode.node.innerHTML = intraCompilation =
+                    intraCompilation.replace(embeddedInterpolations[0], nonTerminal );
+    }
     
     /*repeat template is original DOM_Node with repeat directive on it. The non terminals here
       do not have index or property info. intraCompilation is progressively compiled 
@@ -476,6 +494,8 @@ var Process = {
       }
       intraCompilation = uncompiledTemplate;
     }
+    
+    
     
     /*Annotate control names for compiler*/
     /*Indexed nodes get array pointing to embedded controls. This repeat DOM_Node's model, attrib
