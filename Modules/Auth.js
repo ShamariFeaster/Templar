@@ -41,7 +41,7 @@ structureJS.module('Auth', function(require){
       
     });
     
-    
+    /*
     document.getElementById('btn-list1').addEventListener('click', function(){
       console.log('click');
       EnvModel.getSet('host', 'http://cnet.com');
@@ -56,7 +56,7 @@ structureJS.module('Auth', function(require){
       EnvModel.getSet('footer', AuthModel.getSet('selected'));
       
     });
-    
+    */
   });
   
   return {

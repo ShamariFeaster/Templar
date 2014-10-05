@@ -1,5 +1,5 @@
 <div id="apl-hide" data-apl-hide="header"></div>
-
+<!--
 <select>{{Auth.countries}}</select>
 
 <select data-apl-control="stateControl">{{Auth.states}}</select>
@@ -26,11 +26,18 @@
 
 <br>
 
-<button id="btn-list1" >List 1</button>
-<button id="btn-list2">List 2</button>
-<button id="btn-update-footer">Update Footer</button>
+<button data-apl-control="switchURL1">{{Buttons.switch_url1}}</button>
+<button data-apl-control="switchURL2">{{Buttons.switch_url2}}</button>
+<button data-apl-control="updateFooter" >{{Buttons.update_footer}}</button>
 
 <br>
+
+<ul>
+  <li data-apl-repeat="Auth.list">
+    <span data-apl-control="listControl"> Test </span>
+  </li>
+</ul>
+-->
 
 <ul>
   <li id="items" data-apl-repeat="Auth.items">

@@ -456,7 +456,24 @@ var Process = {
 
     }
   },
-  
+  preProcessControl : function(tmp_node, modelName, attribName, index){
+    /*Annotate control names for compiler*/
+    /*Indexed nodes get array pointing to embedded controls. This repeat DOM_Node's model, attrib
+      index are used to identify the control and delete it when this DOM_Node is removed*/
+    var intraCompilation = tmp_node.node.innerHTML,
+        ctrlRegexResults = null,
+        nonTerminal = '';
+    while( (ctrlRegexResults = Process.CONTROL_REGEX.exec(tmp_node.node.innerHTML)) != null ){
+
+      tmp_node.embeddedControls.push(ctrlRegexResults[1]);
+      nonTerminal = _CTRL_ATTRIB_STRING + '=' + '"' + ctrlRegexResults[1] 
+              + this.buildControlNonTerminal(modelName, attribName, ctrlRegexResults[1], index) + '"';
+        
+        tmp_node.node.innerHTML = intraCompilation =  
+          intraCompilation.replace(ctrlRegexResults[0], nonTerminal);
+    }
+    _log(tmp_node.node.innerHTML);
+  },
   preProcessRepeatNode : function(TMP_baseNode, modelName, attribName, index){
     var newId = null,
         repeatedProperties = null,
@@ -470,6 +487,7 @@ var Process = {
         TMP_repeatedNode = new TMP_Node(newDomNode, modelName, attribName, index),
         ctrlRegexResults = null,
         NONTERMINAL_REGEX = /(\{\{((\w+)\.(\w+))\}\})/g,
+        ntFound = false,/*nonTerminalFound*/
         Process = this;
 
     TMP_repeatedNode.node.innerHTML = TMP_baseNode.node.innerHTML;
@@ -495,6 +513,7 @@ var Process = {
       */
     if( (repeatedProperties = TMP_repeatedNode.node.innerHTML.match(/\{\{(\$*\w+)*\}\}/g)) != null){
       TMP_repeatedNode.hasNonTerminals = true;
+      
       uncompiledTemplate = intraCompilation = TMP_repeatedNode.node.innerHTML;
       /*Cycle through them*/
       for(var z = 0; z < repeatedProperties.length; z++){
@@ -525,10 +544,13 @@ var Process = {
     }
     
     
-    
+    TMP_repeatedNode.hasNonTerminals = (TMP_repeatedNode.hasNonTerminals == false) ? 
+                                        !_isNullOrEmpty(TMP_repeatedNode.node.innerHTML) :
+                                        TMP_repeatedNode.hasNonTerminals;
     /*Annotate control names for compiler*/
     /*Indexed nodes get array pointing to embedded controls. This repeat DOM_Node's model, attrib
       index are used to identify the control and delete it when this DOM_Node is removed*/
+      /*
     intraCompilation = TMP_repeatedNode.node.innerHTML;
     while( (ctrlRegexResults = Process.CONTROL_REGEX.exec(TMP_repeatedNode.node.innerHTML)) != null ){
 
@@ -539,7 +561,9 @@ var Process = {
         TMP_repeatedNode.node.innerHTML = intraCompilation =  
           intraCompilation.replace(ctrlRegexResults[0], nonTerminal);
     }
-
+    */
+    this.preProcessControl(TMP_repeatedNode, modelName, attribName, index);
+    
     return TMP_repeatedNode;
   },
   

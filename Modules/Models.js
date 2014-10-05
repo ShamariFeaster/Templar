@@ -8,6 +8,13 @@ Templar.dataModel('Env',
               color : 'green'
             });
 
+Templar.dataModel('Buttons',
+            {
+              switch_url1 :  'Switch URL 1',
+              switch_url2 : 'Switch URL 2',
+              update_footer : 'Update Footer'
+            });
+            
 Templar.dataModel('Images',{frontPage :  {src : 'blah.img'}});
 
 Templar.dataModel('Auth',
