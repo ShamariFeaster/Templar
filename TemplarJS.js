@@ -170,23 +170,24 @@ var Map = (function(){
     ctx.modelAtrribName = '';
     ctx.hasAttributes = false;
     ctx.stop = false;
-    ctx.target = [];
+    ctx.target = null;
+    ctx.targetCopy = null;
     ctx.key = '';
-    ctx.length = ctx.target.length;
+    ctx.length = 0;
     ctx.index = 0;
     ctx.modelAttribIndex = 0;
     ctx.modelAttribLength = 0;
     ctx.removeItem = function(i){
-      var tmp_node = this.target.splice(i, 1)[0];
+      ctx.target.splice(i, 1);
       var indexCnt = {};
       
-      for(var i = 0; i < this.target.length; i++ ){
-        if(this.target[i].index > _UNINDEXED)
-          indexCnt[this.target[i].index] = true;
+      for(var i = 0; i < ctx.target.length; i++ ){
+        if(ctx.target[i].index > _UNINDEXED)
+          indexCnt[ctx.target[i].index] = true;
       }
       ctx.modelAttribLength = Object.keys(indexCnt).length;
-      this.index--;
-      this.length = this.target.length;
+      ctx.index--;
+      ctx.length--;
     };
    
       
@@ -222,26 +223,29 @@ var Map = (function(){
       var tmp_node = null,
           indexCnt = {};
       if( _isDef(_map[modelName]['nodeTable'][attribName]) ){
-        target = _map[modelName]['nodeTable'][attribName]['nodes'];
+        ctx.target = _map[modelName]['nodeTable'][attribName]['nodes'];
+        ctx.targetCopy = ctx.target.slice(0);
+        ctx.length = ctx.targetCopy.length;
         
-        for(var i = 0; i < target.length; i++ ){
-          if(target[i].index > _UNINDEXED)
-            indexCnt[target[i].index] = true;
+        for(var i = 0; i < ctx.target.length; i++ ){
+          if(ctx.target[i].index > _UNINDEXED)
+            indexCnt[ctx.target[i].index] = true;
         }
         
         ctx.modelAttribLength = Object.keys(indexCnt).length;
         
-        for(; ctx.index < target.length && ctx.stop == false; ctx.index++){
-          tmp_node = target[ctx.index];
+        for(; ctx.index < ctx.length && ctx.stop == false; ctx.index++){
+          if(ctx.index >= ctx.target.length || ctx.target.length > ctx.targetCopy.length){
+            break;
+          }
+          tmp_node = ctx.target[ctx.index];
           ctx.modelName = modelName;
           ctx.modelAtrribName = attribName;
           ctx.modelAttribIndex = tmp_node.index;
-          ctx.target = target;
-          ctx.length = ctx.target.length;
           ctx.key = key;
-          ctx.hasAttributes = (Object.keys(target[ctx.index].symbolMap).length > 0) ? true : false;
-          
+          ctx.hasAttributes = (Object.keys(ctx.target[ctx.index].symbolMap).length > 0) ? true : false;
           mapFunction.call(null, ctx, tmp_node);
+          
         }
         
         
@@ -832,7 +836,7 @@ var Interpolate = {
                       newNodeIndex = attributeVal.length - newNodeCnt;
                   
                   for(var q = newNodeIndex; q < attributeVal.length; q++, newNodeIndex++, ctx.modelAttribLength++){
-                    TMP_newRepeatNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, modelName, attributeName, q);
+                    TMP_newRepeatNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, q);
                     /*embedded controls are added during comilation of the repeat node*/
                     Compile.compile(TMP_newRepeatNode.node, TMP_repeatBaseNode.scope, true);
                     DOM.appendTo(TMP_newRepeatNode.node, TMP_repeatBaseNode.node);
