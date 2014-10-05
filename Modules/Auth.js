@@ -22,23 +22,28 @@ structureJS.module('Auth', function(require){
   }
   
   Templar.success('partial-login-screen.html', function(){
-  
+    var states = AuthModel.getSet('states');
     console.log('partial-login-screen.html onload FIRED');
     
     AuthModel.listen('countries', function(data){
-    
+      
       AuthModel.getSet('selected', data.text);
 
       switch(data.text){
         case 'CAN':
+        /*This clobbers 'states', obviously undesirable.  */
           AuthModel.getSet('states', AuthModel.getSet('CAN_states') );
          break;
+        case 'US':
+          AuthModel.getSet('states', states );
+          break;
       }
       
     });
     
     
     document.getElementById('btn-list1').addEventListener('click', function(){
+      console.log('click');
       EnvModel.getSet('host', 'http://cnet.com');
     });
     

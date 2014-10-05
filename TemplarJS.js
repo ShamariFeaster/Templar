@@ -378,7 +378,7 @@ var Map = (function(){
               if((nodeScopeParts[0] == scopeParts[0])){
                 ctx.removeItem(ctx.index);
                 Map.pruneControlNodes(tmp_node, ctx.modelName, ctx.modelAtrribName, repeatIndex );
-                _log('pruning' + node.tagName);
+                _log('pruning' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName);
               }
             }
           });
@@ -426,13 +426,13 @@ var Process = {
     var propertyName = (_isNullOrEmpty(propertyName)) ? '' : propertyName;
     return '{{' + modelName + '.' + modelAtrribName + '[' + index + '].zTMPzDOT' + parentModel +'DOT' + parentAttrib + '}}';
   },
-  preProcessNodeAttributes : function(node){
+  preProcessNodeAttributes : function(node, scope){
     var attributes = null,
         match = null,
         regex = /(\{\{(\w+\.\w+)(\[\d+\]\.zTMPzDot\w+)*\}\})/g,
         modelNameParts = null,
-        tmp_node = null,
-        hasAttribNonTerminal = false;
+        tmp_node = null;
+        
     if(node.hasAttributes()){
       attributes = node.attributes;
       /*search node attributes for non-terminals*/
@@ -446,14 +446,14 @@ var Process = {
           modelNameParts = this.parseModelAttribName(match[2]); 
           tmp_node = new TMP_Node(node, modelNameParts[0], modelNameParts[1]);         
           tmp_node.symbolMap[attributes[i].name] = attributes[i].value;
+          tmp_node.scope = scope;
           hasAttribNonTerminal = true;
-          //Map.pushNodes(tmp_node);
+          Map.pushNodes(tmp_node);
           /*annotate node with symbolMap and push it onto modelMap */
         }
         
       }
-      if(hasAttribNonTerminal == true)
-          Map.pushNodes(tmp_node);
+
     }
   },
   
@@ -655,7 +655,7 @@ var Process = {
         break;
     }
     
-    this.preProcessNodeAttributes(DOM_Node);
+    this.preProcessNodeAttributes(DOM_Node, scope);
     return compileMe;
   }
   
