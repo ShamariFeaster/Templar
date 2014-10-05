@@ -42,9 +42,10 @@ var ControlNode = function(node, id, modelName, attribName, index){
     
   this.node = node;
   this.id = id;
-  this.modelName = modelName;
-  this.attribName = attribName;
+  this.modelName = _isDef(modelName) ? modelName : '';
+  this.attribName = _isDef(attribName) ? attribName : '';
   this.index = (_isDef(index))? index : -1;
+  this.scope = '';
 };
   
 var DOM = {
@@ -317,21 +318,16 @@ var Map = (function(){
     /*Remove embedded controls*/  
       
     Map.Control.forEach(function(ctrlCtx, ctrlNode){
-    
-      if(!Map.contains(tmp_node.embeddedControls, ctrlCtx.id)){
-        ctrlCtx.stop = true;
-      }else{
         if(ctrlNode.index == index && ctrlNode.modelName == modelName 
             && ctrlNode.attribName == attribName){
-          _log('Pruning controll node ' + ctrlNode.node.tagName);
+          _log('Pruning Controll Node ' + ctrlNode.node.tagName);
           ctrlCtx.removeItem(ctrlCtx.index);
         }
-      }
       
     });
     
   },
-  pruneRepeatNodes : function(tmp_baseNode, repeatModelName, repeatAttribName, index){
+  pruneEmbeddedNodes : function(tmp_baseNode, repeatModelName, repeatAttribName, index){
     var Map = this,
         embeddedAttribs = Object.keys(tmp_baseNode.embeddedModelAttribs),
         splitAttrib = null;
@@ -346,7 +342,7 @@ var Map = (function(){
              && tmp_node.repeatAttribName == repeatAttribName 
              && tmp_node.repeatIndex == index){
               ctx.removeItem(ctx.index);
-              _log('REMOVING :' + tmp_node.node.tagName);
+              _log('Pruning Embedded :' + tmp_node.node.tagName);
           }
           
         });
@@ -456,25 +452,27 @@ var Process = {
 
     }
   },
-  preProcessControl : function(tmp_node, modelName, attribName, index){
+  preProcessControl : function(tmp_node){
     /*Annotate control names for compiler*/
     /*Indexed nodes get array pointing to embedded controls. This repeat DOM_Node's model, attrib
       index are used to identify the control and delete it when this DOM_Node is removed*/
     var intraCompilation = tmp_node.node.innerHTML,
         ctrlRegexResults = null,
         nonTerminal = '';
-    while( (ctrlRegexResults = Process.CONTROL_REGEX.exec(tmp_node.node.innerHTML)) != null ){
+    while( ((ctrlRegexResults = new RegExp(_CTRL_ATTRIB_STRING + '=' + '"(\\w+)"', 'g').exec(tmp_node.node.innerHTML.trim())) != null )
+          && !_isNullOrEmpty(tmp_node.modelName) && !_isNullOrEmpty(tmp_node.attribName)){
 
       tmp_node.embeddedControls.push(ctrlRegexResults[1]);
       nonTerminal = _CTRL_ATTRIB_STRING + '=' + '"' + ctrlRegexResults[1] 
-              + this.buildControlNonTerminal(modelName, attribName, ctrlRegexResults[1], index) + '"';
+              + this.buildControlNonTerminal(tmp_node.modelName, tmp_node.attribName, ctrlRegexResults[1], tmp_node.index) + '"';
         
         tmp_node.node.innerHTML = intraCompilation =  
           intraCompilation.replace(ctrlRegexResults[0], nonTerminal);
     }
-    _log(tmp_node.node.innerHTML);
+
   },
-  preProcessRepeatNode : function(TMP_baseNode, modelName, attribName, index){
+  
+  preProcessRepeatNode : function(TMP_baseNode, index){
     var newId = null,
         repeatedProperties = null,
         embeddedInterpolations = null,
@@ -484,7 +482,7 @@ var Process = {
         idvRepeatedProperty = null,
         nonTerminal = '',
         newDomNode = document.createElement(TMP_baseNode.node.tagName.toLowerCase()),
-        TMP_repeatedNode = new TMP_Node(newDomNode, modelName, attribName, index),
+        TMP_repeatedNode = new TMP_Node(newDomNode, TMP_baseNode.modelName, TMP_baseNode.attribName, index),
         ctrlRegexResults = null,
         NONTERMINAL_REGEX = /(\{\{((\w+)\.(\w+))\}\})/g,
         ntFound = false,/*nonTerminalFound*/
@@ -499,7 +497,7 @@ var Process = {
     intraCompilation = TMP_repeatedNode.node.innerHTML;
     if( (embeddedInterpolations = NONTERMINAL_REGEX.exec(TMP_repeatedNode.node.innerHTML)) != null){
       TMP_baseNode.embeddedModelAttribs[embeddedInterpolations[3] + '.' + embeddedInterpolations[4]] = true;
-      nonTerminal = this.buildRepeatNonTerminal(embeddedInterpolations[3], embeddedInterpolations[4], modelName, attribName , index);
+      nonTerminal = this.buildRepeatNonTerminal(embeddedInterpolations[3], embeddedInterpolations[4], TMP_baseNode.modelName, TMP_baseNode.attribName , index);
             TMP_repeatedNode.node.innerHTML = intraCompilation =
                     intraCompilation.replace(embeddedInterpolations[0], nonTerminal );
     }
@@ -521,7 +519,7 @@ var Process = {
         if( (idvRepeatedProperty = /\{\{(\$*\w+)*\}\}/.exec(repeatedProperties[z]) ) ){
           
           if(idvRepeatedProperty[0] == '{{}}'){
-            nonTerminal = this.buildNonTerminal(modelName, attribName, null, index);
+            nonTerminal = this.buildNonTerminal(TMP_baseNode.modelName, TMP_baseNode.attribName, null, index);
             TMP_repeatedNode.node.innerHTML = intraCompilation = 
                     intraCompilation.replace(idvRepeatedProperty[0], nonTerminal );
            } 
@@ -532,7 +530,7 @@ var Process = {
           }
           
           if(idvRepeatedProperty[0] != '{{}}' && idvRepeatedProperty[0] != '{{$index}}'){
-            nonTerminal = this.buildNonTerminal(modelName, attribName, idvRepeatedProperty[1], index);
+            nonTerminal = this.buildNonTerminal(TMP_baseNode.modelName, TMP_baseNode.attribName, idvRepeatedProperty[1], index);
             TMP_repeatedNode.node.innerHTML = intraCompilation =
                     intraCompilation.replace(idvRepeatedProperty[0], nonTerminal );
           }
@@ -543,26 +541,12 @@ var Process = {
       intraCompilation = uncompiledTemplate;
     }
     
-    
+    /*if no NTs found, repeatNode innerHTML must be empty to be clobbered over by model attrib value*/
     TMP_repeatedNode.hasNonTerminals = (TMP_repeatedNode.hasNonTerminals == false) ? 
                                         !_isNullOrEmpty(TMP_repeatedNode.node.innerHTML) :
                                         TMP_repeatedNode.hasNonTerminals;
-    /*Annotate control names for compiler*/
-    /*Indexed nodes get array pointing to embedded controls. This repeat DOM_Node's model, attrib
-      index are used to identify the control and delete it when this DOM_Node is removed*/
-      /*
-    intraCompilation = TMP_repeatedNode.node.innerHTML;
-    while( (ctrlRegexResults = Process.CONTROL_REGEX.exec(TMP_repeatedNode.node.innerHTML)) != null ){
 
-      TMP_repeatedNode.embeddedControls.push(ctrlRegexResults[1]);
-      var nonTerminal = _CTRL_ATTRIB_STRING + '=' + '"' + ctrlRegexResults[1] 
-              + this.buildControlNonTerminal(modelName, attribName, ctrlRegexResults[1], index) + '"';
-        
-        TMP_repeatedNode.node.innerHTML = intraCompilation =  
-          intraCompilation.replace(ctrlRegexResults[0], nonTerminal);
-    }
-    */
-    this.preProcessControl(TMP_repeatedNode, modelName, attribName, index);
+    this.preProcessControl(TMP_repeatedNode);
     
     return TMP_repeatedNode;
   },
@@ -585,6 +569,7 @@ var Process = {
         TMP_select = null,
         TMP_option = null,
         TMP_input = null,
+        TMP_unknown = null,
         compileMe = true;
     
     switch(type){
@@ -664,7 +649,7 @@ var Process = {
         TMP_RepeatBase.node.setAttribute('style','display:none;');    
         for(var i = 0; i < attributeVal.length; i++){
 
-          TMP_repeatedNode = this.preProcessRepeatNode(TMP_RepeatBase, modelName, attribName, i);
+          TMP_repeatedNode = this.preProcessRepeatNode(TMP_RepeatBase, i);
           TMP_repeatedNode.scope = scope;
           Map.pushNodes(TMP_repeatedNode);
           if(TMP_repeatedNode.hasNonTerminals == false)
@@ -672,10 +657,15 @@ var Process = {
           DOM.appendTo(TMP_repeatedNode.node, TMP_RepeatBase.node);
           
         }
+        /*notice lack of preProcessControl(). This is so we don't add control declared in repeatBase.
+          we do call it during preProcessRepeatNode() on each of the repeated nodes*/
         compileMe = false;
         break;
 
-      default:  
+      default: 
+        TMP_unknown = new TMP_Node(DOM_Node, modelName, attribName);
+        /*add controls on all non-repeat elements with control directive*/
+        this.preProcessControl(TMP_unknown);
         break;
     }
     
@@ -852,9 +842,11 @@ var Interpolate = {
                 }
                 
                 if(ctx.modelAttribLength >= attributeVal.length && ctx.modelAttribIndex >= attributeVal.length){
-                  ctx.removeItem(ctx.index); /*from indexes[key] = []*/
+                  /*This prunes nodes from tree*/
+                  ctx.removeItem(ctx.index); 
                   Map.pruneControlNodes(tmp_node, modelName, attributeName, ctx.modelAttribIndex);
-                  Map.pruneRepeatNodes(TMP_repeatBaseNode, modelName, attributeName, ctx.modelAttribIndex);
+                  /*Prunes embedded interp nodes from other models*/
+                  Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, ctx.modelAttribIndex);
                   existingRepeatNode.parentNode.removeChild(existingRepeatNode);
                 }
               }
@@ -880,7 +872,7 @@ var Compile = {
         Compile = this,
         splitNode = null, span = null, parentNode = null, ctrlRegexResult = null,
         DOM_Node = null, match = null, modelNameParts = [null, null], 
-        repeatAnnotationParts = null,
+        repeatAnnotationParts = null, controlNode = null,
         tmp_node = null,
         
         prevLength = 0, index = -1,
@@ -1002,10 +994,12 @@ var Compile = {
             using the annotated data and add it to our control list*/
           compileMe = Process.preProcessNode(DOM_Node, modelName, attribName, scope);
           
-           //1 = ctrl name, 2 = mdlName, 3 = attribName, 5 = index 
+           //1 = ctrl name, 3 = mdlName, 4 = attribName, 6 = index 
           if(_isDef(DOM_Node.dataset[_CTRL_KEY]) 
-            && (ctrlRegexResult = /(\w+)\|(\w+)\.(\w+)(\.(\d+))*/g.exec(DOM_Node.dataset[_CTRL_KEY])) !== null){
-            Map.addControlNode(new ControlNode(DOM_Node, ctrlRegexResult[1], ctrlRegexResult[2],ctrlRegexResult[3],ctrlRegexResult[5] ));
+            && (ctrlRegexResult = /(\w+)(\|(\w+)\.(\w+)(\.(\d+))*)*/g.exec(DOM_Node.dataset[_CTRL_KEY])) !== null){
+            controlNode = new ControlNode(DOM_Node, ctrlRegexResult[1], ctrlRegexResult[3],ctrlRegexResult[4],ctrlRegexResult[6] );
+            controlNode.scope = scope;
+            Map.addControlNode(controlNode);
           }
           /*Repeat base nodes serve as templates and should remain uncompiled*/
           if(compileMe  == true)
