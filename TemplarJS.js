@@ -30,6 +30,9 @@ var TMP_Node = function(node, modelName, attribName, index){
   this.embeddedControls = [];
   this.scope = '';
   this.hasAttributes = false;
+  this.repeatModelName = '';
+  this.repeatAttribName = '';
+  this.repeatIndex = _UNINDEXED;
 };
 
 var ControlNode = function(node, id, modelName, attribName, index){
@@ -396,12 +399,12 @@ var Process = {
   },
   buildRepeatNonTerminal : function(modelName, modelAtrribName, parentModel, parentAttrib, index){
     var propertyName = (_isNullOrEmpty(propertyName)) ? '' : propertyName;
-    return '{{' + modelName + '.' + modelAtrribName + '[' + index + '].%TMP%DOT' + parentModel +'DOT' + parentAttrib + '}}';
+    return '{{' + modelName + '.' + modelAtrribName + '[' + index + '].zTMPzDOT' + parentModel +'DOT' + parentAttrib + '}}';
   },
   preProcessNodeAttributes : function(node){
     var attributes = null,
         match = null,
-        regex = /(\{\{(\w+\.\w+)(\[\d+\]\.%TMP%Dot\w+)*\}\})/g,
+        regex = /(\{\{(\w+\.\w+)(\[\d+\]\.zTMPzDot\w+)*\}\})/g,
         modelNameParts = null,
         tmp_node = null,
         hasAttribNonTerminal = false;
@@ -466,7 +469,7 @@ var Process = {
       */
     if( (repeatedProperties = TMP_repeatedNode.node.innerHTML.match(/\{\{(\$*\w+)*\}\}/g)) != null){
       TMP_repeatedNode.hasNonTerminals = true;
-      uncompiledTemplate = intraCompilation = DOM_Node.innerHTML;
+      uncompiledTemplate = intraCompilation = TMP_repeatedNode.node.innerHTML;
       /*Cycle through them*/
       for(var z = 0; z < repeatedProperties.length; z++){
         
@@ -824,14 +827,16 @@ var Compile = {
         Compile = this,
         splitNode = null, span = null, parentNode = null, ctrlRegexResult = null,
         DOM_Node = null, match = null, modelNameParts = [null, null], 
+        repeatAnnotationParts = null,
         tmp_node = null,
         
-        prevLength = 0, 
+        prevLength = 0, index = -1,
         
         text = '', parentTagName = '', ctrlName = '',
         modelName = '', attribName = '', qualifiedAttribName = '',
+        propName = '',
         //2 = a.b, 3 = [0], 4 = 0, 5 = propertyName  
-        NONTERMINAL_REGEX = /(\{\{(\w+\.\w+)(\[(\d)+\])*(?:\.)*(\w+)*\}\})/g;
+        NONTERMINAL_REGEX = /(\{\{(\w+\.\w+)(\[(\d)+\])*(?:\.)*(\w+)*?\}\})/g;
         
     if(typeof nodes == 'undefined' || nodes == null)
         return scope;
@@ -839,6 +844,7 @@ var Compile = {
     for(var i = 0; i < nodes.length; i++){
         DOM_Node = nodes[i];
         parentNode = DOM_Node.parentNode;
+        /*option innerText should not be compiled*/
         if(DOM_Node.nodeType == _TEXT_NODE && (!_isNull(parentNode) && parentNode.tagName !== 'OPTION') ){
           text = DOM_Node.wholeText;
           /**/
@@ -862,22 +868,33 @@ var Compile = {
             var span = document.createElement('span');
             /*interpolateIndex and interpolateProperty are passed with DOM_Node to 
               Interpolate.interpolate where it is used to properly dereference the model attrib*/
-            var index = (_isDef(partMap[x]['index'])) ? parseInt(partMap[x]['index']) : -1;
+            propName = partMap[x]['propertyName'];
+            index = (_isDef(partMap[x]['index'])) ? parseInt(partMap[x]['index']) : -1;
             tmp_node = new TMP_Node(span, modelName, attribName, index);
-            tmp_node.prop = partMap[x]['propertyName'];
+            tmp_node.prop = propName;
+            
+            if(!_isNullOrEmpty(propName) && propName.indexOf('zTMPzDOT') != _UNINDEXED){
+              repeatAnnotationParts = propName.split('DOT');
+              tmp_node.repeatModelName = repeatAnnotationParts[1];
+              tmp_node.repeatAttribName = repeatAnnotationParts[2]; 
+              tmp_node.repeatIndex = index;
+              tmp_node.index = _UNINDEXED;
+              tmp_node.prop = '';
+            }
+            
             tmp_node.scope = scope;
             
             splitNode = DOM_Node.splitText(partMap[x]['start'] - prevLength);
             prevLength += DOM_Node.nodeValue.length;
             /*{{Auth.items[0].text}}*/
-            if(splitNode.nodeValue == partMap[x]['fullToken']){
+            if(splitNode.nodeValue.trim() == partMap[x]['fullToken']){
               tmp_node.node.innerText = splitNode.nodeValue;
               Interpolate.interpolateSpan(tmp_node, Map.getAttribute(modelName, attribName));
               parentNode.replaceChild(tmp_node.node, splitNode);
               Map.pushNodes(tmp_node);             
               //log('1Parent Tag Name: ' + parentTagName + ' ' + partMap[x]['fullToken']);
             }
-            if(DOM_Node.nodeValue == partMap[x]['fullToken']){
+            if(DOM_Node.nodeValue.trim() == partMap[x]['fullToken']){
               tmp_node.node.innerText = DOM_Node.nodeValue;
               Interpolate.interpolateSpan(tmp_node, Map.getAttribute(modelName, attribName));
               parentNode.replaceChild(tmp_node.node, DOM_Node);
@@ -892,14 +909,14 @@ var Compile = {
             splitNode = DOM_Node.splitText(partMap[x]['end']  - prevLength);
             prevLength += DOM_Node.nodeValue.length;
             
-            if(splitNode.nodeValue == partMap[x]['fullToken']){
+            if(splitNode.nodeValue.trim() == partMap[x]['fullToken']){
               tmp_node.node.innerText = splitNode.nodeValue;
               Interpolate.interpolateSpan(tmp_node, Map.getAttribute(modelName, attribName));
               parentNode.replaceChild(tmp_node.node, splitNode);
               Map.pushNodes( tmp_node); 
               //log('3Parent Tag Name: ' + parentTagName + ' ' + partMap[x]['fullToken']);
             }
-            if(DOM_Node.nodeValue == partMap[x]['fullToken']){
+            if(DOM_Node.nodeValue.trim() == partMap[x]['fullToken']){
               tmp_node.node.innerText = DOM_Node.nodeValue;
               Interpolate.interpolateSpan(tmp_node, Map.getAttribute(modelName, attribName));
               parentNode.replaceChild(tmp_node.node, DOM_Node);
