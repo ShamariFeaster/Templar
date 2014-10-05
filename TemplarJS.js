@@ -28,6 +28,7 @@ var TMP_Node = function(node, modelName, attribName, index){
   this.symbolMap = {};
   this.hasNonTerminals = false;
   this.embeddedControls = [];
+  this.embeddedModelAttribs = {};
   this.scope = '';
   this.hasAttributes = false;
   this.repeatModelName = '';
@@ -330,6 +331,30 @@ var Map = (function(){
     });
     
   },
+  pruneRepeatNodes : function(tmp_baseNode, repeatModelName, repeatAttribName, index){
+    var Map = this,
+        embeddedAttribs = Object.keys(tmp_baseNode.embeddedModelAttribs),
+        splitAttrib = null;
+
+    for(var i = 0; i < embeddedAttribs.length; i++){
+      if(!_isNullOrEmpty(embeddedAttribs[i])){
+        splitAttrib = embeddedAttribs[i].split('.');/*0 = modelName, 1 = attribName*/
+        
+        Map.forEach(splitAttrib[0], splitAttrib[1], function(ctx, tmp_node){
+        
+          if(tmp_node.repeatModelName == repeatModelName 
+             && tmp_node.repeatAttribName == repeatAttribName 
+             && tmp_node.repeatIndex == index){
+              ctx.removeItem(ctx.index);
+              _log('REMOVING :' + tmp_node.node.tagName);
+          }
+          
+        });
+      }
+    }
+
+    
+  },
   pruneNodeTreeByScope : function( scope ){
     if(_isNullOrEmpty(scope) )
       return;
@@ -432,7 +457,7 @@ var Process = {
     }
   },
   
-  preProcessRepeatNode : function(DOM_Node, modelName, attribName, index){
+  preProcessRepeatNode : function(TMP_baseNode, modelName, attribName, index){
     var newId = null,
         repeatedProperties = null,
         embeddedInterpolations = null,
@@ -441,26 +466,27 @@ var Process = {
         intraCompilation = '',
         idvRepeatedProperty = null,
         nonTerminal = '',
-        newDomNode = document.createElement(DOM_Node.tagName.toLowerCase()),
+        newDomNode = document.createElement(TMP_baseNode.node.tagName.toLowerCase()),
         TMP_repeatedNode = new TMP_Node(newDomNode, modelName, attribName, index),
         ctrlRegexResults = null,
         NONTERMINAL_REGEX = /(\{\{((\w+)\.(\w+))\}\})/g,
         Process = this;
 
-    TMP_repeatedNode.node.innerHTML = DOM_Node.innerHTML;
+    TMP_repeatedNode.node.innerHTML = TMP_baseNode.node.innerHTML;
     /*auto enumeration of existing id attribute*/
-    newId = DOM_Node.getAttribute('id');
+    newId = TMP_baseNode.node.getAttribute('id');
     newId = ( newId == null) ? '' : TMP_repeatedNode.node.setAttribute('id', newId + '-' + index); 
     
     /*Process embedded NTs belonging to other models*/
     intraCompilation = TMP_repeatedNode.node.innerHTML;
     if( (embeddedInterpolations = NONTERMINAL_REGEX.exec(TMP_repeatedNode.node.innerHTML)) != null){
+      TMP_baseNode.embeddedModelAttribs[embeddedInterpolations[3] + '.' + embeddedInterpolations[4]] = true;
       nonTerminal = this.buildRepeatNonTerminal(embeddedInterpolations[3], embeddedInterpolations[4], modelName, attribName , index);
             TMP_repeatedNode.node.innerHTML = intraCompilation =
                     intraCompilation.replace(embeddedInterpolations[0], nonTerminal );
     }
     
-    /*repeat template is original DOM_Node with repeat directive on it. The non terminals here
+    /*repeat template is original TMP_baseNode with repeat directive on it. The non terminals here
       do not have index or property info. intraCompilation is progressively compiled 
       using text replacement. the comiled non-terminals now have prop and index info.
       
@@ -534,7 +560,8 @@ var Process = {
         TMP_RepeatBase = null,
         TMP_select = null,
         TMP_option = null,
-        TMP_input = null;
+        TMP_input = null,
+        compileMe = true;
     
     switch(type){
     
@@ -613,7 +640,7 @@ var Process = {
         TMP_RepeatBase.node.setAttribute('style','display:none;');    
         for(var i = 0; i < attributeVal.length; i++){
 
-          TMP_repeatedNode = this.preProcessRepeatNode(TMP_RepeatBase.node, modelName, attribName, i);
+          TMP_repeatedNode = this.preProcessRepeatNode(TMP_RepeatBase, modelName, attribName, i);
           TMP_repeatedNode.scope = scope;
           Map.pushNodes(TMP_repeatedNode);
           if(TMP_repeatedNode.hasNonTerminals == false)
@@ -621,6 +648,7 @@ var Process = {
           DOM.appendTo(TMP_repeatedNode.node, TMP_RepeatBase.node);
           
         }
+        compileMe = false;
         break;
 
       default:  
@@ -628,7 +656,7 @@ var Process = {
     }
     
     this.preProcessNodeAttributes(DOM_Node);
-    return DOM_Node;
+    return compileMe;
   }
   
 };
@@ -790,7 +818,7 @@ var Interpolate = {
                       newNodeIndex = attributeVal.length - newNodeCnt;
                   
                   for(var q = newNodeIndex; q < attributeVal.length; q++, newNodeIndex++, ctx.modelAttribLength++){
-                    TMP_newRepeatNode = Process.preProcessRepeatNode(TMP_repeatBaseNode.node, modelName, attributeName, q);
+                    TMP_newRepeatNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, modelName, attributeName, q);
                     /*embedded controls are added during comilation of the repeat node*/
                     Compile.compile(TMP_newRepeatNode.node, TMP_repeatBaseNode.scope, true);
                     DOM.appendTo(TMP_newRepeatNode.node, TMP_repeatBaseNode.node);
@@ -802,6 +830,7 @@ var Interpolate = {
                 if(ctx.modelAttribLength >= attributeVal.length && ctx.modelAttribIndex >= attributeVal.length){
                   ctx.removeItem(ctx.index); /*from indexes[key] = []*/
                   Map.pruneControlNodes(tmp_node, modelName, attributeName, ctx.modelAttribIndex);
+                  Map.pruneRepeatNodes(TMP_repeatBaseNode, modelName, attributeName, ctx.modelAttribIndex);
                   existingRepeatNode.parentNode.removeChild(existingRepeatNode);
                 }
               }
@@ -835,6 +864,8 @@ var Compile = {
         text = '', parentTagName = '', ctrlName = '',
         modelName = '', attribName = '', qualifiedAttribName = '',
         propName = '',
+        
+        compileMe = false,
         //2 = a.b, 3 = [0], 4 = 0, 5 = propertyName  
         NONTERMINAL_REGEX = /(\{\{(\w+\.\w+)(\[(\d)+\])*(?:\.)*(\w+)*?\}\})/g;
         
@@ -872,7 +903,9 @@ var Compile = {
             index = (_isDef(partMap[x]['index'])) ? parseInt(partMap[x]['index']) : -1;
             tmp_node = new TMP_Node(span, modelName, attribName, index);
             tmp_node.prop = propName;
-            
+            /*Look for pattern created during preProcessRepeatNode() to indicate this node is an
+              embedded interpolation node inside a repeat; however the model and/or attrib behind
+              the node differ from that of the repeat*/
             if(!_isNullOrEmpty(propName) && propName.indexOf('zTMPzDOT') != _UNINDEXED){
               repeatAnnotationParts = propName.split('DOT');
               tmp_node.repeatModelName = repeatAnnotationParts[1];
@@ -943,17 +976,16 @@ var Compile = {
           /*DOM_Node control value is annotated with model, attrib, and index data that is used to id and delete
             during preprocessing. Once we reach that node during recursive compiling, we create a ControlNode
             using the annotated data and add it to our control list*/
-          Process.preProcessNode(DOM_Node, modelName, attribName, scope);
+          compileMe = Process.preProcessNode(DOM_Node, modelName, attribName, scope);
           
-          
-            
            //1 = ctrl name, 2 = mdlName, 3 = attribName, 5 = index 
           if(_isDef(DOM_Node.dataset[_CTRL_KEY]) 
             && (ctrlRegexResult = /(\w+)\|(\w+)\.(\w+)(\.(\d+))*/g.exec(DOM_Node.dataset[_CTRL_KEY])) !== null){
             Map.addControlNode(new ControlNode(DOM_Node, ctrlRegexResult[1], ctrlRegexResult[2],ctrlRegexResult[3],ctrlRegexResult[5] ));
           }
-          
-          this.compile(DOM_Node, scope, true);
+          /*Repeat base nodes serve as templates and should remain uncompiled*/
+          if(compileMe  == true)
+            this.compile(DOM_Node, scope, true);
         }
         
     }
