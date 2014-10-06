@@ -25,10 +25,10 @@ var TMP_Node = function(node, modelName, attribName, index){
   this.attribName = attribName;
   this.index = (_isDef(index))? index : -1;
   this.prop = '';
-  this.symbolMap = {};
+  this.symbolMap = Object.create(null);
   this.hasNonTerminals = false;
   this.embeddedControls = [];
-  this.embeddedModelAttribs = {};
+  this.embeddedModelAttribs = Object.create(null);
   this.scope = '';
   this.hasAttributes = false;
   this.repeatModelName = '';
@@ -84,9 +84,9 @@ var DOM = {
 };  
 
 var Map = (function(){
-  var _map = {};
-  var _repeatTable = {};/*modelName : { attribName : node}*/
-  var _controlTable = {};/*ctrlId : [ctrl1, ctrl2,......]*/
+  var _map = Object.create(null);/*no prototype chain, better iteration performance >= IE9*/
+  var _repeatTable = Object.create(null);/*modelName : { attribName : node}*/
+  var _controlTable = Object.create(null);/*ctrlId : [ctrl1, ctrl2,......]*/
   return {
   getRepeatBaseNode : function(modelName, attribName){
     var tmp_node = null;
@@ -100,7 +100,7 @@ var Map = (function(){
   
   addRepeatBaseNode : function(tmp_node){
     if(!_isDef(_repeatTable[tmp_node.modelName])){
-      _repeatTable[tmp_node.modelName] = {};
+      _repeatTable[tmp_node.modelName] = Object.create(null);
     }
       _repeatTable[tmp_node.modelName][tmp_node.attribName] = tmp_node;
   },
@@ -137,7 +137,7 @@ var Map = (function(){
         return;
         
       var ctrlIdArray = null,
-          ctx = {};
+          ctx = Object.create(null);
           ctx.index = 0; 
           ctx.id = ''; 
           ctx.length = 0; 
@@ -162,10 +162,10 @@ var Map = (function(){
     }
   },
   forEach : function(modelName, attribName, mapFunction){
-    //__modelMap[modelName] = {modelObj : modelObj, nodes : {}, api : api, listeners : {}};
+    //__modelMap[modelName] = {modelObj : modelObj, nodes : Object.create(null), api : api, listeners : Object.create(null)};
     var target = null;
     var Map = this;
-    var ctx = {};
+    var ctx = Object.create(null);
     ctx.modelName = '';
     ctx.modelAtrribName = '';
     ctx.hasAttributes = false;
@@ -179,7 +179,7 @@ var Map = (function(){
     ctx.modelAttribLength = 0;
     ctx.removeItem = function(i){
       ctx.target.splice(i, 1);
-      var indexCnt = {};
+      var indexCnt = Object.create(null);
       
       for(var i = 0; i < ctx.target.length; i++ ){
         if(ctx.target[i].index > _UNINDEXED)
@@ -198,9 +198,8 @@ var Map = (function(){
       mapFunction = modelName;
       target = _map;
       for(var key in target){
-        if(target.hasOwnProperty(key)){
           mapFunction.call(null, {modelName : key}, key);
-        }
+        
       }
     /*model attribute names*/
     }else if(!_isFunc(modelName) && _isFunc(attribName)){ 
@@ -209,19 +208,17 @@ var Map = (function(){
       var modelAttribName = '';
 
       target = (_isDef(_map[modelName]) && _isDef(_map[modelName]['nodeTable'])) ? 
-                  _map[modelName]['nodeTable'] : {};
+                  _map[modelName]['nodeTable'] : Object.create(null);
                   
       for(var key in target){
-        if(target.hasOwnProperty(key)){
-          ctx.modelName = modelName;
-          ctx.modelAtrribName = key;
-          mapFunction.call(null, ctx, key);
-        }
+        ctx.modelName = modelName;
+        ctx.modelAtrribName = key;
+        mapFunction.call(null, ctx, key);
       }
     /*model attribute node tables (index table and interpolatation array)*/
     }else if(!_isFunc(modelName) && !_isFunc(attribName) && _isFunc(mapFunction)){
       var tmp_node = null,
-          indexCnt = {};
+          indexCnt = Object.create(null);
       if( _isDef(_map[modelName]['nodeTable'][attribName]) ){
         ctx.target = _map[modelName]['nodeTable'][attribName]['nodes'];
         ctx.targetCopy = ctx.target.slice(0);
@@ -293,7 +290,7 @@ var Map = (function(){
           id = string.length + string.charAt(string.length/2);
       
       if(!_isDef(_map[modelName]['listeners'][attributeName])){
-        _map[modelName]['listeners'][attributeName] = {};
+        _map[modelName]['listeners'][attributeName] = Object.create(null);
       }
       
       _map[modelName]['listeners'][attributeName][id] = listener;
@@ -312,7 +309,7 @@ var Map = (function(){
   },
   
   initModel : function(modelName, modelObj, api){
-    _map[modelName] = {modelObj : modelObj, nodeTable : {}, api : api, listeners : {}};
+    _map[modelName] = {modelObj : modelObj, nodeTable : Object.create(null), api : api, listeners : Object.create(null)};
   },
   pruneControlNodes : function(tmp_node, modelName, attribName, index){
     var Map = this;
@@ -677,7 +674,7 @@ var Interpolate = {
 
     if(_isDef(listeners)){
       for(var id in listeners){
-        if(listeners.hasOwnProperty(id) &&_isFunc(listeners[id])){
+        if(_isFunc(listeners[id])){
           listeners[id].call(null, data);
         }
       }
@@ -686,7 +683,7 @@ var Interpolate = {
   },
   
   updateNodeAttributes : function(tmp_node, modelName, attributeName){
-    var updateObject = {};
+    var updateObject = Object.create(null);
     var node = tmp_node.node;
     if(node.hasAttributes()){
       var regex = /(\{\{(\w+\.\w+)\}\})/g, //result array -> [1] = {{a.b}}, [2] = a.b
@@ -742,7 +739,7 @@ var Interpolate = {
         listeners = Map.getListeners(modelName, attributeName),
         Interpolate = this,
         attribCurrState = Map.getAttribute(modelName, attributeName),
-        updateObject = {},
+        updateObject = Object.create(null),
         numNodesToAdd = 0,
         numNodesToRemove = 0,
         newNodeStartIndex = 0,
@@ -1010,7 +1007,7 @@ var Compile = {
 
 var Templar = {
 
-  _onloadHandlerMap : {},
+  _onloadHandlerMap : Object.create(null),
   
   success : function(partialFileName, onloadFunction){
     this._onloadHandlerMap[partialFileName] = onloadFunction;
