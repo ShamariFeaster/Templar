@@ -23,28 +23,55 @@ structureJS.module('Auth', function(require){
   
   Templar.success('partial-login-screen.html', function(){
     var states = AuthModel.states;
-    console.log('partial-login-screen.html onload FIRED');
-    
+    AuthModel.filter('countries').by('text').using('userName');
     AuthModel.listen('countries', function(data){
       
       AuthModel.selected = data.text;
-      console.log(AuthModel.selected);
+
       switch(data.text){
         case 'CAN':
         /*This clobbers 'states', obviously undesirable.  */
           AuthModel.states = AuthModel.CAN_states;
          break;
+         
         case 'US':
           AuthModel.states = states;
-          /*
-          AuthModel.stash('def_states', states)
-          */
           break;
       }
       
     });
     
     /*
+    
+    AuthModel.filter('countries').using('seachInput');
+    AuthModel.filter('people').by('firstName').using('userInput');
+    
+    AuthModel.sort('countries').using('userDefinedSort');
+    AuthModel.sort('countries').by('lastName').using('userDefinedSort');
+    
+    AuthModel.forEach('people', function(person){
+    
+    });
+    
+    Templar('button1').listen('onclick', function(){
+      //Behind the scenes, control listeners look like this
+      function wrapper(e){
+        e.specialData = 'stuff';
+        passedinFunction.call(null, e);
+      }
+      buttonNode.addEventListener('onclick', wrapper);
+    
+    });
+    
+    Templar('startVideo').show()
+    Templar('startVideo').hide()
+    Templar('startVideo').addClass()
+    Templar('startVideo').removeClass()
+    Templar('startVideo').hasClass()
+    Templar('startVideo').hidden() 
+    Templar('startVideo').listen('onclick',function(){})
+    Templar('startVideo').ignore('onclick')
+    
     document.getElementById('btn-list1').addEventListener('click', function(){
       console.log('click');
       EnvModel.getSet('host', 'http://cnet.com');

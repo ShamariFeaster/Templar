@@ -10,6 +10,7 @@ var _MODEL_ATTRIB_KEY = 'aplAttrib',
   _UNINDEXED = -1,
   _classesSetToHide = '',
   _isDef = function(a){return (typeof a !== 'undefined');},
+  _isString = function(a){ return (!_isDef(a) || typeof a === 'string');},
   _isFunc = function(a){ return (!_isDef(a) || typeof a === 'function');},
   _isNull = function(a){ return (!_isDef(a) || a == null);}
   _isNullOrEmpty = function(a){ return (!_isDef(a) || (a === null || a === ''));},
@@ -812,7 +813,7 @@ var Interpolate = {
 
           Interpolate.interpolateSpan(tmp_node, attributeVal);
           updateObject.text = node.innerText;
-          Interpolate.dispatchListeners(listeners, {type : node.tagName.toLowerCase(), text : updateObject});
+          Interpolate.dispatchListeners(listeners, {type : node.tagName.toLowerCase(), text : updateObject.text});
           
           break;
           
@@ -1030,7 +1031,7 @@ var Model = function(modelName ,modelObj){
                 }
               })(attrib, this),
         get : (function(attrib, model){
-                return function(value){
+                return function(){
                   return Map.getAttribute(model.modelName, attrib);
                 }
               })(attrib, this)
@@ -1048,6 +1049,50 @@ var Model = function(modelName ,modelObj){
 
 Model.prototype.listen = function(attributeName, listener){
   Map.setListener(this.modelName, attributeName, listener);
+};
+
+Model.prototype.filter = function(attribName){
+  var chain = Object.create(null),
+      target = Map.getAttribute(this.modelName, attribName),
+      results = [],
+      propName = '',
+      itemValue = null,
+      item = null,
+      Model = this;
+  
+  
+  chain.propName = '';
+  chain.using = function(otherAttribName){
+  
+    if(_isArray(target)){
+      Model.listen(otherAttribName, function(data){
+
+        for(var i = 0; i < target.length; i++){
+          item = target[i];
+          if(!_isNullOrEmpty(chain.propName) && _isDef(item[chain.propName])){
+            itemValue = item[chain.propName];
+          }else{
+            itemValue = item;
+          }
+          if(!_isNullOrEmpty(data.text) && _isString(itemValue) && itemValue.indexOf(data.text) == 0){
+            results.push(item);
+          }
+        }
+        
+        if(results.length < 1)
+          results = target;
+        
+        Model[attribName] = results;
+      });
+    }
+  };
+  
+  chain.by = function(propName){
+    chain.propName = propName;
+    return chain;
+  }
+  
+  return chain;
 };
 
 var Templar = {
