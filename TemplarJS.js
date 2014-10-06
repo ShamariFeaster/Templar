@@ -235,9 +235,6 @@ var Map = (function(){
         ctx.modelAttribLength = Object.keys(indexCnt).length;
         
         for(; ctx.index < ctx.length && ctx.stop == false; ctx.index++){
-          if(ctx.index >= ctx.target.length || ctx.target.length > ctx.targetCopy.length){
-            break;
-          }
           tmp_node = ctx.target[ctx.index];
           ctx.modelName = modelName;
           ctx.modelAtrribName = attribName;
@@ -818,11 +815,8 @@ var Interpolate = {
           
         default:
           var TMP_newRepeatNode = null,
-              outerCtx = ctx,
-              indexesToPrune = [];
-          if( (TMP_repeatBaseNode = Map.getRepeatBaseNode(modelName, attributeName)) !== null){
-            _log('BASE NODE: \n');
-            _log(TMP_repeatBaseNode.node.innerHTML);
+              outerCtx = ctx;
+          if( !_isNull((TMP_repeatBaseNode = Map.getRepeatBaseNode(modelName, attributeName))) ){
             /*Kill existing repeat tree*/
             Map.forEach(modelName, attributeName, function(ctx, tmp_node){
               if(tmp_node.index > _UNINDEXED){
@@ -834,6 +828,7 @@ var Interpolate = {
               
             });
             
+            /*Put in function b/c this is duplicated from preProcessNode()*/
             var TMP_repeatedNode = null;
             /*rebuild new one*/
             for(var i = 0; i < attributeVal.length; i++){
@@ -846,9 +841,9 @@ var Interpolate = {
               DOM.appendTo(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
               Compile.compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope, true);
             }
-            
+            /*Stop outter loop. We build the updated repeat nodes in one pass*/
             outerCtx.stop = true;
-            _log('END FOREACH');
+
           }
           break;
         }
