@@ -347,6 +347,7 @@ var Map = (function(){
              && tmp_node.repeatIndex == index){
               ctx.removeItem(ctx.index);
               _log('Pruning Embedded :' + tmp_node.node.tagName);
+
           }
           
         });
@@ -642,14 +643,8 @@ var Process = {
         TMP_RepeatBase.scope = scope;
         Map.addRepeatBaseNode(TMP_RepeatBase); 
         Map.pushNodes(TMP_RepeatBase); 
-        var newId = null,
-            repeatedProperties = null,
-            uncompiledTemplate = '',
-            uncompiledTemplate = ''
-            intraCompilation = '',
-            idvRepeatedProperty = null,
-            nonTerminal = '',
-            TMP_repeatedNode = null;
+        var TMP_repeatedNode = null;
+        
         TMP_RepeatBase.node.setAttribute('style','display:none;');    
         for(var i = 0; i < attributeVal.length; i++){
 
@@ -822,39 +817,38 @@ var Interpolate = {
           break;
           
         default:
-          var TMP_newRepeatNode = null;
+          var TMP_newRepeatNode = null,
+              outerCtx = ctx,
+              indexesToPrune = [];
           if( (TMP_repeatBaseNode = Map.getRepeatBaseNode(modelName, attributeName)) !== null){
+            _log('BASE NODE: \n');
+            _log(TMP_repeatBaseNode.node.innerHTML);
+            /*Kill existing repeat tree*/
             Map.forEach(modelName, attributeName, function(ctx, tmp_node){
-              var existingRepeatNode = tmp_node.node;
-              if(_isArray(attributeVal)){
-              
-              /*New model data, longer than existing data, add extra nodes*/
-                if(attributeVal.length > ctx.modelAttribLength){
-                  /*amount of nodes needed*/
-                  var newNodeCnt = attributeVal.length - ctx.modelAttribLength,
-                      /*where to start the new indexes in the 'indexes' table*/
-                      newNodeIndex = attributeVal.length - newNodeCnt;
-                  
-                  for(var q = newNodeIndex; q < attributeVal.length; q++, newNodeIndex++, ctx.modelAttribLength++){
-                    TMP_newRepeatNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, q);
-                    /*embedded controls are added during comilation of the repeat node*/
-                    Compile.compile(TMP_newRepeatNode.node, TMP_repeatBaseNode.scope, true);
-                    DOM.appendTo(TMP_newRepeatNode.node, TMP_repeatBaseNode.node);
-                    Map.pushNodes(TMP_newRepeatNode);
-                  }
-                  /*For this to work, API has to recalculate modelAttribLength*/
-                }
-                
-                if(ctx.modelAttribLength >= attributeVal.length && ctx.modelAttribIndex >= attributeVal.length){
-                  /*This prunes nodes from tree*/
-                  ctx.removeItem(ctx.index); 
-                  Map.pruneControlNodes(tmp_node, modelName, attributeName, ctx.modelAttribIndex);
-                  /*Prunes embedded interp nodes from other models*/
-                  Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, ctx.modelAttribIndex);
-                  existingRepeatNode.parentNode.removeChild(existingRepeatNode);
-                }
+              if(tmp_node.index > _UNINDEXED){
+                Map.pruneControlNodes(tmp_node, modelName, attributeName, tmp_node.index);
+                Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, tmp_node.index);
+                ctx.removeItem(ctx.index);
+                tmp_node.node.parentNode.removeChild(tmp_node.node);
               }
+              
             });
+            
+            var TMP_repeatedNode = null;
+            /*rebuild new one*/
+            for(var i = 0; i < attributeVal.length; i++){
+
+              TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
+              TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
+              Map.pushNodes(TMP_repeatedNode);
+              if(TMP_repeatedNode.hasNonTerminals == false)
+                TMP_repeatedNode.node.innerHTML = attributeVal[i];
+              DOM.appendTo(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
+              Compile.compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope, true);
+            }
+            
+            outerCtx.stop = true;
+            _log('END FOREACH');
           }
           break;
         }
