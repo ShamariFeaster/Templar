@@ -88,6 +88,9 @@ var Map = (function(){
   var _repeatTable = Object.create(null);/*modelName : { attribName : node}*/
   var _controlTable = Object.create(null);/*ctrlId : [ctrl1, ctrl2,......]*/
   return {
+  buildAttribAlias : function(attribName){
+    return '_' + attribName;
+  },
   getRepeatBaseNode : function(modelName, attribName){
     var tmp_node = null;
     if(!_isDef(attribName) || !_isDef(modelName))
@@ -261,7 +264,7 @@ var Map = (function(){
   },
   getAttribute : function(modelName, attribName){
     var returnVal = null;
-    if(_isDef(_map[modelName]['modelObj'][attribName])){
+    if(_isDef(_map[modelName]) && _isDef(_map[modelName]['modelObj'][attribName])){
       returnVal = _map[modelName]['modelObj'][attribName];
     }
     return returnVal;
@@ -269,7 +272,7 @@ var Map = (function(){
   
   setAttribute : function(modelName, attribName, value){
     var returnVal = null;
-    if(_isDef(_map[modelName]['modelObj'][attribName])){
+    if(_isDef(_map[modelName]) && _isDef(_map[modelName]['modelObj'][attribName])){
       _map[modelName]['modelObj'][attribName] = value;
     }
     return returnVal;
@@ -308,8 +311,9 @@ var Map = (function(){
     return model;
   },
   
-  initModel : function(modelName, modelObj, api){
-    _map[modelName] = {modelObj : modelObj, nodeTable : Object.create(null), api : api, listeners : Object.create(null)};
+  initModel : function(model_obj){
+    _map[model_obj.modelName] = {modelObj : model_obj.attributes, nodeTable : Object.create(null),
+                      api : model_obj, listeners : Object.create(null)};
   },
   pruneControlNodes : function(tmp_node, modelName, attribName, index){
     var Map = this;
@@ -735,6 +739,8 @@ var Interpolate = {
     }
   },
   interpolate : function(modelName, attributeName, attributeVal){  
+    if(!Map.exists(modelName))
+      return;
     var option = null;
         listeners = Map.getListeners(modelName, attributeName),
         Interpolate = this,
@@ -1004,6 +1010,45 @@ var Compile = {
 };
 
 
+var Model = function(modelName ,modelObj){
+  if(!(this instanceof Model)){
+    return new Model(modelObj);
+  }
+  
+  this.modelName = modelName;
+  for(var attrib in modelObj){
+    
+    if(modelObj.hasOwnProperty(attrib)){
+
+      Object.defineProperty(this, attrib, {
+        /*Closure is needed to bind 'attrib' value to each get/set. If we use attrib from Model scope
+          it will always be the last value of the iteration*/
+        set : (function(attrib, model){
+                return function(value){
+                  Map.setAttribute(model.modelName, attrib, value);
+                  Interpolate.interpolate(model.modelName, attrib, value);
+                }
+              })(attrib, this),
+        get : (function(attrib, model){
+                return function(value){
+                  return Map.getAttribute(model.modelName, attrib);
+                }
+              })(attrib, this)
+        
+      });
+
+    }
+  }
+  
+  this.attributes = modelObj;
+  /*Prevent run-time extension of the model*/
+  Object.freeze(this.attributes);
+  Object.freeze(modelObj);
+};
+
+Model.prototype.listen = function(attributeName, listener){
+  Map.setListener(this.modelName, attributeName, listener);
+};
 
 var Templar = {
 
@@ -1024,29 +1069,7 @@ var Templar = {
   },
   
   dataModel : function(modelName, modelObj){
-    var api = {
-            getSet : function(modelAttribName, value){
-              var returnVal = null;
-              if( Map.exists(modelName) ){
-              
-                if(_isDef(value)){
-                  Map.setAttribute(modelName, modelAttribName, value)
-                  Interpolate.interpolate(modelName, modelAttribName, value);
-                }else{
-                  returnVal = Map.getAttribute(modelName, modelAttribName);
-                }
-              }
-              return returnVal;
-            },
-            listen : function(attributeName, listener){
-              Map.setListener(modelName,attributeName, listener);
-            }
-          };
-          
-    
-    Map.initModel(modelName, modelObj, api);
-
-    return api;
+    Map.initModel(new Model(modelName, modelObj));
   },
 
   getModel : function(modelName){

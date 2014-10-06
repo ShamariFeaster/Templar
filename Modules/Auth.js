@@ -8,7 +8,7 @@ structureJS.module('Auth', function(require){
     of setter will be the tag names like 'model.select('modelAttribName', value)*/
   
   function select(model, selectName, value){
-    var select = model.getSet(selectName),
+    var select = model[selectName],
         index = 0;
     for(var i = 0; i < select.length; i++){
       select[i].selected = false;
@@ -17,25 +17,28 @@ structureJS.module('Auth', function(require){
       }
     }
     select[index].selected = true;
-    model.getSet(selectName, select);
-    model.getSet('selected', value);
+    model.getSet[selectName] = select;
+    model.selected = value;
   }
   
   Templar.success('partial-login-screen.html', function(){
-    var states = AuthModel.getSet('states');
+    var states = AuthModel.states;
     console.log('partial-login-screen.html onload FIRED');
     
     AuthModel.listen('countries', function(data){
       
-      AuthModel.getSet('selected', data.text);
-
+      AuthModel.selected = data.text;
+      console.log(AuthModel.selected);
       switch(data.text){
         case 'CAN':
         /*This clobbers 'states', obviously undesirable.  */
-          AuthModel.getSet('states', AuthModel.getSet('CAN_states') );
+          AuthModel.states = AuthModel.CAN_states;
          break;
         case 'US':
-          AuthModel.getSet('states', states );
+          AuthModel.states = states;
+          /*
+          AuthModel.stash('def_states', states)
+          */
           break;
       }
       
