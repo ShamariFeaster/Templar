@@ -1044,7 +1044,7 @@ var Model = function(modelName ,modelObj){
   this.linkTable = Object.create(null);
   //this.cleanCopies = Object.create(null);
   /*Prevent run-time extension of the model*/
-  Object.freeze(this.attributes);
+  //Object.freeze(this.attributes);
   //Object.freeze(modelObj);
 };
 

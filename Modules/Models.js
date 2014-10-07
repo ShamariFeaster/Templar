@@ -1,32 +1,32 @@
 Templar = structureJS.require('Templar');
 
-Templar.dataModel('Env',
+Templar.dataModel('Environment',
             {
-              title :  'Nitework',
+              /*Base page */
+              siteName :  'Nitework',
               footer : 'Footer',
               host : 'http://nitework.com',
-              color : 'green'
+              
+              /*Page Clock*/
+              time : ''
             });
 
-Templar.dataModel('Buttons',
+Templar.dataModel('Login',
             {
-              switch_url1 :  'Switch URL 1',
-              switch_url2 : 'Switch URL 2',
-              update_footer : 'Update Footer'
-            });
-            
-Templar.dataModel('Images',{frontPage :  {src : 'blah.img'}});
-
-Templar.dataModel('Auth',
-            {
+              /*Text data*/
               banner :  'Welcome To NiteWork',
-              userName : 'User Names',
-              url : '/pages.html',
+              url : '/login.html',
+              
+              /*Inputs*/
+              userInput : 'Type Here',
+              
+              /*Drop down data*/
               countries :  [{text : 'CAN', value : 1},
                         {text : 'MEX', value : 2},
                         {text : 'US', value : 3, selected : true}],
+              
                         
-              states : [{text : 'Alabama', value : 1},
+              US_states : [{text : 'Alabama', value : 1},
                         {text : 'Arkansas', value : 2}],
                         
               CAN_states : [{text : 'BC', value : 1},
@@ -34,6 +34,8 @@ Templar.dataModel('Auth',
                         {text : 'Calgary', value : 3}],
                         
               selected : 'Nothing Yet',
+              
+              /*Repeated Data*/
               items : [{title : 'Baseball Cards', price : '$1.00', color : 'blue' },
                        {title : 'Fishing Rod', price : '$35', color : 'red'}],
               list : ['apples', 'bananas', 'carrots'],

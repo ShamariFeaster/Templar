@@ -1,54 +1,32 @@
 <div id="apl-hide" data-apl-hide="header"></div>
 <!---->
-<select>{{Auth.countries}}</select>
+<select>{{Login.countries}}</select>
 
-<select data-apl-control="stateControl">{{Auth.states}}</select>
-
-<br>
-
-<input value="{{Auth.userName}}" />
-<br>
-
-<div id="{{Auth.userName}}"> Span with interpolated attributes and text {{Auth.userName}} </div>
-
+<select>{{Login.US_states}}</select>
 
 <br>
 
-<div id="{{Auth.userName}}" class="" >Attrib Test</div>
+<input value="{{Login.userInput}}" />
+<br>
 
 <br>
 
-<div>You have Selected {{Auth.selected}}</div>
+<div>You have Selected {{Login.selected}}</div>
 
 <br>
 
-<div id="{{Env.host}}/{{Auth.url}}">Compsoite Attrib Test</div>
+<div id="{{Environment.host}}/{{Login.url}}">Compsoite Attrib Test</div>
 
 <br>
 
 <ul>
-  <li data-apl-repeat="Auth.list">
-    <span data-apl-control="listControl"> {{}} {{Auth.userName}} </span>
-  </li>
+  <li data-apl-repeat="Login.list"></li>
 </ul>
 
 
 <ul>
-  <li id="items" data-apl-repeat="Auth.items">
-    <span id="start-{{$index}}">Buy {{title}} for ONLY </span>
-    <span style="color:{{color}};">{{price}}!!!!</span>  {{Auth.userName}}
+  <li data-apl-repeat="Login.items"> 
+    Buy {{title}} for ONLY {{price}}!!!!  {{Login.userInput}}
   </li>
 </ul>
-<!--
-<br>
-<button data-apl-control="switchURL1">{{Buttons.switch_url1}}</button>
-<button data-apl-control="switchURL2">{{Buttons.switch_url2}}</button>
-<button data-apl-control="updateFooter" >{{Buttons.update_footer}}</button>
 
-<br>
-<ul>
-  <li data-apl-repeat="Auth.list">
-    <span id="{{$index}}" style="color : {{Env.color}};">{{}} {{$index}}</span>
-  </li>
-</ul>
--->
