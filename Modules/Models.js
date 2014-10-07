@@ -23,8 +23,8 @@ Templar.dataModel('Login',
               userInput : 'Type Here',
               
               /*Drop down data*/
-              countries :  [{text : 'CAN', value : 1},
-                        {text : 'MEX', value : 2},
+              countries :  [{text : 'CAN', value : 1, test : 'blah'},
+                        {text : 'MEX', value : 2, test : 'oh nooze'},
                         {text : 'US', value : 3, selected : true}],
               
                         
@@ -44,6 +44,7 @@ Templar.dataModel('Login',
               /*Repeated Data*/
               items : [{title : 'Baseball Cards', price : '$1.00', color : 'blue' },
                        {title : 'Fishing Rod', price : '$35', color : 'red'}],
-              list : ['apples', 'bananas', 'carrots'],
+              list : ['apples', 'bananas', 'clams', 'carrots','donuts','eggplants','fish','grapes',
+                      'gordos','hot dogs','krack']
               
             });

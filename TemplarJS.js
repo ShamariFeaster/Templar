@@ -314,6 +314,7 @@ var Map = (function(){
   removeListener : function(modelName, attribName){
     delete _map[modelName]['listeners'][attribName];
   },
+  
   getModel : function(modelName){
     var model = null;
     if(this.exists(modelName)){
@@ -324,7 +325,8 @@ var Map = (function(){
   
   initModel : function(model_obj){
     _map[model_obj.modelName] = {modelObj : model_obj.attributes, nodeTable : Object.create(null),
-                      api : model_obj, listeners : Object.create(null), linkTable : model_obj.linkTable};
+                      api : model_obj, listeners : Object.create(null), linkTable : model_obj.linkTable,
+                      limitTable : model_obj.limitTable};
   },
   pruneControlNodes : function(tmp_node, modelName, attribName, index){
     var Map = this;
@@ -398,7 +400,12 @@ var Map = (function(){
     });
     
   },
-  
+  getInternalModel : function(modelName){
+    results = null;
+    if(this.exists(modelName))
+      results = _map[modelName];
+    return results;
+  },
   getMap : function(){
     return _map;
   },
@@ -623,8 +630,7 @@ var Process = {
             , {type : 'select'
             , value : e.target.options[e.target.selectedIndex].value
             , text : e.target.options[e.target.selectedIndex].text
-            /*during compilation, put other properties as data attributes and send the dataSet as a 'data' property
-              of this event object*/
+            , index : e.target.selectedIndex
               }
           );                  
         });
@@ -740,6 +746,25 @@ var Interpolate = {
         node.innerText = attributeVal[tmp_node.index];
     }
   },
+  getPageSlice : function(Model, attributeName, target){
+    var start = 0,
+        length = target.length,
+        limit = 0, 
+        page = 0,
+        results = target;
+    if(_isDef(Model.limitTable[attributeName])){
+      page = Model.limitTable[attributeName].page;
+      limit = Model.limitTable[attributeName].limit;
+      length = (((limit * page) - 1)  <= target.length) ? 
+               ((limit * page) - 1) : target.length;
+      start = ( ((page * limit) - limit) < length) ?
+              (page * limit) - limit : ((page * limit) - limit) - length;
+      results = target.slice(start, length);
+    }    
+    
+            
+    return results;
+  },
   interpolate : function(modelName, attributeName, attributeVal){  
     if(!Map.exists(modelName))
       return;
@@ -782,9 +807,6 @@ var Interpolate = {
                 Map.pushNodes(tmp_option);
               }
             }
-            updateObj.value = node.options[node.selectedIndex].value;
-            updateObj.text = node.options[node.selectedIndex].text;
-            updateObj.type = 'select';
             
           }
           break;
@@ -801,7 +823,7 @@ var Interpolate = {
             updateObj.value = node.parentNode.options[node.parentNode.selectedIndex].value;
             updateObj.text = node.parentNode.options[node.parentNode.selectedIndex].text;
             updateObj.type = 'select';
-            
+            updateObj.index = node.parentNode.selectedIndex;
             /*New model data, shorter than existing data, kill extra nodes*/
             if(ctx.modelAttribIndex >= attributeVal.length){
               ctx.removeItem(ctx.index); /*from indexes[key] = []*/
@@ -837,7 +859,19 @@ var Interpolate = {
             });
             
             /*Put in function b/c this is duplicated from preProcessNode()*/
-            var TMP_repeatedNode = null;
+            var TMP_repeatedNode = null,
+                Model = Map.getInternalModel(modelName),
+                limit = 0, 
+                page = 0;
+                
+            if(_isDef(Model.limitTable[attributeName]) && !_isDef(Model.linkTable[attributeName])){
+              page = Model.limitTable[attributeName].page;
+              limit = Model.limitTable[attributeName].limit;
+              attributeVal = Interpolate.getPageSlice(Model, attributeName, attributeVal);
+            }
+            
+            
+            
             /*rebuild new one*/
             for(var i = 0; i < attributeVal.length; i++){
 
@@ -1049,6 +1083,7 @@ var Model = function(modelName ,modelObj){
   
   this.attributes = modelObj;
   this.linkTable = Object.create(null);
+  this.limitTable = Object.create(null);
   //this.cleanCopies = Object.create(null);
   /*Prevent run-time extension of the model*/
   //Object.freeze(this.attributes);
@@ -1056,7 +1091,7 @@ var Model = function(modelName ,modelObj){
 };
 
 /*Non-clobbering updating of interface using new data. Note that */
-Model.prototype.update = function(attribName, value){
+Model.prototype.softset = function(attribName, value){
   this.linkTable[attribName] = value;
   Interpolate.interpolate(this.modelName, attribName, value);
   delete this.linkTable[attribName];
@@ -1073,24 +1108,23 @@ Model.prototype.filter = function(attribName){
       item = null,
       Model = this;
   
-  
   chain.propName = '';
   chain.using = function(otherAttribName){
   
-    
       Model.listen(otherAttribName, function(data){
         /*On empty search input restore full attribute value*/
         if(_isNullOrEmpty(data.text)){
           delete Model.linkTable[attribName];
+          Interpolate.interpolate(Model.modelName, attribName, 
+                        Map.getAttribute(Model.modelName, attribName));
+          return;
         }
           
         var results = [],
             target = Map.getAttribute(Model.modelName, attribName);
-            
-        /*Special case for repeats as they need to be restored on empty input.*/
-        if(_isNullOrEmpty(data.text)){
-          Interpolate.interpolate(Model.modelName, attribName, target);
-        }
+        
+        target = Interpolate.getPageSlice(Model, attribName, target);
+        
         
         if(_isArray(target)){
         
@@ -1117,11 +1151,10 @@ Model.prototype.filter = function(attribName){
             Interpolate.interpolate(Model.modelName, attribName, results);
           }
           
-
         }
         
       }, true);
-    
+      
   };
   
   chain.by = function(propName){
@@ -1131,6 +1164,27 @@ Model.prototype.filter = function(attribName){
   
   return chain;
 };
+
+Model.prototype.limit = function(attribName){
+  var chain = Object.create(null),
+      Model = this;
+  chain.to = function(limit){
+    Model.limitTable[attribName] = {limit : limit, page : 1};
+  };
+  return chain;
+}
+
+Model.prototype.gotoPage = function(pageNum){
+  var chain = Object.create(null),
+      Model = this;
+  chain.of = function(attribName){
+    if(_isDef(Model.limitTable[attribName]) && pageNum > 0){
+      Model.limitTable[attribName].page = pageNum;
+      Interpolate.interpolate(Model.modelName, attribName, Map.getAttribute(Model.modelName, attribName));
+    }
+  };
+  return chain;
+}
 
 var Templar = {
 
