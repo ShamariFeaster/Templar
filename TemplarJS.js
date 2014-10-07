@@ -191,7 +191,7 @@ var Map = (function(){
       }
       ctx.modelAttribLength = Object.keys(indexCnt).length;
       ctx.index--;
-      ctx.length--;
+
     };
    
       
@@ -225,8 +225,6 @@ var Map = (function(){
           indexCnt = Object.create(null);
       if( _isDef(_map[modelName]['nodeTable'][attribName]) ){
         ctx.target = _map[modelName]['nodeTable'][attribName]['nodes'];
-        ctx.targetCopy = ctx.target.slice(0);
-        ctx.length = ctx.targetCopy.length;
         
         for(var i = 0; i < ctx.target.length; i++ ){
           if(ctx.target[i].index > _UNINDEXED)
@@ -235,7 +233,7 @@ var Map = (function(){
         
         ctx.modelAttribLength = Object.keys(indexCnt).length;
         
-        for(; ctx.index < ctx.length && ctx.stop == false; ctx.index++){
+        for(; ctx.index < ctx.target.length && ctx.stop == false; ctx.index++){
           tmp_node = ctx.target[ctx.index];
           ctx.modelName = modelName;
           ctx.modelAtrribName = attribName;
@@ -268,6 +266,15 @@ var Map = (function(){
     if(_isDef(_map[modelName]) && _isDef(_map[modelName]['modelObj'][attribName])){
       returnVal = _map[modelName]['modelObj'][attribName];
     }
+    /*special case due to fact that repeats are recompiled instead of interpolated. this means the
+      values shown can only be what is returned by this fnction. We don't want to clobber the 
+      attrib during filtering so instead we create a link to the filtered version. This is signaled
+      by the existence of an entry in the Model's linkTable with a key of the model attrib name.
+      This link is broken when the filter fails by removing the entry from the link table.*/
+    if(_isDef(_map[modelName]['linkTable'][attribName])){
+      returnVal = _map[modelName]['linkTable'][attribName];
+    }
+    
     return returnVal;
   },
   
@@ -288,11 +295,14 @@ var Map = (function(){
     return listeners;
   },
   
-  setListener : function(modelName, attributeName, listener){        
+  setListener : function(modelName, attributeName, listener, pushDuplicate){        
     if(_isFunc(listener)){
       var string = listener.toString(),
           id = string.length + string.charAt(string.length/2);
-      
+      if(_isDef(pushDuplicate) && pushDuplicate == true){
+        id += Math.random();
+        _log('Adding duplicate with id ' + id);
+      }
       if(!_isDef(_map[modelName]['listeners'][attributeName])){
         _map[modelName]['listeners'][attributeName] = Object.create(null);
       }
@@ -314,7 +324,7 @@ var Map = (function(){
   
   initModel : function(model_obj){
     _map[model_obj.modelName] = {modelObj : model_obj.attributes, nodeTable : Object.create(null),
-                      api : model_obj, listeners : Object.create(null)};
+                      api : model_obj, listeners : Object.create(null), linkTable : model_obj.linkTable};
   },
   pruneControlNodes : function(tmp_node, modelName, attribName, index){
     var Map = this;
@@ -642,19 +652,8 @@ var Process = {
         TMP_RepeatBase.scope = scope;
         Map.addRepeatBaseNode(TMP_RepeatBase); 
         Map.pushNodes(TMP_RepeatBase); 
-        var TMP_repeatedNode = null;
-        
-        TMP_RepeatBase.node.setAttribute('style','display:none;');    
-        for(var i = 0; i < attributeVal.length; i++){
+        TMP_RepeatBase.node.setAttribute('style','display:none;'); 
 
-          TMP_repeatedNode = this.preProcessRepeatNode(TMP_RepeatBase, i);
-          TMP_repeatedNode.scope = scope;
-          Map.pushNodes(TMP_repeatedNode);
-          if(TMP_repeatedNode.hasNonTerminals == false)
-            TMP_repeatedNode.node.innerHTML = attributeVal[i];
-          DOM.appendTo(TMP_repeatedNode.node, TMP_RepeatBase.node);
-          
-        }
         /*notice lack of preProcessControl(). This is so we don't add control declared in repeatBase.
           we do call it during preProcessRepeatNode() on each of the repeated nodes*/
         compileMe = false;
@@ -1042,19 +1041,25 @@ var Model = function(modelName ,modelObj){
   }
   
   this.attributes = modelObj;
+  this.linkTable = Object.create(null);
+  //this.cleanCopies = Object.create(null);
   /*Prevent run-time extension of the model*/
   Object.freeze(this.attributes);
-  Object.freeze(modelObj);
+  //Object.freeze(modelObj);
 };
 
-Model.prototype.listen = function(attributeName, listener){
-  Map.setListener(this.modelName, attributeName, listener);
+/*Non-clobbering updating of interface using new data. Note that */
+Model.prototype.update = function(attribName, value){
+  this.linkTable[attribName] = value;
+  Interpolate.interpolate(this.modelName, attribName, value);
+};
+
+Model.prototype.listen = function(attributeName, listener, pushDuplicate){
+  Map.setListener(this.modelName, attributeName, listener, pushDuplicate);
 };
 
 Model.prototype.filter = function(attribName){
   var chain = Object.create(null),
-      target = Map.getAttribute(this.modelName, attribName),
-      results = [],
       propName = '',
       itemValue = null,
       item = null,
@@ -1064,27 +1069,51 @@ Model.prototype.filter = function(attribName){
   chain.propName = '';
   chain.using = function(otherAttribName){
   
-    if(_isArray(target)){
+    
       Model.listen(otherAttribName, function(data){
-
-        for(var i = 0; i < target.length; i++){
-          item = target[i];
-          if(!_isNullOrEmpty(chain.propName) && _isDef(item[chain.propName])){
-            itemValue = item[chain.propName];
-          }else{
-            itemValue = item;
-          }
-          if(!_isNullOrEmpty(data.text) && _isString(itemValue) && itemValue.indexOf(data.text) == 0){
-            results.push(item);
-          }
+        /*On empty search input restore full attribute value*/
+        if(_isNullOrEmpty(data.text)){
+          delete Model.linkTable[attribName];
+        }
+          
+        var results = [],
+            target = Map.getAttribute(Model.modelName, attribName);
+            
+        /*Special case for repeats as they need to be restored on empty input.*/
+        if(_isNullOrEmpty(data.text)){
+          Interpolate.interpolate(Model.modelName, attribName, target);
         }
         
-        if(results.length < 1)
-          results = target;
+        if(_isArray(target)){
         
-        Model[attribName] = results;
-      });
-    }
+          for(var i = 0; i < target.length; i++){
+            item = target[i];
+            if(!_isNullOrEmpty(chain.propName) && _isDef(item[chain.propName])){
+              itemValue = item[chain.propName];
+            }else{
+              itemValue = item;
+            }
+            if(!_isNullOrEmpty(data.text) && _isString(itemValue) 
+                && itemValue.toLowerCase().indexOf(data.text.toLowerCase()) == 0){
+              results.push(item);
+            }
+          }
+          /*On failed filter, kill linkTable entry but also set results to original value.
+            This is special case for selects as they are interpolated using 'results', whereas
+            repeats are compiled using the value returned by getAttribute*/
+          if(results.length < 1){
+            results = target;
+            delete Model.linkTable[attribName];
+          }else{
+            Model.linkTable[attribName] = results;
+            Interpolate.interpolate(Model.modelName, attribName, results);
+          }
+          
+
+        }
+        
+      }, true);
+    
   };
   
   chain.by = function(propName){

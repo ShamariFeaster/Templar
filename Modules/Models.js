@@ -36,6 +36,6 @@ Templar.dataModel('Auth',
               selected : 'Nothing Yet',
               items : [{title : 'Baseball Cards', price : '$1.00', color : 'blue' },
                        {title : 'Fishing Rod', price : '$35', color : 'red'}],
-              list : ['blah', 'blah2', 'blah3'],
+              list : ['apples', 'bananas', 'carrots'],
               
             });

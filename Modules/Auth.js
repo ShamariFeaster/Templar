@@ -22,8 +22,10 @@ structureJS.module('Auth', function(require){
   }
   
   Templar.success('partial-login-screen.html', function(){
-    var states = AuthModel.states;
+
     AuthModel.filter('countries').by('text').using('userName');
+    AuthModel.filter('list').using('userName');
+    
     AuthModel.listen('countries', function(data){
       
       AuthModel.selected = data.text;
@@ -31,11 +33,12 @@ structureJS.module('Auth', function(require){
       switch(data.text){
         case 'CAN':
         /*This clobbers 'states', obviously undesirable.  */
-          AuthModel.states = AuthModel.CAN_states;
+          AuthModel.update('states', AuthModel.CAN_states);
          break;
          
         case 'US':
-          AuthModel.states = states;
+          AuthModel.update('states', AuthModel.states);
+
           break;
       }
       
