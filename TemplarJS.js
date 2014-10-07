@@ -746,6 +746,7 @@ var Interpolate = {
         node.innerText = attributeVal[tmp_node.index];
     }
   },
+  /*Returns the whole attribute if no limit is defined for this attribute*/
   getPageSlice : function(Model, attributeName, target){
     var start = 0,
         length = target.length,
@@ -755,8 +756,8 @@ var Interpolate = {
     if(_isDef(Model.limitTable[attributeName])){
       page = Model.limitTable[attributeName].page;
       limit = Model.limitTable[attributeName].limit;
-      length = (((limit * page) - 1)  <= target.length) ? 
-               ((limit * page) - 1) : target.length;
+      length = (((limit * page))  <= target.length) ? 
+               ((limit * page)) : target.length;
       start = ( ((page * limit) - limit) < length) ?
               (page * limit) - limit : ((page * limit) - limit) - length;
       results = target.slice(start, length);
@@ -858,12 +859,13 @@ var Interpolate = {
               
             });
             
-            /*Put in function b/c this is duplicated from preProcessNode()*/
+
             var TMP_repeatedNode = null,
                 Model = Map.getInternalModel(modelName),
                 limit = 0, 
                 page = 0;
-                
+            
+            /*Get page, if limit has been defined*/    
             if(_isDef(Model.limitTable[attributeName]) && !_isDef(Model.linkTable[attributeName])){
               page = Model.limitTable[attributeName].page;
               limit = Model.limitTable[attributeName].limit;
