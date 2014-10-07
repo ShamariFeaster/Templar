@@ -8,7 +8,9 @@ Templar.dataModel('Environment',
               host : 'http://nitework.com',
               
               /*Page Clock*/
-              time : ''
+              time : '',
+              
+              image_templar : 'images/Cross_Templar.svg'
             });
 
 Templar.dataModel('Login',
@@ -32,6 +34,10 @@ Templar.dataModel('Login',
               CAN_states : [{text : 'BC', value : 1},
                         {text : 'Ontario', value : 2, selected : true},
                         {text : 'Calgary', value : 3}],
+              
+              MEX_states : [{text : 'Juarez', value : 1},
+                        {text : 'Oxiaca', value : 2, selected : true},
+                        {text : 'Sinola', value : 3}],
                         
               selected : 'Nothing Yet',
               

@@ -623,6 +623,8 @@ var Process = {
             , {type : 'select'
             , value : e.target.options[e.target.selectedIndex].value
             , text : e.target.options[e.target.selectedIndex].text
+            /*during compilation, put other properties as data attributes and send the dataSet as a 'data' property
+              of this event object*/
               }
           );                  
         });
@@ -749,7 +751,8 @@ var Interpolate = {
         numNodesToAdd = 0,
         numNodesToRemove = 0,
         newNodeStartIndex = 0,
-        TMP_repeatBaseNode = null;
+        TMP_repeatBaseNode = null,
+        updateObj = Object.create(null);
     
     Map.forEach(modelName, attributeName, function(ctx, tmp_node){
       var node = tmp_node.node;
@@ -779,14 +782,10 @@ var Interpolate = {
                 Map.pushNodes(tmp_option);
               }
             }
+            updateObj.value = node.options[node.selectedIndex].value;
+            updateObj.text = node.options[node.selectedIndex].text;
+            updateObj.type = 'select';
             
-            Interpolate.dispatchListeners(
-                          listeners
-                          , {type : 'select'
-                          , value : node.options[node.selectedIndex].value
-                          , text : node.options[node.selectedIndex].text}
-                        );
-          
           }
           break;
         case 'OPTION':
@@ -797,7 +796,11 @@ var Interpolate = {
                 node.parentNode.selectedIndex = 
                   (_isDef(attributeVal[ctx.modelAttribIndex].selected) && attributeVal[ctx.modelAttribIndex].selected == true) ? 
                     ctx.modelAttribIndex : node.selectedIndex;
+              
             }
+            updateObj.value = node.parentNode.options[node.parentNode.selectedIndex].value;
+            updateObj.text = node.parentNode.options[node.parentNode.selectedIndex].text;
+            updateObj.type = 'select';
             
             /*New model data, shorter than existing data, kill extra nodes*/
             if(ctx.modelAttribIndex >= attributeVal.length){
@@ -805,6 +808,8 @@ var Interpolate = {
               Map.pruneControlNodes(tmp_node, modelName, attributeName, ctx.modelAttribIndex);
               node.parentNode.removeChild(node);
             }
+            
+            
           }
           break;
         
@@ -852,7 +857,9 @@ var Interpolate = {
         }
       
     });
-        
+    
+    Interpolate.dispatchListeners(listeners, updateObj);
+    
   }
   
 };
@@ -1052,6 +1059,7 @@ var Model = function(modelName ,modelObj){
 Model.prototype.update = function(attribName, value){
   this.linkTable[attribName] = value;
   Interpolate.interpolate(this.modelName, attribName, value);
+  delete this.linkTable[attribName];
 };
 
 Model.prototype.listen = function(attributeName, listener, pushDuplicate){

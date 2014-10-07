@@ -1,27 +1,28 @@
-structureJS.module('Auth', function(require){
+structureJS.module('LoginCotroller', function(require){
   var Templar = require('Templar'),
-      AuthModel = Templar.getModel('Login'),
+      LoginModel = Templar.getModel('Login'),
       EnvModel = Templar.getModel('Environment');
 
   Templar.success('partial-login-screen.html', function(){
     
     /*Live filter stuff using input*/
-    AuthModel.filter('countries').by('text').using('userInput');
-    AuthModel.filter('list').using('userInput');
+    LoginModel.filter('countries').by('text').using('userInput');
+    LoginModel.filter('list').using('userInput');
     
     /*Changes the 'States' select based on what country has been selected*/
-    AuthModel.listen('countries', function(data){
+    LoginModel.listen('countries', function(data){
       
-      AuthModel.selected = data.text;
+      LoginModel.selected = data.text;
 
       switch(data.text){
         case 'CAN':
-          AuthModel.update('US_states', AuthModel.CAN_states);
+          LoginModel.update('US_states', LoginModel.CAN_states);
          break;
-         
         case 'US':
-          AuthModel.update('US_states', AuthModel.US_states);
-
+          LoginModel.update('US_states', LoginModel.US_states);
+          break;
+        case 'MEX':
+          LoginModel.update('US_states', LoginModel.MEX_states);
           break;
       }
       
