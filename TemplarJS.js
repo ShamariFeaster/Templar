@@ -300,12 +300,12 @@ var Map = (function(){
     return listeners;
   },
   
-  setListener : function(modelName, attributeName, listener, pushDuplicate){        
+  setListener : function(modelName, attributeName, listener, isFilterListener){        
     if(_isFunc(listener)){
       var string = listener.toString(),
           id = string.length + string.charAt(string.length/2);
-      if(_isDef(pushDuplicate) && pushDuplicate == true){
-        id += Math.random();
+      if(_isDef(isFilterListener) && isFilterListener == true){
+        id = '_LIVE_FILTER_' + id + Math.random();
         _log('Adding duplicate with id ' + id);
       }
       if(!_isDef(_map[modelName]['listeners'][attributeName])){
@@ -318,6 +318,18 @@ var Map = (function(){
   
   removeListener : function(modelName, attribName){
     delete _map[modelName]['listeners'][attribName];
+  },
+  
+  removeFilterListeners : function(modelName, attribName){
+    if(_isDef(_map[modelName]['listeners'][attribName])){
+      var listeners = _map[modelName]['listeners'][attribName];
+      for(var id in listeners){
+        if(id.indexOf('_LIVE_FILTER_') == 0){
+          _log('REMOVING Listener with id: ' + id);
+          delete listeners[id];
+        }
+      }
+    }
   },
   
   getModel : function(modelName){
@@ -844,11 +856,13 @@ var Interpolate = {
         case 'SPAN':
 
           Interpolate.interpolateSpan(tmp_node, attributeVal);
-          updateObject.text = node.innerText;
-          Interpolate.dispatchListeners(listeners, {type : node.tagName.toLowerCase(), text : updateObject.text});
-          
+          updateObj.text = node.innerText;
+          updateObj.type = node.tagName.toLowerCase();
           break;
-          
+        case 'INPUT':
+          updateObj.text = node.value;
+          updateObj.type = node.tagName.toLowerCase();
+          break;
         default:
           var TMP_newRepeatNode = null,
               outerCtx = ctx;
@@ -1092,20 +1106,34 @@ var Model = function(modelName ,modelObj){
   this.cachedResults = Object.create(null);
   this.filterResults = Object.create(null);
   this.limitTable = Object.create(null);
+  this.liveFilters = Object.create(null);
 };
 
 Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/property, /*nullable*/input, filterFunc
-                                        , clearCachedResults, storeFilterResults){
+                                        , clearCachedResults, storeFilterResults, isInputFilter){
   /*make sure getAttribute() returns the full array to filter against, unless clearCachedResults is true
     this is used to differentiate between filters that watch live attributes and those that filter data statically.
     Live filter shouldn't used cached results on every filter; rather they should check the whole set with each update.
   */
   if(_isDef(clearCachedResults) && clearCachedResults  == true)
     delete this.cachedResults[attribName];
+  /*if we fail input filter we should restore he attribute to original state*/
+  if(_isDef(isInputFilter) && isInputFilter == true){
+    if(filterFunc.call(null, input) == false){
+      if(_isNullOrEmpty(input))
+        Interpolate.interpolate(this.modelName, attribName,  Map.getAttribute(this.modelName, attribName));
+
+      return false;
+    }
+    else{
+      return true;
+    }
+  }
   
   var Model = this,
       results = [],
-      target = Map.getAttribute(Model.modelName, attribName);
+      target = Map.getAttribute(Model.modelName, attribName),
+      filterResults = null;
   
   target = Interpolate.getPageSlice(Model, attribName, target);
   
@@ -1118,28 +1146,40 @@ Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/propert
       }else{
         itemValue = item;
       }
-      /*filter fun*/
-      if(filterFunc.call(null, itemValue, input ) == true){
+      /*if this is a static filter pass filter funct the itemVal as first arg. Live filters
+        need the input first. This is done because live 'and' functions signal to this wrapper
+        that they are input filters by having a single param (input). Those funcs have no use for
+        an item val.*/
+      filterResults = (storeFilterResults == true) ? 
+                        filterFunc.call(null, itemValue ) :
+                        filterFunc.call(null, input, itemValue );
+      if(filterResults == true){
         results.push(item);
       }
     }
     
-    /*empty set returned by filtering, kill cachedResults  but also set results to original set.*/
+    /*empty set returned by filtering, kill cachedResults  but also set results to original set.
+      Chained 'and's in static filters have to pass results to each other via the cachedResults.
+    */
     if(results.length < 1){
-      results = target;
       delete Model.cachedResults[attribName];
       /*get full attrib before interpolation. of importance with repeats during recompilation*/
-      results = Map.getAttribute(Model.modelName, attribName);
+      if(clearCachedResults == true){
+        results = Map.getAttribute(Model.modelName, attribName);
+        Interpolate.interpolate(Model.modelName, attribName, results);
+      }
     }else{
       /*cachedResults signals to getAttribute() to return these temp results during recompilation*/
       Model.cachedResults[attribName] = results;
       
-      /*This subset is what's retrieved from now on, used in static filtering*/
+      /*This subset acts as the v=original attrib from now on. This is to persist static filtering*/
       if(_isDef(storeFilterResults) && storeFilterResults  == true)
         Model.filterResults[attribName] = results;
+      Interpolate.interpolate(Model.modelName, attribName, results);
     }
-    Interpolate.interpolate(Model.modelName, attribName, results);
+    
   }
+  return true;
 };
 
 /*Non-clobbering updating of interface using new data. Note that */
@@ -1158,24 +1198,50 @@ Model.prototype.filter = function(attribName){
       propName = '',
       itemValue = null,
       item = null,
-      Model = this;
+      Model = this,
+      clearCachedResults = true,
+      storeFilterResults = void(0);
   
   chain.propName = '';
-  
-  
+  chain.isStatic = false;
+  chain.liveAndFuncs = [];
     chain.using = function(atrribNameOrFunction){
       if(_isFunc(atrribNameOrFunction)){
         /*Static Filter
-          Function take a single arg, returns bool a < 5 for example*/
-        Model.filterWarapper(attribName, chain.propName, null, atrribNameOrFunction, false, true);
+          Function take a single arg which is list element, returns bool a < 5 for example*/
+          clearCachedResults = false;
+          storeFilterResults = true;
+          chain.isStatic = true;
+        Model.filterWarapper(attribName, chain.propName, null, atrribNameOrFunction, clearCachedResults, storeFilterResults);
       }
       else{
+        if(!_isDef(Model.liveFilters[attribName])){
+          Model.liveFilters[attribName] = [];
+        } 
+        
+        Model.liveFilters[attribName].push(atrribNameOrFunction);
+        
         /*Live Filter*/
         Model.listen(atrribNameOrFunction, function(data){
-          /*default filter for model attribute is a 'startsWith' string compare*/
-          Model.filterWarapper(attribName, chain.propName, data.text, function(item, input){
-            return (_isString(item) && !_isNullOrEmpty(input) && item.toLowerCase().indexOf(input.toLowerCase()) == 0);
-          }, true);
+          /*clear results when we have no chained 'and' functions*/
+          clearCachedResults = (chain.liveAndFuncs.length < 1);
+          
+          var passedInputFilter = true,
+              defaultFilterOverride = false;
+          /*Filter with live 'and' functions*/
+          for(var i = 0; i < chain.liveAndFuncs.length && passedInputFilter == true; i++){
+            var isInputFilter = (chain.liveAndFuncs[i].length == 1);
+            passedInputFilter = chain.liveAndFuncs[i].funct.call(null, data.text, chain.propName, isInputFilter);
+            defaultFilterOverride |= !isInputFilter; 
+          }
+          _log('defaultFilterOverride: ' + defaultFilterOverride);
+          /*if we passed input filter, we shoould move on to default filter*/
+          if(passedInputFilter == true && defaultFilterOverride == false){
+            /*default filter for model attribute is a 'startsWith' string compare*/
+            Model.filterWarapper(attribName, chain.propName, data.text, function(input, item){
+              return (!_isNullOrEmpty(item) && !_isNullOrEmpty(input) && item.toString().toLowerCase().indexOf(input.toLowerCase()) == 0);
+            }, clearCachedResults, storeFilterResults);
+          }
 
         }, true);
       }
@@ -1188,17 +1254,32 @@ Model.prototype.filter = function(attribName){
       
       return chain;
     }
-    
+    /*'and' queries on live filters iterate the entire data set. */
     chain.and = function(comparitorFunc){
       if(_isFunc(comparitorFunc)){
-        Model.filterWarapper(attribName, null, null, comparitorFunc, false, true);
+        /*Live comparitors should take input*/
+        chain.liveAndFuncs.push({ funct : function(input, propName, isInputFilter){
+          storeFilterResults = chain.isStatic;
+          clearCachedResults = isInputFilter;
+          return Model.filterWarapper(attribName, propName, input, comparitorFunc, clearCachedResults, storeFilterResults, isInputFilter);
+        }, length : comparitorFunc.length});
+        
+        /*push input filters to the front*/
+        chain.liveAndFuncs.sort(function(a,b){
+          return (a.funct.length != 1);
+        });
+        
+        clearCachedResults = false;
+        storeFilterResults = chain.isStatic;
+        
+        if( (storeFilterResults = chain.isStatic) == true){
+          Model.filterWarapper(attribName, chain.propName, null, comparitorFunc, clearCachedResults, storeFilterResults);
+        }
+        
       }
       return chain;
     }
-    
-  
-  
-  
+
   return chain;
 };
 
@@ -1221,6 +1302,20 @@ Model.prototype.gotoPage = function(pageNum){
     }
   };
   return chain;
+}
+
+Model.prototype.resetLiveFiltersOf = function(attribName){
+  var watching = null;
+  if(_isDef(this.liveFilters[attribName])){
+    watching = this.liveFilters[attribName];
+    for(var i = 0; i < watching.length; i++){
+      Map.removeFilterListeners(this.modelName, watching[i]);
+    }
+  }
+}
+
+Model.prototype.resetStaticFiltersOf = function(attribName){
+  delete this.filterResults[attribName];
 }
 
 var Templar = {

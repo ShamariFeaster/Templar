@@ -9,7 +9,7 @@ structureJS.module('EnvironmentController', function(require){
       /*Incremenet clock every second*/
       setInterval(function(){
         dateObj.setSeconds(dateObj.getSeconds() + 1);
-        EnvModel.time = dateObj.toDateString() + ' ' + dateObj.toTimeString();
+        //EnvModel.time = dateObj.toDateString() + ' ' + dateObj.toTimeString();
       },1000);
       
   
