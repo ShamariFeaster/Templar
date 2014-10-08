@@ -3,14 +3,25 @@ structureJS.module('LoginCotroller', function(require){
       LoginModel = Templar.getModel('Login'),
       EnvModel = Templar.getModel('Environment');
     
-  LoginModel.limit('list').to(5);
+  /*Limit any sequential data attrib, like those backing repeats*/
+  //LoginModel.limit('list').to(5);
+  
+  /*static filter*/
+  /*LoginModel.filter('numbers')
+    .using(function(a){ return (a > 2);})
+    .and(function(a){ return (a < 5);});
+  */
+  
+  
   
   Templar.success('partial-login-screen.html', function(){
     
-    /*Live filter stuff using input*/
-    //LoginModel.filter('countries').by('text').using('userInput');
-    LoginModel.filter('list').using('userInput');
+    /*Live filter by roperty*/
+    LoginModel.filter('countries').by('text').using('userInput');
     
+    /*Live filter*/
+    //LoginModel.filter('list').using('userInput');
+      
     /*
     LoginModel.gotoPage(2).of('list');
     */

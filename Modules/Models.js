@@ -45,6 +45,8 @@ Templar.dataModel('Login',
               items : [{title : 'Baseball Cards', price : '$1.00', color : 'blue' },
                        {title : 'Fishing Rod', price : '$35', color : 'red'}],
               list : ['apples', 'bananas', 'clams', 'carrots','donuts','eggplants','fish','grapes',
-                      'gordos','hot dogs','krack']
+                      'gordos','hot dogs','krack'],
+                      
+              numbers : [0,1,2,3,4,5,6,7,8,9,10]
               
             });

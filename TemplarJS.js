@@ -193,9 +193,7 @@ var Map = (function(){
       ctx.index--;
 
     };
-   
-      
-      
+
     /*model names*/
     if(_isFunc(modelName)){
     
@@ -269,10 +267,10 @@ var Map = (function(){
     /*special case due to fact that repeats are recompiled instead of interpolated. this means the
       values shown can only be what is returned by this fnction. We don't want to clobber the 
       attrib during filtering so instead we create a link to the filtered version. This is signaled
-      by the existence of an entry in the Model's linkTable with a key of the model attrib name.
+      by the existence of an entry in the Model's cachedResults with a key of the model attrib name.
       This link is broken when the filter fails by removing the entry from the link table.*/
-    if(_isDef(_map[modelName]['linkTable'][attribName])){
-      returnVal = _map[modelName]['linkTable'][attribName];
+    if(_isDef(_map[modelName]['cachedResults'][attribName])){
+      returnVal = _map[modelName]['cachedResults'][attribName];
     }
     
     return returnVal;
@@ -325,7 +323,7 @@ var Map = (function(){
   
   initModel : function(model_obj){
     _map[model_obj.modelName] = {modelObj : model_obj.attributes, nodeTable : Object.create(null),
-                      api : model_obj, listeners : Object.create(null), linkTable : model_obj.linkTable,
+                      api : model_obj, listeners : Object.create(null), cachedResults : model_obj.cachedResults,
                       limitTable : model_obj.limitTable};
   },
   pruneControlNodes : function(tmp_node, modelName, attribName, index){
@@ -866,7 +864,7 @@ var Interpolate = {
                 page = 0;
             
             /*Get page, if limit has been defined*/    
-            if(_isDef(Model.limitTable[attributeName]) && !_isDef(Model.linkTable[attributeName])){
+            if(_isDef(Model.limitTable[attributeName]) && !_isDef(Model.cachedResults[attributeName])){
               page = Model.limitTable[attributeName].page;
               limit = Model.limitTable[attributeName].limit;
               attributeVal = Interpolate.getPageSlice(Model, attributeName, attributeVal);
@@ -1084,7 +1082,7 @@ var Model = function(modelName ,modelObj){
   }
   
   this.attributes = modelObj;
-  this.linkTable = Object.create(null);
+  this.cachedResults = Object.create(null);
   this.limitTable = Object.create(null);
   //this.cleanCopies = Object.create(null);
   /*Prevent run-time extension of the model*/
@@ -1092,11 +1090,55 @@ var Model = function(modelName ,modelObj){
   //Object.freeze(modelObj);
 };
 
+Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/property, /*nullable*/input, filterFunc, clearcachedResults){
+  /*make sure getAttribute() returns the full array to filter against, unless clearcachedResults is true
+    this is used to differentiate between filters that watch live attributes and those that filter data statically.
+    Live filter shouldn't used cached results on every filter; rather they should check the whole set with each update.
+  */
+  
+  if(clearcachedResults == true)
+    delete this.cachedResults[attribName];
+  
+  var Model = this,
+      results = [],
+      target = Map.getAttribute(Model.modelName, attribName);
+  
+  target = Interpolate.getPageSlice(Model, attribName, target);
+  
+  if(_isArray(target)){
+  
+    for(var i = 0; i < target.length; i++){
+      item = target[i];
+      if(!_isNullOrEmpty(property) && _isDef(item[property])){
+        itemValue = item[property];
+      }else{
+        itemValue = item;
+      }
+      /*filter fun*/
+      if(filterFunc.call(null, itemValue, input ) == true){
+        results.push(item);
+      }
+    }
+    
+    /*On failed filter, kill cachedResults entry but also set results to original value.*/
+    if(results.length < 1){
+      results = target;
+      delete Model.cachedResults[attribName];
+      /*get full attrib before interpolation. namely of import with repeats and recompilation*/
+      results = Map.getAttribute(Model.modelName, attribName);
+    }else{
+      /*cachedResults signals to getAttribute() to return these temp results during recompilation*/
+      Model.cachedResults[attribName] = results;
+    }
+    Interpolate.interpolate(Model.modelName, attribName, results);
+  }
+};
+
 /*Non-clobbering updating of interface using new data. Note that */
 Model.prototype.softset = function(attribName, value){
-  this.linkTable[attribName] = value;
+  this.cachedResults[attribName] = value;
   Interpolate.interpolate(this.modelName, attribName, value);
-  delete this.linkTable[attribName];
+  delete this.cachedResults[attribName];
 };
 
 Model.prototype.listen = function(attributeName, listener, pushDuplicate){
@@ -1111,58 +1153,42 @@ Model.prototype.filter = function(attribName){
       Model = this;
   
   chain.propName = '';
-  chain.using = function(otherAttribName){
   
-      Model.listen(otherAttribName, function(data){
-        /*On empty search input restore full attribute value*/
-        if(_isNullOrEmpty(data.text)){
-          delete Model.linkTable[attribName];
-          Interpolate.interpolate(Model.modelName, attribName, 
-                        Map.getAttribute(Model.modelName, attribName));
-          return;
-        }
-          
-        var results = [],
-            target = Map.getAttribute(Model.modelName, attribName);
-        
-        target = Interpolate.getPageSlice(Model, attribName, target);
-        
-        
-        if(_isArray(target)){
-        
-          for(var i = 0; i < target.length; i++){
-            item = target[i];
-            if(!_isNullOrEmpty(chain.propName) && _isDef(item[chain.propName])){
-              itemValue = item[chain.propName];
-            }else{
-              itemValue = item;
-            }
-            if(!_isNullOrEmpty(data.text) && _isString(itemValue) 
-                && itemValue.toLowerCase().indexOf(data.text.toLowerCase()) == 0){
-              results.push(item);
-            }
-          }
-          /*On failed filter, kill linkTable entry but also set results to original value.
-            This is special case for selects as they are interpolated using 'results', whereas
-            repeats are compiled using the value returned by getAttribute*/
-          if(results.length < 1){
-            results = target;
-            delete Model.linkTable[attribName];
-          }else{
-            Model.linkTable[attribName] = results;
-            Interpolate.interpolate(Model.modelName, attribName, results);
-          }
-          
-        }
-        
-      }, true);
+  
+    chain.using = function(atrribNameOrFunction){
+      if(_isFunc(atrribNameOrFunction)){
+        /*function take a single arg, returns bool a < 5 for example*/
+        Model.filterWarapper(attribName, null, null, atrribNameOrFunction, false);
+      }
+      else{
+        Model.listen(atrribNameOrFunction, function(data){
+          /*default filter for model attribute id startsWith*/
+          Model.filterWarapper(attribName, chain.propName, data.text, function(item, input){
+            return (_isString(item) && !_isNullOrEmpty(input) && item.toLowerCase().indexOf(input.toLowerCase()) == 0);
+          }, true);
+
+        }, true);
+      }
       
-  };
+      return chain;  
+    };
+    
+    chain.by = function(propName){
+      chain.propName = propName;
+      
+      return chain;
+    }
+    
+    /*notice how 'and' is not defined until 'using' has been called, enforcing proper call order*/
+    chain.and = function(comparitorFunc){
+      if(_isFunc(comparitorFunc)){
+        Model.filterWarapper(attribName, null, null, comparitorFunc, false);
+      }
+      return chain;
+    }
+    
   
-  chain.by = function(propName){
-    chain.propName = propName;
-    return chain;
-  }
+  
   
   return chain;
 };
@@ -1199,11 +1225,11 @@ var Templar = {
   getPartialOnlodHandler : function(partialFileName){
     var onloadHandler = function(){};
     
-    if(_isDef(this._onloadHandlerMap[partialFileName]) && _isFunc(this._onloadHandlerMap[partialFileName])){
-          onloadHandler = this._onloadHandlerMap[partialFileName];
-      }
-      
-      return onloadHandler;
+    if(_isDef(this._onloadHandlerMap[partialFileName]) 
+       && _isFunc(this._onloadHandlerMap[partialFileName])){
+        onloadHandler = this._onloadHandlerMap[partialFileName];
+    }
+    return onloadHandler;
   },
   
   dataModel : function(modelName, modelObj){
