@@ -1108,7 +1108,21 @@ var Model = function(modelName ,modelObj){
   this.limitTable = Object.create(null);
   this.liveFilters = Object.create(null);
 };
+/************************API************************************/
+/*Non-clobbering updating of interface using new data. Note that */
+/*public*/
+Model.prototype.softset = function(attribName, value){
+  this.cachedResults[attribName] = value;
+  Interpolate.interpolate(this.modelName, attribName, value);
+  delete this.cachedResults[attribName];
+};
+/*public*/
+Model.prototype.listen = function(attributeName, listener, pushDuplicate){
+  Map.setListener(this.modelName, attributeName, listener, pushDuplicate);
+};
 
+/******FILTERING***************/
+/*INTERNAL*/
 Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/property, /*nullable*/input, filterFunc
                                         , clearCachedResults, storeFilterResults, isInputFilter){
   /*make sure getAttribute() returns the full array to filter against, unless clearCachedResults is true
@@ -1181,18 +1195,7 @@ Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/propert
   }
   return true;
 };
-
-/*Non-clobbering updating of interface using new data. Note that */
-Model.prototype.softset = function(attribName, value){
-  this.cachedResults[attribName] = value;
-  Interpolate.interpolate(this.modelName, attribName, value);
-  delete this.cachedResults[attribName];
-};
-
-Model.prototype.listen = function(attributeName, listener, pushDuplicate){
-  Map.setListener(this.modelName, attributeName, listener, pushDuplicate);
-};
-
+/*public*/
 Model.prototype.filter = function(attribName){
   var chain = Object.create(null),
       propName = '',
@@ -1282,7 +1285,23 @@ Model.prototype.filter = function(attribName){
 
   return chain;
 };
+/*public*/
+Model.prototype.resetLiveFiltersOf = function(attribName){
+  var watching = null;
+  if(_isDef(this.liveFilters[attribName])){
+    watching = this.liveFilters[attribName];
+    for(var i = 0; i < watching.length; i++){
+      Map.removeFilterListeners(this.modelName, watching[i]);
+    }
+  }
+}
+/*public*/
+Model.prototype.resetStaticFiltersOf = function(attribName){
+  delete this.filterResults[attribName];
+}
 
+/*END Filtering*/
+/*public*/
 Model.prototype.limit = function(attribName){
   var chain = Object.create(null),
       Model = this;
@@ -1291,7 +1310,7 @@ Model.prototype.limit = function(attribName){
   };
   return chain;
 }
-
+/*public*/
 Model.prototype.gotoPage = function(pageNum){
   var chain = Object.create(null),
       Model = this;
@@ -1303,21 +1322,61 @@ Model.prototype.gotoPage = function(pageNum){
   };
   return chain;
 }
-
-Model.prototype.resetLiveFiltersOf = function(attribName){
-  var watching = null;
-  if(_isDef(this.liveFilters[attribName])){
-    watching = this.liveFilters[attribName];
-    for(var i = 0; i < watching.length; i++){
-      Map.removeFilterListeners(this.modelName, watching[i]);
+/*******************SORTING**********************************/
+Model.prototype.sort = function(attribName){
+  var chain = Object.create(null),
+      Model = this,
+      target = Map.getAttribute(Model.modelName, attribName),
+      A_FIRST = -1,
+      B_FIRST = 1,
+      NO_CHANGE = 0;
+      
+  chain.propName = '';
+  chain.prevProps = [];
+  chain.sorter = function(a,b){
+    var orig_a = a,
+        orig_b = b,
+        a = (!_isNull(chain.propName)) ? a[chain.propName] : a,
+        b = (!_isNull(chain.propName)) ? b[chain.propName] : b,
+        intA = parseInt(a),
+        intB = parseInt(b),
+        pastPropsAligned = true,
+        sortAction = NO_CHANGE;
+        
+    if(!_isDef(a) || !_isDef(b)){
+      return NO_CHANGE;
     }
+    for(var i = 0; i < chain.prevProps.length; i++){
+      pastPropsAligned &= (orig_a[chain.prevProps[i]] == orig_b[chain.prevProps[i]]);
+    }
+    a = (isNaN(intA)) ? a : intA;
+    b = (isNaN(intB)) ? b : intB;
+    sortAction = (b < a) ? B_FIRST : A_FIRST;
+    sortAction = (pastPropsAligned == true) ? sortAction : NO_CHANGE;
+    return sortAction
+  };
+    
+  chain.orderBy = function(propName){
+    chain.propName = propName;
+    target.sort(chain.sorter);
+    chain.prevProps.push(propName);
+    return chain;
+  };
+  
+  chain.thenBy = function(propName){
+    chain.propName = propName;
+    target.sort(chain.sorter);
+    chain.prevProps.push(propName);
+    return chain;
   }
+  
+  chain.using = function(softFunc){
+    chain.sorter = softFunc;
+  };
+  return chain;
+  
 }
-
-Model.prototype.resetStaticFiltersOf = function(attribName){
-  delete this.filterResults[attribName];
-}
-
+/*END Sort*/
 var Templar = {
 
   _onloadHandlerMap : Object.create(null),
@@ -1347,6 +1406,7 @@ var Templar = {
   Interpolate : Interpolate
 };
 
+
 var Link = {
 
   bindModel : function(){
@@ -1360,6 +1420,7 @@ var Link = {
     });
   }
 };
+
 
 var State = {
   isLinkloading : false,

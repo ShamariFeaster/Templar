@@ -77,13 +77,11 @@ structureJS.module('LoginCotroller', function(require){
     .and(function(item){
       return (item.price < 201 );
     })
-
+    LoginModel.sort('numbers')
+    LoginModel.sort('items').orderBy('title').thenBy('price').thenBy('color');
   */
   
-  
-  
-  ;
-  
+  LoginModel.sort('numbers').orderBy();
   Templar.success('partial-login-screen.html', function(){
     
     

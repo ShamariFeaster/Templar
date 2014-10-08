@@ -42,18 +42,18 @@ Templar.dataModel('Login',
               selected : 'Nothing Yet',
               
               /*Repeated Data*/
-              items : [{title : 'Baseball Cards', price : '1', color : 'blue' },
-                       {title : 'Fishing Rod', price : '35', color : 'red'},
+              items : [{title : 'Doo Doo', price : '100', color : 'blue' },
+                       {title : 'Peanuts', price : '35', color : 'red'},
                        {title : 'Doo Doo', price : '5', color : 'red'},
-                       {title : 'Food', price : '15', color : 'red'},
-                       {title : 'Chick', price : '32', color : 'red'},
+                       {title : 'Doo Doo', price : '15', color : 'blue'},
+                       {title : 'Peas', price : '32', color : 'blue'},
                        {title : 'Peas', price : '42', color : 'red'},
-                       {title : 'TV', price : '200', color : 'red'},
-                       {title : 'Lotion', price : '12', color : 'red'},
-                       {title : 'Peanuts', price : '25', color : 'red'}],
-              list : ['apples', 'bananas', 'clams', 'carrots','donuts','eggplants','fish','grapes',
+                       {title : 'Peas', price : '2', color : 'blue'},
+                       {title : 'Donald Duck', price : '12', color : 'green'},
+                       {title : 'Peanuts', price : '25', color : 'green'}],
+              list : ['apples', 'Peanuts', 'clams', 'carrots','donuts','eggplants','fish','grapes',
                       'gordos','hot dogs','krack'],
                       
-              numbers : [0,1,2,3,4,5,6,7,8,9,10]
+              numbers : [2,7,4,7,24,74,11,-6,-29,66,43]
               
             });
