@@ -42,8 +42,15 @@ Templar.dataModel('Login',
               selected : 'Nothing Yet',
               
               /*Repeated Data*/
-              items : [{title : 'Baseball Cards', price : '$1.00', color : 'blue' },
-                       {title : 'Fishing Rod', price : '$35', color : 'red'}],
+              items : [{title : 'Baseball Cards', price : '1', color : 'blue' },
+                       {title : 'Fishing Rod', price : '35', color : 'red'},
+                       {title : 'Doo Doo', price : '5', color : 'red'},
+                       {title : 'Food', price : '15', color : 'red'},
+                       {title : 'Chick', price : '32', color : 'red'},
+                       {title : 'Peas', price : '42', color : 'red'},
+                       {title : 'TV', price : '200', color : 'red'},
+                       {title : 'Lotion', price : '12', color : 'red'},
+                       {title : 'Peanuts', price : '25', color : 'red'}],
               list : ['apples', 'bananas', 'clams', 'carrots','donuts','eggplants','fish','grapes',
                       'gordos','hot dogs','krack'],
                       

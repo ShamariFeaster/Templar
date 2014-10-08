@@ -4,23 +4,40 @@ structureJS.module('LoginCotroller', function(require){
       EnvModel = Templar.getModel('Environment');
     
   /*Limit any sequential data attrib, like those backing repeats*/
-  //LoginModel.limit('list').to(5);
+  LoginModel.limit('list').to(5);
   
   /*static filter*/
-  /*LoginModel.filter('numbers')
+  /*
+    LoginModel.filter('numbers')
     .using(function(a){ return (a > 2);})
     .and(function(a){ return (a < 5);});
-  */
+    
+    LoginModel.filter('items')
+    .by('price')
+    .using(function(price){return parseInt(price) > 15});
+    
+    LoginModel.filter('items')
+    .by('title')
+    .using(function(title){return title.indexOf('P') != -1});
+    
+    //Live filter by property
+    LoginModel.filter('countries').by('text').using('userInput');
+    
+    //Live filtera
+    LoginModel.filter('list').using('userInput');
+      
+    LoginModel.filter('items')
+    .by('title')
+    .using('userInput');
+  
+   */ 
+    
   
   
   
   Templar.success('partial-login-screen.html', function(){
     
-    /*Live filter by roperty*/
-    LoginModel.filter('countries').by('text').using('userInput');
     
-    /*Live filter*/
-    //LoginModel.filter('list').using('userInput');
       
     /*
     LoginModel.gotoPage(2).of('list');

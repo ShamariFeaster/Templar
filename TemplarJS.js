@@ -264,6 +264,12 @@ var Map = (function(){
     if(_isDef(_map[modelName]) && _isDef(_map[modelName]['modelObj'][attribName])){
       returnVal = _map[modelName]['modelObj'][attribName];
     }
+    
+    /*We should always pull the filtered subset if a static filter has been applied*/
+    if(_isDef(_map[modelName]['filterResults'][attribName])){
+      returnVal = _map[modelName]['filterResults'][attribName];
+    }
+    
     /*special case due to fact that repeats are recompiled instead of interpolated. this means the
       values shown can only be what is returned by this fnction. We don't want to clobber the 
       attrib during filtering so instead we create a link to the filtered version. This is signaled
@@ -272,6 +278,7 @@ var Map = (function(){
     if(_isDef(_map[modelName]['cachedResults'][attribName])){
       returnVal = _map[modelName]['cachedResults'][attribName];
     }
+
     
     return returnVal;
   },
@@ -324,7 +331,7 @@ var Map = (function(){
   initModel : function(model_obj){
     _map[model_obj.modelName] = {modelObj : model_obj.attributes, nodeTable : Object.create(null),
                       api : model_obj, listeners : Object.create(null), cachedResults : model_obj.cachedResults,
-                      limitTable : model_obj.limitTable};
+                      limitTable : model_obj.limitTable, filterResults : model_obj.filterResults};
   },
   pruneControlNodes : function(tmp_node, modelName, attribName, index){
     var Map = this;
@@ -1083,20 +1090,17 @@ var Model = function(modelName ,modelObj){
   
   this.attributes = modelObj;
   this.cachedResults = Object.create(null);
+  this.filterResults = Object.create(null);
   this.limitTable = Object.create(null);
-  //this.cleanCopies = Object.create(null);
-  /*Prevent run-time extension of the model*/
-  //Object.freeze(this.attributes);
-  //Object.freeze(modelObj);
 };
 
-Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/property, /*nullable*/input, filterFunc, clearcachedResults){
-  /*make sure getAttribute() returns the full array to filter against, unless clearcachedResults is true
+Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/property, /*nullable*/input, filterFunc
+                                        , clearCachedResults, storeFilterResults){
+  /*make sure getAttribute() returns the full array to filter against, unless clearCachedResults is true
     this is used to differentiate between filters that watch live attributes and those that filter data statically.
     Live filter shouldn't used cached results on every filter; rather they should check the whole set with each update.
   */
-  
-  if(clearcachedResults == true)
+  if(_isDef(clearCachedResults) && clearCachedResults  == true)
     delete this.cachedResults[attribName];
   
   var Model = this,
@@ -1120,15 +1124,19 @@ Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/propert
       }
     }
     
-    /*On failed filter, kill cachedResults entry but also set results to original value.*/
+    /*empty set returned by filtering, kill cachedResults  but also set results to original set.*/
     if(results.length < 1){
       results = target;
       delete Model.cachedResults[attribName];
-      /*get full attrib before interpolation. namely of import with repeats and recompilation*/
+      /*get full attrib before interpolation. of importance with repeats during recompilation*/
       results = Map.getAttribute(Model.modelName, attribName);
     }else{
       /*cachedResults signals to getAttribute() to return these temp results during recompilation*/
       Model.cachedResults[attribName] = results;
+      
+      /*This subset is what's retrieved from now on, used in static filtering*/
+      if(_isDef(storeFilterResults) && storeFilterResults  == true)
+        Model.filterResults[attribName] = results;
     }
     Interpolate.interpolate(Model.modelName, attribName, results);
   }
@@ -1157,12 +1165,14 @@ Model.prototype.filter = function(attribName){
   
     chain.using = function(atrribNameOrFunction){
       if(_isFunc(atrribNameOrFunction)){
-        /*function take a single arg, returns bool a < 5 for example*/
-        Model.filterWarapper(attribName, null, null, atrribNameOrFunction, false);
+        /*Static Filter
+          Function take a single arg, returns bool a < 5 for example*/
+        Model.filterWarapper(attribName, chain.propName, null, atrribNameOrFunction, false, true);
       }
       else{
+        /*Live Filter*/
         Model.listen(atrribNameOrFunction, function(data){
-          /*default filter for model attribute id startsWith*/
+          /*default filter for model attribute is a 'startsWith' string compare*/
           Model.filterWarapper(attribName, chain.propName, data.text, function(item, input){
             return (_isString(item) && !_isNullOrEmpty(input) && item.toLowerCase().indexOf(input.toLowerCase()) == 0);
           }, true);
@@ -1179,10 +1189,9 @@ Model.prototype.filter = function(attribName){
       return chain;
     }
     
-    /*notice how 'and' is not defined until 'using' has been called, enforcing proper call order*/
     chain.and = function(comparitorFunc){
       if(_isFunc(comparitorFunc)){
-        Model.filterWarapper(attribName, null, null, comparitorFunc, false);
+        Model.filterWarapper(attribName, null, null, comparitorFunc, false, true);
       }
       return chain;
     }
