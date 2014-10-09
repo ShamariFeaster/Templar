@@ -48,7 +48,13 @@ var ControlNode = function(node, id, modelName, attribName, index){
   this.index = (_isDef(index))? index : -1;
   this.scope = '';
 };
-  
+
+var State = {
+  isLinkloading : false,
+  isFirstPartialLoad : true,
+  preventUpdate : false
+};
+
 var DOM = {
   modifyClasses : function(node, add, remove){
     var nodeClassList = '',
@@ -808,6 +814,8 @@ var Interpolate = {
   interpolate : function(modelName, attributeName, attributeVal){  
     if(!Map.exists(modelName))
       return;
+      
+    _log('Interpolating ' + modelName + '.' + attributeName);
     var option = null;
         listeners = Map.getListeners(modelName, attributeName),
         Interpolate = this,
@@ -1109,7 +1117,7 @@ var Model = function(modelName ,modelObj){
           it will always be the last value of the iteration*/
         set : (function(attrib, model){
                 return function(value){
-                  _log('SET FIRED');
+                  _log('SET FIRED for ' + model.modelName + '.' + attrib);
                   /*kill old limit and page num on reassingment*/
                   if(_isDef(model.limitTable[attrib])){
                     delete model.limitTable[attrib];
@@ -1375,7 +1383,7 @@ Model.prototype.sort = function(attribName, pageNum){
       NO_CHANGE = 0;
       
   chain.target = Map.getAttribute(Model.modelName, attribName);
-  if(_isDef(pageNum) && pageNum > 0){
+  if(_isDef(pageNum) && _isDef(Model.limitTable[attribName]) && pageNum > 0){
     oldPageNum = Model.limitTable[attribName].page;
     Model.limitTable[attribName].page = pageNum;
     chain.target = Interpolate.getPageSlice(Model, attribName, chain.target);
@@ -1386,7 +1394,7 @@ Model.prototype.sort = function(attribName, pageNum){
   /*in a page sort chain.target is a slice of the full target*/
   chain.insertSortedSlice = function(targetSlice, Model, attribName, pageNum){
     /*Short circuit this so we don't set limitTable.page to undefined*/
-    if(!_isDef(pageNum))
+    if(!_isDef(pageNum) || !_isDef(Model.limitTable[attribName]))
       return;
       
     Model.limitTable[attribName].page = pageNum;
@@ -1513,10 +1521,7 @@ var Link = {
 };
 
 
-var State = {
-  isLinkloading : false,
-  isFirstPartialLoad : true
-};
+
 
 var Bootstrap = {
 
