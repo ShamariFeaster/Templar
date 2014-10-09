@@ -265,10 +265,19 @@ var Map = (function(){
     _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]['nodes'].push(tmp_node);
 
   },
-  getAttribute : function(modelName, attribName){
+  getAttribute : function(modelName, attribName, index, property){
     var returnVal = null;
     if(_isDef(_map[modelName]) && _isDef(_map[modelName]['modelObj'][attribName])){
-      returnVal = _map[modelName]['modelObj'][attribName];
+    
+      if(_isDef(index) && _isDef(property)){
+        returnVal = _map[modelName]['modelObj'][attribName][index][property];
+      }else 
+      if(_isDef(index)){
+        returnVal = _map[modelName]['modelObj'][attribName][index];
+      }else{
+        returnVal = _map[modelName]['modelObj'][attribName];
+      }
+      
     }
     
     /*We should always pull the filtered subset if a static filter has been applied*/
@@ -469,11 +478,12 @@ var Process = {
   preProcessNodeAttributes : function(node, scope){
     var attributes = null,
         match = null,
-        regex = /(\{\{(\w+\.\w+)(\[\d+\]\.zTMPzDot\w+)*\}\})/g,
+        regex = /\{\{(\w+)\.(\w+)(\[(\d)+\])*(?:\.)*(\w+)*?\}\}/g,
         modelNameParts = null,
         tmp_node = null;
-        
-    if(node.hasAttributes()){
+    
+    /*Options don't need to be in the node tree due to having NTs in 'value' attribute*/
+    if(node.hasAttributes() && node.tagName != 'OPTION'){
       attributes = node.attributes;
       /*search node attributes for non-terminals*/
       for(var i = 0; i < attributes.length; i++){
@@ -481,14 +491,18 @@ var Process = {
         if(attributes[i].name == 'style' || attributes[i].name == 'class'){
           continue;
         }
-        
+
         while( (match = regex.exec(attributes[i].value)) != null ){
-          modelNameParts = this.parseModelAttribName(match[2]); 
-          tmp_node = new TMP_Node(node, modelNameParts[0], modelNameParts[1]);         
+          tmp_node = new TMP_Node(node, match[1], match[2]);         
           tmp_node.symbolMap[attributes[i].name] = attributes[i].value;
           tmp_node.scope = scope;
           hasAttribNonTerminal = true;
           Map.pushNodes(tmp_node);
+          /*This is necessary for repeats as their child nodes aren't added to Interpolation array
+            Rather they are recompiled using repeated elements as the base. It makes sense since
+            we do interpolation during preprocessing with repeats that we do the same with attributes
+            in repeats*/
+          Interpolate.updateNodeAttributes(tmp_node, tmp_node.modelName, tmp_node.attribName);
           /*annotate node with symbolMap and push it onto modelMap */
         }
         
@@ -721,7 +735,9 @@ var Interpolate = {
     var updateObject = Object.create(null);
     var node = tmp_node.node;
     if(node.hasAttributes()){
-      var regex = /(\{\{(\w+\.\w+)\}\})/g, //result array -> [1] = {{a.b}}, [2] = a.b
+      var regex = /(\{\{(\w+\.\w+)\}\})/g, 
+      //result array -> [1] = {{a.b}}, [2] = a.b, 4 = index, 5 = prop
+          ntRegex = /(\{\{(\w+\.\w+)(\[(\d)+\])*(?:\.)*(\w+)*?\}\})/g,
           match = null,
           text = '',
           intermediateValue = '',
@@ -738,13 +754,13 @@ var Interpolate = {
                                   '';
         /*short circuit: is this model attribute's non-terminal in the node attributes string?
           during compilation, any node with a non-terminal is annotated w/ a symbol map*/
-        if(_isDef( uninterpolatedString ) 
-            && uninterpolatedString.match(new RegExp('{{' + modelName + '.' + attributeName + '}}'))){
+        if(_isDef( uninterpolatedString ) && ntRegex.test(uninterpolatedString)){
           /*get each non-terminal then, using text replacement, we update the node attribute
             value*/
-          while(  (match = regex.exec(uninterpolatedString)) != null){
+          ntRegex.lastIndex = 0;
+          while(  (match = ntRegex.exec(uninterpolatedString)) != null){
             modelNameParts = Process.parseModelAttribName(match[2]);
-            currAttribVal = Map.getAttribute(modelNameParts[0], modelNameParts[1]);
+            currAttribVal = Map.getAttribute(modelNameParts[0], modelNameParts[1], match[4], match[5]);
             intermediateValue = uninterpolatedString.replace(match[1], currAttribVal );
             uninterpolatedString = intermediateValue;
           }
@@ -938,6 +954,7 @@ var Interpolate = {
             outerCtx.stop = true;
 
           }
+
           break;
         }
       
@@ -1081,7 +1098,6 @@ var Compile = {
             during preprocessing. Once we reach that node during recursive compiling, we create a ControlNode
             using the annotated data and add it to our control list*/
           compileMe = Process.preProcessNode(DOM_Node, modelName, attribName, scope);
-          
            //1 = ctrl name, 3 = mdlName, 4 = attribName, 6 = index 
           if(_isDef(DOM_Node.dataset[_CTRL_KEY]) 
             && (ctrlRegexResult = /(\w+)(\|(\w+)\.(\w+)(\.(\d+))*)*/g.exec(DOM_Node.dataset[_CTRL_KEY])) !== null){
@@ -1089,6 +1105,7 @@ var Compile = {
             controlNode.scope = scope;
             Map.addControlNode(controlNode);
           }
+          
           /*Repeat base nodes serve as templates and should remain uncompiled*/
           if(compileMe  == true)
             this.compile(DOM_Node, scope, true);
@@ -1101,7 +1118,7 @@ var Compile = {
   }
 };
 
-
+/*****************MODEL*****************************************/
 var Model = function(modelName ,modelObj){
   if(!(this instanceof Model)){
     return new Model(modelObj);
@@ -1118,7 +1135,9 @@ var Model = function(modelName ,modelObj){
         set : (function(attrib, model){
                 return function(value){
                   _log('SET FIRED for ' + model.modelName + '.' + attrib);
-                  /*kill old limit and page num on reassingment*/
+                  /* Since clobber assignment request - clear attribute meta-data
+                  
+                  kill old limit and page num on reassingment*/
                   if(_isDef(model.limitTable[attrib])){
                     delete model.limitTable[attrib];
                   }
@@ -1155,7 +1174,7 @@ var Model = function(modelName ,modelObj){
   this.limitTable = Object.create(null);
   this.liveFilters = Object.create(null);
 };
-/************************API************************************/
+/************************GENERAL************************************/
 /*Non-clobbering updating of interface using new data. Note that */
 /*public*/
 Model.prototype.softset = function(attribName, value){
@@ -1171,7 +1190,7 @@ Model.prototype.listen = function(attributeName, listener, pushDuplicate){
   Map.setListener(this.modelName, attributeName, listener, pushDuplicate);
 };
 
-/******FILTERING***************/
+/*******************FILTERING*************************************/
 /*INTERNAL*/
 Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/property, /*nullable*/input, filterFunc
                                         , clearCachedResults, storeFilterResults, isInputFilter){
@@ -1351,6 +1370,7 @@ Model.prototype.resetStaticFiltersOf = function(attribName){
 }
 
 /*END Filtering*/
+/*******************PAGNG**************************************/
 /*public*/
 Model.prototype.limit = function(attribName){
   var chain = Object.create(null),
@@ -1383,11 +1403,15 @@ Model.prototype.sort = function(attribName, pageNum){
       NO_CHANGE = 0;
       
   chain.target = Map.getAttribute(Model.modelName, attribName);
+  /*substituting target for the page slice. Also need to set the 'page' meta-data
+    to the requested page for getPageSlice() and other slice-concerned functions
+    to work. The previous values are reinstated later*/
   if(_isDef(pageNum) && _isDef(Model.limitTable[attribName]) && pageNum > 0){
     oldPageNum = Model.limitTable[attribName].page;
     Model.limitTable[attribName].page = pageNum;
     chain.target = Interpolate.getPageSlice(Model, attribName, chain.target);
-  }    
+  }
+  
   chain.propName = '';
   chain.prevProps = [];
   
@@ -1400,22 +1424,18 @@ Model.prototype.sort = function(attribName, pageNum){
     Model.limitTable[attribName].page = pageNum;
     /*we have to get full target on each call because last call has changed it*/
     var fullTarget = Map.getAttribute(Model.modelName, attribName),
-        points = Interpolate.getPageSliceData(Model, attribName, fullTarget);
+        points = Interpolate.getPageSliceData(Model, attribName, fullTarget),
+        fullTargetCopy = null;
+        
     /*point.start of -1 indicates undefined limitTable*/
     if(points.start > -1 && !_isNull(targetSlice)){
-    
-      var cachedResults = (_isDef(Model.cachedResults[attribName])) ? Model.cachedResults[attribName] : void(0),
-          filterResults = (_isDef(Model.filterResults[attribName])) ? Model.filterResults[attribName] : void(0),
-          limitTable = (_isDef(Model.limitTable[attribName])) ? Model.limitTable[attribName] : void(0),
-          fullTargetCopy = fullTarget.slice(0);
-      
+
+      fullTargetCopy = fullTarget.slice(0);
+      /*t = target, ts = target slice*/
       for(var ts = 0, t = points.start; ts < targetSlice.length && t < points.length; ts++, t++){
         fullTargetCopy[t] = targetSlice[ts];
       }
       Map.setAttribute(Model.modelName, attribName, fullTargetCopy.slice(0));
-      Model.cachedResults[attribName] = (_isDef(cachedResults)) ?  cachedResults: void(0);
-      Model.filterResults[attribName]  = (_isDef(filterResults)) ? filterResults: void(0);
-      Model.limitTable[attribName] = (_isDef(limitTable)) ? limitTable : void(0);
       Model.limitTable[attribName].page = oldPageNum;
     }
   };
@@ -1433,7 +1453,8 @@ Model.prototype.sort = function(attribName, pageNum){
     if(!_isDef(a) || !_isDef(b)){
       return NO_CHANGE;
     }
-    /*if all of the prev sorted props of the operands are not aligned, no-op */
+    /*if all of the prev sorted props of the operands are not aligned, no-op.
+      ie, previously sorted fields must have the same value to sort this field*/
     for(var i = 0; i < chain.prevProps.length; i++){
       pastPropsAligned &= (orig_a[chain.prevProps[i]] == orig_b[chain.prevProps[i]]);
     }

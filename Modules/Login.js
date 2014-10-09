@@ -75,11 +75,20 @@ structureJS.module('LoginCotroller', function(require){
   LoginModel.sortPage(3).of('numbers').orderBy();
   LoginModel.sortPage(2).of('items').orderBy('title').thenBy('price');
   
-  //View Attribute
   console.log(LoginModel.attributes['items']);
   
+  //Contorls
+  
+  Templar.control('playBtn').listen('onclick', function(self){
+    self.event.preventDefault();
+    
+    //get's 'player' of same index
+    self('player').play();
+  });
   */
 
+  
+  
   Templar.success('partial-login-screen.html', function(){
     
     /*Changes the 'States' select based on what country has been selected*/

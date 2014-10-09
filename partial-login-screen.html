@@ -22,15 +22,7 @@
 
 
 
-<ul>
-  <li data-apl-repeat="Login.items"> 
-    Buy {{title}} for ONLY {{price}}!!!!  {{color}}
-  </li>
-</ul>
-
-
-
-<!--
-<ul>
-  <li data-apl-repeat="Login.numbers"></li>
-</ul>-->
+  <div data-apl-repeat="Login.songs">
+    <audio src="{{src}}" controls preload="auto" controls></audio>
+    <button data-apl-control="playButton">Play</button>
+  </div>

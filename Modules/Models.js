@@ -54,6 +54,9 @@ Templar.dataModel('Login',
               list : ['apples', 'Peanuts', 'clams', 'carrots','donuts','eggplants','fish','grapes',
                       'gordos','hot dogs','krack'],
                       
-              numbers : [2,7,4,8,-24,-74,11,-6,-29,66,43]
+              numbers : [2,7,4,8,-24,-74,11,-6,-29,66,43],
+              
+              songs : [{src : 'media/prototype.mp3' , title : 'OutKast - Prototype'}, 
+                      { src : 'media/sleep.mp3', title : 'Roots - Sleep'}]
               
             });
