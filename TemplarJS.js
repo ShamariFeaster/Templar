@@ -776,12 +776,34 @@ var Interpolate = {
       length = (((limit * page))  <= target.length) ? 
                ((limit * page)) : target.length;
       start = ( ((page * limit) - limit) < length) ?
-              (page * limit) - limit : ((page * limit) - limit) - length;
+              (page * limit) - limit : 0;
       results = target.slice(start, length);
     }    
     
             
     return results;
+  },
+  getPageSliceData : function(Model, attributeName, target){
+    var start = 0,
+        length = target.length,
+        limit = 0, 
+        page = 0,
+        results = Object.create(null);
+        results.start = -1;
+        results.length = 0;
+        
+    if(_isDef(Model.limitTable[attributeName])){
+      page = Model.limitTable[attributeName].page;
+      limit = Model.limitTable[attributeName].limit;
+      length = (((limit * page))  <= target.length) ? 
+               ((limit * page)) : target.length;
+      start = ( ((page * limit) - limit) < length) ?
+              (page * limit) - limit : 0;
+      results.start = start;
+      results.length = length;
+    }
+    return results;
+    
   },
   interpolate : function(modelName, attributeName, attributeVal){  
     if(!Map.exists(modelName))
@@ -1076,7 +1098,7 @@ var Model = function(modelName ,modelObj){
   if(!(this instanceof Model)){
     return new Model(modelObj);
   }
-  
+
   this.modelName = modelName;
   for(var attrib in modelObj){
     
@@ -1087,6 +1109,22 @@ var Model = function(modelName ,modelObj){
           it will always be the last value of the iteration*/
         set : (function(attrib, model){
                 return function(value){
+                  _log('SET FIRED');
+                  /*kill old limit and page num on reassingment*/
+                  if(_isDef(model.limitTable[attrib])){
+                    delete model.limitTable[attrib];
+                  }
+                  
+                  /*kill old static filter results as dataset has changed*/
+                  if(_isDef(model.filterResults[attrib])){
+                    delete model.filterResults[attrib];
+                  }
+                  
+                  /*kill cached filter results as dataset has changed*/
+                  if(_isDef(model.cachedResults[attrib])){
+                    delete model.cachedResults[attrib];
+                  }
+                  
                   Map.setAttribute(model.modelName, attrib, value);
                   Interpolate.interpolate(model.modelName, attrib, value);
                 }
@@ -1103,6 +1141,7 @@ var Model = function(modelName ,modelObj){
   }
   
   this.attributes = modelObj;
+  /*holde intra-filter results. eg, between subsequent 'and's of a filter() call */
   this.cachedResults = Object.create(null);
   this.filterResults = Object.create(null);
   this.limitTable = Object.create(null);
@@ -1115,6 +1154,9 @@ Model.prototype.softset = function(attribName, value){
   this.cachedResults[attribName] = value;
   Interpolate.interpolate(this.modelName, attribName, value);
   delete this.cachedResults[attribName];
+  if(_isDef(this.limitTable[attribName])){
+    this.limitTable[attribName].page = 1;
+  }
 };
 /*public*/
 Model.prototype.listen = function(attributeName, listener, pushDuplicate){
@@ -1306,7 +1348,8 @@ Model.prototype.limit = function(attribName){
   var chain = Object.create(null),
       Model = this;
   chain.to = function(limit){
-    Model.limitTable[attribName] = {limit : limit, page : 1};
+    if(limit > 0)
+      Model.limitTable[attribName] = {limit : limit, page : 1};
   };
   return chain;
 }
@@ -1323,16 +1366,52 @@ Model.prototype.gotoPage = function(pageNum){
   return chain;
 }
 /*******************SORTING**********************************/
-Model.prototype.sort = function(attribName){
+Model.prototype.sort = function(attribName, pageNum){
   var chain = Object.create(null),
       Model = this,
-      target = Map.getAttribute(Model.modelName, attribName),
+      oldPageNum = 0,
       A_FIRST = -1,
       B_FIRST = 1,
       NO_CHANGE = 0;
       
+  chain.target = Map.getAttribute(Model.modelName, attribName);
+  if(_isDef(pageNum) && pageNum > 0){
+    oldPageNum = Model.limitTable[attribName].page;
+    Model.limitTable[attribName].page = pageNum;
+    chain.target = Interpolate.getPageSlice(Model, attribName, chain.target);
+  }    
   chain.propName = '';
   chain.prevProps = [];
+  
+  /*in a page sort chain.target is a slice of the full target*/
+  chain.insertSortedSlice = function(targetSlice, Model, attribName, pageNum){
+    /*Short circuit this so we don't set limitTable.page to undefined*/
+    if(!_isDef(pageNum))
+      return;
+      
+    Model.limitTable[attribName].page = pageNum;
+    /*we have to get full target on each call because last call has changed it*/
+    var fullTarget = Map.getAttribute(Model.modelName, attribName),
+        points = Interpolate.getPageSliceData(Model, attribName, fullTarget);
+    /*point.start of -1 indicates undefined limitTable*/
+    if(points.start > -1 && !_isNull(targetSlice)){
+    
+      var cachedResults = (_isDef(Model.cachedResults[attribName])) ? Model.cachedResults[attribName] : void(0),
+          filterResults = (_isDef(Model.filterResults[attribName])) ? Model.filterResults[attribName] : void(0),
+          limitTable = (_isDef(Model.limitTable[attribName])) ? Model.limitTable[attribName] : void(0),
+          fullTargetCopy = fullTarget.slice(0);
+      
+      for(var ts = 0, t = points.start; ts < targetSlice.length && t < points.length; ts++, t++){
+        fullTargetCopy[t] = targetSlice[ts];
+      }
+      Map.setAttribute(Model.modelName, attribName, fullTargetCopy.slice(0));
+      Model.cachedResults[attribName] = (_isDef(cachedResults)) ?  cachedResults: void(0);
+      Model.filterResults[attribName]  = (_isDef(filterResults)) ? filterResults: void(0);
+      Model.limitTable[attribName] = (_isDef(limitTable)) ? limitTable : void(0);
+      Model.limitTable[attribName].page = oldPageNum;
+    }
+  };
+  
   chain.sorter = function(a,b){
     var orig_a = a,
         orig_b = b,
@@ -1346,9 +1425,11 @@ Model.prototype.sort = function(attribName){
     if(!_isDef(a) || !_isDef(b)){
       return NO_CHANGE;
     }
+    /*if all of the prev sorted props of the operands are not aligned, no-op */
     for(var i = 0; i < chain.prevProps.length; i++){
       pastPropsAligned &= (orig_a[chain.prevProps[i]] == orig_b[chain.prevProps[i]]);
     }
+    
     a = (isNaN(intA)) ? a : intA;
     b = (isNaN(intB)) ? b : intB;
     sortAction = (b < a) ? B_FIRST : A_FIRST;
@@ -1358,23 +1439,33 @@ Model.prototype.sort = function(attribName){
     
   chain.orderBy = function(propName){
     chain.propName = propName;
-    target.sort(chain.sorter);
+    chain.target.sort(chain.sorter);
+    chain.insertSortedSlice(chain.target, Model, attribName, pageNum);
     chain.prevProps.push(propName);
     return chain;
   };
   
   chain.thenBy = function(propName){
     chain.propName = propName;
-    target.sort(chain.sorter);
+    chain.target.sort(chain.sorter);
+    chain.insertSortedSlice(chain.target, Model, attribName, pageNum);
     chain.prevProps.push(propName);
     return chain;
   }
   
-  chain.using = function(softFunc){
-    chain.sorter = softFunc;
-  };
   return chain;
   
+}
+
+Model.prototype.sortPage = function(pageNum){
+  var chain = Object.create(null),
+      Model = this;
+      
+  chain.of = function(attribName){
+    chain = Model.sort(attribName, pageNum);
+    return chain;
+  }
+  return chain;
 }
 /*END Sort*/
 var Templar = {

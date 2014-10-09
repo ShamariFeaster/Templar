@@ -4,7 +4,7 @@ structureJS.module('LoginCotroller', function(require){
       EnvModel = Templar.getModel('Environment');
     
   /*Limit any sequential data attrib, like those backing repeats*/
-  LoginModel.limit('list').to(5);
+  
   
   /*static filter*/
   /*
@@ -80,8 +80,10 @@ structureJS.module('LoginCotroller', function(require){
     LoginModel.sort('numbers')
     LoginModel.sort('items').orderBy('title').thenBy('price').thenBy('color');
   */
-  
-  LoginModel.sort('numbers').orderBy();
+  LoginModel.limit('items').to(4);
+  LoginModel.sortPage(2).of('items').orderBy('title').thenBy('price');
+
+  //LoginModel.sortPage(3).of('numbers').orderBy();
   Templar.success('partial-login-screen.html', function(){
     
     
