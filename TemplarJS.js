@@ -40,13 +40,21 @@ var TMP_Node = function(node, modelName, attribName, index){
 var ControlNode = function(node, id, modelName, attribName, index){
   if(!(this instanceof ControlNode))
     return new ControlNode(node, id, modelName, attribName, index);
-    
+  
+  
   this.node = node;
   this.id = id;
   this.modelName = _isDef(modelName) ? modelName : '';
   this.attribName = _isDef(attribName) ? attribName : '';
   this.index = (_isDef(index))? index : -1;
   this.scope = '';
+  this.childIds = Object.create(null);
+  
+  for(var x = 0; x < node.children.length; x++){
+    if(!_isNullOrEmpty(node.children[x].id)){
+      this.childIds[node.children[x].id] = node.children[x];
+    }
+  }
 };
 
 var State = {
@@ -84,7 +92,7 @@ var DOM = {
     }
   },
   appendTo : function(child, parent){  
-    if(!_isDef(parent) || !_isDef(child))
+    if(!_isDef(parent) || !_isDef(child) || _isNull(parent.parentNode))
       return;
     parent.parentNode.insertBefore(child, child.nextSibling);
   }
@@ -269,13 +277,24 @@ var Map = (function(){
     var returnVal = null;
     if(_isDef(_map[modelName]) && _isDef(_map[modelName]['modelObj'][attribName])){
     
-      if(_isDef(index) && _isDef(property)){
+      if(_isDef(index) 
+          && _isDef(property) 
+          && _isArray(_map[modelName]['modelObj'][attribName]) 
+          && _isDef(_map[modelName]['modelObj'][attribName][index][property])){
+          
         returnVal = _map[modelName]['modelObj'][attribName][index][property];
+        
       }else 
-      if(_isDef(index)){
+      if(_isDef(index) 
+        && _isArray(_map[modelName]['modelObj'][attribName][index])
+        && _isDef(_map[modelName]['modelObj'][attribName][index])){
+        
         returnVal = _map[modelName]['modelObj'][attribName][index];
+        
       }else{
+      
         returnVal = _map[modelName]['modelObj'][attribName];
+        
       }
       
     }
@@ -446,8 +465,8 @@ var Map = (function(){
     return _repeatTable;
   },
   
-  getControl : function(){
-    return _controlTable;
+  getControl : function(controlName){
+    return (_isDef(_controlTable[controlName])) ? _controlTable[controlName] : null;;
   }
 };
 })();
@@ -915,7 +934,7 @@ var Interpolate = {
           if( !_isNull((TMP_repeatBaseNode = Map.getRepeatBaseNode(modelName, attributeName))) ){
             /*Kill existing repeat tree*/
             Map.forEach(modelName, attributeName, function(ctx, tmp_node){
-              if(tmp_node.index > _UNINDEXED){
+              if(tmp_node.index > _UNINDEXED && !_isNull(tmp_node.node.parentNode)){
                 Map.pruneControlNodes(tmp_node, modelName, attributeName, tmp_node.index);
                 Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, tmp_node.index);
                 ctx.removeItem(ctx.index);
@@ -1497,34 +1516,120 @@ Model.prototype.sortPage = function(pageNum){
   return chain;
 }
 /*END Sort*/
-var Templar = {
 
-  _onloadHandlerMap : Object.create(null),
-  
-  success : function(partialFileName, onloadFunction){
-    this._onloadHandlerMap[partialFileName] = onloadFunction;
-  },
-
-  getPartialOnlodHandler : function(partialFileName){
-    var onloadHandler = function(){};
+var Control = function(controlName){
+  if(!(this instanceof Control))
+    return new Control(controlName);
     
-    if(_isDef(this._onloadHandlerMap[partialFileName]) 
-       && _isFunc(this._onloadHandlerMap[partialFileName])){
-        onloadHandler = this._onloadHandlerMap[partialFileName];
-    }
-    return onloadHandler;
-  },
-  
-  dataModel : function(modelName, modelObj){
-    Map.initModel(new Model(modelName, modelObj));
-  },
-
-  getModel : function(modelName){
-    return Map.getModel(modelName);
-  },
-  Map : Map,
-  Interpolate : Interpolate
+  this.controls =  Map.getControl(controlName);
 };
+
+Control.prototype.listenTo = function(childName){
+  var chain = Object.create(null),
+      eventObj = Object.create(null),
+      Control = this;
+  
+  
+  chain.forEvent = function(eventType, handler){
+  
+    if(_isDef(childName)
+     && !_isNull(Control.controls)
+     && _isDef(Control.controls[0])
+     && _isDef(Control.controls[0].childIds[childName])){
+    
+      for(var i = 0; i < Control.controls.length; i++){
+        for(var id in Control.controls[i].childIds){
+          eventObj[id] = Control.controls[i].childIds[id];
+        }
+      
+        for(var id in Control.controls[i].childIds){
+          (function(eventObj, handler, i){
+            Control.controls[i].childIds[id].addEventListener(eventType, function(e){
+              eventObj.event = e;
+              handler.call(null, eventObj, i);
+            });
+          })(eventObj, handler, i);
+          
+        }
+      }
+
+    }
+
+  };
+  
+  return chain;
+};
+
+Control.prototype.forEach = function(func){
+  var chain = Object.create(null),
+      eventObj = Object.create(null),
+      Control = this;
+      
+  for(var i = 0; i < Control.controls.length; i++){
+    for(var id in Control.controls[i].childIds){
+      for(var id in Control.controls[i].childIds){
+        eventObj[id] = Control.controls[i].childIds[id]; 
+      }
+      
+    }
+    func.call(null, eventObj, i);
+  }
+};
+
+Control.prototype.listen = function(eventType, handler){
+  var Control = this,
+      eventObj = Object.create(null);
+  if(!_isNullOrEmpty(eventType) && _isFunc(handler) && !_isNull(Control.controls)){
+  
+    for(var i = 0; i < Control.controls.length; i++){
+    
+      for(var id in Control.controls[i].childIds){
+        for(var id in Control.controls[i].childIds){
+          eventObj[id] = Control.controls[i].childIds[id];
+        }      
+      }
+
+      (function(eventObj, handler, i){
+        Control.controls[i].node.addEventListener(eventType, function(e){
+          eventObj.event = e;
+          handler.call(null, eventObj, i);  
+        });
+      })(eventObj, handler, i);
+    }
+    
+    
+  }
+};
+
+
+var Templar = function(controlName){
+  return new Control(controlName);
+};
+
+Templar._onloadHandlerMap = Object.create(null);
+Templar.success = function(partialFileName, onloadFunction){
+    this._onloadHandlerMap[partialFileName] = onloadFunction;
+  };
+Templar.getPartialOnlodHandler = function(partialFileName){
+  var onloadHandler = function(){};
+  
+  if(_isDef(this._onloadHandlerMap[partialFileName]) 
+     && _isFunc(this._onloadHandlerMap[partialFileName])){
+      onloadHandler = this._onloadHandlerMap[partialFileName];
+  }
+  return onloadHandler;
+};
+
+Templar.getModel = function(modelName){
+  return Map.getModel(modelName);
+};
+
+Templar.Map = Map;
+
+Templar.dataModel = function(modelName, modelObj){
+  Map.initModel(new Model(modelName, modelObj));
+};
+
 
 
 var Link = {
@@ -1574,7 +1679,7 @@ var Bootstrap = {
       }
     }
   },
-  
+  /*Preloading audio players will hang the framework.*/
   loadPartialIntoTemplate : function(){
     var partialContents = this.responseText,
         fileName = this.onload.fileName,

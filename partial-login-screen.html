@@ -20,9 +20,13 @@
 <br>
 
 
-
-
   <div data-apl-repeat="Login.songs">
-    <audio src="{{src}}" controls preload="auto" controls></audio>
-    <button data-apl-control="playButton">Play</button>
+    <div data-apl-control="audioPlayer">
+      <div>{{title}}</div>
+      <audio  id="player" src="{{src}}" ></audio> 
+      <button id="play">Play</button>
+      <button id="pause">Pause</button>
+      <button id="prev">Prev</button>
+      <button id="next">Next</button>
+    </div>
   </div>

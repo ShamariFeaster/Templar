@@ -77,20 +77,39 @@ structureJS.module('LoginCotroller', function(require){
   
   console.log(LoginModel.attributes['items']);
   
-  //Contorls
+  //Repeat Contorls
+  var audioplayers = Templar('audioPlayer');
   
-  Templar.control('playBtn').listen('onclick', function(self){
-    self.event.preventDefault();
-    
-    //get's 'player' of same index
-    self('player').play();
+  //listenTo() called on a control will look for id's of control's children
+  audioplayers.listenTo('play').for('onclick', function(self){
+    self.player.play();
+  };
+  
+  //Single Controls
+  Templar.listenTo('sortByPrice').forEvent('onclick', function(){
+  
   });
   */
 
   
   
   Templar.success('partial-login-screen.html', function(){
+
+    var audioplayers = Templar('audioPlayer');
     
+    audioplayers.listenTo('play').forEvent('click', function(e, index){
+      console.log('Child Click ' + index);
+    });
+    
+    
+    Templar('audioPlayer').listen('click', function(e, index){
+      console.log('Self Click ' + index);
+    });
+    
+    audioplayers.forEach(function(children, i){
+    });
+    
+    console.log(audioplayers);
     /*Changes the 'States' select based on what country has been selected*/
     LoginModel.listen('countries', function(e){
       
