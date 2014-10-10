@@ -88,28 +88,62 @@ structureJS.module('LoginCotroller', function(require){
   //Single Controls
   Templar.listenTo('sortByPrice').forEvent('onclick', function(){
   
-  });
-  */
-
-  
-  
-  Templar.success('partial-login-screen.html', function(){
-
-    var audioplayers = Templar('audioPlayer');
-    
+  //Put listener on control children
     audioplayers.listenTo('play').forEvent('click', function(e, index){
-      console.log('Child Click ' + index);
+      console.log('Paly Click ' + index);
     });
     
+    audioplayers.listenTo('pause').forEvent('click', function(e, index){
+      console.log('Pause Click ' + index);
+    });
     
+    audioplayers.listenTo('prev').forEvent('click', function(e, index){
+      console.log('Prev Click ' + index);
+    });
+    
+    audioplayers.listenTo('next').forEvent('click', function(e, index){
+      console.log('Next Click ' + index);
+    });
+    
+    /*Put listener on control itself
     Templar('audioPlayer').listen('click', function(e, index){
       console.log('Self Click ' + index);
     });
     
+    //ForEach for a given control set
     audioplayers.forEach(function(children, i){
     });
+  
+  });
+  */
+
+  function bindListeners(){
+    var numberChanger = Templar('numberChanger');
     
-    console.log(audioplayers);
+    numberChanger.listenTo('increment').forEvent('click', function(e, index){
+      LoginModel.numbers[index]++;
+      LoginModel.numbers = LoginModel.numbers;
+    });
+    
+    
+    numberChanger.listenTo('decrement').forEvent('click', function(e, index){
+      LoginModel.numbers[index]--;
+      LoginModel.numbers = LoginModel.numbers;
+    });
+  }
+  
+  Templar.success('partial-login-screen.html', function(){
+    
+    bindListeners();
+    Templar('sort').listen('click', function(){
+      LoginModel.sort('numbers').orderBy();
+      LoginModel.update('numbers');
+    });
+    LoginModel.listen('numbers', function(){
+      bindListeners();
+    });
+    
+
     /*Changes the 'States' select based on what country has been selected*/
     LoginModel.listen('countries', function(e){
       

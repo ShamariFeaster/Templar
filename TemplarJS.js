@@ -461,6 +461,10 @@ var Map = (function(){
     return _map;
   },
   
+  getControls : function(){
+    return _controlTable;
+  },
+  
   getRepeat : function(){
     return _repeatTable;
   },
@@ -497,7 +501,7 @@ var Process = {
   preProcessNodeAttributes : function(node, scope){
     var attributes = null,
         match = null,
-        regex = /\{\{(\w+)\.(\w+)(\[(\d)+\])*(?:\.)*(\w+)*?\}\}/g,
+        regex = /\{\{(\w+)\.(\w+)(\[(\d+)\])*(?:\.)*(\w+)*?\}\}/g,
         modelNameParts = null,
         tmp_node = null;
     
@@ -756,7 +760,7 @@ var Interpolate = {
     if(node.hasAttributes()){
       var regex = /(\{\{(\w+\.\w+)\}\})/g, 
       //result array -> [1] = {{a.b}}, [2] = a.b, 4 = index, 5 = prop
-          ntRegex = /(\{\{(\w+\.\w+)(\[(\d)+\])*(?:\.)*(\w+)*?\}\})/g,
+          ntRegex = /(\{\{(\w+\.\w+)(\[(\d+)\])*(?:\.)*(\w+)*?\}\})/g,
           match = null,
           text = '',
           intermediateValue = '',
@@ -1007,7 +1011,7 @@ var Compile = {
         
         compileMe = false,
         //2 = a.b, 3 = [0], 4 = 0, 5 = propertyName  
-        NONTERMINAL_REGEX = /(\{\{(\w+\.\w+)(\[(\d)+\])*(?:\.)*(\w+)*?\}\})/g;
+        NONTERMINAL_REGEX = /(\{\{(\w+\.\w+)(\[(\d+)\])*(?:\.)*(\w+)*?\}\})/g;
         
     if(typeof nodes == 'undefined' || nodes == null)
         return scope;
@@ -1203,6 +1207,10 @@ Model.prototype.softset = function(attribName, value){
   if(_isDef(this.limitTable[attribName])){
     this.limitTable[attribName].page = 1;
   }
+};
+
+Model.prototype.update = function(attribName){
+  Interpolate.interpolate(this.modelName, attribName, Map.getAttribute(this.modelName, attribName));
 };
 /*public*/
 Model.prototype.listen = function(attributeName, listener, pushDuplicate){
@@ -1543,12 +1551,15 @@ Control.prototype.listenTo = function(childName){
         }
       
         for(var id in Control.controls[i].childIds){
-          (function(eventObj, handler, i){
-            Control.controls[i].childIds[id].addEventListener(eventType, function(e){
-              eventObj.event = e;
-              handler.call(null, eventObj, i);
-            });
-          })(eventObj, handler, i);
+          if(id == childName){
+            (function(eventObj, handler, i){
+              Control.controls[i].childIds[id].addEventListener(eventType, function(e){
+                eventObj.event = e;
+                handler.call(null, eventObj, i);
+              });
+            })(eventObj, handler, i);
+          }
+          
           
         }
       }
@@ -1564,7 +1575,8 @@ Control.prototype.forEach = function(func){
   var chain = Object.create(null),
       eventObj = Object.create(null),
       Control = this;
-      
+  if(_isNull(Control.controls))
+    return;
   for(var i = 0; i < Control.controls.length; i++){
     for(var id in Control.controls[i].childIds){
       for(var id in Control.controls[i].childIds){
