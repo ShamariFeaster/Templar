@@ -41,20 +41,29 @@ var ControlNode = function(node, id, modelName, attribName, index){
   if(!(this instanceof ControlNode))
     return new ControlNode(node, id, modelName, attribName, index);
   
-  
-  this.node = node;
-  this.id = id;
+  var thisChild = null;
+  this.node = _isDef(node) ? node : null;
+  this.id = _isDef(id) ? id : '';
   this.modelName = _isDef(modelName) ? modelName : '';
   this.attribName = _isDef(attribName) ? attribName : '';
   this.index = (_isDef(index))? index : -1;
   this.scope = '';
   this.childIds = Object.create(null);
-  
-  for(var x = 0; x < node.children.length; x++){
-    if(!_isNullOrEmpty(node.children[x].id)){
-      this.childIds[node.children[x].id] = node.children[x];
+  this.controlBaseNodes = [];
+
+  /*child nodes keyed on their ids*/
+  if(!_isNull(this.node)){
+    for(var x = 0; x < this.node.children.length; x++){
+      if(!_isNullOrEmpty(this.node.children[x].id)){
+        /*children are wrapped so they can use ControlNode functions. Children also should put
+        themselves on the controlBaseNodes property. This is so indexedWrapper() will work as expected*/
+        thisChild = new ControlNode(this.node.children[x]);
+        thisChild.controlBaseNodes.push(thisChild)
+        this.childIds[this.node.children[x].id] = thisChild;
+      }
     }
   }
+  
 };
 
 var State = {
@@ -468,8 +477,8 @@ var Map = (function(){
   getRepeat : function(){
     return _repeatTable;
   },
-  
-  getControl : function(controlName){
+  /*returns an array of ControlNode(s). These have valid elements as their 'node' property*/
+  getBaseControls : function(controlName){
     return (_isDef(_controlTable[controlName])) ? _controlTable[controlName] : null;;
   }
 };
@@ -1525,42 +1534,76 @@ Model.prototype.sortPage = function(pageNum){
 }
 /*END Sort*/
 
-var Control = function(controlName){
-  if(!(this instanceof Control))
-    return new Control(controlName);
-    
-  this.controls =  Map.getControl(controlName);
+
+ControlNode.prototype.indexedWrapper = function(index, funct){
+  if(_isDef(index) && index < this.controlBaseNodes.length){
+    funct.call(null, this.controlBaseNodes[index]);
+  }
+  else {
+    for(var i = 0; i < this.controlBaseNodes.length; i++){
+      funct.call(null, this.controlBaseNodes[i]);
+    }
+  }
 };
 
-Control.prototype.listenTo = function(childName){
+ControlNode.prototype.hide = function(index){
+  this.indexedWrapper(index, function(controlNode){
+    DOM.modifyClasses(controlNode.node, 'apl-hide', 'apl-show');
+  });
+};
+
+ControlNode.prototype.show = function(index){
+  this.indexedWrapper(index, function(controlNode){
+    DOM.modifyClasses(controlNode.node, 'apl-show', 'apl-hide');
+  });
+};
+
+ControlNode.prototype.addClass = function(addClass, index){
+  this.indexedWrapper(index, function(controlNode){
+    DOM.modifyClasses(controlNode.node, addClass, '');
+  });
+};
+
+ControlNode.prototype.removeClass = function(removeClass, index){
+  this.indexedWrapper(index, function(controlNode){
+    DOM.modifyClasses(controlNode.node, '', removeClass);
+  });
+};
+
+ControlNode.prototype.listenTo = function(childName){
   var chain = Object.create(null),
-      eventObj = Object.create(null),
-      Control = this;
+      Control = this,
+      thisControlNode = null,
+      thisChildNode = null;
   
   
   chain.forEvent = function(eventType, handler){
   
     if(_isDef(childName)
-     && !_isNull(Control.controls)
-     && _isDef(Control.controls[0])
-     && _isDef(Control.controls[0].childIds[childName])){
+     && !_isNull(Control.controlBaseNodes)
+     && _isDef(Control.controlBaseNodes[0])
+     && _isDef(Control.controlBaseNodes[0].childIds[childName])){
     
-      for(var i = 0; i < Control.controls.length; i++){
-        for(var id in Control.controls[i].childIds){
-          eventObj[id] = Control.controls[i].childIds[id];
-        }
-      
-        for(var id in Control.controls[i].childIds){
+      for(var i = 0; i < Control.controlBaseNodes.length; i++){
+        thisControlNode = Control.controlBaseNodes[i];
+        
+        for(var id in thisControlNode.childIds){
+          
           if(id == childName){
-            (function(eventObj, handler, i){
-              Control.controls[i].childIds[id].addEventListener(eventType, function(e){
-                eventObj.event = e;
-                handler.call(null, eventObj, i);
+          
+            thisChildNode = thisControlNode.childIds[id].node;
+            (function(handler, i, thisChildNode, thisControlNode){
+              
+              thisChildNode.addEventListener(eventType, function(e){
+                thisControlNode.childIds.event = e;
+                handler.call(null, thisControlNode.childIds, i);
               });
-            })(eventObj, handler, i);
+              
+            })(handler, i, thisChildNode, thisControlNode);
+
           }
-          
-          
+            
+            
         }
       }
 
@@ -1571,42 +1614,33 @@ Control.prototype.listenTo = function(childName){
   return chain;
 };
 
-Control.prototype.forEach = function(func){
+ControlNode.prototype.forEach = function(func){
   var chain = Object.create(null),
-      eventObj = Object.create(null),
       Control = this;
-  if(_isNull(Control.controls))
-    return;
-  for(var i = 0; i < Control.controls.length; i++){
-    for(var id in Control.controls[i].childIds){
-      for(var id in Control.controls[i].childIds){
-        eventObj[id] = Control.controls[i].childIds[id]; 
-      }
       
-    }
-    func.call(null, eventObj, i);
+  if(_isNull(Control.controlBaseNodes))
+    return;
+  for(var i = 0; i < Control.controlBaseNodes.length; i++){
+    func.call(null, i, Control.controlBaseNodes[i], Control.controlBaseNodes[i].childIds);
   }
 };
 
-Control.prototype.listen = function(eventType, handler){
+ControlNode.prototype.listen = function(eventType, handler){
   var Control = this,
-      eventObj = Object.create(null);
-  if(!_isNullOrEmpty(eventType) && _isFunc(handler) && !_isNull(Control.controls)){
+      thisBaseNode = null,
+      thisChildNode = null;
+  if(!_isNullOrEmpty(eventType) && _isFunc(handler) && !_isNull(Control.controlBaseNodes)){
   
-    for(var i = 0; i < Control.controls.length; i++){
-    
-      for(var id in Control.controls[i].childIds){
-        for(var id in Control.controls[i].childIds){
-          eventObj[id] = Control.controls[i].childIds[id];
-        }      
-      }
+    for(var i = 0; i < Control.controlBaseNodes.length; i++){
 
-      (function(eventObj, handler, i){
-        Control.controls[i].node.addEventListener(eventType, function(e){
-          eventObj.event = e;
-          handler.call(null, eventObj, i);  
+      (function(handler, i){
+        
+        Control.controlBaseNodes[i].node.addEventListener(eventType, function(e){
+          Control.controlBaseNodes[i].childIds.event = e;
+          handler.call(null, Control.controlBaseNodes[i].childIds, i);  
         });
-      })(eventObj, handler, i);
+        
+      })(handler, i);
     }
     
     
@@ -1615,7 +1649,9 @@ Control.prototype.listen = function(eventType, handler){
 
 
 var Templar = function(controlName){
-  return new Control(controlName);
+  var control = new ControlNode();
+    control.controlBaseNodes = Map.getBaseControls(controlName);
+  return control;
 };
 
 Templar._onloadHandlerMap = Object.create(null);

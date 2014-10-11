@@ -5,3 +5,11 @@
 #header  h2 {
   float : left;
 }
+
+.apl-hide {
+  display : none;
+}
+
+.apl-show {
+  display : block;
+}
