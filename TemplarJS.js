@@ -392,27 +392,55 @@ var Map = (function(){
                       api : model_obj, listeners : Object.create(null), cachedResults : model_obj.cachedResults,
                       limitTable : model_obj.limitTable, filterResults : model_obj.filterResults};
   },
-  pruneControlNodes : function(tmp_node, modelName, attribName, index, scope){
+  pruneControlNodesOfRepeat : function(tmp_node, modelName, attribName, index){
     var Map = this,
-        scopeParts = (!_isDef(scope)) ? tmp_node.scope.split(' ') : scope.split(' '),
-        nodeScopeParts = null;
+        scopeParts = tmp_node.scope.split(' '),
+        nodeScopeParts = null,
+        deleteNodes = true;
     /*Remove embedded controls*/  
-      
+    
     Map.Control.forEach(function(ctrlCtx, ctrlNode){
-      if(( nodeScopeParts = ctrlNode.scope.split(' ')) !== null){
-        if((nodeScopeParts[0] == scopeParts[0] && nodeScopeParts[1] != scopeParts[1])
-            && ctrlNode.index == index 
-            && ctrlNode.modelName == modelName 
-            && ctrlNode.attribName == attribName
-        ){
-          _log('Pruning Controll Node ' + ctrlNode.node.tagName + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
-          ctrlCtx.removeItem(ctrlCtx.index);
-        }
+
+      nodeScopeParts = ctrlNode.scope.split(' ');
+
+      if( (nodeScopeParts[0] == scopeParts[0] && nodeScopeParts[1] == scopeParts[1])
+          && ctrlNode.index == index 
+          && ctrlNode.modelName == modelName 
+          && ctrlNode.attribName == attribName
+      ){
+        _log('Pruning Controll Node ' + ctrlNode.node.tagName + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
+        ctrlCtx.removeItem(ctrlCtx.index);
       }
+      
       
     });
     
   },
+  
+  pruneControlNodesByScope : function(modelName, attribName, index, scope){
+    var Map = this,
+        scopeParts = scope.split(' '),
+        nodeScopeParts = null,
+        deleteNodes = true;
+    /*Remove embedded controls*/  
+    
+    Map.Control.forEach(function(ctrlCtx, ctrlNode){
+
+      nodeScopeParts = ctrlNode.scope.split(' ');
+
+      if( (nodeScopeParts[0] == scopeParts[0] && nodeScopeParts[1] != scopeParts[1])
+          && ctrlNode.index == index 
+          && ctrlNode.modelName == modelName 
+          && ctrlNode.attribName == attribName
+      ){
+        _log('Pruning Controll Node ' + ctrlNode.node.tagName + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
+        ctrlCtx.removeItem(ctrlCtx.index);
+      }
+      
+      
+    });
+  },
+  
   pruneEmbeddedNodes : function(tmp_baseNode, repeatModelName, repeatAttribName, index){
     var Map = this,
         embeddedAttribs = Object.keys(tmp_baseNode.embeddedModelAttribs),
@@ -460,7 +488,7 @@ var Map = (function(){
             if(( nodeScopeParts = tmp_node.scope.split(' ')) !== null){
               if((nodeScopeParts[0] == scopeParts[0] && nodeScopeParts[1] != scopeParts[1])){
                 ctx.removeItem(ctx.index);
-                Map.pruneControlNodes(tmp_node, ctx.modelName, ctx.modelAtrribName, repeatIndex, scope );
+                Map.pruneControlNodesByScope(ctx.modelName, ctx.modelAtrribName, repeatIndex, scope );
                 _log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName 
                     + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
               }
@@ -935,7 +963,8 @@ var Interpolate = {
             /*New model data, shorter than existing data, kill extra nodes*/
             if(ctx.modelAttribIndex >= attributeVal.length){
               ctx.removeItem(ctx.index); /*from indexes[key] = []*/
-              Map.pruneControlNodes(tmp_node, modelName, attributeName, ctx.modelAttribIndex);
+              /*this is most likely unecessary*/
+              //Map.pruneControlNodesOfRepeat(tmp_node, modelName, attributeName, ctx.modelAttribIndex);
               node.parentNode.removeChild(node);
             }
             
@@ -960,7 +989,7 @@ var Interpolate = {
             /*Kill existing repeat tree*/
             Map.forEach(modelName, attributeName, function(ctx, tmp_node){
               if(tmp_node.index > _UNINDEXED && !_isNull(tmp_node.node.parentNode)){
-                Map.pruneControlNodes(tmp_node, modelName, attributeName, tmp_node.index);
+                Map.pruneControlNodesOfRepeat(tmp_node, modelName, attributeName, tmp_node.index);
                 Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, tmp_node.index);
                 ctx.removeItem(ctx.index);
                 tmp_node.node.parentNode.removeChild(tmp_node.node);
