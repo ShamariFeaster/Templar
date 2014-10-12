@@ -71,7 +71,8 @@ var State = {
   isFirstPartialLoad : true,
   preventUpdate : false,
   target : '',
-  aplHideList : ''
+  aplHideList : '',
+  linkClicked : false
 };
 
 var DOM = {
@@ -971,8 +972,6 @@ var Interpolate = {
               attributeVal = Interpolate.getPageSlice(Model, attributeName, attributeVal);
             }
             
-            
-            
             /*rebuild new one*/
             for(var i = 0; i < attributeVal.length; i++){
 
@@ -1003,7 +1002,17 @@ var Interpolate = {
 var Compile = {
   
   compile : function(root, scope){
+  
+    if(_isNull(root) || _isNull(root.childNodes))
+      return scope;
 
+    var defaultPartialHref = root.getAttribute('data-apl-default');
+    if(!_isNullOrEmpty(defaultPartialHref)){
+      root.setAttribute('data-apl-default', '');
+      Bootstrap.asynGetPartial(defaultPartialHref,Bootstrap.loadPartialIntoTemplate, '', root );
+      return scope;
+    }
+    
     var nodes = root.childNodes,
         partMap = [],
         Compile = this,
@@ -1022,8 +1031,6 @@ var Compile = {
         //2 = a.b, 3 = [0], 4 = 0, 5 = propertyName  
         NONTERMINAL_REGEX = /(\{\{(\w+\.\w+)(\[(\d+)\])*(?:\.)*(\w+)*?\}\})/g;
         
-    if(typeof nodes == 'undefined' || nodes == null)
-        return scope;
 
     for(var i = 0; i < nodes.length; i++){
         DOM_Node = nodes[i];
@@ -1706,11 +1713,12 @@ var Link = {
 
 var Bootstrap = {
 
-  asynGetPartial : function(fileName, callback, targetId){
+  asynGetPartial : function(fileName, callback, targetId, node){
     var xhr = new XMLHttpRequest();
     xhr.onload = callback;
-    xhr.onload.fileName = fileName;
-    xhr.onload.targetId = targetId;
+    xhr.fileName = fileName;
+    xhr.targetId = targetId;
+    xhr.targetNode = node;
     xhr.onreadystatechange = function() {
     if (xhr.readyState === 4){   //if complete
         if(xhr.status !== 200){  //check if "OK" (200)
@@ -1728,6 +1736,7 @@ var Bootstrap = {
       _log('Binding Link Handlers');
       State.target = (!_isNull(e.target.dataset[_TARGET_ATTRIB_KEY])) ? 
                             e.target.dataset[_TARGET_ATTRIB_KEY] : '';
+
   },
   
   bindTargetSetter : function(){
@@ -1743,10 +1752,10 @@ var Bootstrap = {
   /*Preloading audio players will hang the framework.*/
   loadPartialIntoTemplate : function(){
     var partialContents = this.responseText,
-        fileName = this.onload.fileName,
-        targetId = (!_isNullOrEmpty(this.onload.targetId)) ? 
-                      this.onload.targetId.replace('#','') : 'apl-content',
-        targetNode = null,
+        fileName = this.fileName,
+        targetId = (!_isNullOrEmpty(this.targetId)) ? 
+                      this.targetId.replace('#','') : 'apl-content',
+        targetNode = (!_isNull(this.targetNode)) ? this.targetNode : null,
         /*a partial can define parent template dom elements to be hidden*/
         aplHideNode = null,
         nodeToShow = null,
@@ -1755,14 +1764,11 @@ var Bootstrap = {
         existingOnloadFunction = window.onload,
         href = document.location.href,
         timestamp = new Date().getTime();
-        /*add hash tag to href*/
-        if(href.lastIndexOf('#') != -1){/*if there isn't a hash already parse href and put hash at end*/
-          document.location.href = href.substring(0, href.lastIndexOf('#')) + '#' + fileName;
-        }else{
-          document.location.href = '#' + fileName;
-        }
-    /*bad targets don't do anything*/    
-    if( (targetNode = document.getElementById(targetId)) != null){
+        
+    if(!_isNull(targetNode)){
+      targetNode.innerHTML = partialContents;
+    }else
+    if((targetNode = document.getElementById(targetId)) != null){
       targetNode.innerHTML = partialContents;
     }
 
@@ -1783,7 +1789,7 @@ var Bootstrap = {
     
     Compile.compile( targetNode, fileName + ' ' + timestamp );
     /*unhide target node after compilation*/
-    DOM.modifyClasses(targetNode,'apl-show','apl-hide');
+    DOM.modifyClasses(targetNode,'apl-show','apl-hide,apl-show');
     Link.bindModel();
     Bootstrap.bindTargetSetter();
     
@@ -1847,13 +1853,6 @@ window.onload = function(){
   Compile.compile( document.getElementsByTagName('body')[0], 'body' ); 
   Link.bindModel();
 
-  if(aplContentNode != null){//data-apl-default
-    var defaultPartialHref = aplContentNode.getAttribute('data-apl-default');
-    if(!_isNullOrEmpty(defaultPartialHref)){
-      Bootstrap.asynGetPartial(defaultPartialHref,Bootstrap.loadPartialIntoTemplate );
-    }
-  }
-  
 };
 
 /*Put in structureJS module chain if SJS is defined, otherwise export into global NS as 
