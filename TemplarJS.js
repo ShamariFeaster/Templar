@@ -68,10 +68,10 @@ var ControlNode = function(node, id, modelName, attribName, index){
 };
 
 var State = {
-  isLinkloading : false,
   isFirstPartialLoad : true,
   preventUpdate : false,
-  target : ''
+  target : '',
+  aplHideList : ''
 };
 
 var DOM = {
@@ -79,7 +79,7 @@ var DOM = {
     var nodeClassList = '',
         removeAsArray = remove.split(_CLASS_SEPARATOR);
     
-    if(node != null){
+    if(!_isNull(node)){
       /*getAttribute may return '' or null so we check below*/
       nodeClassList = node.getAttribute('class');
       nodeClassList = (_isNull(nodeClassList)) ? '' : nodeClassList.trim();
@@ -449,10 +449,10 @@ var Map = (function(){
             var node = tmp_node.node,
                 repeatIndex = tmp_node.index;
             if(( nodeScopeParts = tmp_node.scope.split(' ')) !== null){
-              if((nodeScopeParts[0] == scopeParts[0])){
+              if((nodeScopeParts[0] == scopeParts[0] && nodeScopeParts[1] != scopeParts[1])){
                 ctx.removeItem(ctx.index);
                 Map.pruneControlNodes(tmp_node, ctx.modelName, ctx.modelAtrribName, repeatIndex );
-                _log('pruning' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName);
+                _log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName);
               }
             }
           });
@@ -982,7 +982,7 @@ var Interpolate = {
               if(TMP_repeatedNode.hasNonTerminals == false)
                 TMP_repeatedNode.node.innerHTML = attributeVal[i];
               DOM.appendTo(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
-              Compile.compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope, true);
+              Compile.compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
             }
             /*Stop outter loop. We build the updated repeat nodes in one pass*/
             outerCtx.stop = true;
@@ -1002,10 +1002,8 @@ var Interpolate = {
 
 var Compile = {
   
-  compile : function(root, scopeName, useGivenScope){
-    
-    var scope = (_isDef(useGivenScope))? scopeName : scopeName + ' ' + (new Date().getTime()).toString();
-    
+  compile : function(root, scope){
+
     var nodes = root.childNodes,
         partMap = [],
         Compile = this,
@@ -1142,7 +1140,7 @@ var Compile = {
           
           /*Repeat base nodes serve as templates and should remain uncompiled*/
           if(compileMe  == true)
-            this.compile(DOM_Node, scope, true);
+            this.compile(DOM_Node, scope);
         }
         
     }
@@ -1751,13 +1749,12 @@ var Bootstrap = {
         targetNode = null,
         /*a partial can define parent template dom elements to be hidden*/
         aplHideNode = null,
-        /*aplHideNode will have a data element with comma-separated list of dom IDs*/
-        aplHideList = '',
         nodeToShow = null,
         defaultHiddenNodeList = null,
         defaultNodeToHide = null,
         existingOnloadFunction = window.onload,
-        href = document.location.href;
+        href = document.location.href,
+        timestamp = new Date().getTime();
         /*add hash tag to href*/
         if(href.lastIndexOf('#') != -1){/*if there isn't a hash already parse href and put hash at end*/
           document.location.href = href.substring(0, href.lastIndexOf('#')) + '#' + fileName;
@@ -1772,47 +1769,48 @@ var Bootstrap = {
     aplHideNode = document.getElementById('apl-hide');
     
     /*Show nodes hidden from last partial load*/
-      nodesPreviouslyHidden = _classesSetToHide.split(_CLASS_SEPARATOR);
+      nodesPreviouslyHidden = State.aplHideList.split(_CLASS_SEPARATOR);
       for(var i = 0; i < nodesPreviouslyHidden.length; i++){
           nodeToShow = document.getElementById(nodesPreviouslyHidden[i]);
           DOM.modifyClasses(nodeToShow,'apl-show','apl-show,apl-hide');
         }
 
-    if(aplHideNode != null){
-      aplHideList = _classesSetToHide = aplHideNode.getAttribute('data-apl-hide');
-      DOM.hideByIdList(aplHideList);
+    if(!_isNull(aplHideNode)){
+      State.aplHideList = aplHideNode.getAttribute('data-apl-hide');
+      DOM.hideByIdList(State.aplHideList);
     }
     
-    Map.pruneNodeTreeByScope( fileName +  ' ' + 'timestamp'  ); 
-    Compile.compile( targetNode, fileName );
     
+    Compile.compile( targetNode, fileName + ' ' + timestamp );
+    /*unhide target node after compilation*/
+    DOM.modifyClasses(targetNode,'apl-show','apl-hide');
     Link.bindModel();
     Bootstrap.bindTargetSetter();
     
+    Templar.getPartialOnlodHandler(fileName).call(null);
     /*This handles case of the first page loaded needs to hide template elements. Unfortunately
         we have to use hard coded 'hide' classes in the template to keep the elements intended to
         be hidden from flashing until the default partial loads and instructs APL to hide stuff. As
         soon as we navigate away from our inital template load we need to remove the special hard
         coded class. We used state to do this, which is obviously undesirable. For now, it will
         until a better solution  is found.*/
-        
     if(State.isFirstPartialLoad == true){
       State.isFirstPartialLoad = false;
       
       defaultHiddenNodeList = document.querySelectorAll('.apl-default-hidden');
-      if(defaultHiddenNodeList != null){
+      if(!_isNull(defaultHiddenNodeList)){
         for(var i = 0; i < defaultHiddenNodeList.length; i++){
           defaultNodeToHide = defaultHiddenNodeList[i];
           DOM.modifyClasses(defaultNodeToHide,'','apl-default-hidden');
         }
       }
+    }else{
+      /*on initial load we would prune just loaded nodes, so we stop that*/
+      Map.pruneNodeTreeByScope( fileName +  ' ' + timestamp ); 
     }
     
-    Templar.getPartialOnlodHandler(fileName).call(null);
-    State.isLinkloading = false;
   },
   partialLinkLoadHandler : function(e){
-    State.isLinkloading = true;
     var aplLinkHref = e.target.getAttribute('href').replace('#','');
     
     if(!_isNullOrEmpty(aplLinkHref)){
@@ -1835,6 +1833,12 @@ window.onload = function(){
     var href = event.newURL.substring(event.newURL.indexOf('#')).replace('#', '');
     
     if( (event.newURL != event.oldURL)){
+      /*Hide target node, we will unhide after compilation. Prevents seeing uncompiled template*/
+      var targetId = (!_isNullOrEmpty(State.target)) ? 
+                      State.target.replace('#','') : 'apl-content',
+          targetNode = document.getElementById(targetId);
+          
+      DOM.modifyClasses(targetNode,'apl-hide','');
       Bootstrap.asynGetPartial(href, Bootstrap.loadPartialIntoTemplate, State.target);
     }
 
