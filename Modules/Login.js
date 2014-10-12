@@ -94,9 +94,9 @@ structureJS.module('LoginCotroller', function(require){
   
   
   Templar.success('partial-login-screen.html', function(){
-
-    var audioplayers = Templar('audioPlayer');
     
+    var audioplayers = Templar('audioPlayer');
+
     /*Put listener on control children*/
     audioplayers.listenTo('play').forEvent('click', function(e, index){
       console.log('Paly Click ' + index + ' '  + e.player.src);

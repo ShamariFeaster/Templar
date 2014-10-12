@@ -72,7 +72,8 @@ var State = {
   preventUpdate : false,
   target : '',
   aplHideList : '',
-  linkClicked : false
+  compilationThreadCount : 0,
+  onloadFileQueue : []
 };
 
 var DOM = {
@@ -453,7 +454,7 @@ var Map = (function(){
               if((nodeScopeParts[0] == scopeParts[0] && nodeScopeParts[1] != scopeParts[1])){
                 ctx.removeItem(ctx.index);
                 Map.pruneControlNodes(tmp_node, ctx.modelName, ctx.modelAtrribName, repeatIndex );
-                _log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName);
+                _log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName + ' scope: ' + nodeScopeParts[1]);
               }
             }
           });
@@ -1009,8 +1010,11 @@ var Compile = {
     var defaultPartialHref = root.getAttribute('data-apl-default');
     if(!_isNullOrEmpty(defaultPartialHref)){
       root.setAttribute('data-apl-default', '');
+      State.compilationThreadCount++;
+      State.onloadFileQueue.push(defaultPartialHref);
       Bootstrap.asynGetPartial(defaultPartialHref,Bootstrap.loadPartialIntoTemplate, '', root );
-      return scope;
+      _log('Loading and compiling ' + defaultPartialHref + ' on ' + root.id + ' w/ scope ' + scope);
+      //return scope;
     }
     
     var nodes = root.childNodes,
@@ -1151,7 +1155,7 @@ var Compile = {
         }
         
     }
-    
+
     return scope;
           
   }
@@ -1733,10 +1737,16 @@ var Bootstrap = {
   /*handlers with same handler are not duplicate bound. handler needs to be defined on persistent
     object or global scope*/
   setTarget : function(e){
-      _log('Binding Link Handlers');
       State.target = (!_isNull(e.target.dataset[_TARGET_ATTRIB_KEY])) ? 
                             e.target.dataset[_TARGET_ATTRIB_KEY] : '';
 
+  },
+  
+  fireOnloads : function(){
+    var file = '';
+    while( (file = State.onloadFileQueue.pop())){
+      Templar.getPartialOnlodHandler(file).call(null);
+    }
   },
   
   bindTargetSetter : function(){
@@ -1786,42 +1796,30 @@ var Bootstrap = {
       DOM.hideByIdList(State.aplHideList);
     }
     
+    _log('Loading ' + fileName + 'scope ' + timestamp);
+    /*remove this pending comp*/
+    State.compilationThreadCount--;
     
     Compile.compile( targetNode, fileName + ' ' + timestamp );
+    
     /*unhide target node after compilation*/
     DOM.modifyClasses(targetNode,'apl-show','apl-hide,apl-show');
-    Link.bindModel();
-    Bootstrap.bindTargetSetter();
-    
-    Templar.getPartialOnlodHandler(fileName).call(null);
-    /*This handles case of the first page loaded needs to hide template elements. Unfortunately
-        we have to use hard coded 'hide' classes in the template to keep the elements intended to
-        be hidden from flashing until the default partial loads and instructs APL to hide stuff. As
-        soon as we navigate away from our inital template load we need to remove the special hard
-        coded class. We used state to do this, which is obviously undesirable. For now, it will
-        until a better solution  is found.*/
-    if(State.isFirstPartialLoad == true){
-      State.isFirstPartialLoad = false;
-      
-      defaultHiddenNodeList = document.querySelectorAll('.apl-default-hidden');
-      if(!_isNull(defaultHiddenNodeList)){
-        for(var i = 0; i < defaultHiddenNodeList.length; i++){
-          defaultNodeToHide = defaultHiddenNodeList[i];
-          DOM.modifyClasses(defaultNodeToHide,'','apl-default-hidden');
-        }
-      }
-    }else{
-      /*on initial load we would prune just loaded nodes, so we stop that*/
+    /*if a default-template tag found, recursive compilations will be spun off async during compile()
+      .without a way to determine if there are still unfinished 'threads' we will interpolate multiple
+      times and prematurely causing unecessary overhead and misfiring of our onload handlers. Dangers of
+      multiple interps is tearing down/rebuilding repeats which destroys control nodes causing control failure*/
+    if(State.compilationThreadCount <= 0){
+      Link.bindModel();
+      Bootstrap.bindTargetSetter();
+      Bootstrap.fireOnloads();
       Map.pruneNodeTreeByScope( fileName +  ' ' + timestamp ); 
+      State.compilationThreadCount = 0;
     }
+
+
     
-  },
-  partialLinkLoadHandler : function(e){
-    var aplLinkHref = e.target.getAttribute('href').replace('#','');
     
-    if(!_isNullOrEmpty(aplLinkHref)){
-      Bootstrap.asynGetPartial(aplLinkHref, Bootstrap.loadPartialIntoTemplate, e.target.dataset[_TARGET_ATTRIB_KEY]);
-    }
+    
   }
 };
 
@@ -1845,14 +1843,22 @@ window.onload = function(){
           targetNode = document.getElementById(targetId);
           
       DOM.modifyClasses(targetNode,'apl-hide','');
+      State.onloadFileQueue.push(href);
       Bootstrap.asynGetPartial(href, Bootstrap.loadPartialIntoTemplate, State.target);
     }
 
   };
 
   Compile.compile( document.getElementsByTagName('body')[0], 'body' ); 
-  Link.bindModel();
-
+  var defaultHiddenNodeList = document.querySelectorAll('.apl-default-hidden');
+  if(!_isNull(defaultHiddenNodeList)){
+    for(var i = 0; i < defaultHiddenNodeList.length; i++){
+      defaultNodeToHide = defaultHiddenNodeList[i];
+      DOM.modifyClasses(defaultNodeToHide,'','apl-default-hidden');
+    }
+  }
+  State.isFirstPartialLoad = false;
+  _log('Body COMPILATION DONE');
 };
 
 /*Put in structureJS module chain if SJS is defined, otherwise export into global NS as 
