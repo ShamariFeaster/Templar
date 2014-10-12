@@ -392,16 +392,23 @@ var Map = (function(){
                       api : model_obj, listeners : Object.create(null), cachedResults : model_obj.cachedResults,
                       limitTable : model_obj.limitTable, filterResults : model_obj.filterResults};
   },
-  pruneControlNodes : function(tmp_node, modelName, attribName, index){
-    var Map = this;
+  pruneControlNodes : function(tmp_node, modelName, attribName, index, scope){
+    var Map = this,
+        scopeParts = (!_isDef(scope)) ? tmp_node.scope.split(' ') : scope.split(' '),
+        nodeScopeParts = null;
     /*Remove embedded controls*/  
       
     Map.Control.forEach(function(ctrlCtx, ctrlNode){
-        if(ctrlNode.index == index && ctrlNode.modelName == modelName 
-            && ctrlNode.attribName == attribName){
-          _log('Pruning Controll Node ' + ctrlNode.node.tagName);
+      if(( nodeScopeParts = ctrlNode.scope.split(' ')) !== null){
+        if((nodeScopeParts[0] == scopeParts[0] && nodeScopeParts[1] != scopeParts[1])
+            && ctrlNode.index == index 
+            && ctrlNode.modelName == modelName 
+            && ctrlNode.attribName == attribName
+        ){
+          _log('Pruning Controll Node ' + ctrlNode.node.tagName + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
           ctrlCtx.removeItem(ctrlCtx.index);
         }
+      }
       
     });
     
@@ -453,8 +460,9 @@ var Map = (function(){
             if(( nodeScopeParts = tmp_node.scope.split(' ')) !== null){
               if((nodeScopeParts[0] == scopeParts[0] && nodeScopeParts[1] != scopeParts[1])){
                 ctx.removeItem(ctx.index);
-                Map.pruneControlNodes(tmp_node, ctx.modelName, ctx.modelAtrribName, repeatIndex );
-                _log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName + ' scope: ' + nodeScopeParts[1]);
+                Map.pruneControlNodes(tmp_node, ctx.modelName, ctx.modelAtrribName, repeatIndex, scope );
+                _log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName 
+                    + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
               }
             }
           });
@@ -1796,7 +1804,7 @@ var Bootstrap = {
       DOM.hideByIdList(State.aplHideList);
     }
     
-    _log('Loading ' + fileName + 'scope ' + timestamp);
+    _log('Loading ' + fileName + ' scope ' + fileName + ' ' + timestamp);
     /*remove this pending comp*/
     State.compilationThreadCount--;
     
