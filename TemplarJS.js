@@ -5,6 +5,7 @@ var _MODEL_ATTRIB_KEY = 'aplAttrib',
   _TARGET_ATTRIB_KEY = 'aplTarget',
   _CTRL_KEY = 'aplControl',
   _CTRL_ATTRIB_STRING = 'data-apl-control',
+  _CLASS_SEPARATOR = /,|\s/,
   _TEXT_NODE = 3,
   _ELEMENT_NODE = 1,
   _UNINDEXED = -1,
@@ -69,18 +70,19 @@ var ControlNode = function(node, id, modelName, attribName, index){
 var State = {
   isLinkloading : false,
   isFirstPartialLoad : true,
-  preventUpdate : false
+  preventUpdate : false,
+  target : ''
 };
 
 var DOM = {
   modifyClasses : function(node, add, remove){
     var nodeClassList = '',
-        removeAsArray = remove.split(' ');
+        removeAsArray = remove.split(_CLASS_SEPARATOR);
     
     if(node != null){
       /*getAttribute may return '' or null so we check below*/
       nodeClassList = node.getAttribute('class');
-      nodeClassList = (_isNull(nodeClassList)) ? '' : nodeClassList;
+      nodeClassList = (_isNull(nodeClassList)) ? '' : nodeClassList.trim();
       for(var i = 0; i < removeAsArray.length; i++ ){
         nodeClassList = nodeClassList.replace(removeAsArray[i], '', 'g');
       }
@@ -92,7 +94,7 @@ var DOM = {
         idListAsArray = null;
         
     if(commaSeparatedIdList != null && commaSeparatedIdList != ''){
-      idListAsArray = commaSeparatedIdList.split(',');
+      idListAsArray = commaSeparatedIdList.split(_CLASS_SEPARATOR);
       for(var i = 0; i < idListAsArray.length; i++){
         nodeToHide = document.getElementById(idListAsArray[i]);
         this.modifyClasses(nodeToHide,'apl-hide','apl-show,apl-hide');
@@ -1647,6 +1649,13 @@ ControlNode.prototype.listen = function(eventType, handler){
   }
 };
 
+var Route = function(){
+
+};
+/*#path-to-partial(/modelName:attribName)* */
+Route.parse = function(path){
+  var parts
+};
 
 var Templar = function(controlName){
   var control = new ControlNode();
@@ -1715,23 +1724,30 @@ var Bootstrap = {
     xhr.open('get',  fileName, true);
     xhr.send();
   },
+  /*handlers with same handler are not duplicate bound. handler needs to be defined on persistent
+    object or global scope*/
+  setTarget : function(e){
+      _log('Binding Link Handlers');
+      State.target = (!_isNull(e.target.dataset[_TARGET_ATTRIB_KEY])) ? 
+                            e.target.dataset[_TARGET_ATTRIB_KEY] : '';
+  },
   
-  bindLinkListener : function(){
-    var aplLinkNodeList = document.querySelectorAll('.apl-link'),
-        aplLinkNode = null,
-        aplLinkHref = '';
-
+  bindTargetSetter : function(){
+    var aplLinkNodeList = document.getElementsByTagName('a');
+        
     if(aplLinkNodeList != null){
       for(var i = 0; i < aplLinkNodeList.length; i++){
-        aplLinkNodeList[i].addEventListener('click', this.partialLinkLoadHandler);
+        aplLinkNodeList[i].addEventListener('click', this.setTarget);
       }
     }
+    
   },
   /*Preloading audio players will hang the framework.*/
   loadPartialIntoTemplate : function(){
     var partialContents = this.responseText,
         fileName = this.onload.fileName,
-        targetId = (_isDef(this.onload.targetId)) ? this.onload.targetId.replace('#','') : 'apl-content',
+        targetId = (!_isNullOrEmpty(this.onload.targetId)) ? 
+                      this.onload.targetId.replace('#','') : 'apl-content',
         targetNode = null,
         /*a partial can define parent template dom elements to be hidden*/
         aplHideNode = null,
@@ -1743,8 +1759,8 @@ var Bootstrap = {
         existingOnloadFunction = window.onload,
         href = document.location.href;
         /*add hash tag to href*/
-        if(href.indexOf('#') != -1){/*if there isn't a hash already parse href and put hash at end*/
-          document.location.href = href.substring(0, href.indexOf('#')) + '#' + fileName;
+        if(href.lastIndexOf('#') != -1){/*if there isn't a hash already parse href and put hash at end*/
+          document.location.href = href.substring(0, href.lastIndexOf('#')) + '#' + fileName;
         }else{
           document.location.href = '#' + fileName;
         }
@@ -1756,41 +1772,41 @@ var Bootstrap = {
     aplHideNode = document.getElementById('apl-hide');
     
     /*Show nodes hidden from last partial load*/
-      nodesPreviouslyHidden = _classesSetToHide.split(',');
+      nodesPreviouslyHidden = _classesSetToHide.split(_CLASS_SEPARATOR);
       for(var i = 0; i < nodesPreviouslyHidden.length; i++){
           nodeToShow = document.getElementById(nodesPreviouslyHidden[i]);
           DOM.modifyClasses(nodeToShow,'apl-show','apl-show,apl-hide');
-          
         }
 
     if(aplHideNode != null){
       aplHideList = _classesSetToHide = aplHideNode.getAttribute('data-apl-hide');
       DOM.hideByIdList(aplHideList);
-      /*This handles case of the first page loaded needs to hide template elements. Unfortunately
+    }
+    
+    Map.pruneNodeTreeByScope( fileName +  ' ' + 'timestamp'  ); 
+    Compile.compile( targetNode, fileName );
+    
+    Link.bindModel();
+    Bootstrap.bindTargetSetter();
+    
+    /*This handles case of the first page loaded needs to hide template elements. Unfortunately
         we have to use hard coded 'hide' classes in the template to keep the elements intended to
         be hidden from flashing until the default partial loads and instructs APL to hide stuff. As
         soon as we navigate away from our inital template load we need to remove the special hard
         coded class. We used state to do this, which is obviously undesirable. For now, it will
         until a better solution  is found.*/
         
-      if(State.isFirstPartialLoad == true){
-        State.isFirstPartialLoad = false;
-        
-        defaultHiddenNodeList = document.querySelectorAll('.apl-default-hidden');
-        if(defaultHiddenNodeList != null){
-          for(var i = 0; i < defaultHiddenNodeList.length; i++){
-            defaultNodeToHide = defaultHiddenNodeList[i];
-            DOM.modifyClasses(defaultNodeToHide,'','apl-default-hidden');
-          }
+    if(State.isFirstPartialLoad == true){
+      State.isFirstPartialLoad = false;
+      
+      defaultHiddenNodeList = document.querySelectorAll('.apl-default-hidden');
+      if(defaultHiddenNodeList != null){
+        for(var i = 0; i < defaultHiddenNodeList.length; i++){
+          defaultNodeToHide = defaultHiddenNodeList[i];
+          DOM.modifyClasses(defaultNodeToHide,'','apl-default-hidden');
         }
       }
-      
     }
-    Map.pruneNodeTreeByScope( fileName +  ' ' + 'timestamp'  ); 
-    Compile.compile( targetNode, fileName );
-    
-    Link.bindModel();
-    Bootstrap.bindLinkListener();
     
     Templar.getPartialOnlodHandler(fileName).call(null);
     State.isLinkloading = false;
@@ -1816,11 +1832,12 @@ window.onload = function(){
   existingOnloadFunction.call(null);
   /*Works back to IE 8*/
   window.onhashchange  = function(event) {
-    var href = event.newURL;
-
-    if( (event.newURL != event.oldURL) && State.isLinkloading == false){
-      Bootstrap.asynGetPartial(href.substring(href.indexOf('#')).replace('#', ''), Bootstrap.loadPartialIntoTemplate);
+    var href = event.newURL.substring(event.newURL.indexOf('#')).replace('#', '');
+    
+    if( (event.newURL != event.oldURL)){
+      Bootstrap.asynGetPartial(href, Bootstrap.loadPartialIntoTemplate, State.target);
     }
+
   };
 
   Compile.compile( document.getElementsByTagName('body')[0], 'body' ); 

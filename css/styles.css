@@ -13,3 +13,7 @@
 .apl-show {
   display : block;
 }
+
+.apl-default-hidden{
+  display : none;
+}

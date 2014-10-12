@@ -1,5 +1,4 @@
-<div id="apl-hide" data-apl-hide="header"></div>
-<!---->
+ <div id="apl-hide" data-apl-hide="header, footer"></div> 
 
 <br>
 
@@ -7,7 +6,7 @@
   <div data-apl-repeat="Login.songs">
     <div data-apl-control="audioPlayer">
       <div>{{title}}</div>
-      <audio  id="player" src="{{src}}" ></audio> 
+      <audio  id="player" src="{{src}}" preload="none"></audio> 
       <button id="play">Play</button>
       <button id="pause">Pause</button>
       <button id="prev">Prev</button>
