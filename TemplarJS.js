@@ -68,7 +68,6 @@ var ControlNode = function(node, id, modelName, attribName, index){
 };
 
 var State = {
-  isFirstPartialLoad : true,
   preventUpdate : false,
   target : '',
   aplHideList : '',
@@ -392,7 +391,7 @@ var Map = (function(){
                       api : model_obj, listeners : Object.create(null), cachedResults : model_obj.cachedResults,
                       limitTable : model_obj.limitTable, filterResults : model_obj.filterResults};
   },
-  pruneControlNodesOfRepeat : function(tmp_node, modelName, attribName, index){
+  pruneControlNodesByIndex : function(tmp_node, modelName, attribName, index){
     var Map = this,
         scopeParts = tmp_node.scope.split(' '),
         nodeScopeParts = null,
@@ -964,7 +963,7 @@ var Interpolate = {
             if(ctx.modelAttribIndex >= attributeVal.length){
               ctx.removeItem(ctx.index); /*from indexes[key] = []*/
               /*this is most likely unecessary*/
-              //Map.pruneControlNodesOfRepeat(tmp_node, modelName, attributeName, ctx.modelAttribIndex);
+              //Map.pruneControlNodesByIndex(tmp_node, modelName, attributeName, ctx.modelAttribIndex);
               node.parentNode.removeChild(node);
             }
             
@@ -989,7 +988,7 @@ var Interpolate = {
             /*Kill existing repeat tree*/
             Map.forEach(modelName, attributeName, function(ctx, tmp_node){
               if(tmp_node.index > _UNINDEXED && !_isNull(tmp_node.node.parentNode)){
-                Map.pruneControlNodesOfRepeat(tmp_node, modelName, attributeName, tmp_node.index);
+                Map.pruneControlNodesByIndex(tmp_node, modelName, attributeName, tmp_node.index);
                 Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, tmp_node.index);
                 ctx.removeItem(ctx.index);
                 tmp_node.node.parentNode.removeChild(tmp_node.node);
@@ -1049,8 +1048,8 @@ var Compile = {
       root.setAttribute('data-apl-default', '');
       State.compilationThreadCount++;
       State.onloadFileQueue.push(defaultPartialHref);
-      Bootstrap.asynGetPartial(defaultPartialHref,Bootstrap.loadPartialIntoTemplate, '', root );
-      _log('Loading and compiling ' + defaultPartialHref + ' on ' + root.id + ' w/ scope ' + scope);
+      Bootstrap.asynGetPartial(defaultPartialHref,Bootstrap.loadPartialIntoTemplate, null, root );
+      _log('Spawning Thread <' + defaultPartialHref + '> w/ target <' + root.id + '> w/ scope <' + scope + '>');
       //return scope;
     }
     
@@ -1833,7 +1832,7 @@ var Bootstrap = {
       DOM.hideByIdList(State.aplHideList);
     }
     
-    _log('Loading ' + fileName + ' scope ' + fileName + ' ' + timestamp);
+    _log('Compiling <' + fileName + '> w/ scope <' + fileName + ' ' + timestamp + '>');
     /*remove this pending comp*/
     State.compilationThreadCount--;
     
@@ -1853,10 +1852,6 @@ var Bootstrap = {
       State.compilationThreadCount = 0;
     }
 
-
-    
-    
-    
   }
 };
 
@@ -1894,7 +1889,7 @@ window.onload = function(){
       DOM.modifyClasses(defaultNodeToHide,'','apl-default-hidden');
     }
   }
-  State.isFirstPartialLoad = false;
+
   _log('Body COMPILATION DONE');
 };
 
