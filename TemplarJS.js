@@ -9,6 +9,8 @@ var _MODEL_ATTRIB_KEY = 'aplAttrib',
   _TEXT_NODE = 3,
   _ELEMENT_NODE = 1,
   _UNINDEXED = -1,
+  _NON_TERMINAL = 0,
+  _TERMINAL = 1,
   _classesSetToHide = '',
   _isDef = function(a){return (typeof a !== 'undefined');},
   _isString = function(a){ return (!_isDef(a) || typeof a === 'string');},
@@ -1694,8 +1696,132 @@ ControlNode.prototype.listen = function(eventType, handler){
   }
 };
 
-var Route = function(){
+var RouteNode = function (value, type, next){
+    if(!(this instanceof RouteNode))
+        return new RouteNode(value, next);
+    this.value = _isDef(value) ? value : null;
+    this.next = _isDef(next) ? next : null;
+    this.type = _isDef(type) ? type : null;
+    this.signature = '';
+    this.partial = '';
+    this.length = 0;
+    this.route = '';
+};
 
+var Route = {
+
+  mapPattern : function(route, terminalSet){
+    var ntRegex = /\w\:\w/,
+        mappedVal = '',
+        parts = route.trim().split('/').slice(1),
+        retVal = Object.create(null);
+    for(var i = 0; i < parts.length; i++){
+      if(parts[i] == '') continue;
+      mappedVal += (_isDef(terminalSet[parts[i]])) ? _TERMINAL : _NON_TERMINAL;
+    }
+    retVal.map = mappedVal;
+    retVal.parts = parts;
+    retVal.length = parts.length;
+    return retVal;
+  },
+  
+  buildRouteLinkedList : function(route, partial){
+    var next = null,
+        ntRegex = /\w\:\w/,
+        mappedVal ='',
+        parent = new RouteNode(),
+        lastNode = parent,
+        thisNode = parent,
+        partial = (_isDef(partial)) ? partial : '',
+        parts = route.trim().split('/').slice(1),
+        nonTerminals = [];
+
+    for(var i = 0; i < parts.length; i++){
+      mappedVal += (ntRegex.test(parts[i])) ? _NON_TERMINAL : _TERMINAL;
+      thisNode  = new RouteNode(parts[i], mappedVal.charAt(i));
+      
+      if(thisNode.type == NON_TERMINAL)
+        nonTerminals.push(thisNode.value.split(':'));
+      
+      lastNode = lastNode.next = thisNode;
+    }
+    parent = parent.next;
+    parent.signature = mappedVal;
+    parent.partial = partial;
+    parent.length = parts.length;
+    parent.route = route;
+    parent.nonTerminals = nonTerminals;
+   return parent;
+
+  },
+  
+  buildRouteTree : function(routes){
+    var routeObj = {};
+    var tmp = null;
+    var routeNode = null;
+    var parent = null;
+    var branchCreated = false;
+    routeObj.terminalSet = Object.create(null);
+    for(var i = 0; i < routes.length; i++){
+      routeNode = buildRouteLinkedList(routes[i].route, routes[i].partial);
+      
+      if(!_isDef(routeObj[routeNode.signature])){
+          routeObj[routeNode.signature] = Object.create(null);
+      }
+      
+      tmp = routeObj[routeNode.signature];
+      parent = routeNode;
+      do{
+        delete tmp.parent;
+        
+        if(routeNode.type == TERMINAL){
+          
+          if(!_isDef(tmp[routeNode.value])){
+              tmp[routeNode.value] = Object.create(null);
+              branchCreated = true;
+          }else{
+              tmp[routeNode.value] = tmp[routeNode.value];
+          }
+          routeObj.terminalSet[routeNode.value] = true;
+          tmp = tmp[routeNode.value];
+        }
+        
+        tmp.parent = parent;
+        routeNode = routeNode.next;        
+      }while(routeNode != null)
+          if(!branchCreated){
+            throw 'Error: Ambiguous Route "' + routes[i].route + '"';
+          }
+      branchCreated = false;
+    }
+    return routeObj;
+  },
+  
+  resolveRoute : function(route, routeTree){
+    var routeObj = mapPattern(route, routeTree.terminalSet),
+        routePart = routeTree[routeObj.map],
+        nonTerminalValues = [];
+    if(!_isDef(routePart)){
+      _log('Error: Route "' + route + '" not found');
+      return;
+    }
+    
+    for(var i = 0; i < routeObj.parts.length; i++){
+      if(routeObj.map.charAt(i) == _NON_TERMINAL){ 
+        nonTerminalValues.push(routeObj.parts[i]);
+        continue;
+      }
+      routePart = routePart[routeObj.parts[i]];
+      if(!_isDef(routePart)){
+        _log('Error: Route "' + route + '" not found');
+        break;
+      }
+    }
+    _log('Route matched: ' + route);
+    _log(routePart);
+    _log(nonTerminalValues);
+  }
+  
 };
 /*#path-to-partial(/modelName:attribName)* */
 Route.parse = function(path){
@@ -1726,13 +1852,12 @@ Templar.getModel = function(modelName){
   return Map.getModel(modelName);
 };
 
-Templar.Map = Map;
-
 Templar.dataModel = function(modelName, modelObj){
   Map.initModel(new Model(modelName, modelObj));
 };
 
-
+Templar.Map = Map;
+Templar.Route = Route;
 
 var Link = {
 
