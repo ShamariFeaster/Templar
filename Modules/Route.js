@@ -29,11 +29,15 @@ function buildRouteTree(routes){
 
   for(var i = 0; i < routes.length; i++){
 
-    parts = routes[i].route.trim().split('/').slice(1); 
+    parts = routes[i].route.trim().split('/'); 
     tmp = routeObj;
     tat = ambiguityTree;
     
     for(var x = 0; x < parts.length; x++){
+      /*this nullifies no leading / or trailing /*/
+      if(parts[x] == '')
+        continue;
+
       routePartName = parts[x].toLowerCase();
       thisType = (NT_REGEX.test(parts[x])) ? NON_TERMINAL : TERMINAL;
       nextPart = (x+1 < parts.length) ? parts[x+1] : null;
@@ -45,8 +49,9 @@ function buildRouteTree(routes){
       
       if(!_isDef(tmp[routePartName])){
         tmp[routePartName] = Object.create(null);
-        tmp[routePartName].lookaheadType = thisType;
         tmp[routePartName].endOfChain = false;
+        tmp[routePartName].lookaheadVal = (nextType == NON_TERMINAL) ? nextPart : '';
+        tmp[routePartName].lookaheadType = nextType;
         terminalBranchCreated = true; 
       }
       /*Make parallel tree with NT names normalized so they don't spawn branches. */
@@ -55,16 +60,6 @@ function buildRouteTree(routes){
         nonAmbiguousBranchCreated = true;
       }
       
-      /*if im the last element, I && my lookaheadType with itself keeping it the same*/
-      lookahead = (!_isNull(nextPart)) ? nextType : tmp[routePartName].lookaheadType;
-      /*if next part is NT, NT becomes my lookaheadType*/
-      tmp[routePartName].lookaheadType = tmp[routePartName].lookaheadType && lookahead; 
-      /*if NT is next part, store it's pattern as my lookaheadKey*/
-      if(!_isNull(nextPart) 
-        && tmp[routePartName].lookaheadType == NON_TERMINAL
-        && nextType == NON_TERMINAL){
-        tmp[routePartName].lookaheadKey = nextPart.toLowerCase();
-      }
       
       tmp = tmp[routePartName];
       tat = tat[normalizedName];
@@ -84,6 +79,7 @@ function buildRouteTree(routes){
     
     tmp.endOfChain = true;
     tmp.route = route;
+    tmp.partial = routes[i].partial;
     terminalBranchCreated = false;
     nonAmbiguousBranchCreated = false;
   }
@@ -100,9 +96,9 @@ function resolveRoute(route, routeTree){
   routePart = routeTree;
  
   for(var i = 0; i < parts.length; i++){
-  
-    if(skipKeyAssignment){
-      skipKeyAssignment = !skipKeyAssignment;
+
+    if(_isDef(routePart.lookaheadType) && routePart.lookaheadType == NON_TERMINAL){
+      key = routePart.lookaheadVal;
     }else{
       key = parts[i].toLowerCase();
     }
@@ -111,13 +107,7 @@ function resolveRoute(route, routeTree){
     
     if(!_isDef(routePart))
       throw 'Error: Route "' + route + '" not found';
-      
-    /*take non-term paths first, if not there check lookaheads and take that path*/
-    if(i + 1 < parts.length && !_isDef(routePart[parts[i+1]]) && routePart.lookaheadType == NON_TERMINAL){
-      key = routePart.lookaheadKey;
-      nonTerminalValues.push([key, parts[i+1]]);
-      skipKeyAssignment = true;
-    }
+
   }
   
   if(routePart.endOfChain == true)
@@ -130,9 +120,8 @@ function resolveRoute(route, routeTree){
 }
 
 (function(){
-  var routes =    [{route : '/term2/z'}, {route : '/term2/w:e/z'}, {route : '/term2/z/w:q'}, 
-                   {route : '/term2/z/m'}];
-  var nonMatch = '/TERM2/z';
+  var routes =    [{route : '/term2/w:e/z', partial : 'partial.html'}];
+  var nonMatch = '/TERM2/z/z';
   var routeTree = buildRouteTree(routes);
   resolveRoute(nonMatch, routeTree);
 })();
