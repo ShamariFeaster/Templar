@@ -122,11 +122,17 @@ structureJS.module('LoginCotroller', function(require){
     });
     
     LoginModel.listen('searchBy', function(e){
-      console.log('Setting search Filter to ' + e.value);
-      LoginModel.filter('comments')
-      .by(e.value)
-      .using('userInput');
-      
+      LoginModel
+        .filter('comments')
+        .by(e.value)
+        .using('userInput');
+    });
+    
+    LoginModel.listen('orderBy', function(e){
+      LoginModel
+        .sortCurrentPageOf('comments')
+        .orderBy(e.value);
+      LoginModel.update('comments');
     });
     
     /*Pagination*/

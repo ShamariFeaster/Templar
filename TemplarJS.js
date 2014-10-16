@@ -322,7 +322,7 @@ var Map = (function(){
     }
     
     /*Get page, if limit has been defined*/    
-    if(_isDef(Model.limitTable[attribName]) && !_isDef(Model.cachedResults[attribName])){
+    if(_isDef(Model.limitTable[attribName]) && Model.limitTable[attribName].limit > 0){
       returnVal = Interpolate.getPageSlice(Model, attribName, returnVal);
     }
     
@@ -1381,7 +1381,7 @@ Model.prototype.filter = function(attribName){
         Model.listen(atrribNameOrFunction, function(data){
           /*clear results when we have no chained 'and' functions*/
           clearCachedResults = (chain.liveAndFuncs.length < 1);
-          _log(data);
+
           var passedInputFilter = true,
               defaultFilterOverride = false;
           /*Filter with live 'and' functions*/
@@ -1511,6 +1511,7 @@ Model.prototype.sort = function(attribName, pageNum){
   var chain = Object.create(null),
       Model = this,
       oldPageNum = 0,
+      oldLimit = 0,
       A_FIRST = -1,
       B_FIRST = 1,
       NO_CHANGE = 0;
@@ -1535,9 +1536,13 @@ Model.prototype.sort = function(attribName, pageNum){
       return;
       
     Model.limitTable[attribName].page = pageNum;
+    /*we have to trick getAttribute() to give us the full slice*/
+    oldLimit = Model.limitTable[attribName].limit;
+    Model.limitTable[attribName].limit = 0;
     /*we have to get full target on each call because last call has changed it*/
-    var fullTarget = Map.getAttribute(Model.modelName, attribName),
-        points = Interpolate.getPageSliceData(Model, attribName, fullTarget),
+    var fullTarget = Map.getAttribute(Model.modelName, attribName);
+    Model.limitTable[attribName].limit = oldLimit;
+    var points = Interpolate.getPageSliceData(Model, attribName, fullTarget),
         fullTargetCopy = null;
         
     /*point.start of -1 indicates undefined limitTable*/
@@ -1599,15 +1604,14 @@ Model.prototype.sort = function(attribName, pageNum){
   
 }
 
-Model.prototype.sortPage = function(pageNum){
+Model.prototype.sortCurrentPageOf = function(attribName){
   var chain = Object.create(null),
-      Model = this;
+      Model = this,
+      limitTable = Model.limitTable[attribName];
       
-  chain.of = function(attribName){
-    chain = Model.sort(attribName, pageNum);
-    return chain;
+  if(_isDef(limitTable)){
+    return Model.sort(attribName, limitTable.currentPage);
   }
-  return chain;
 }
 /*END Sort*/
 
