@@ -90,14 +90,15 @@ structureJS.module('LoginCotroller', function(require){
 
   var Templar = require('Templar'),
       LoginModel = Templar.getModel('Login'),
-      EnvModel = Templar.getModel('Environment'),
-      page = 1;
+      EnvModel = Templar.getModel('Environment');
   
   /*Itial page limit*/
   LoginModel.limit('comments').to(3);
     
   Templar.success('partial-login-screen.html', function(){
-  
+
+    LoginModel.resetLiveFiltersOf('comments');
+    
     LoginModel.filter('comments')
     .by('ln')
     .using('userInput');
@@ -125,6 +126,7 @@ structureJS.module('LoginCotroller', function(require){
     });
     
     LoginModel.listen('searchBy', function(e){
+      console.log('Setting search Filter to ' + e.value);
       LoginModel.filter('comments')
       .by(e.value)
       .using('userInput');
@@ -133,11 +135,11 @@ structureJS.module('LoginCotroller', function(require){
     
     /*Pagination*/
     Templar('prev').listen('click', function(){
-      LoginModel.gotoPage(--page).of('comments');
+      LoginModel.gotoPreviousPageOf('comments');
     });
     
     Templar('next').listen('click', function(){
-      LoginModel.gotoPage(++page).of('comments');
+      LoginModel.gotoNextPageOf('comments');
     });
     
     

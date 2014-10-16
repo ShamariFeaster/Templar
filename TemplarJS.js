@@ -323,8 +323,6 @@ var Map = (function(){
     
     /*Get page, if limit has been defined*/    
     if(_isDef(Model.limitTable[attribName]) && !_isDef(Model.cachedResults[attribName])){
-      page = Model.limitTable[attribName].page;
-      limit = Model.limitTable[attribName].limit;
       returnVal = Interpolate.getPageSlice(Model, attribName, returnVal);
     }
     
@@ -1010,18 +1008,8 @@ var Interpolate = {
             });
             
 
-            var TMP_repeatedNode = null,
-                Model = Map.getInternalModel(modelName),
-                limit = 0, 
-                page = 0;
-            
-            /*Get page, if limit has been defined    
-            if(_isDef(Model.limitTable[attributeName]) && !_isDef(Model.cachedResults[attributeName])){
-              page = Model.limitTable[attributeName].page;
-              limit = Model.limitTable[attributeName].limit;
-              attributeVal = Interpolate.getPageSlice(Model, attributeName, attributeVal);
-            }
-            */
+            var TMP_repeatedNode = null;
+
             /*rebuild new one*/
             for(var i = 0; i < attributeVal.length; i++){
 
@@ -1042,7 +1030,7 @@ var Interpolate = {
         }
       
     });
-    
+    _log(updateObj);
     Interpolate.dispatchListeners(listeners, updateObj);
     
   }
@@ -1393,7 +1381,7 @@ Model.prototype.filter = function(attribName){
         Model.listen(atrribNameOrFunction, function(data){
           /*clear results when we have no chained 'and' functions*/
           clearCachedResults = (chain.liveAndFuncs.length < 1);
-          
+          _log(data);
           var passedInputFilter = true,
               defaultFilterOverride = false;
           /*Filter with live 'and' functions*/
@@ -1463,32 +1451,61 @@ Model.prototype.resetLiveFiltersOf = function(attribName){
 /*public*/
 Model.prototype.resetStaticFiltersOf = function(attribName){
   delete this.filterResults[attribName];
-}
+};
 
 /*END Filtering*/
 /*******************PAGNG**************************************/
 /*public*/
 Model.prototype.limit = function(attribName){
   var chain = Object.create(null),
-      Model = this;
+      Model = this,
+      modelAttrib = 0,
+      totalPages = 0;
   chain.to = function(limit){
-    if(limit > 0)
-      Model.limitTable[attribName] = {limit : limit, page : 1};
+    if(limit > 0){
+      delete Model.limitTable[attribName];
+      modelAttrib = Map.getAttribute(Model.modelName, attribName);
+      
+      if(_isArray(modelAttrib)){
+        totalPages = Math.floor(modelAttrib.length/limit);
+        totalPages += ((modelAttrib.length%limit > 0) ? 1 : 0);
+        Model.limitTable[attribName] = {limit : limit, page : 1, totalPages : totalPages, currentPage : 1};
+      }
+      
+    }
   };
   return chain;
-}
+};
 /*public*/
 Model.prototype.gotoPage = function(pageNum){
   var chain = Object.create(null),
-      Model = this;
+      Model = this,
+      limitTable = null;
   chain.of = function(attribName){
-    if(_isDef(Model.limitTable[attribName]) && pageNum > 0){
-      Model.limitTable[attribName].page = pageNum;
+    limitTable = Model.limitTable[attribName];
+    if(_isDef(limitTable) && pageNum > 0 && pageNum <= limitTable.totalPages){
+      limitTable.page = pageNum;
       Interpolate.interpolate(Model.modelName, attribName, Map.getAttribute(Model.modelName, attribName));
     }
   };
   return chain;
-}
+};
+
+Model.prototype.gotoNextPageOf = function(attribName){
+  var Model = this,
+      limitTable = Model.limitTable[attribName];
+  if(_isDef(limitTable) && (limitTable.currentPage + 1 <= limitTable.totalPages )){
+    Model.gotoPage(++limitTable.currentPage).of(attribName);
+  }
+};
+
+Model.prototype.gotoPreviousPageOf = function(attribName){
+  var Model = this,
+      limitTable = Model.limitTable[attribName];
+  if(_isDef(limitTable) && (limitTable.currentPage - 1 > 0 )){
+    Model.gotoPage(--limitTable.currentPage).of(attribName);
+  }
+};
 /*******************SORTING**********************************/
 Model.prototype.sort = function(attribName, pageNum){
   var chain = Object.create(null),
@@ -2003,9 +2020,9 @@ var Bootstrap = {
       multiple interps is tearing down/rebuilding repeats which destroys control nodes causing control failure*/
     if(State.compilationThreadCount <= 0){
       Link.bindModel();
+      Map.pruneNodeTreeByScope( fileName +  ' ' + timestamp ); 
       Bootstrap.bindTargetSetter();
       Bootstrap.fireOnloads();
-      Map.pruneNodeTreeByScope( fileName +  ' ' + timestamp ); 
       State.compilationThreadCount = 0;
     }
 
