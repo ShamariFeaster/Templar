@@ -5,6 +5,30 @@
 #header  h2 {
   float : left;
 }
+ul {
+list-style: none;
+}
+.comment {
+  width : 400px;
+  background-color : blue;
+  border : 1px solid black;
+  margin-bottom : 2px;
+}
+
+.user-name {
+  font-weight : bold;
+  border-bottom : 1px solid black;
+  margin-bottom : 2px;
+}
+
+#comments {
+float : left;
+margin-right : 150px;
+}
+
+#players {
+float : left;
+}
 
 .apl-hide {
   display : none;

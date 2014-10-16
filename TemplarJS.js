@@ -6,6 +6,7 @@ var _MODEL_ATTRIB_KEY = 'aplAttrib',
   _CTRL_KEY = 'aplControl',
   _CTRL_ATTRIB_STRING = 'data-apl-control',
   _CLASS_SEPARATOR = /,|\s/,
+  _NT_REGEX = /\w\:\w/,
   _TEXT_NODE = 3,
   _ELEMENT_NODE = 1,
   _UNINDEXED = -1,
@@ -287,8 +288,10 @@ var Map = (function(){
     _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]['nodes'].push(tmp_node);
 
   },
+  
   getAttribute : function(modelName, attribName, index, property){
-    var returnVal = null;
+    var returnVal = null,
+        Model = _map[modelName]['api'];
     if(_isDef(_map[modelName]) && _isDef(_map[modelName]['modelObj'][attribName])){
     
       if(_isDef(index) 
@@ -316,6 +319,13 @@ var Map = (function(){
     /*We should always pull the filtered subset if a static filter has been applied*/
     if(_isDef(_map[modelName]['filterResults'][attribName])){
       returnVal = _map[modelName]['filterResults'][attribName];
+    }
+    
+    /*Get page, if limit has been defined*/    
+    if(_isDef(Model.limitTable[attribName]) && !_isDef(Model.cachedResults[attribName])){
+      page = Model.limitTable[attribName].page;
+      limit = Model.limitTable[attribName].limit;
+      returnVal = Interpolate.getPageSlice(Model, attribName, returnVal);
     }
     
     /*special case due to fact that repeats are recompiled instead of interpolated. this means the
@@ -481,7 +491,7 @@ var Map = (function(){
     Map.forEach(function(ctx, modelName){
       Map.forEach(ctx.modelName, function(ctx, attribName){
         /*remove listeners*/
-          Map.removeListener(ctx.modelName, ctx.modelAtrribName);
+          
           
           Map.forEach(ctx.modelName, ctx.modelAtrribName, function(ctx, tmp_node){
             var node = tmp_node.node,
@@ -490,6 +500,7 @@ var Map = (function(){
               if((nodeScopeParts[0] == scopeParts[0] && nodeScopeParts[1] != scopeParts[1])){
                 ctx.removeItem(ctx.index);
                 Map.pruneControlNodesByScope(ctx.modelName, ctx.modelAtrribName, repeatIndex, scope );
+                Map.removeListener(ctx.modelName, ctx.modelAtrribName);
                 _log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName 
                     + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
               }
@@ -1004,13 +1015,13 @@ var Interpolate = {
                 limit = 0, 
                 page = 0;
             
-            /*Get page, if limit has been defined*/    
+            /*Get page, if limit has been defined    
             if(_isDef(Model.limitTable[attributeName]) && !_isDef(Model.cachedResults[attributeName])){
               page = Model.limitTable[attributeName].page;
               limit = Model.limitTable[attributeName].limit;
               attributeVal = Interpolate.getPageSlice(Model, attributeName, attributeVal);
             }
-            
+            */
             /*rebuild new one*/
             for(var i = 0; i < attributeVal.length; i++){
 
@@ -1696,35 +1707,8 @@ ControlNode.prototype.listen = function(eventType, handler){
   }
 };
 
-var RouteNode = function (value, type, next){
-    if(!(this instanceof RouteNode))
-        return new RouteNode(value, next);
-    this.value = _isDef(value) ? value : null;
-    this.next = _isDef(next) ? next : null;
-    this.type = _isDef(type) ? type : null;
-    this.signature = '';
-    this.partial = '';
-    this.length = 0;
-    this.route = '';
-};
-
 var Route = {
 
-  mapPattern : function(route, terminalSet){
-    var ntRegex = /\w\:\w/,
-        mappedVal = '',
-        parts = route.trim().split('/').slice(1),
-        retVal = Object.create(null);
-    for(var i = 0; i < parts.length; i++){
-      if(parts[i] == '') continue;
-      mappedVal += (_isDef(terminalSet[parts[i]])) ? _TERMINAL : _NON_TERMINAL;
-    }
-    retVal.map = mappedVal;
-    retVal.parts = parts;
-    retVal.length = parts.length;
-    return retVal;
-  },
-  
   buildRouteLinkedList : function(route, partial){
     var next = null,
         ntRegex = /\w\:\w/,
@@ -1756,71 +1740,119 @@ var Route = {
   },
   
   buildRouteTree : function(routes){
-    var routeObj = {};
-    var tmp = null;
-    var routeNode = null;
-    var parent = null;
-    var branchCreated = false;
-    routeObj.terminalSet = Object.create(null);
-    for(var i = 0; i < routes.length; i++){
-      routeNode = buildRouteLinkedList(routes[i].route, routes[i].partial);
+    var  routeObj = Object.create(null),
+         ambiguityTree = Object.create(null),
+         normalizedName = null,
+         routePartName = '',
+         tmp = null,
+         tat = null,
+         terminalBranchCreated = false,
+         nonAmbiguousBranchCreated = false,
+         lookahead = null,
+         route = '',
+         parts = null,
+         thisPart = '',
+         thisType = null,
+         nextPart = null,
+         nextType = null;
+  
+
+  for(var i = 0; i < routes.length; i++){
+
+    parts = routes[i].route.trim().split('/'); 
+    tmp = routeObj;
+    tat = ambiguityTree;
+    
+    for(var x = 0; x < parts.length; x++){
+      /*this nullifies no leading / or trailing /*/
+      if(parts[x] == '')
+        continue;
+
+      routePartName = parts[x].toLowerCase();
+      thisType = (_NT_REGEX.test(parts[x])) ? _NON_TERMINAL : _TERMINAL;
+      nextPart = (x+1 < parts.length) ? parts[x+1] : null;
+      nextType = (!_isNull(nextPart)) ? 
+        (_NT_REGEX.test(nextPart)) ? _NON_TERMINAL : _TERMINAL : null;
+        
+      /*Basically we flatten the tree by normalizing NT names*/
+      normalizedName = (_NT_REGEX.test(parts[x])) ? 'NT' : routePartName;
       
-      if(!_isDef(routeObj[routeNode.signature])){
-          routeObj[routeNode.signature] = Object.create(null);
+      if(!_isDef(tmp[routePartName])){
+        tmp[routePartName] = Object.create(null);
+        tmp[routePartName].endOfChain = false;
+        tmp[routePartName].lookaheadVal = (nextType == _NON_TERMINAL) ? nextPart : '';
+        tmp[routePartName].lookaheadType = nextType;
+        terminalBranchCreated = true; 
+      }
+      /*Make parallel tree with NT names normalized so they don't spawn branches. */
+      if(!_isDef(tat[normalizedName])){
+        tat[normalizedName] = Object.create(null);
+        nonAmbiguousBranchCreated = true;
       }
       
-      tmp = routeObj[routeNode.signature];
-      parent = routeNode;
-      do{
-        delete tmp.parent;
-        
-        if(routeNode.type == TERMINAL){
-          
-          if(!_isDef(tmp[routeNode.value])){
-              tmp[routeNode.value] = Object.create(null);
-              branchCreated = true;
-          }else{
-              tmp[routeNode.value] = tmp[routeNode.value];
-          }
-          routeObj.terminalSet[routeNode.value] = true;
-          tmp = tmp[routeNode.value];
-        }
-        
-        tmp.parent = parent;
-        routeNode = routeNode.next;        
-      }while(routeNode != null)
-          if(!branchCreated){
-            throw 'Error: Ambiguous Route "' + routes[i].route + '"';
-          }
-      branchCreated = false;
+      
+      tmp = tmp[routePartName];
+      tat = tat[normalizedName];
+      
+      route = routes[i].route;
+                   
     }
-    return routeObj;
+
+    /*we can get away with not creatin a new branch if pattern before us has same pattern but longer*/
+    if(!terminalBranchCreated && tmp.endOfChain == true){
+      throw 'Error: Duplicate Route "' + routes[i].route + '" Detected';
+    }
+
+    if(!nonAmbiguousBranchCreated && tmp.endOfChain == true){
+      throw 'Error: Ambiguous Route "' + routes[i].route + '" Detected';
+    }
+    
+    tmp.endOfChain = true;
+    tmp.route = route;
+    tmp.partial = routes[i].partial;
+    terminalBranchCreated = false;
+    nonAmbiguousBranchCreated = false;
+  }
+  
+  _log(routeObj);
+  return routeObj;
+  
   },
   
   resolveRoute : function(route, routeTree){
-    var routeObj = mapPattern(route, routeTree.terminalSet),
-        routePart = routeTree[routeObj.map],
-        nonTerminalValues = [];
-    if(!_isDef(routePart)){
-      _log('Error: Route "' + route + '" not found');
-      return;
+    var parts = route.trim().split('/'),
+      nonTerminalValues = [],
+      key = '',
+      skipKeyAssignment = false;
+  
+    routePart = routeTree;
+   
+    for(var i = 0; i < parts.length; i++){
+      
+      if(parts[i] == '' || parts[i] == '#')
+          continue;
+          
+      if(_isDef(routePart.lookaheadType) && routePart.lookaheadType == _NON_TERMINAL){
+        key = routePart.lookaheadVal;
+      }else{
+        key = parts[i].toLowerCase();
+      }
+      
+      routePart = routePart[key];
+      
+      if(!_isDef(routePart))
+        throw 'Error: Route "' + route + '" not found';
+
     }
     
-    for(var i = 0; i < routeObj.parts.length; i++){
-      if(routeObj.map.charAt(i) == _NON_TERMINAL){ 
-        nonTerminalValues.push(routeObj.parts[i]);
-        continue;
-      }
-      routePart = routePart[routeObj.parts[i]];
-      if(!_isDef(routePart)){
-        _log('Error: Route "' + route + '" not found');
-        break;
-      }
-    }
-    _log('Route matched: ' + route);
+    if(routePart.endOfChain == true)
+      _log('Route matched: ' + route + ' with ' + routePart.route);
+    else
+      throw ' > Route "' + route + '" not found';
+      
     _log(routePart);
     _log(nonTerminalValues);
-  }
+    }
   
 };
 /*#path-to-partial(/modelName:attribName)* */

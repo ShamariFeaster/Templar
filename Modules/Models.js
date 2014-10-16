@@ -20,20 +20,19 @@ Templar.dataModel('Login',
               url : '/login.html',
               
               /*Inputs*/
-              userInput : 'Type Here',
+              userInput : '',
               
               /*Drop down data*/
-              countries :  [{text : 'CAN', value : 1, test : 'blah'},
-                        {text : 'MEX', value : 2, test : 'oh nooze'},
-                        {text : 'US', value : 3, selected : true}],
+              orderBy :  [{text : 'First Name', value : 'fn', selected : true},
+                        {text : 'Last Name', value : 'ln'}],
               
                         
-              US_states : [{text : 'Alabama', value : 1},
-                        {text : 'Arkansas', value : 2}],
+              limits : [{text : '3', value : 3, selected : true},
+                        {text : '5', value : 5},
+                        {text : '7', value : 7}],
                         
-              CAN_states : [{text : 'BC', value : 1},
-                        {text : 'Ontario', value : 2, selected : true},
-                        {text : 'Calgary', value : 3}],
+              searchBy : [{text : 'First Name', value : 'fn'},
+                        {text : 'Last Name', value : 'ln', selected : true}],
               
               MEX_states : [{text : 'Juarez', value : 1},
                         {text : 'Oxiaca', value : 2, selected : true},
@@ -57,6 +56,22 @@ Templar.dataModel('Login',
               numbers : [2,7,4,8,-24,-74,11,-6,-29,66,43],
               
               songs : [{src : 'media/prototype.mp3' , title : 'OutKast - Prototype'}, 
-                      { src : 'media/sleep.mp3', title : 'Roots - Sleep'}]
+                      { src : 'media/sleep.mp3', title : 'Roots - Sleep'}],
+                      
+              comments : [{fn : 'susan', ln : 'apples' ,comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'},
+                          {fn : 'susan', ln : 'knotts' , comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'},
+                          {fn : 'tom', ln : 'essien' , comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'},
+                          {fn : 'tom', ln : 'feaster' , comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'},
+                          {fn : 'tom', ln : 'hyatt' , comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'},
+                          {fn : 'jerry', ln : 'brown' , comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'},
+                          {fn : 'jerry', ln : 'cundiff' , comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'},
+                          {fn : 'jerry', ln : 'jones' , comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'},
+                          {fn : 'billy', ln : 'flacco' , comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'},
+                          {fn : 'john', ln : 'manziel' , comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'},
+                          {fn : 'jeffery', ln : 'watt' , comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'},
+                          {fn : 'jeffery', ln : 'manning' , comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'},
+                          {fn : 'westley', ln : 'dolton' , comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'},
+                          {fn : 'westley', ln : 'crusher' , comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'},
+                          {fn : 'jim', ln : 'brown' , comment : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt vulputate quam at euismod. Curabitur vel ante eros. Praesent purus eros, viverra a fermentum quis, pretium vitae metus. Mauris egestas ex nec neque maximus, in mollis lacus dictum.'}]
               
             });

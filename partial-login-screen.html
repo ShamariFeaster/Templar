@@ -2,18 +2,38 @@
 
 <br>
 
-<!--
-  <div data-apl-repeat="Login.songs">
-    <div data-apl-control="audioPlayer">
-      <div>{{title}}</div>
-      <audio  id="player" src="{{src}}" preload="none"></audio> 
-      <button id="play">Play</button>
-      <button id="pause">Pause</button>
-      <button id="prev">Prev</button>
-      <button id="next">Next</button>
+Search: <input value="{{Login.userInput}}"/>
+Search Property : <select>{{Login.searchBy}}</select>
+Order By: <select>{{Login.orderBy}}</select>
+Comments per page: <select>{{Login.limits}}</select>
+
+<ul id="comments">
+  <h3>Comments</h3>
+  <button data-apl-control="prev">Prev Page</button><button data-apl-control="next">Next Page</button>
+  
+  <li data-apl-repeat="Login.comments">
+    <div class="comment">
+      <div class="user-name">{{ln}}, {{fn}}</div>
+      <div class="comment-text">{{comment}}</div>
     </div>
-  </div>
--->
-<ul>
-<li data-apl-repeat="Login.numbers"><div data-apl-control="test">{{}}</div></li>
+  </li>
 </ul>
+
+<div id="players">
+
+  <h3>Music</h3>
+  
+  <div  data-apl-repeat="Login.songs">
+      <div data-apl-control="audioPlayer">
+        <div>{{title}}</div>
+        <audio  id="player" src="{{src}}" preload="none"></audio> 
+        <button id="play">Play</button>
+        <button id="pause">Pause</button>
+        <button id="prev">Prev</button>
+        <button id="next">Next</button>
+      </div>
+  </div>
+</div>
+
+
+

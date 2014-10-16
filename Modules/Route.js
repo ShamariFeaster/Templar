@@ -88,7 +88,7 @@ function buildRouteTree(routes){
 }
 
 function resolveRoute(route, routeTree){
-  var parts = route.trim().split('/').slice(1),
+  var parts = route.trim().split('/'),
       nonTerminalValues = [],
       key = '',
       skipKeyAssignment = false;
@@ -96,7 +96,10 @@ function resolveRoute(route, routeTree){
   routePart = routeTree;
  
   for(var i = 0; i < parts.length; i++){
-
+    
+    if(parts[i] == '' || parts[i] == '#')
+        continue;
+        
     if(_isDef(routePart.lookaheadType) && routePart.lookaheadType == NON_TERMINAL){
       key = routePart.lookaheadVal;
     }else{
@@ -120,7 +123,7 @@ function resolveRoute(route, routeTree){
 }
 
 (function(){
-  var routes =    [{route : '/term2/w:e/z', partial : 'partial.html'}];
+  var routes =    [{route : '/term2/w:e/z/', partial : 'partial.html'}];
   var nonMatch = '/TERM2/z/z';
   var routeTree = buildRouteTree(routes);
   resolveRoute(nonMatch, routeTree);

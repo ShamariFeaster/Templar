@@ -1,7 +1,4 @@
 structureJS.module('LoginCotroller', function(require){
-  var Templar = require('Templar'),
-      LoginModel = Templar.getModel('Login'),
-      EnvModel = Templar.getModel('Environment');
     
   /*
   //Limit any sequential data attrib, like those backing repeats
@@ -91,27 +88,58 @@ structureJS.module('LoginCotroller', function(require){
   });
   */
 
+  var Templar = require('Templar'),
+      LoginModel = Templar.getModel('Login'),
+      EnvModel = Templar.getModel('Environment'),
+      page = 1;
   
-  
-  Templar.success('partial-login-screen.html', function(){
+  /*Itial page limit*/
+  LoginModel.limit('comments').to(3);
     
+  Templar.success('partial-login-screen.html', function(){
+  
+    LoginModel.filter('comments')
+    .by('ln')
+    .using('userInput');
+  
     var audioplayers = Templar('audioPlayer');
 
     /*Put listener on control children*/
     audioplayers.listenTo('play').forEvent('click', function(e, index){
-      console.log('Paly Click ' + index + ' '  + e.player.src);
+      console.log('Play Click ' + index + ' '  + e.player.src);
       e.player.node.play();
-      e.next.hide();
+      //e.next.hide();
       
     });
     
     audioplayers.listenTo('pause').forEvent('click', function(e, index){
       console.log('Pause Click ' + index);
       e.player.node.pause();
-      e.next.show();
+      //e.next.show();
     });
     
-
+    /*Listen to select changes*/
+    LoginModel.listen('limits', function(e){
+      LoginModel.limit('comments').to(e.value);
+      LoginModel.update('comments');
+    });
+    
+    LoginModel.listen('searchBy', function(e){
+      LoginModel.filter('comments')
+      .by(e.value)
+      .using('userInput');
+      
+    });
+    
+    /*Pagination*/
+    Templar('prev').listen('click', function(){
+      LoginModel.gotoPage(--page).of('comments');
+    });
+    
+    Templar('next').listen('click', function(){
+      LoginModel.gotoPage(++page).of('comments');
+    });
+    
     
   });
   
