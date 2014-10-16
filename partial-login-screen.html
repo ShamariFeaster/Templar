@@ -2,10 +2,10 @@
 
 <br>
 <div id="search-bar">
-Search: <input value="{{Login.userInput}}"/>
-Search Property : <select>{{Login.searchBy}}</select>
-Order By: <select>{{Login.orderBy}}</select>
-Comments per page: <select>{{Login.limits}}</select>
+Search: <input value="{{Comments.searchInput}}"/><br>
+Search Property : <select>{{Comments.searchBy}}</select><br>
+Sort By: <select>{{Comments.orderBy}}</select><br>
+Comments per page: <select>{{Comments.limits}}</select>
 </div>
 
 <ul id="comments">
@@ -14,7 +14,7 @@ Comments per page: <select>{{Login.limits}}</select>
   <button data-apl-control="prev">Prev Page</button>
   <button data-apl-control="next">Next Page</button>
   
-  <li data-apl-repeat="Login.comments">
+  <li data-apl-repeat="Comments.comments">
     <div class="comment">
       <div class="user-name">{{ln}}, {{fn}}</div>
       <div class="comment-text">{{comment}}</div>
@@ -26,7 +26,7 @@ Comments per page: <select>{{Login.limits}}</select>
 
   <h3>Music</h3>
   
-  <div  data-apl-repeat="Login.songs">
+  <div  data-apl-repeat="Music.songs">
       <div data-apl-control="audioPlayer">
         <div>{{title}}</div>
         <audio  id="player" src="{{src}}" preload="none"></audio> 

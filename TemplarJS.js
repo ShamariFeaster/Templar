@@ -12,6 +12,7 @@ var _MODEL_ATTRIB_KEY = 'aplAttrib',
   _UNINDEXED = -1,
   _NON_TERMINAL = 0,
   _TERMINAL = 1,
+  _SYSTEM_EVENT_TYPES = { system : 'system', interpolation_done : 'interp-done'};
   _classesSetToHide = '',
   _isDef = function(a){return (typeof a !== 'undefined');},
   _isString = function(a){ return (!_isDef(a) || typeof a === 'string');},
@@ -115,6 +116,9 @@ var DOM = {
 
 var Map = (function(){
   var _map = Object.create(null);/*no prototype chain, better iteration performance >= IE9*/
+  /*Add system event types to listener pool*/
+  _map[_SYSTEM_EVENT_TYPES.system] = Object.create(null);
+  _map[_SYSTEM_EVENT_TYPES.system]['listeners'] = Object.create(null);
   var _repeatTable = Object.create(null);/*modelName : { attribName : node}*/
   var _controlTable = Object.create(null);/*ctrlId : [ctrl1, ctrl2,......]*/
   return {
@@ -356,12 +360,17 @@ var Map = (function(){
     return listeners;
   },
   
-  setListener : function(modelName, attributeName, listener, isFilterListener){        
+  setListener : function(modelName, attributeName, listener, isFilterListener, isLateBoundListener){        
     if(_isFunc(listener)){
       var string = listener.toString(),
           id = string.length + string.charAt(string.length/2);
       if(_isDef(isFilterListener) && isFilterListener == true){
         id = '_LIVE_FILTER_' + id + Math.random();
+        _log('Adding duplicate with id ' + id);
+      }
+      
+      if(_isDef(isLateBoundListener) && isLateBoundListener == true){
+        id = '_LATE_BOUND_' + id + Math.random();
         _log('Adding duplicate with id ' + id);
       }
       if(!_isDef(_map[modelName]['listeners'][attributeName])){
@@ -811,6 +820,10 @@ var Interpolate = {
       }
     }
     
+    if(!_isNull(data) && _isDef(data.caller) && data.caller == _SYSTEM_EVENT_TYPES.system){
+      this.dispatchListeners.call(null, Map.getListeners(data.caller, data.type), null);
+    }
+    
   },
   
   updateNodeAttributes : function(tmp_node, modelName, attributeName){
@@ -1023,7 +1036,6 @@ var Interpolate = {
             }
             /*Stop outter loop. We build the updated repeat nodes in one pass*/
             outerCtx.stop = true;
-
           }
 
           break;
@@ -1652,49 +1664,59 @@ ControlNode.prototype.removeClass = function(removeClass, index){
 };
 
 ControlNode.prototype.listenTo = function(childName){
+  
   var chain = Object.create(null),
-      Control = this,
-      thisControlNode = null,
-      thisChildNode = null;
-  
-  
+      Control = this;
+      
   chain.forEvent = function(eventType, handler){
-  
-    if(_isDef(childName)
-     && !_isNull(Control.controlBaseNodes)
-     && _isDef(Control.controlBaseNodes[0])
-     && _isDef(Control.controlBaseNodes[0].childIds[childName])){
+    /*For notes on what's happening here see Templar()*/
+    var lateBind = (function(eventType, handler, childName, Control){
     
-      for(var i = 0; i < Control.controlBaseNodes.length; i++){
-        thisControlNode = Control.controlBaseNodes[i];
-        
-        for(var id in thisControlNode.childIds){
+      var thisControlNode = null,
+          thisChildNode = null;
           
-          if(id == childName){
+      return function(){
+        if(_isDef(childName)
+           && !_isNull(Control.controlBaseNodes)
+           && _isDef(Control.controlBaseNodes[0])
+           && _isDef(Control.controlBaseNodes[0].childIds[childName])){
           
-            thisChildNode = thisControlNode.childIds[id].node;
-            (function(handler, i, thisChildNode, thisControlNode){
+            for(var i = 0; i < Control.controlBaseNodes.length; i++){
+              thisControlNode = Control.controlBaseNodes[i];
               
-              thisChildNode.addEventListener(eventType, function(e){
-                thisControlNode.childIds.event = e;
-                handler.call(null, thisControlNode.childIds, i);
-              });
-              
-            })(handler, i, thisChildNode, thisControlNode);
+              for(var id in thisControlNode.childIds){
+                
+                if(id == childName){
+                
+                  thisChildNode = thisControlNode.childIds[id].node;
+                  (function(handler, i, thisChildNode, thisControlNode){
+                    
+                    thisChildNode.addEventListener(eventType, function(e){
+                      thisControlNode.childIds.event = e;
+                      handler.call(null, thisControlNode.childIds, i);
+                    });
+                    
+                  })(handler, i, thisChildNode, thisControlNode);
+
+                }
+                  
+                  
+              }
+            }
 
           }
-            
-            
-        }
-      }
-
-    }
-
+      };
+    })(eventType, handler, childName, Control);
+    
+    Map.setListener(_SYSTEM_EVENT_TYPES.system, _SYSTEM_EVENT_TYPES.interpolation_done, lateBind, false, true );
+    
   };
   
   return chain;
 };
 
+/*Will not work in client's onload functions. It will work in event-based functions. Shouldn't publish 
+  in version 1 API.*/
 ControlNode.prototype.forEach = function(func){
   var chain = Object.create(null),
       Control = this;
@@ -1707,25 +1729,35 @@ ControlNode.prototype.forEach = function(func){
 };
 
 ControlNode.prototype.listen = function(eventType, handler){
-  var Control = this,
-      thisBaseNode = null,
-      thisChildNode = null;
-  if(!_isNullOrEmpty(eventType) && _isFunc(handler) && !_isNull(Control.controlBaseNodes)){
-  
-    for(var i = 0; i < Control.controlBaseNodes.length; i++){
+  var Control = this;
+  var lateBind = (function(eventType, handler, Control){
+      
+      return function(){
+        var thisBaseNode = null,
+            thisChildNode = null;
+            
+        if(!_isNullOrEmpty(eventType) && _isFunc(handler) && !_isNull(Control.controlBaseNodes)){
+        
+          for(var i = 0; i < Control.controlBaseNodes.length; i++){
 
-      (function(handler, i){
-        
-        Control.controlBaseNodes[i].node.addEventListener(eventType, function(e){
-          Control.controlBaseNodes[i].childIds.event = e;
-          handler.call(null, Control.controlBaseNodes[i].childIds, i);  
-        });
-        
-      })(handler, i);
-    }
+            (function(handler, i){
+              
+              Control.controlBaseNodes[i].node.addEventListener(eventType, function(e){
+                Control.controlBaseNodes[i].childIds.event = e;
+                handler.call(null, Control.controlBaseNodes[i].childIds, i);  
+              });
+              
+            })(handler, i);
+          }
+          
+          
+        }
+      };
+    })(eventType, handler, Control);
     
-    
-  }
+  Map.setListener(_SYSTEM_EVENT_TYPES.system, _SYSTEM_EVENT_TYPES.interpolation_done, lateBind, false, true  );
+  
+  
 };
 
 var Route = {
@@ -1882,23 +1914,47 @@ Route.parse = function(path){
 };
 
 var Templar = function(controlName){
-  var control = new ControlNode();
+  var control = new ControlNode(),
+      lateBind = null;
     control.controlBaseNodes = Map.getBaseControls(controlName);
+  /*This is primarily for repated controls which won't exist until AFTER interpolation. B/c they
+    are objects we can bind an assignment that will happen later than the assignment in the controller.
+    We late bind the binding of any listeners attached to controls. This is because those listeners will
+    typically operate on children of a given control. Those children won't exist at the time of the client's
+    listner bindings. By delaying the bind until the system notifies us all repeats are drawn (interpolation_done)
+    , we can ensure that the client's listeners will have valid nodes to operate on.
+    */
+    
+  var lateBind = (function(control, controlName){
+      
+      return function(){
+        control.controlBaseNodes = Map.getBaseControls(controlName);
+      };
+    })(control, controlName);
+    
+  Map.setListener(_SYSTEM_EVENT_TYPES.system, _SYSTEM_EVENT_TYPES.interpolation_done, lateBind, false, true );  
+    
   return control;
 };
 
 Templar._onloadHandlerMap = Object.create(null);
 Templar.success = function(partialFileName, onloadFunction){
-    this._onloadHandlerMap[partialFileName] = onloadFunction;
-  };
-Templar.getPartialOnlodHandler = function(partialFileName){
-  var onloadHandler = function(){};
-  
-  if(_isDef(this._onloadHandlerMap[partialFileName]) 
-     && _isFunc(this._onloadHandlerMap[partialFileName])){
-      onloadHandler = this._onloadHandlerMap[partialFileName];
+  if(!_isDef(this._onloadHandlerMap[partialFileName])){
+    this._onloadHandlerMap[partialFileName] = [];
   }
-  return onloadHandler;
+  
+  if(_isFunc(onloadFunction)){
+    this._onloadHandlerMap[partialFileName].push(onloadFunction);
+  }
+};
+
+Templar.getPartialOnlodHandler = function(partialFileName){
+  var onloadHandlers = [];
+  
+  if(_isDef(this._onloadHandlerMap[partialFileName])){
+      onloadHandlers = this._onloadHandlerMap[partialFileName];
+  }
+  return onloadHandlers;
 };
 
 Templar.getModel = function(modelName){
@@ -1913,8 +1969,9 @@ Templar.Map = Map;
 Templar.Route = Route;
 
 var Link = {
-
+  
   bindModel : function(){
+    var updateObj = Object.create(null);
     /*get model name names*/
     Map.forEach(function(ctx, modelName){
       /*get model attribute names*/
@@ -1923,6 +1980,11 @@ var Link = {
                                   Map.getAttribute(ctx.modelName,ctx.modelAtrribName));
       });
     });
+    /*Control listeners should not fire until this system event is finished*/
+    updateObj.caller = _SYSTEM_EVENT_TYPES.system;
+    updateObj.type = _SYSTEM_EVENT_TYPES.interpolation_done;
+    Interpolate.dispatchListeners(null, updateObj);
+    //Map.setListener(_SYSTEM_EVENT_TYPES.system, _SYSTEM_EVENT_TYPES.interpolation_done )
   }
 };
 
@@ -1957,9 +2019,13 @@ var Bootstrap = {
   },
   
   fireOnloads : function(){
-    var file = '';
+    var file = '',
+        handlers = null;
     while( (file = State.onloadFileQueue.pop())){
-      Templar.getPartialOnlodHandler(file).call(null);
+      handlers = Templar.getPartialOnlodHandler(file);
+      for(var i = 0; i < handlers.length; i++){
+        handlers[i].call(null);
+      }
     }
   },
   
