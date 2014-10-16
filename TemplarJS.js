@@ -1030,7 +1030,7 @@ var Interpolate = {
         }
       
     });
-    _log(updateObj);
+
     Interpolate.dispatchListeners(listeners, updateObj);
     
   }
@@ -2019,10 +2019,11 @@ var Bootstrap = {
       times and prematurely causing unecessary overhead and misfiring of our onload handlers. Dangers of
       multiple interps is tearing down/rebuilding repeats which destroys control nodes causing control failure*/
     if(State.compilationThreadCount <= 0){
-      Link.bindModel();
+      
       Map.pruneNodeTreeByScope( fileName +  ' ' + timestamp ); 
-      Bootstrap.bindTargetSetter();
       Bootstrap.fireOnloads();
+      Link.bindModel();
+      Bootstrap.bindTargetSetter();
       State.compilationThreadCount = 0;
     }
 

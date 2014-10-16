@@ -99,10 +99,6 @@ structureJS.module('LoginCotroller', function(require){
 
     LoginModel.resetLiveFiltersOf('comments');
     
-    LoginModel.filter('comments')
-    .by('ln')
-    .using('userInput');
-  
     var audioplayers = Templar('audioPlayer');
 
     /*Put listener on control children*/
