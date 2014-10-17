@@ -125,13 +125,13 @@ var Map = (function(){
   buildAttribAlias : function(attribName){
     return '_' + attribName;
   },
-  getRepeatBaseNode : function(modelName, attribName){
-    var tmp_node = null;
+  getRepeatBaseNodes : function(modelName, attribName){
+    var baseNodes = [];
     if(!_isDef(attribName) || !_isDef(modelName))
-      return tmp_node;
+      return baseNodes;
       
     if(_isDef(_repeatTable[modelName]) && _isDef(_repeatTable[modelName][attribName]))
-      return tmp_node = _repeatTable[modelName][attribName];
+      return _repeatTable[modelName][attribName];
   
   },
   
@@ -139,7 +139,11 @@ var Map = (function(){
     if(!_isDef(_repeatTable[tmp_node.modelName])){
       _repeatTable[tmp_node.modelName] = Object.create(null);
     }
-      _repeatTable[tmp_node.modelName][tmp_node.attribName] = tmp_node;
+    
+    if(!_isDef(_repeatTable[tmp_node.modelName][tmp_node.attribName])){
+      _repeatTable[tmp_node.modelName][tmp_node.attribName] = [];
+    }
+      _repeatTable[tmp_node.modelName][tmp_node.attribName].push(tmp_node);
   },
   
   addControlNode : function(ControlNode){
@@ -409,6 +413,7 @@ var Map = (function(){
     _map[model_obj.modelName] = {modelObj : model_obj.attributes, nodeTable : Object.create(null),
                       api : model_obj, listeners : Object.create(null), cachedResults : model_obj.cachedResults,
                       limitTable : model_obj.limitTable, filterResults : model_obj.filterResults};
+                      
   },
   pruneControlNodesByIndex : function(tmp_node, modelName, attribName, index){
     var Map = this,
@@ -1007,25 +1012,30 @@ var Interpolate = {
           break;
         default:
           var TMP_newRepeatNode = null,
-              outerCtx = ctx;
-          if( !_isNull((TMP_repeatBaseNode = Map.getRepeatBaseNode(modelName, attributeName))) ){
-            /*Kill existing repeat tree*/
-            Map.forEach(modelName, attributeName, function(ctx, tmp_node){
-              if(tmp_node.index > _UNINDEXED && !_isNull(tmp_node.node.parentNode)){
-                Map.pruneControlNodesByIndex(tmp_node, modelName, attributeName, tmp_node.index);
-                Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, tmp_node.index);
-                ctx.removeItem(ctx.index);
-                tmp_node.node.parentNode.removeChild(tmp_node.node);
-              }
-              
-            });
+              TMP_repeatedNode = null,
+              outerCtx = ctx,
+              baseNodes = null,
+              repeatStart = 0,
+              repeatEnd = 0;
+         
+         
+          /*Kill existing repeat tree*/
+          Map.forEach(modelName, attributeName, function(ctx, tmp_node){
+            if(tmp_node.index > _UNINDEXED && !_isNull(tmp_node.node.parentNode)){
+              Map.pruneControlNodesByIndex(tmp_node, modelName, attributeName, tmp_node.index);
+              ctx.removeItem(ctx.index);
+              tmp_node.node.parentNode.removeChild(tmp_node.node);
+            }
             
-
-            var TMP_repeatedNode = null;
-
+          });
+         
+          baseNodes = Map.getRepeatBaseNodes(modelName, attributeName);
+          for(var z = 0; z < baseNodes.length; z++){
+            TMP_repeatBaseNode = baseNodes[z];
+            
             /*rebuild new one*/
             for(var i = 0; i < attributeVal.length; i++){
-
+              Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, i);
               TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
               TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
               Map.pushNodes(TMP_repeatedNode);
@@ -1034,9 +1044,11 @@ var Interpolate = {
               DOM.appendTo(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
               Compile.compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
             }
-            /*Stop outter loop. We build the updated repeat nodes in one pass*/
-            outerCtx.stop = true;
           }
+            
+          /*Stop outter loop. We build the updated repeat nodes in one pass*/
+          outerCtx.stop = true;
+          
 
           break;
         }

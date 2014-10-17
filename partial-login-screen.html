@@ -8,6 +8,10 @@ Sort By: <select>{{Comments.orderBy}}</select><br>
 Comments per page: <select>{{Comments.limits}}</select>
 </div>
 
+<div>
+  <div data-apl-repeat="Comments.comments">{{$index}}</div>
+</div>
+
 <ul id="comments">
   <h3>Comments</h3>
   
@@ -21,6 +25,8 @@ Comments per page: <select>{{Comments.limits}}</select>
     </div>
   </li>
 </ul>
+
+
 
 <div id="players">
 
