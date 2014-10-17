@@ -5,7 +5,9 @@ structureJS.module('CommentCotroller', function(require){
   
   /*Itial page limit*/
   CommentsModel.limit('comments').to(3);
-    
+  CommentsModel.currentPage = CommentsModel.currentPageOf('comments');  
+  CommentsModel.totalPages = CommentsModel.totalPagesOf('comments');
+  
   Templar.success('partial-login-screen.html', function(){
     console.log('Comment Onload Fired');
     CommentsModel.resetLiveFiltersOf('comments');
@@ -14,6 +16,7 @@ structureJS.module('CommentCotroller', function(require){
     CommentsModel.listen('limits', function(e){
       CommentsModel.limit('comments').to(e.value);
       CommentsModel.update('comments');
+      CommentsModel.totalPages = CommentsModel.totalPagesOf('comments');
     });
     
     CommentsModel.listen('searchBy', function(e){
@@ -33,10 +36,12 @@ structureJS.module('CommentCotroller', function(require){
     /*Pagination*/
     Templar('prev').listen('click', function(){
       CommentsModel.gotoPreviousPageOf('comments');
+      CommentsModel.currentPage = CommentsModel.currentPageOf('comments');  
     });
     
     Templar('next').listen('click', function(){
       CommentsModel.gotoNextPageOf('comments');
+      CommentsModel.currentPage = CommentsModel.currentPageOf('comments');  
     });
     
     

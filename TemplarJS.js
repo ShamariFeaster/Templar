@@ -111,6 +111,20 @@ var DOM = {
     if(!_isDef(parent) || !_isDef(child) || _isNull(parent.parentNode))
       return;
     parent.parentNode.insertBefore(child, child.nextSibling);
+  },
+  
+  cloneAttributes : function(fromNode, toNode){
+    if(fromNode.hasAttributes()){
+      attributes = fromNode.attributes;
+      /*search node attributes for non-terminals*/
+      for(var i = 0; i < attributes.length; i++){
+        if(attributes[i].name == 'data-apl-repeat' || attributes[i].name == 'style')
+          continue;
+        
+        toNode.setAttribute(attributes[i].name, attributes[i].value);
+      }
+
+    }
   }
 };  
 
@@ -641,7 +655,7 @@ var Process = {
         NONTERMINAL_REGEX = /(\{\{((\w+)\.(\w+))\}\})/g,
         ntFound = false,/*nonTerminalFound*/
         Process = this;
-
+    DOM.cloneAttributes(TMP_baseNode.node, TMP_repeatedNode.node);
     TMP_repeatedNode.node.innerHTML = TMP_baseNode.node.innerHTML;
     /*auto enumeration of existing id attribute*/
     newId = TMP_baseNode.node.getAttribute('id');
@@ -1530,6 +1544,24 @@ Model.prototype.gotoPreviousPageOf = function(attribName){
     Model.gotoPage(--limitTable.currentPage).of(attribName);
   }
 };
+
+Model.prototype.currentPageOf = function(attribName){
+  var Model = this,
+      limitTable = Model.limitTable[attribName];
+  if(_isDef(limitTable)){
+    return limitTable.currentPage;
+  }
+};
+
+Model.prototype.totalPagesOf = function(attribName){
+  var Model = this,
+      limitTable = Model.limitTable[attribName];
+  if(_isDef(limitTable)){
+    return limitTable.totalPages;
+  }
+};
+
+
 /*******************SORTING**********************************/
 Model.prototype.sort = function(attribName, pageNum){
   var chain = Object.create(null),
