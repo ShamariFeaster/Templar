@@ -125,6 +125,13 @@ var DOM = {
       }
 
     }
+  },
+  
+  isVisible : function(DOM_node){
+    if(_isNull(DOM_node))
+      return false;
+    
+    return (DOM_node.offsetWidth > 0 && DOM_node.offsetHeight > 0);
   }
 };  
 
@@ -467,8 +474,9 @@ var Map = (function(){
 
       if( (nodeScopeParts[0] == scopeParts[0] && nodeScopeParts[1] != scopeParts[1])
           && ctrlNode.index == index 
-          && ctrlNode.modelName == modelName 
-          && ctrlNode.attribName == attribName
+          /*non-repeat controls have '' for model/atrrib names*/
+          && (ctrlNode.modelName == modelName || _isNullOrEmpty(ctrlNode.modelName))
+          && (ctrlNode.attribName == attribName || _isNullOrEmpty(ctrlNode.attribName))
       ){
         _log('Pruning Controll Node ' + ctrlNode.node.tagName + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
         ctrlCtx.removeItem(ctrlCtx.index);
@@ -1035,29 +1043,32 @@ var Interpolate = {
          
           /*Kill existing repeat tree*/
           Map.forEach(modelName, attributeName, function(ctx, tmp_node){
-            if(tmp_node.index > _UNINDEXED && !_isNull(tmp_node.node.parentNode)){
-              Map.pruneControlNodesByIndex(tmp_node, modelName, attributeName, tmp_node.index);
-              ctx.removeItem(ctx.index);
+            /*un-track all nodes*/
+            Map.pruneControlNodesByIndex(tmp_node, modelName, attributeName, tmp_node.index);
+            ctx.removeItem(ctx.index);
+            /*only remove visible elements from DOM, don't remove base node from DOM*/
+            if(!_isNull(tmp_node.node.parentNode) && tmp_node.index > _UNINDEXED)
               tmp_node.node.parentNode.removeChild(tmp_node.node);
-            }
-            
           });
          
           baseNodes = Map.getRepeatBaseNodes(modelName, attributeName);
           for(var z = 0; z < baseNodes.length; z++){
             TMP_repeatBaseNode = baseNodes[z];
-            
-            /*rebuild new one*/
-            for(var i = 0; i < attributeVal.length; i++){
-              Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, i);
-              TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
-              TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
-              Map.pushNodes(TMP_repeatedNode);
-              if(TMP_repeatedNode.hasNonTerminals == false)
-                TMP_repeatedNode.node.innerHTML = attributeVal[i];
-              DOM.appendTo(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
-              Compile.compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
+            /*If base node has no parent then it is not in the current DOM*/
+            if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode)){
+              /*rebuild new one*/
+              for(var i = 0; i < attributeVal.length; i++){
+                Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, i);
+                TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
+                TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
+                Map.pushNodes(TMP_repeatedNode);
+                if(TMP_repeatedNode.hasNonTerminals == false)
+                  TMP_repeatedNode.node.innerHTML = attributeVal[i];
+                DOM.appendTo(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
+                Compile.compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
+              }
             }
+            
           }
             
           /*Stop outter loop. We build the updated repeat nodes in one pass*/
@@ -2097,7 +2108,8 @@ var Bootstrap = {
         defaultNodeToHide = null,
         existingOnloadFunction = window.onload,
         href = document.location.href,
-        timestamp = new Date().getTime();
+        timestamp = new Date().getTime(),
+        scope = fileName +  ' ' + timestamp;
         
     if(!_isNull(targetNode)){
       targetNode.innerHTML = partialContents;
@@ -2120,11 +2132,11 @@ var Bootstrap = {
       DOM.hideByIdList(State.aplHideList);
     }
     
-    _log('Compiling <' + fileName + '> w/ scope <' + fileName + ' ' + timestamp + '>');
+    _log('Compiling <' + fileName + '> w/ scope <' + scope + '>');
     /*remove this pending comp*/
     State.compilationThreadCount--;
     
-    Compile.compile( targetNode, fileName + ' ' + timestamp );
+    Compile.compile( targetNode, scope );
     
     /*unhide target node after compilation*/
     DOM.modifyClasses(targetNode,'apl-show','apl-hide,apl-show');
@@ -2134,7 +2146,7 @@ var Bootstrap = {
       multiple interps is tearing down/rebuilding repeats which destroys control nodes causing control failure*/
     if(State.compilationThreadCount <= 0){
       
-      Map.pruneNodeTreeByScope( fileName +  ' ' + timestamp ); 
+      Map.pruneNodeTreeByScope( scope ); 
       Bootstrap.fireOnloads();
       Link.bindModel();
       Bootstrap.bindTargetSetter();

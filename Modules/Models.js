@@ -48,6 +48,7 @@ Templar.dataModel('Comments',{
             {text : '7', value : 7}],
             
   searchBy : [{text : 'First Name', value : 'fn'},
-            {text : 'Last Name', value : 'ln', selected : true}]
+            {text : 'Last Name', value : 'ln', selected : true}],
+  range : [0,1,2,3,4,5,6,7,8,9,10]
 });
 
