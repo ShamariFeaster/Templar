@@ -8,7 +8,7 @@ var DOM = require('DOM');
 var Interpolate = require('Interpolate');
 var Process = require('Process');
 var State = require('State');
-var circular = structureJS.circular();
+var Circular = structureJS.circular();
 
 return {
   compile : function(root, scope){
@@ -21,7 +21,7 @@ return {
       root.setAttribute('data-apl-default', '');
       State.compilationThreadCount++;
       State.onloadFileQueue.push(defaultPartialHref);
-      DOM.asynGetPartial(defaultPartialHref, circular('Bootstrap').loadPartialIntoTemplate, null, root );
+      DOM.asynGetPartial(defaultPartialHref, Circular('Bootstrap').loadPartialIntoTemplate, null, root );
       _.log('Spawning Thread <' + defaultPartialHref + '> w/ target <' + root.id + '> w/ scope <' + scope + '>');
       //return scope;
     }

@@ -1,9 +1,7 @@
 structureJS.module('ModelHeader', function(require){
 
 var _ = this;
-var Map = require('Map');
-var Interpolate = require('Interpolate');
-
+var Circular = structureJS.circular();
 
 var Model = function(modelName ,modelObj){
   if(!(this instanceof Model)){
@@ -38,8 +36,8 @@ var Model = function(modelName ,modelObj){
                     delete model.cachedResults[attrib];
                   }
                   
-                  Map.setAttribute(model.modelName, attrib, value);
-                  Interpolate.interpolate(model.modelName, attrib, value);
+                  Circular('Map').setAttribute(model.modelName, attrib, value);
+                  Circular('Interpolate').interpolate(model.modelName, attrib, value);
                 }
               })(attrib, this),
         get : (function(attrib, model){

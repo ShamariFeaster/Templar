@@ -1,21 +1,24 @@
+/*Data structures*/
 structureJS.declare('templar/State');
-
-
+structureJS.declare('templar/Map');
+/*Parse + Compile + Link _ Interpolate*/
+structureJS.declare('templar/Process');
+structureJS.declare('templar/Interpolate');
 structureJS.declare('templar/Compile');
-
-structureJS.declare('templar/ClassModelSort');
-structureJS.declare('templar/ClassModelPage');
-structureJS.declare('templar/ClassModelFilter');
-structureJS.declare('templar/ClassModelAPI');
-
-structureJS.declare('templar/ClassControlNodeAPI');
-
+structureJS.declare('templar/Link');
+/*Class Definitions*/
+structureJS.declare('classes/ClassModelSort');
+structureJS.declare('classes/ClassModelPage');
+structureJS.declare('classes/ClassModelFilter');
+structureJS.declare('classes/ClassModelAPI');
+structureJS.declare('classes/ClassControlNodeAPI');
+/*API*/
 structureJS.declare('templar/Route');
 structureJS.declare('templar/Templar');
-structureJS.declare('templar/Link');
+/*Loading*/
 structureJS.declare('templar/Bootstrap');
 structureJS.declare('templar/Export');
-
+/*App*/
 structureJS.declare('modules/Models');
 structureJS.declare('modules/MusicController');
 structureJS.declare('modules/CommentController');

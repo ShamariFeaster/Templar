@@ -2,13 +2,10 @@ structureJS.configure(
 {
   globals : ['templar/Constants', 
             'templar/Util', 
-            'templar/ClassTMP_Node',
-            'templar/ClassControlNode',
-            'templar/Map',
-            'templar/DOM',
-            'templar/Process',
-            'templar/Interpolate',
-            'templar/ClassModel'],
-  directory_aliases : {modules : 'Modules/', templar : 'TemplarJS/'}
+            'classes/ClassTMP_Node',
+            'classes/ClassControlNode',
+            'classes/ClassModel',
+            'templar/DOM'],
+  directory_aliases : {modules : 'Modules/', templar : 'TemplarJS/', classes : 'TemplarJS/Classes/'}
 });
 
