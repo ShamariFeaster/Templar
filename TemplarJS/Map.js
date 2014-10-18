@@ -304,7 +304,7 @@ return {
       var listeners = _map[modelName]['listeners'][attribName];
       for(var id in listeners){
         if(id.indexOf('_LIVE_FILTER_') == 0){
-          _log('REMOVING Listener with id: ' + id);
+          _.log('REMOVING Listener with id: ' + id);
           delete listeners[id];
         }
       }
@@ -341,7 +341,7 @@ return {
           && ctrlNode.modelName == modelName 
           && ctrlNode.attribName == attribName
       ){
-        _log('Pruning Controll Node ' + ctrlNode.node.tagName + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
+        _.log('Pruning Controll Node ' + ctrlNode.node.tagName + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
         ctrlCtx.removeItem(ctrlCtx.index);
       }
       
@@ -367,7 +367,7 @@ return {
           && (ctrlNode.modelName == modelName || _.isNullOrEmpty(ctrlNode.modelName))
           && (ctrlNode.attribName == attribName || _.isNullOrEmpty(ctrlNode.attribName))
       ){
-        _log('Pruning Controll Node ' + ctrlNode.node.tagName + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
+        _.log('Pruning Controll Node ' + ctrlNode.node.tagName + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
         ctrlCtx.removeItem(ctrlCtx.index);
       }
       
@@ -390,7 +390,7 @@ return {
              && tmp_node.repeatAttribName == repeatAttribName 
              && tmp_node.repeatIndex == index){
               ctx.removeItem(ctx.index);
-              _log('Pruning Embedded :' + tmp_node.node.tagName);
+              _.log('Pruning Embedded :' + tmp_node.node.tagName);
 
           }
           
@@ -424,7 +424,7 @@ return {
                 ctx.removeItem(ctx.index);
                 Map.pruneControlNodesByScope(ctx.modelName, ctx.modelAtrribName, repeatIndex, scope );
                 Map.removeListener(ctx.modelName, ctx.modelAtrribName);
-                _log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName 
+                _.log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName 
                     + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
               }
             }
