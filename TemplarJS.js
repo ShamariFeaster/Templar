@@ -1351,7 +1351,7 @@ Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/propert
       target = Map.getAttribute(Model.modelName, attribName),
       filterResults = null;
   
-  target = Interpolate.getPageSlice(Model, attribName, target);
+  target = Map.getPageSlice(Model, attribName, target);
   
   if(_isArray(target)){
   
@@ -1590,7 +1590,7 @@ Model.prototype.sort = function(attribName, pageNum){
   if(_isDef(pageNum) && _isDef(Model.limitTable[attribName]) && pageNum > 0){
     oldPageNum = Model.limitTable[attribName].page;
     Model.limitTable[attribName].page = pageNum;
-    chain.target = Interpolate.getPageSlice(Model, attribName, chain.target);
+    chain.target = Map.getPageSlice(Model, attribName, chain.target);
   }
   
   chain.propName = '';
