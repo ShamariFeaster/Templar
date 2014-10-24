@@ -10,7 +10,8 @@ structureJS.module('CommentCotroller', function(require){
   
   Templar.Route([{
     route : '#/comment/show/Comments:selectedComment',
-    partial : 'partial-show-comment.html'
+    partial : 'partial-show-comment.html',
+    target : '#single-nitework'
   
   }]);
   

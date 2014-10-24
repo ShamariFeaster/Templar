@@ -5,6 +5,7 @@ var ControlNode = require('ControlNodeHeader');
 var Map = require('Map');
 var Route = require('Route');
 var Model = require('ModelHeader');
+var System = require('System');
 
 var Templar = function(controlName){
   var control = new ControlNode(),
@@ -25,7 +26,7 @@ var Templar = function(controlName){
       };
     })(control, controlName);
     
-  Map.setListener(_.SYSTEM_EVENT_TYPES.system, _.SYSTEM_EVENT_TYPES.interpolation_done, lateBind, false, true );  
+  System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, lateBind); 
     
   return control;
 };

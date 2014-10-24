@@ -33,7 +33,6 @@ return {
         }
       }
     }
-    System.removeSystemListeners(type);
   },
   
   updateNodeAttributes : function(tmp_node, modelName, attributeName){

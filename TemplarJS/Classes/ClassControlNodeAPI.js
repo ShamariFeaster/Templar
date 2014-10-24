@@ -130,7 +130,7 @@ ControlNode.prototype.listen = function(eventType, handler){
         }
       };
     })(eventType, handler, Control);
-    
+  
   System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, lateBind);
   
   

@@ -6,6 +6,8 @@ structureJS.configure(
             'classes/ClassControlNode',
             'classes/ClassModel',
             'templar/DOM'],
-  directory_aliases : {modules : 'Modules/', templar : 'TemplarJS/', classes : 'TemplarJS/Classes/'}
+  directory_aliases : {modules : 'Modules/', 
+                      templar : 'TemplarJS/', 
+                      classes : 'TemplarJS/Classes/'}
 });
 
