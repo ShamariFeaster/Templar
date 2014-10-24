@@ -21,7 +21,7 @@ Comments per page: <select>{{Comments.limits}}</select>
   
   <li data-apl-repeat="Comments.comments">
     <div class="comment">
-      <div class="user-name">{{ln}}, {{fn}}</div>
+      <div class="user-name"><a href="#/comment/show/{{id}}">{{ln}}, {{fn}}</a></div>
       <div class="comment-text">{{comment}}</div>
     </div>
   </li>

@@ -4,6 +4,7 @@ return {
   target : '',
   aplHideList : '',
   compilationThreadCount : 0,
-  onloadFileQueue : []
+  onloadFileQueue : [],
+  hasDeclaredRoutes : false
 };
 });

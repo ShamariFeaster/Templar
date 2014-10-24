@@ -5,6 +5,7 @@ var TMP_Node = require('TMP_Node');
 var Map = require('Map');
 var DOM = require('DOM');
 var Process = require('Process');
+var System = require('System');
 var Circular = structureJS.circular();
 
 return {
@@ -19,10 +20,20 @@ return {
       }
     }
     
-    if(!_.isNull(data) && _.isDef(data.caller) && data.caller == _.SYSTEM_EVENT_TYPES.system){
-      this.dispatchListeners.call(null, Map.getListeners(data.caller, data.type), null);
-    }
     
+  },
+  
+  dispatchSystemListeners : function(type){
+    if(!_.isNullOrEmpty(type)){
+      var listeners = System.getSystemListeners(type),
+          systemId = _.SYSTEM_EVENT_TYPES.system;
+      for(var i = 0;i < listeners.length; i++){
+        if(_.isFunc(listeners[i])){
+          listeners[i].call(null);
+        }
+      }
+    }
+    System.removeSystemListeners(type);
   },
   
   updateNodeAttributes : function(tmp_node, modelName, attributeName){

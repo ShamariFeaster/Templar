@@ -13,7 +13,7 @@ structureJS.module('Constants', function(require){
   _.UNINDEXED = -1;
   _.NON_TERMINAL = 0;
   _.TERMINAL = 1;
-  _.SYSTEM_EVENT_TYPES = { system : 'system', interpolation_done : 'interp-done'};
+  _.SYSTEM_EVENT_TYPES = { system : 'TMP_SYSTEM', interpolation_done : 'interp_done'};
   
   structureJS.extendContext(_); 
 });

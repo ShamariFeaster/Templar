@@ -193,7 +193,7 @@ return {
         limit = 0, 
         page = 0,
         results = target;
-    if(_.isDef(Model.limitTable[attributeName])){
+    if(_.isDef(Model.limitTable[attributeName]) && _.isArray(target)){
       page = Model.limitTable[attributeName].page;
       limit = Model.limitTable[attributeName].limit;
       length = (((limit * page))  <= target.length) ? 
@@ -210,28 +210,9 @@ return {
   getAttribute : function(modelName, attribName, index, property){
     var returnVal = null,
         Model = _map[modelName]['api'];
-    if(_.isDef(_map[modelName]) && _.isDef(_map[modelName]['modelObj'][attribName])){
     
-      if(_.isDef(index) 
-          && _.isDef(property) 
-          && _.isArray(_map[modelName]['modelObj'][attribName]) 
-          && _.isDef(_map[modelName]['modelObj'][attribName][index][property])){
-          
-        returnVal = _map[modelName]['modelObj'][attribName][index][property];
-        
-      }else 
-      if(_.isDef(index) 
-        && _.isArray(_map[modelName]['modelObj'][attribName][index])
-        && _.isDef(_map[modelName]['modelObj'][attribName][index])){
-        
-        returnVal = _map[modelName]['modelObj'][attribName][index];
-        
-      }else{
-      
-        returnVal = _map[modelName]['modelObj'][attribName];
-        
-      }
-      
+    if(_.isDef(_map[modelName]) && _.isDef(_map[modelName]['modelObj'][attribName])){
+      returnVal = _map[modelName]['modelObj'][attribName];
     }
     
     /*We should always pull the filtered subset if a static filter has been applied*/
@@ -252,7 +233,19 @@ return {
     if(_.isDef(_map[modelName]['cachedResults'][attribName])){
       returnVal = _map[modelName]['cachedResults'][attribName];
     }
+    
 
+    
+    if(_.isDef(index) && _.isDef(property) && _.isArray(returnVal) && _.isDef(returnVal[index][property])){
+        
+      returnVal = returnVal[index][property];
+      
+    }else 
+    if(_.isDef(index) && _.isArray(returnVal[index]) && _.isDef(returnVal[index])){
+      
+      returnVal = returnVal[index];
+      
+    }
     
     return returnVal;
   },
@@ -282,11 +275,7 @@ return {
         id = '_LIVE_FILTER_' + id + Math.random();
         _.log('Adding duplicate with id ' + id);
       }
-      
-      if(_.isDef(isLateBoundListener) && isLateBoundListener == true){
-        id = '_LATE_BOUND_' + id + Math.random();
-        _.log('Adding duplicate with id ' + id);
-      }
+
       if(!_.isDef(_map[modelName]['listeners'][attributeName])){
         _map[modelName]['listeners'][attributeName] = Object.create(null);
       }

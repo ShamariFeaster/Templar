@@ -3,7 +3,7 @@ var _ = this;
 var ControlNode = require('ControlNodeHeader');
 var DOM = require('DOM');
 var Map = require('Map');
-
+var System = require('System');
 ControlNode.prototype.indexedWrapper = function(index, funct){
   if(_.isDef(index) && index < this.controlBaseNodes.length){
     funct.call(null, this.controlBaseNodes[index]);
@@ -84,7 +84,7 @@ ControlNode.prototype.listenTo = function(childName){
       };
     })(eventType, handler, childName, Control);
     
-    Map.setListener(_.SYSTEM_EVENT_TYPES.system, _.SYSTEM_EVENT_TYPES.interpolation_done, lateBind, false, true );
+    System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, lateBind);
     
   };
   
@@ -131,7 +131,7 @@ ControlNode.prototype.listen = function(eventType, handler){
       };
     })(eventType, handler, Control);
     
-  Map.setListener(_.SYSTEM_EVENT_TYPES.system, _.SYSTEM_EVENT_TYPES.interpolation_done, lateBind, false, true  );
+  System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, lateBind);
   
   
 };

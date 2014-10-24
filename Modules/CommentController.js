@@ -8,6 +8,12 @@ structureJS.module('CommentCotroller', function(require){
   CommentsModel.currentPage = CommentsModel.currentPageOf('comments');  
   CommentsModel.totalPages = CommentsModel.totalPagesOf('comments');
   
+  Templar.Route([{
+    route : '#/comment/show/Comments:selectedComment',
+    partial : 'partial-show-comment.html'
+  
+  }]);
+  
   Templar.success('partial-login-screen.html', function(){
     console.log('Comment Onload Fired');
     CommentsModel.resetLiveFiltersOf('comments');

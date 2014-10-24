@@ -17,10 +17,7 @@ return {
       });
     });
     /*Control listeners should not fire until this system event is finished*/
-    updateObj.caller = _.SYSTEM_EVENT_TYPES.system;
-    updateObj.type = _.SYSTEM_EVENT_TYPES.interpolation_done;
-    Interpolate.dispatchListeners(null, updateObj);
-    //Map.setListener(_SYSTEM_EVENT_TYPES.system, _SYSTEM_EVENT_TYPES.interpolation_done )
+    Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done);
   }
 };
 

@@ -59,8 +59,12 @@ Templar.dataModel = function(modelName, modelObj){
   Map.initModel(new Model(modelName, modelObj));
 };
 
+Templar.Route = function(routeObj){
+  Route.buildRouteTree(routeObj);
+};
+Templar.RouteObj = Route;
 Templar.Map = Map;
-Templar.Route = Route;
+
 
 return Templar;
 
