@@ -33,6 +33,13 @@ structureJS.module('CommentCotroller', function(require){
         .using('searchInput');
     });
     
+    CommentsModel.listen('searchBy', function(e){
+      CommentsModel
+        .filter('comments')
+        .by(e.value)
+        .using('searchInput');
+    });
+    
     CommentsModel.listen('orderBy', function(e){
       CommentsModel
         .sortCurrentPageOf('comments')

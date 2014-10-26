@@ -21,8 +21,9 @@ Model.prototype.update = function(attribName){
   Interpolate.interpolate(this.modelName, attribName, Map.getAttribute(this.modelName, attribName));
 };
 /*public*/
-Model.prototype.listen = function(attributeName, listener, pushDuplicate){
-  Map.setListener(this.modelName, attributeName, listener, pushDuplicate);
+Model.prototype.listen = function(attributeName, listener){
+  if(!Map.isDuplicateListener(this.modelName, attributeName, listener))
+    Map.setListener(this.modelName, attributeName, listener);
 };
 
 

@@ -298,7 +298,7 @@ return {
     return listeners;
   },
   
-  setListener : function(modelName, attributeName, listener, isFilterListener, isLateBoundListener){        
+  setListener : function(modelName, attributeName, listener, isFilterListener){        
     if(_.isFunc(listener)){
       var string = listener.toString(),
           id = string.length + string.charAt(string.length/2);
@@ -317,6 +317,18 @@ return {
   
   removeListener : function(modelName, attribName){
     delete _map[modelName]['listeners'][attribName];
+  },
+  
+  isDuplicateListener : function(modelName, attribName, listener){
+    var listeners = this.getListeners(modelName, attribName);
+    
+    for(var id in listeners){
+      if(listener.toString() == listeners[id].toString())
+        return true;
+    }
+    
+    return false;
+    
   },
   
   removeFilterListeners : function(modelName, attribName){

@@ -109,8 +109,7 @@ Model.prototype.filter = function(attribName){
         
         Model.liveFilters[attribName].push(atrribNameOrFunction);
         
-        /*Live Filter*/
-        Model.listen(atrribNameOrFunction, function(data){
+        Map.setListener(Model.modelName, atrribNameOrFunction, function(data){
           /*clear results when we have no chained 'and' functions*/
           clearCachedResults = (chain.liveAndFuncs.length < 1);
 
@@ -132,6 +131,7 @@ Model.prototype.filter = function(attribName){
           }
 
         }, true);
+
       }
       
       return chain;  
