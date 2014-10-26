@@ -79,7 +79,7 @@ var Bootstrap = {
     _.log('Compiling <' + fileName + '> w/ scope <' + scope + '>');
     /*remove this pending comp*/
     State.compilationThreadCount--;
-    
+    State.compiledScopes += scope + ',';
     Compile.compile( targetNode, scope );
     
     /*unhide target node after compilation*/
@@ -90,9 +90,9 @@ var Bootstrap = {
       multiple interps is tearing down/rebuilding repeats which destroys control nodes causing control failure*/
     if(State.compilationThreadCount <= 0){
       
-      Map.pruneNodeTreeByScope( scope ); 
+      Map.pruneNodeTreeByScope( State.compiledScopes ); 
       Bootstrap.fireOnloads();
-      Link.bindModel();
+      Link.bindModel( State.compiledScopes );
       Bootstrap.bindTargetSetter();
       State.compilationThreadCount = 0;
     }

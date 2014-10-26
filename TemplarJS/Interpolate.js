@@ -131,11 +131,11 @@ return {
     return results;
     
   },
-  interpolate : function(modelName, attributeName, attributeVal){  
+  interpolate : function(modelName, attributeName, attributeVal, compiledScopes){  
     if(!Map.exists(modelName))
       return;
       
-    _.log('Interpolating ' + modelName + '.' + attributeName);
+    _.log('Attemping Interpolation ' + modelName + '.' + attributeName + ' for scopes ' + compiledScopes);
     var option = null;
         listeners = Map.getListeners(modelName, attributeName),
         Interpolate = this,
@@ -145,10 +145,19 @@ return {
         numNodesToRemove = 0,
         newNodeStartIndex = 0,
         TMP_repeatBaseNode = null,
-        updateObj = Object.create(null);
+        updateObj = Object.create(null),
+        nodeScopeParts = null,
+        node = null;
     
     Map.forEach(modelName, attributeName, function(ctx, tmp_node){
-      var node = tmp_node.node;
+             
+      /*On Link() only interp nodes belonging to the linked scope*/
+      if(_.isDef(compiledScopes) && !Map.isInScopeList(tmp_node.scope, compiledScopes)){
+        _.log('Not Interpolating '  + modelName + '.' + attributeName + ' for scope <' + tmp_node.scope + '> not in <' + compiledScopes +'>');
+        return;
+      }
+        
+      node = tmp_node.node;
       if(ctx.hasAttributes == true)
         updateObject = Interpolate.updateNodeAttributes(tmp_node, modelName, attributeName);
         
@@ -177,6 +186,7 @@ return {
             }
             
           }
+           
           break;
         case 'OPTION':
           if(_.isArray(attributeVal)){
@@ -195,11 +205,8 @@ return {
             /*New model data, shorter than existing data, kill extra nodes*/
             if(ctx.modelAttribIndex >= attributeVal.length){
               ctx.removeItem(ctx.index); /*from indexes[key] = []*/
-              /*this is most likely unecessary*/
-              //Map.pruneControlNodesByIndex(tmp_node, modelName, attributeName, ctx.modelAttribIndex);
               node.parentNode.removeChild(node);
             }
-            
             
           }
           break;
@@ -252,17 +259,18 @@ return {
             }
             
           }
-            
+          Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built); 
+          System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built);
           /*Stop outter loop. We build the updated repeat nodes in one pass*/
           outerCtx.stop = true;
-          
-
+          updateObj.type = 'repeat';
           break;
         }
       
     });
-
-    Interpolate.dispatchListeners(listeners, updateObj);
+    /*only dispatchListeners() for interps which change node values*/
+    if(_.isDef(updateObj.type))
+      Interpolate.dispatchListeners(listeners, updateObj);
     
   }
   

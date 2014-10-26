@@ -33,7 +33,6 @@ return {
         listeners = systemListnersObj[type];
       }     
     }
-    _.log(listeners.length);
     return listeners;
   },
   

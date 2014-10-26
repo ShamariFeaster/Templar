@@ -17,6 +17,7 @@ return {
       return scope;
 
     var defaultPartialHref = root.getAttribute('data-apl-default');
+    
     if(!_.isNullOrEmpty(defaultPartialHref)){
       root.setAttribute('data-apl-default', '');
       State.compilationThreadCount++;

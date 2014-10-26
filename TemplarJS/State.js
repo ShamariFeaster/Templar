@@ -5,6 +5,7 @@ return {
   aplHideList : '',
   compilationThreadCount : 0,
   onloadFileQueue : [],
-  hasDeclaredRoutes : false
+  hasDeclaredRoutes : false,
+  compiledScopes : ''
 };
 });

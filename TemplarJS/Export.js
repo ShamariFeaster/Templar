@@ -16,7 +16,8 @@ var _ = this;
 var existingOnloadFunction = window.onload || function(){};
 
 window.onload = function(){
-  var aplContentNode = document.getElementById('apl-content');
+  var aplContentNode = document.getElementById('apl-content'),
+      scope = 'body ' + new Date().getTime();
   
   existingOnloadFunction.call(null);
   /*Works back to IE 8*/
@@ -57,8 +58,8 @@ window.onload = function(){
     }
 
   };
-
-  Compile.compile( document.getElementsByTagName('body')[0], 'body' ); 
+  State.compiledScopes += scope + ',';
+  Compile.compile( document.getElementsByTagName('body')[0], scope ); 
   var defaultHiddenNodeList = document.querySelectorAll('.apl-default-hidden');
   if(!_.isNull(defaultHiddenNodeList)){
     for(var i = 0; i < defaultHiddenNodeList.length; i++){

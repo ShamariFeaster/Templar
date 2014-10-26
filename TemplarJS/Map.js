@@ -60,7 +60,38 @@ return {
     }
     return result;
   },
-  
+  /*Checks currentScope against a comma-separated list of scopes*/
+  isInScopeList : function(currentScope, compiledScopes, tryMatchTime){
+    var scopeListParts = null,
+        currScopeParts = (_.isDef(currentScope)) ? currentScope.split(' ') : [],
+        compiledScopes = (_.isDef(compiledScopes)) ? compiledScopes.split(',') : [],
+        tryMatchTime = (_.isDef(tryMatchTime)) ? tryMatchTime : false;
+        inScope = false;
+        
+    if(compiledScopes.length > 0){
+      /*incorrectly formatted scopes get set to [nuul,null]*/
+      currScopeParts = (currScopeParts.length > 1) ? currScopeParts : [null, null];
+      /*produce 2-d array with [name, timestamp] as elements*/
+      scopeListParts = compiledScopes.map(function(el){ 
+                        var scopeParts = el.split(' ');
+                        return (scopeParts.length > 1) ? scopeParts : [null, null];
+                      });
+      /*if either comparisson operator is null*/
+      for(var i = 0; i < scopeListParts.length; i++){
+          if(_.isNullOrEmpty(currScopeParts[0]) || _.isNullOrEmpty(scopeListParts[i][0]))
+            continue;
+            
+          if(currScopeParts[0] == scopeListParts[i][0]){
+            inScope = (tryMatchTime == true) ? (true && (currScopeParts[1] == scopeListParts[i][1])) : true;
+            break;
+          }
+        
+      }
+    }
+    
+    return inScope;
+  },
+
   Control : {
     forEach : function(mapFunction){
       var ControlNode = null;
@@ -273,7 +304,7 @@ return {
           id = string.length + string.charAt(string.length/2);
       if(_.isDef(isFilterListener) && isFilterListener == true){
         id = '_LIVE_FILTER_' + id + Math.random();
-        _.log('Adding duplicate with id ' + id);
+        _.log('Adding duplicate with id ' + id + ' on ' + modelName + '.' + attributeName);
       }
 
       if(!_.isDef(_map[modelName]['listeners'][attributeName])){
@@ -339,9 +370,8 @@ return {
     
   },
   
-  pruneControlNodesByScope : function(modelName, attribName, index, scope){
+  pruneControlNodesByScope : function(modelName, attribName, index, compiledScopes){
     var Map = this,
-        scopeParts = scope.split(' '),
         nodeScopeParts = null,
         deleteNodes = true;
     /*Remove embedded controls*/  
@@ -350,7 +380,7 @@ return {
 
       nodeScopeParts = ctrlNode.scope.split(' ');
 
-      if( (nodeScopeParts[0] == scopeParts[0] && nodeScopeParts[1] != scopeParts[1])
+      if( (Map.isInScopeList(ctrlNode.scope, compiledScopes) && !Map.isInScopeList(ctrlNode.scope, compiledScopes, true))
           && ctrlNode.index == index 
           /*non-repeat controls have '' for model/atrrib names*/
           && (ctrlNode.modelName == modelName || _.isNullOrEmpty(ctrlNode.modelName))
@@ -386,15 +416,13 @@ return {
         });
       }
     }
-
     
   },
-  pruneNodeTreeByScope : function( scope ){
-    if(_.isNullOrEmpty(scope) )
+  pruneNodeTreeByScope : function( compiledScopes ){
+    if(_.isNullOrEmpty(compiledScopes) )
       return;
     
-    var scopeParts = scope.split(' '),
-        attribNodes = null,
+    var attribNodes = null,
         nodeScopeParts = null,
         interpolateNodes = null,
         indexNodes = null,
@@ -404,20 +432,19 @@ return {
       Map.forEach(ctx.modelName, function(ctx, attribName){
         /*remove listeners*/
           
-          
-          Map.forEach(ctx.modelName, ctx.modelAtrribName, function(ctx, tmp_node){
-            var node = tmp_node.node,
-                repeatIndex = tmp_node.index;
-            if(( nodeScopeParts = tmp_node.scope.split(' ')) !== null){
-              if((nodeScopeParts[0] == scopeParts[0] && nodeScopeParts[1] != scopeParts[1])){
-                ctx.removeItem(ctx.index);
-                Map.pruneControlNodesByScope(ctx.modelName, ctx.modelAtrribName, repeatIndex, scope );
-                Map.removeListener(ctx.modelName, ctx.modelAtrribName);
-                _.log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName 
-                    + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
-              }
+        Map.forEach(ctx.modelName, ctx.modelAtrribName, function(ctx, tmp_node){
+          var node = tmp_node.node,
+              repeatIndex = tmp_node.index;
+          if(( nodeScopeParts = tmp_node.scope.split(' ')) !== null){
+            if(Map.isInScopeList(tmp_node.scope, compiledScopes) && !Map.isInScopeList(tmp_node.scope, compiledScopes, true)){
+              ctx.removeItem(ctx.index);
+              Map.pruneControlNodesByScope(ctx.modelName, ctx.modelAtrribName, repeatIndex, compiledScopes );
+              Map.removeListener(ctx.modelName, ctx.modelAtrribName);
+              _.log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName 
+                  + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
             }
-          });
+          }
+        });
               
       });
     
