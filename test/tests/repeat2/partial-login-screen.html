@@ -1,0 +1,52 @@
+ <div id="apl-hide" data-apl-hide="header, footer"></div> 
+
+<br>
+<div id="search-bar">
+Search: <input value="{{Comments.searchInput}}"/><br>
+Search Property : <select>{{Comments.searchBy}}</select><br>
+Sort By: <select>{{Comments.orderBy}}</select><br>
+Comments per page: <select>{{Comments.limits}}</select>
+</div>
+
+<div>
+  On page {{Comments.currentPage}} of {{Comments.totalPages}} Pages
+</div>
+
+
+<ul id="comments">
+  <h3>Comments</h3>
+  
+  <button data-apl-control="prev">Prev Page</button>
+  <button data-apl-control="next">Next Page</button>
+  
+  <li data-apl-repeat="Comments.comments">
+    <div class="comment">
+      <div class="user-name"><a href="#/comment/show/{{id}}">{{ln}}, {{fn}}</a></div>
+      <div class="comment-text">{{comment}}</div>
+    </div>
+  </li>
+</ul>
+
+
+
+<div id="players">
+
+  <h3>Music</h3>
+  
+  <div  data-apl-repeat="Music.songs">
+      <div data-apl-control="audioPlayer">
+        <div>{{title}}</div>
+        <audio  id="player" src="{{src}}" preload="none"></audio> 
+        <button id="play">Play</button>
+        <button id="pause">Pause</button>
+        <button id="prev">Prev</button>
+        <button id="next">Next</button>
+      </div>
+  </div>
+</div>
+
+<!--
+
+<div  data-apl-repeat="Comments.range">
+<a href="" data-apl-control="link">{{}}</a>
+</div>-->
