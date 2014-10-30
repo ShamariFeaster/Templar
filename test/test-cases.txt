@@ -1,0 +1,68 @@
+Templar.success
+- multiple callbacks on same file X
+
+Templar
+- creates ControlNode
+
+Templar.getModel
+- wrapper for Map.getModel
+
+Routing
+-click routes w/ + w/o interps
+-check direct that hash navigation fires routing
+-targeting routes work
+
+apl-Hides
+-switching context should un-hide
+
+apl-default
+-test for correct/complete compilation
+
+Listeners
+-Model.listen
+
+Model.softset
+
+Check that assignment reflects in DOM
+
+State of node queue
+-after switch page context
+-check control queue
+-check after target loading (using routes for example)
+
+Node attribute interp
+
+Check interped values
+-wrap interped elements in identifiable divs to check text value
+
+Repeats
+- give repeats classes and check for correct element count
+--multiple version same repeat
+
+
+--Filtering
+--- static
+--- dynamic
+--- resetLiveFiltersOf
+--- resetStaticFiltersOf
+
+--Paging
+--- next
+--- prev
+--- limits
+--- goto page
+--- currentPageOf
+--- totalPagesOf
+
+--Sort
+--- by prop
+--- change prop
+--- sort page and all
+
+ControlNode
+-hide
+-show
+-addClass
+-removeClass
+-listenTo
+-listen

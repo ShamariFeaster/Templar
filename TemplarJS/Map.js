@@ -451,7 +451,7 @@ return {
             if(Map.isInScopeList(tmp_node.scope, compiledScopes) && !Map.isInScopeList(tmp_node.scope, compiledScopes, true)){
               ctx.removeItem(ctx.index);
               Map.pruneControlNodesByScope(ctx.modelName, ctx.modelAtrribName, repeatIndex, compiledScopes );
-              Map.removeListener(ctx.modelName, ctx.modelAtrribName);
+              //Map.removeListener(ctx.modelName, ctx.modelAtrribName);
               _.log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName 
                   + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
             }

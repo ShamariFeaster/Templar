@@ -32,8 +32,6 @@ describe('Regression Suite', function() {
   });
 
   it('Run Regression Suite', function() {
-    test('repeat');
-    test('repeat2');
-    test('repeat3');
+    test('body-interp');
   });
 });

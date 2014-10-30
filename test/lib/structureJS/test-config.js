@@ -1,6 +1,7 @@
 structureJS.configure(
 {
   globals : ['lib/qunit',
+             'lib/jquery', 
             'templar/Constants', 
             'templar/Util', 
             'classes/ClassTMP_Node',
