@@ -2,6 +2,7 @@
 structureJS.declare('templar/State');
 structureJS.declare('templar/Map');
 structureJS.declare('templar/System');
+structureJS.declare('lib/qunit-extension');
 /*Parse + Compile + Link _ Interpolate*/
 structureJS.declare('templar/Process');
 structureJS.declare('templar/Interpolate');
@@ -19,6 +20,7 @@ structureJS.declare('templar/Templar');
 /*Loading*/
 structureJS.declare('templar/Bootstrap');
 structureJS.declare('templar/Export');
+
 /*App*/
 structureJS.declare('modules/Model');
 structureJS.declare('modules/Controller');

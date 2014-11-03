@@ -1,4 +1,4 @@
-QUnit.module('Dependency Functional Tests', 
+QUnit.module('Templar', 
 {
   setup : function(){
   },
