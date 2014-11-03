@@ -27,11 +27,21 @@ return {
     if(!_.isNullOrEmpty(type)){
       var listeners = System.getSystemListeners(type),
           systemId = _.SYSTEM_EVENT_TYPES.system;
-      for(var i = 0;i < listeners.length; i++){
-        if(_.isFunc(listeners[i])){
-          listeners[i].call(null);
+          
+      if(_.SYSTEM_EVENT_TYPES.LIST_TYPE == _.QUEUE){
+        for(var i = 0;i < listeners.length; i++){
+          if(_.isFunc(listeners[i])){
+            listeners[i].call(null);
+          }
+        }
+      }else if(_.SYSTEM_EVENT_TYPES.LIST_TYPE == _.STACK){
+        for(var i = listeners.length - 1;i >= 0; i--){
+          if(_.isFunc(listeners[i])){
+            listeners[i].call(null);
+          }
         }
       }
+      
     }
   },
   

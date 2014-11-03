@@ -8,7 +8,6 @@ var _map = Object.create(null);/*no prototype chain, better iteration performanc
 _map[_.SYSTEM_EVENT_TYPES.system] = Object.create(null);
 _map[_.SYSTEM_EVENT_TYPES.system]['listeners'] = Object.create(null);
 
-
 var TMP_Node = require('TMP_Node');
 
 return {
