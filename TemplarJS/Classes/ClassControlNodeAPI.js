@@ -70,6 +70,7 @@ ControlNode.prototype.listenTo = function(childName){
                     thisChildNode.addEventListener(eventType, function(e){
                       thisControlNode.childIds.event = e;
                       handler.call(null, thisControlNode.childIds, i);
+                      delete thisControlNode.childIds.event;
                     });
                     
                   })(handler, i, thisChildNode, thisControlNode);
@@ -83,7 +84,8 @@ ControlNode.prototype.listenTo = function(childName){
           }
       };
     })(eventType, handler, childName, Control);
-    
+    /*for listeners placed after interpolation_done already fired( ie, DOM is mature)*/
+    lateBind.call(null);
     System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, lateBind);
     
   };
@@ -91,17 +93,23 @@ ControlNode.prototype.listenTo = function(childName){
   return chain;
 };
 
-/*Will not work in client's onload functions. It will work in event-based functions. Shouldn't publish 
-  in version 1 API.*/
 ControlNode.prototype.forEach = function(func){
   var chain = Object.create(null),
       Control = this;
-      
-  if(_.isNull(Control.controlBaseNodes))
-    return;
-  for(var i = 0; i < Control.controlBaseNodes.length; i++){
-    func.call(null, i, Control.controlBaseNodes[i], Control.controlBaseNodes[i].childIds);
-  }
+
+  var lateBind = (function(Control, func){
+    return function(){
+      for(var i = 0; i < Control.controlBaseNodes.length; i++){
+        func.call(null, i, Control.controlBaseNodes[i], Control.controlBaseNodes[i].childIds);
+      }
+    };
+    
+  })(Control, func);
+  System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, lateBind);
+  
+  if(!_.isNull(Control.controlBaseNodes))
+    lateBind.call(null);
+  
 };
 
 ControlNode.prototype.listen = function(eventType, handler){
@@ -121,6 +129,7 @@ ControlNode.prototype.listen = function(eventType, handler){
               Control.controlBaseNodes[i].node.addEventListener(eventType, function(e){
                 Control.controlBaseNodes[i].childIds.event = e;
                 handler.call(null, Control.controlBaseNodes[i].childIds, i);  
+                delete Control.controlBaseNodes[i].childIds.event;
               });
               
             })(handler, i);
@@ -130,7 +139,8 @@ ControlNode.prototype.listen = function(eventType, handler){
         }
       };
     })(eventType, handler, Control);
-  
+  /*for listeners placed after interpolation_done already fired( ie, DOM is mature)*/
+  lateBind.call(null);
   System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, lateBind);
   
   

@@ -26,6 +26,8 @@ var Templar = function(controlName){
       };
     })(control, controlName);
     
+  /*if interpolation_done already fired( ie, DOM is mature), immediately execute the lateBind*/
+  lateBind.call(null);
   System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, lateBind); 
     
   return control;
