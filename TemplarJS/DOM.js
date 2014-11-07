@@ -68,9 +68,11 @@ return {
         }
       } 
     }
-
-    xhr.open('get',  fileName, true);
-    xhr.send();
+    if(!_.isNullOrEmpty(xhr.fileName)){
+      xhr.open('get',  fileName, true);
+      xhr.send();
+    }
+    
   }
 }; 
 

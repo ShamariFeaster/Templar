@@ -13,9 +13,9 @@ var Bootstrap = {
   /*handlers with same handler are not duplicate bound. handler needs to be defined on persistent
     object or global scope*/
   setTarget : function(e){
-      State.target = (!_.isNull(e.target.dataset[_.TARGET_ATTRIB_KEY])) ? 
-                            e.target.dataset[_.TARGET_ATTRIB_KEY] : '';
-
+    State.target = _.getDataAttribute(e.target, _.IE_TARGET_ATTRIB_KEY);
+    State.target = (!_.isNullOrEmpty(State.target)) ? 
+                        State.target : '';
   },
   
   fireOnloads : function(){
@@ -54,7 +54,7 @@ var Bootstrap = {
         href = document.location.href,
         timestamp = new Date().getTime(),
         scope = fileName +  ' ' + timestamp;
-        
+  
     if(!_.isNull(targetNode)){
       targetNode.innerHTML = partialContents;
     }else

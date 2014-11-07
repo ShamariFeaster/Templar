@@ -164,7 +164,8 @@ return {
   preProcessNode : function(DOM_Node, modelName, attribName, scope){
     if(!_.isDef(DOM_Node) || DOM_Node === null )
       return;
-    var type = (_.isDef(DOM_Node.dataset[_.MODEL_ATTRIB_REPEAT_KEY])) 
+    var repeatValue = _.getDataAttribute(DOM_Node, _.IE_CTRL_ATTRIB_KEY);
+    var type = (!_.isNullOrEmpty(repeatValue)) 
                   ? 'REPEAT' :
                     DOM_Node.tagName;
     var attributeVal = null,

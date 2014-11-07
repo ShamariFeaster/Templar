@@ -13,35 +13,38 @@ var _ = this;
 
 /******Initialization*******/
 
-var existingOnloadFunction = window.onload || function(){};
-
-window.onload = function(){
+(function(){
+  
   var aplContentNode = document.getElementById('apl-content'),
       scope = 'body ' + new Date().getTime(),
       resolvedRouteObj = null,
-      routeContentNode = null;
+      routeContentNode = null,
+      defaultKey = '';
   
-  existingOnloadFunction.call(null);
-  
+ 
   /*Works back to IE 8*/
   window.onhashchange  = function(event) {
-  
-    if( (event.newURL != event.oldURL)){
-      Route.handleRoute(event.newURL);
+    /*event.newURL && event.oldURL don't work for IE*/
+    if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){
+      State.onloadFileQueue.push(resolvedRouteObj.partial);
+      DOM.asynGetPartial(resolvedRouteObj.partial, Bootstrap.loadPartialIntoTemplate, resolvedRouteObj.target);
     }
-
+    
   };
   State.compiledScopes += scope + ',';
   /*If we see a route on page load, kill any default on target of this route.*/
   if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){
-    if(!_.isNullOrEmpty(resolvedRouteObj.target) && !_.isNullOrEmpty(resolvedRouteObj.partial)){
+    if(!_.isNullOrEmpty(resolvedRouteObj.partial)){
       /*get target node*/
       routeContentNode = document.getElementById(resolvedRouteObj.target);
-      if(!_.isNull(routeContentNode) && _.isDef(routeContentNode.dataset.aplDefault)){
-        routeContentNode.dataset.aplDefault = '';
+      defaultKey = _.getDataAttribute(routeContentNode, _.IE_DEFAULT_ATTRIB_KEY);
+      if(!_.isNull(routeContentNode) && !_.isNullOrEmpty(defaultKey)){
+        routeContentNode.setAttribute('data-' + _.IE_DEFAULT_ATTRIB_KEY, '')
       }
-    }else{
-      aplContentNode.dataset.aplDefault = '';
+      
+      State.onloadFileQueue.push(resolvedRouteObj.partial);
+      DOM.asynGetPartial(resolvedRouteObj.partial, Bootstrap.loadPartialIntoTemplate, resolvedRouteObj.target);
+      
     }
     
   }
@@ -57,10 +60,8 @@ window.onload = function(){
   }
 
   _.log('Body COMPILATION DONE');
-};
+})();
 
-
-window['Templar'] = Templar;
 
 
 });

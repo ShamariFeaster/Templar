@@ -5,8 +5,9 @@ var _ = this,
     State = require('State'),
     DOM = require('DOM'),
     Map = require('Map'),
-    Interpolate = require('Interpolate');
-
+    Interpolate = require('Interpolate'),
+    Bootstrap = require('Bootstrap');
+_.log(Bootstrap);
 return {
   routeTree : Object.create(null),
   buildRouteTree : function(routes){
@@ -135,8 +136,7 @@ return {
     var href = url.substring(url.indexOf('#')).replace('#', '');
 
     /*Hide target node, we will unhide after compilation. Prevents seeing uncompiled template*/
-    var targetId = (!_.isNullOrEmpty(State.target)) ? 
-                    State.target.replace('#','') : 'apl-content',
+    var targetId = '',
         targetNode = document.getElementById(targetId),
         resolvedRouteObject = null,
         NTDirectives = null,
@@ -145,10 +145,8 @@ return {
     if(State.hasDeclaredRoutes == true){
       try{
         resolvedRouteObject = Route.resolveRoute(href);
-        href = (!_.isNullOrEmpty(resolvedRouteObject.partial)) ? 
-                  resolvedRouteObject.partial : href;
-        State.target = (!_.isNullOrEmpty(resolvedRouteObject.target)) ? 
-                          resolvedRouteObject.target : State.target;
+        resolvedRouteObject.target = (!_.isNullOrEmpty(resolvedRouteObject.target)) ? 
+                          resolvedRouteObject.target : 'apl-content';
         NTDirectives = resolvedRouteObject.nonTerminalValues;
         
         for(var i = 0; i < NTDirectives.length; i++){
@@ -161,9 +159,7 @@ return {
         _.log(e);
       }
     }    
-    DOM.modifyClasses(targetNode,'apl-hide','');
-    State.onloadFileQueue.push(href);
-    DOM.asynGetPartial(href, Bootstrap.loadPartialIntoTemplate, State.target);
+    
     
     return resolvedRouteObject;
   }

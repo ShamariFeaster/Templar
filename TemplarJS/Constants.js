@@ -6,6 +6,12 @@ structureJS.module('Constants', function(require){
   _.TARGET_ATTRIB_KEY = 'aplTarget';
   _.CTRL_KEY = 'aplControl';
   _.CTRL_ATTRIB_STRING = 'data-apl-control';
+  
+  _.IE_MODEL_ATTRIB_KEY = 'apl-attrib';
+  _.IE_MODEL_REPEAT_KEY = 'apl-repeat';
+  _.IE_TARGET_ATTRIB_KEY = 'apl-target';
+  _.IE_CTRL_ATTRIB_KEY = 'apl-control';
+  _.IE_DEFAULT_ATTRIB_KEY = 'apl-default';
   _.CLASS_SEPARATOR = /,|\s/;
   _.NT_REGEX = /\w\:\w/;
   _.TEXT_NODE = 3;

@@ -68,7 +68,7 @@ Templar.Route = function(routeObj){
 Templar.RouteObj = Route;
 Templar.Map = Map;
 
-
+window['Templar'] = Templar;
 return Templar;
 
 });

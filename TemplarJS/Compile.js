@@ -17,7 +17,7 @@ return {
       return scope;
 
     var defaultPartialHref = root.getAttribute('data-apl-default');
-    
+
     if(!_.isNullOrEmpty(defaultPartialHref)){
       root.setAttribute('data-apl-default', '');
       State.compilationThreadCount++;
@@ -140,9 +140,9 @@ return {
           prevLength = 0;
         }else if(DOM_Node.nodeType == _.ELEMENT_NODE){
           //log('Recursing on :' + DOM_Node.tagName);
-          
-          if(_.isDef(DOM_Node.dataset[_.MODEL_ATTRIB_REPEAT_KEY])){
-            modelNameParts = Process.parseModelAttribName(DOM_Node.dataset[_.MODEL_ATTRIB_REPEAT_KEY]);
+          var repeatKey = _.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);
+          if(!_.isNullOrEmpty(repeatKey)){
+            modelNameParts = Process.parseModelAttribName(repeatKey);
             modelName = modelNameParts[0];
             attribName = modelNameParts[1];
           }
@@ -151,9 +151,10 @@ return {
             during preprocessing. Once we reach that node during recursive compiling, we create a ControlNode
             using the annotated data and add it to our control list*/
           compileMe = Process.preProcessNode(DOM_Node, modelName, attribName, scope);
+          var controlKey = _.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY)
            //1 = ctrl name, 3 = mdlName, 4 = attribName, 6 = index 
-          if(_.isDef(DOM_Node.dataset[_.CTRL_KEY]) 
-            && (ctrlRegexResult = /(\w+)(\|(\w+)\.(\w+)(\.(\d+))*)*/g.exec(DOM_Node.dataset[_.CTRL_KEY])) !== null){
+          if(!_.isNullOrEmpty(controlKey)
+            && (ctrlRegexResult = /(\w+)(\|(\w+)\.(\w+)(\.(\d+))*)*/g.exec(controlKey)) !== null){
             controlNode = new ControlNode(DOM_Node, ctrlRegexResult[1], ctrlRegexResult[3],ctrlRegexResult[4],ctrlRegexResult[6] );
             controlNode.scope = scope;
             Map.addControlNode(controlNode);
