@@ -17,48 +17,36 @@ var existingOnloadFunction = window.onload || function(){};
 
 window.onload = function(){
   var aplContentNode = document.getElementById('apl-content'),
-      scope = 'body ' + new Date().getTime();
+      scope = 'body ' + new Date().getTime(),
+      resolvedRouteObj = null,
+      routeContentNode = null;
   
   existingOnloadFunction.call(null);
+  
   /*Works back to IE 8*/
   window.onhashchange  = function(event) {
-    var href = event.newURL.substring(event.newURL.indexOf('#')).replace('#', '');
-    
+  
     if( (event.newURL != event.oldURL)){
-      /*Hide target node, we will unhide after compilation. Prevents seeing uncompiled template*/
-      var targetId = (!_.isNullOrEmpty(State.target)) ? 
-                      State.target.replace('#','') : 'apl-content',
-          targetNode = document.getElementById(targetId),
-          resolvedRouteObject = null,
-          NTDirectives = null,
-          modelParts = null;
-          
-      if(State.hasDeclaredRoutes == true){
-        try{
-          resolvedRouteObject = Route.resolveRoute(href);
-          href = (!_.isNullOrEmpty(resolvedRouteObject.partial)) ? 
-                    resolvedRouteObject.partial : href;
-          State.target = (!_.isNullOrEmpty(resolvedRouteObject.target)) ? 
-                            resolvedRouteObject.target : State.target;
-          NTDirectives = resolvedRouteObject.nonTerminalValues;
-          
-          for(var i = 0; i < NTDirectives.length; i++){
-            modelParts = NTDirectives[i][0].split(':');
-            Map.setAttribute(modelParts[0], modelParts[1], NTDirectives[i][1]);
-            Interpolate.interpolate(modelParts[0], modelParts[1], NTDirectives[i][1] );
-          }
-          
-        }catch(e){
-          _.log(e);
-        }
-      }    
-      DOM.modifyClasses(targetNode,'apl-hide','');
-      State.onloadFileQueue.push(href);
-      DOM.asynGetPartial(href, Bootstrap.loadPartialIntoTemplate, State.target);
+      Route.handleRoute(event.newURL);
     }
 
   };
   State.compiledScopes += scope + ',';
+  /*If we see a route on page load, kill any default on target of this route.*/
+  if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){
+    if(!_.isNullOrEmpty(resolvedRouteObj.target) && !_.isNullOrEmpty(resolvedRouteObj.partial)){
+      /*get target node*/
+      routeContentNode = document.getElementById(resolvedRouteObj.target);
+      if(!_.isNull(routeContentNode) && _.isDef(routeContentNode.dataset.aplDefault)){
+        routeContentNode.dataset.aplDefault = '';
+      }
+    }else{
+      aplContentNode.dataset.aplDefault = '';
+    }
+    
+  }
+    
+    
   Compile.compile( document.getElementsByTagName('body')[0], scope ); 
   var defaultHiddenNodeList = document.querySelectorAll('.apl-default-hidden');
   if(!_.isNull(defaultHiddenNodeList)){
