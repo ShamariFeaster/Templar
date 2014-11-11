@@ -18,8 +18,9 @@ structureJS.declare('templar/Route');
 structureJS.declare('templar/Templar');
 /*Loading*/
 structureJS.declare('templar/Bootstrap');
-structureJS.declare('templar/Export');
+
 /*App*/
 structureJS.declare('modules/Models');
 structureJS.declare('modules/MusicController');
 structureJS.declare('modules/CommentController');
+structureJS.declare('templar/Export');

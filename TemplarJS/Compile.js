@@ -90,8 +90,8 @@ return {
             }
             
             tmp_node.scope = scope;
-            
-            splitNode = DOM_Node.splitText(partMap[x]['start'] - prevLength);
+            splitNode = DOM.splitText(DOM_Node, partMap[x]['start'] - prevLength)
+            //splitNode = DOM_Node.splitText(partMap[x]['start'] - prevLength);
             prevLength += DOM_Node.nodeValue.length;
             /*{{Auth.items[0].text}}*/
             if(splitNode.nodeValue.trim() == partMap[x]['fullToken']){
@@ -112,8 +112,8 @@ return {
             
             if(DOM_Node.nodeType != _.TEXT_NODE)
                 break;
-            
-            splitNode = DOM_Node.splitText(partMap[x]['end']  - prevLength);
+            splitNode = DOM.splitText(DOM_Node, partMap[x]['end']  - prevLength);
+            //splitNode = DOM_Node.splitText(partMap[x]['end']  - prevLength);
             prevLength += DOM_Node.nodeValue.length;
             
             if(splitNode.nodeValue.trim() == partMap[x]['fullToken']){

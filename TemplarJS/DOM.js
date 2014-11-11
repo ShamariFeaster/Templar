@@ -73,7 +73,27 @@ return {
       xhr.send();
     }
     
+  },
+  /*Solution from: http://stackoverflow.com/questions/7378186/ie9-childnodes-not-updated-after-splittext*/
+  insertAfter : function(node, precedingNode) {
+    var nextNode = precedingNode.nextSibling, parent = precedingNode.parentNode;
+    if (nextNode) {
+      parent.insertBefore(node, nextNode);
+    } else {
+      parent.appendChild(node);
+    }
+    return node;
+  },
+
+// Note that we cannot use splitText() because it is bugridden in IE 9.
+  splitText : function(node, index) {
+    var newNode = node.cloneNode(false);
+    newNode.deleteData(0, index);
+    node.deleteData(index, node.length - index);
+    this.insertAfter(newNode, node);
+    return newNode;
   }
+  
 }; 
 
 

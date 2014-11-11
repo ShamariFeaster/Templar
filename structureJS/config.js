@@ -1,6 +1,7 @@
 structureJS.configure(
 {
-  globals : ['templar/Constants', 
+  globals : [
+            'templar/Constants', 
             'templar/Util', 
             'classes/ClassTMP_Node',
             'classes/ClassControlNode',

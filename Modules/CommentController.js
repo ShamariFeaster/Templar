@@ -60,6 +60,6 @@ structureJS.module('CommentCotroller', function(require){
     
     
   });
-  
+
   return {};
 });

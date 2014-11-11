@@ -13,6 +13,7 @@ var _ = this;
 
 /******Initialization*******/
 
+
 (function(){
   
   var aplContentNode = document.getElementById('apl-content'),
@@ -22,9 +23,9 @@ var _ = this;
       defaultKey = '';
   
  
-  /*Works back to IE 8*/
+
   window.onhashchange  = function(event) {
-    /*event.newURL && event.oldURL don't work for IE*/
+
     if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){
       State.onloadFileQueue.push(resolvedRouteObj.partial);
       DOM.asynGetPartial(resolvedRouteObj.partial, Bootstrap.loadPartialIntoTemplate, resolvedRouteObj.target);
@@ -32,10 +33,10 @@ var _ = this;
     
   };
   State.compiledScopes += scope + ',';
-  /*If we see a route on page load, kill any default on target of this route.*/
+
   if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){
     if(!_.isNullOrEmpty(resolvedRouteObj.partial)){
-      /*get target node*/
+
       routeContentNode = document.getElementById(resolvedRouteObj.target);
       defaultKey = _.getDataAttribute(routeContentNode, _.IE_DEFAULT_ATTRIB_KEY);
       if(!_.isNull(routeContentNode) && !_.isNullOrEmpty(defaultKey)){
