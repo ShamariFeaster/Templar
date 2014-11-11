@@ -21,6 +21,6 @@ structureJS.module('Util', function(require){
           DOM_Node.getAttribute('data-' + attributeKey);
     return (_.isNull(value)) ? '' : value;
   }
-  
+
   structureJS.extendContext(_); 
 });

@@ -3,10 +3,7 @@ structureJS.module('CommentCotroller', function(require){
   var Templar = require('Templar'),
       CommentsModel = Templar.getModel('Comments');
   
-  /*Itial page limit*/
-  CommentsModel.limit('comments').to(3);
-  CommentsModel.currentPage = CommentsModel.currentPageOf('comments');  
-  CommentsModel.totalPages = CommentsModel.totalPagesOf('comments');
+  
   
   Templar.Route([{
     route : '#/comment/show/Comments:selectedComment',
@@ -17,12 +14,15 @@ structureJS.module('CommentCotroller', function(require){
   
   Templar.success('partial-login-screen.html', function(){
     console.log('Comment Onload Fired');
+    /*Itial page limit*/
+    CommentsModel.limit('comments').to(3);
+    CommentsModel.currentPage = CommentsModel.currentPageOf('comments');  
+    CommentsModel.totalPages = CommentsModel.totalPagesOf('comments');
     CommentsModel.resetLiveFiltersOf('comments');
     
     /*Listen to select changes*/
     CommentsModel.listen('limits', function(e){
       CommentsModel.limit('comments').to(e.value);
-      CommentsModel.update('comments');
       CommentsModel.totalPages = CommentsModel.totalPagesOf('comments');
     });
     

@@ -8,10 +8,10 @@ structureJS.declare('templar/Interpolate');
 structureJS.declare('templar/Compile');
 structureJS.declare('templar/Link');
 /*Class Definitions*/
+structureJS.declare('classes/ClassModelAPI');
 structureJS.declare('classes/ClassModelSort');
 structureJS.declare('classes/ClassModelPage');
 structureJS.declare('classes/ClassModelFilter');
-structureJS.declare('classes/ClassModelAPI');
 structureJS.declare('classes/ClassControlNodeAPI');
 /*API*/
 structureJS.declare('templar/Route');
