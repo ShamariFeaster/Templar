@@ -151,7 +151,7 @@ return {
             during preprocessing. Once we reach that node during recursive compiling, we create a ControlNode
             using the annotated data and add it to our control list*/
           compileMe = Process.preProcessNode(DOM_Node, modelName, attribName, scope);
-          var controlKey = _.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY)
+          var controlKey = _.getDataAttribute(DOM_Node, _.IE_CTRL_ATTRIB_KEY)
            //1 = ctrl name, 3 = mdlName, 4 = attribName, 6 = index 
           if(!_.isNullOrEmpty(controlKey)
             && (ctrlRegexResult = /(\w+)(\|(\w+)\.(\w+)(\.(\d+))*)*/g.exec(controlKey)) !== null){

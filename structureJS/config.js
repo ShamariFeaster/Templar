@@ -1,6 +1,7 @@
 structureJS.configure(
 {
   globals : [
+            'lib/docReady',
             'templar/Constants', 
             'templar/Util', 
             'classes/ClassTMP_Node',
@@ -9,6 +10,7 @@ structureJS.configure(
             'templar/DOM'],
   directory_aliases : {modules : 'Modules/', 
                       templar : 'TemplarJS/', 
-                      classes : 'TemplarJS/Classes/'}
+                      classes : 'TemplarJS/Classes/',
+                      lib : 'TemplarJS/lib/'}
 });
 

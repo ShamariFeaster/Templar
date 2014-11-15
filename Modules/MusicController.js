@@ -22,6 +22,5 @@ structureJS.module('MusicCotroller', function(require){
     });
     
   });
-  
-  return {};
+
 });

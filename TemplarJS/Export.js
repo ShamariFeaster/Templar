@@ -11,18 +11,17 @@ var _ = this;
     Interpolate = require('Interpolate'),
     Process = require('Process');
 
-/******Initialization*******/
+    /******Initialization*******/
 
-
-(function(){
-  
+structureJS.done(function(){
+  if(!_.isDef( console )){
+    console = { log : function(){} };
+  }
   var aplContentNode = document.getElementById('apl-content'),
       scope = 'body ' + new Date().getTime(),
       resolvedRouteObj = null,
       routeContentNode = null,
       defaultKey = '';
-  
- 
 
   window.onhashchange  = function(event) {
 
@@ -61,7 +60,7 @@ var _ = this;
   }
 
   _.log('Body COMPILATION DONE');
-})();
+});
 
 
 
