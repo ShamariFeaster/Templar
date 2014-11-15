@@ -32,7 +32,8 @@ Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/propert
   var Model = this,
       results = [],
       target = Map.getAttribute(Model.modelName, attribName),
-      filterResults = null;
+      filterResults = null,
+      item = null;
   
   target = Map.getPageSlice(Model, attribName, target);
   

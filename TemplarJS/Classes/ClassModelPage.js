@@ -19,7 +19,7 @@ Model.prototype.limit = function(attribName){
         totalPages = Math.floor(modelAttrib.length/limit);
         totalPages += ((modelAttrib.length%limit > 0) ? 1 : 0);
         Model.limitTable[attribName] = {limit : limit, page : 1, totalPages : totalPages, currentPage : 1};
-        Model.update(modelAttrib);
+        Model.update(attribName);
       }
       
     }
