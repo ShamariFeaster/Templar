@@ -1,7 +1,6 @@
 structureJS.configure(
 {
   globals : [
-            'lib/docReady',
             'templar/Constants', 
             'templar/Util', 
             'classes/ClassTMP_Node',
