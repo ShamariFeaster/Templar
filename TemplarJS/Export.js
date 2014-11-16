@@ -24,7 +24,7 @@ structureJS.done(function(){
       defaultKey = '';
 
   window.onhashchange  = function(event) {
-    var hashValue = '';
+    var hashValue = '', resolvedRouteObj = null;
     if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){
       State.onloadFileQueue.push(resolvedRouteObj.partial);
       DOM.asynGetPartial(resolvedRouteObj.partial, Bootstrap.loadPartialIntoTemplate, resolvedRouteObj.target);
