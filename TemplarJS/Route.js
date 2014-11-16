@@ -133,7 +133,7 @@ return {
   },
   
   handleRoute : function(url){
-    var href = url.substring(url.indexOf('#')).replace('#', '');
+    var href = DOM.getHashValue(url);
 
     /*Hide target node, we will unhide after compilation. Prevents seeing uncompiled template*/
     var targetId = '',

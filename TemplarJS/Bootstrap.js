@@ -13,7 +13,7 @@ var Bootstrap = {
   /*handlers with same handler are not duplicate bound. handler needs to be defined on persistent
     object or global scope*/
   setTarget : function(e){
-    State.target = _.getDataAttribute(e.target, _.IE_TARGET_ATTRIB_KEY);
+    State.target = DOM.getDataAttribute(e.target, _.IE_TARGET_ATTRIB_KEY);
     State.target = (!_.isNullOrEmpty(State.target)) ? 
                         State.target : '';
   },

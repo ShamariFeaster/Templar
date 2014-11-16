@@ -92,6 +92,29 @@ return {
     node.deleteData(index, node.length - index);
     this.insertAfter(newNode, node);
     return newNode;
+  },
+  
+  getHashValue : function(url){
+    return (_.isString(url)) ? url.substring(url.indexOf('#')).replace('#', '') : '';
+  },
+  
+  getDataAttribute : function(DOM_Node, attributeKey){
+    var parts = (_.isString(attributeKey)) ? attributeKey.split('-') : [];
+    var value = null;
+    /*camelcase from the first word on*/
+    var camelCaseKey = parts.slice(0,1).concat(parts.slice(1).map(function(part){
+      return part.charAt(0).toUpperCase() + part.slice(1);
+    })).join('');
+    
+    if(!_.isNull(DOM_Node)){
+      if(_.isDef(DOM_Node.dataset)){
+        value = DOM_Node.dataset[camelCaseKey];
+      }else{
+        value = DOM_Node.getAttribute('data-' + attributeKey);
+      }
+    }
+
+    return (_.isNull(value)) ? '' : value;
   }
   
 }; 

@@ -28,6 +28,9 @@ structureJS.done(function(){
     if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){
       State.onloadFileQueue.push(resolvedRouteObj.partial);
       DOM.asynGetPartial(resolvedRouteObj.partial, Bootstrap.loadPartialIntoTemplate, resolvedRouteObj.target);
+    }else{
+      State.onloadFileQueue.push(window.location.href);
+      DOM.asynGetPartial(DOM.getHashValue(window.location.href), Bootstrap.loadPartialIntoTemplate, State.target);
     }
     
   };
@@ -37,7 +40,7 @@ structureJS.done(function(){
     if(!_.isNullOrEmpty(resolvedRouteObj.partial)){
 
       routeContentNode = document.getElementById(resolvedRouteObj.target);
-      defaultKey = _.getDataAttribute(routeContentNode, _.IE_DEFAULT_ATTRIB_KEY);
+      defaultKey = DOM.getDataAttribute(routeContentNode, _.IE_DEFAULT_ATTRIB_KEY);
       if(!_.isNull(routeContentNode) && !_.isNullOrEmpty(defaultKey)){
         routeContentNode.setAttribute('data-' + _.IE_DEFAULT_ATTRIB_KEY, '')
       }

@@ -164,7 +164,7 @@ return {
   preProcessNode : function(DOM_Node, modelName, attribName, scope){
     if(!_.isDef(DOM_Node) || DOM_Node === null )
       return;
-    var repeatValue = _.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);
+    var repeatValue = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);
     var type = (!_.isNullOrEmpty(repeatValue)) 
                   ? 'REPEAT' :
                     DOM_Node.tagName;
