@@ -24,13 +24,14 @@ structureJS.done(function(){
       defaultKey = '';
 
   window.onhashchange  = function(event) {
-
+    var hashValue = '';
     if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){
       State.onloadFileQueue.push(resolvedRouteObj.partial);
       DOM.asynGetPartial(resolvedRouteObj.partial, Bootstrap.loadPartialIntoTemplate, resolvedRouteObj.target);
     }else{
-      State.onloadFileQueue.push(window.location.href);
-      DOM.asynGetPartial(DOM.getHashValue(window.location.href), Bootstrap.loadPartialIntoTemplate, State.target);
+      hashValue = DOM.getHashValue(window.location.href);
+      State.onloadFileQueue.push(hashValue);
+      DOM.asynGetPartial(hashValue, Bootstrap.loadPartialIntoTemplate, State.target);
     }
     
   };

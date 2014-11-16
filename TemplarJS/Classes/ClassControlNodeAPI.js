@@ -85,8 +85,10 @@ ControlNode.prototype.listenTo = function(childName){
       };
     })(eventType, handler, childName, Control);
     /*for listeners placed after interpolation_done already fired( ie, DOM is mature)*/
-    lateBind.call(null);
-    System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, lateBind);
+    if(!_.isNull(Control.controlBaseNodes))
+      lateBind.call(null);
+    else
+      System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, lateBind);
     
   };
   
@@ -140,8 +142,10 @@ ControlNode.prototype.listen = function(eventType, handler){
       };
     })(eventType, handler, Control);
   /*for listeners placed after interpolation_done already fired( ie, DOM is mature)*/
-  lateBind.call(null);
-  System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, lateBind);
+  if(!_.isNull(Control.controlBaseNodes))
+    lateBind.call(null);
+  else
+    System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, lateBind);
   
   
 };
