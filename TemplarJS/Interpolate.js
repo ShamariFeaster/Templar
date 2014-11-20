@@ -269,7 +269,7 @@ return {
                 Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
               }
             }
-            
+            TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 
           }
           Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built); 
           System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built);
