@@ -251,7 +251,7 @@ return {
         TMP_RepeatBase.scope = scope;
         Map.addRepeatBaseNode(TMP_RepeatBase); 
         Map.pushNodes(TMP_RepeatBase); 
-        TMP_RepeatBase.node.setAttribute('style','display:none;'); 
+        //TMP_RepeatBase.node.setAttribute('style','display:none;'); 
 
         /*notice lack of preProcessControl(). This is so we don't add control declared in repeatBase.
           we do call it during preProcessRepeatNode() on each of the repeated nodes*/
