@@ -69,7 +69,7 @@ return {
         
         tmp = tmp[routePartName];
         tat = tat[normalizedName];
-        
+
         route = routes[i].route;
                      
       }
@@ -79,7 +79,7 @@ return {
         throw 'Error: Duplicate Route "' + routes[i].route + '" Detected';
       }
 
-      if(!nonAmbiguousBranchCreated && tmp.endOfChain == true){
+      if(!nonAmbiguousBranchCreated){
         throw 'Error: Ambiguous Route "' + routes[i].route + '" Detected';
       }
       

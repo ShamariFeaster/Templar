@@ -89,15 +89,17 @@ return {
   },
   interpolateSpan : function(tmp_node, attributeVal){
     var node = tmp_node.node;
-    if(_.isNullOrEmpty(tmp_node.prop) && tmp_node.index == _.UNINDEXED){
-      node.innerText =  attributeVal;
-    }else if(!_.isNullOrEmpty(tmp_node.prop) && tmp_node.index >= 0){
-      if(_.isDef(attributeVal[tmp_node.index]) && tmp_node.index < attributeVal.length)
-        node.innerText = attributeVal[tmp_node.index][tmp_node.prop];
-    }else if(tmp_node.index >= 0){
-      if(_.isDef(attributeVal[tmp_node.index]) && tmp_node.index < attributeVal.length)
-        node.innerText = attributeVal[tmp_node.index];
-    }
+    /*Notice the sequence of the if/else ladder. the first test was last but firefox 33
+      was ignoring the test and running the blcok.*/
+    if(_.isNullOrEmpty(tmp_node.prop) && tmp_node.index >= 0 && _.isDef(attributeVal[tmp_node.index]) && tmp_node.index < attributeVal.length){
+        node.innerText = node.innerHTML = attributeVal[tmp_node.index];
+    }else if(_.isNullOrEmpty(tmp_node.prop) && tmp_node.index == _.UNINDEXED){
+      node.innerText = node.innerHTML = attributeVal;
+    }else if(!_.isNullOrEmpty(tmp_node.prop) && tmp_node.index >= 0 && _.isDef(attributeVal[tmp_node.index]) && tmp_node.index < attributeVal.length){
+      node.innerText = node.innerHTML = attributeVal[tmp_node.index][tmp_node.prop];     
+    } 
+    
+    
   },
   /*Returns the whole attribute if no limit is defined for this attribute*/
   getPageSlice : function(Model, attributeName, target){
