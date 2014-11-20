@@ -3,11 +3,12 @@ QUnit.asyncTest( 'Multiple onloads', function( assert ) {
   var output = '';
   Templar.success('partial-login-screen.html', function(){
     output += 'onload1';
+    assert.equal(output,'onload1', 'multiple success callback fired in FIFO part 1');
     QUnit.start();
   }); 
   
   Templar.success('partial-login-screen.html', function(){
   output += ' then onload2';
-    assert.equal(output,'onload1 then onload2', 'multiple success callback fired in FIFO');
+    assert.equal(output,'onload1 then onload2', 'multiple success callback fired in FIFO part 2');
   }); 
 });

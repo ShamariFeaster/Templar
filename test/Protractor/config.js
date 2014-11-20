@@ -6,6 +6,15 @@ exports.config = {
     global.isAngularSite = function(flag){
             browser.ignoreSynchronization = !flag;
         };
-  }
+  },
+  multiCapabilities: [{
+  'browserName': 'chrome'
+}, {
+  'browserName': 'firefox'
+},{
+   'browserName': 'internet explorer',
+    'platform': 'ANY',
+    'version': '9'
+}]
 }
 
