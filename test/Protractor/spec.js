@@ -36,5 +36,6 @@ describe('Regression Suite', function() {
     test('templar-success');
     test('templar-controlNode');
     test('routing');
+    test('templar-nodeTree');
   });
 });
