@@ -70,9 +70,13 @@ QUnit.frameworkLoaded(function(){
   });
   
   QUnit.test('ControlNode API listenTo',function( assert ){
-    var clicked = false;
-    baseNode.listenTo('testCnBtn1').forEvent('click', function(){
+    var clicked = false,
+        tagName = '',
+        typeofNode = '';
+    baseNode.listenTo('testCnBtn1').forEvent('click', function(e){
       clicked = true;
+      tagName = e.testCnBtn1.node.tagName;
+      typeofNode = (e.testCnBtn1 instanceof ControlNode);
     });
     
     $('button[name=tcn1]').click();
@@ -85,6 +89,10 @@ QUnit.frameworkLoaded(function(){
     clicked = false;
     $('button[name=tcn3]').click();
     assert.equal(clicked,true,'listenTo() works (btn1)');
+    
+    assert.equal(tagName,'BUTTON','id indexing of control nodes works in listeners');
+    
+    assert.equal(true,typeofNode,'typeof indexed control nodes works in listeners');
   });
   
   QUnit.test('ControlNode API listen',function( assert ){
