@@ -40,3 +40,7 @@ float : left;
 .apl-default-hidden{
   display : none;
 }
+
+.pane {
+border : 1px black solid;
+}
