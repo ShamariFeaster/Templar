@@ -255,7 +255,10 @@ return {
           baseNodes = Map.getRepeatBaseNodes(modelName, attributeName);
           for(var z = 0; z < baseNodes.length; z++){
             TMP_repeatBaseNode = baseNodes[z];
-            /*If base node has no parent then it is not in the current DOM*/
+            /*If base node has no parent then it is not in the current DOM.
+            NOTE (11/24/14): if we use 'apl-default-hidden' class on BODY repeats will not interp.
+            I've never liked the default hidden class anyways so for now I'm not going to
+            change logic here to support the continued use of the default hidden class.*/
             if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode)){
               /*rebuild new one*/
               for(var i = 0; i < attributeVal.length; i++){
