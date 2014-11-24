@@ -207,7 +207,7 @@ return {
                 node.value = attributeVal[ctx.modelAttribIndex].value;
                 node.parentNode.selectedIndex = 
                   (_.isDef(attributeVal[ctx.modelAttribIndex].selected) && attributeVal[ctx.modelAttribIndex].selected == true) ? 
-                    ctx.modelAttribIndex : node.selectedIndex;
+                    ctx.modelAttribIndex : node.parentNode.selectedIndex;
               
             }
             updateObj.value = node.parentNode.options[node.parentNode.selectedIndex].value;
