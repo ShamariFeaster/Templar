@@ -8,6 +8,7 @@ var _ = this;
     Compile = require('Compile'),
     Templar = require('Templar'),
     Route = require('Route'),
+    Link = require('Link'),
     Interpolate = require('Interpolate'),
     Process = require('Process');
 
@@ -55,6 +56,9 @@ structureJS.done(function(){
     
     
   Compile.compile( document.getElementsByTagName('body')[0], scope ); 
+  Link.bindModel( State.compiledScopes );
+  Bootstrap.bindTargetSetter();
+  
   var defaultHiddenNodeList = document.querySelectorAll('.apl-default-hidden');
   if(!_.isNull(defaultHiddenNodeList)){
     for(var i = 0; i < defaultHiddenNodeList.length; i++){
