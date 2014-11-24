@@ -218,7 +218,7 @@ return {
         DOM_Node.addEventListener('change', function(e){
           Interpolate.dispatchListeners(
             Map.getListeners(this.model, this.name)
-            , {type : 'select'
+            , {type : _.MODEL_EVENT_TYPES.select_change
             , value : e.target.options[e.target.selectedIndex].value
             , text : e.target.options[e.target.selectedIndex].text
             , index : e.target.selectedIndex

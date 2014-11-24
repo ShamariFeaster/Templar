@@ -212,7 +212,7 @@ return {
             }
             updateObj.value = node.parentNode.options[node.parentNode.selectedIndex].value;
             updateObj.text = node.parentNode.options[node.parentNode.selectedIndex].text;
-            updateObj.type = 'select';
+            updateObj.type = _.MODEL_EVENT_TYPES.interp_change;
             updateObj.index = node.parentNode.selectedIndex;
             /*New model data, shorter than existing data, kill extra nodes*/
             if(ctx.modelAttribIndex >= attributeVal.length){

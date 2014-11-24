@@ -25,6 +25,9 @@ structureJS.module('Constants', function(require){
                            interpolation_done : 'interp_done',
                            repeat_built : 'repeat_built',
                            LIST_TYPE : _.QUEUE};
-  
+  _.MODEL_EVENT_TYPES = {
+    interp_change : 'i_change',
+    select_change : 's_change'
+  };
   structureJS.extendContext(_); 
 });
