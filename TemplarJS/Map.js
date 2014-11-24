@@ -16,12 +16,13 @@ return {
   },
   getRepeatBaseNodes : function(modelName, attribName){
     var baseNodes = [];
-    if(!_.isDef(attribName) || !_.isDef(modelName))
-      return baseNodes;
-      
-    if(_.isDef(_repeatTable[modelName]) && _.isDef(_repeatTable[modelName][attribName]))
-      return _repeatTable[modelName][attribName];
-  
+
+    if((_.isDef(attribName) && _.isDef(modelName)) &&
+        _.isDef(_repeatTable[modelName]) && 
+        _.isDef(_repeatTable[modelName][attribName]))
+      baseNodes = _repeatTable[modelName][attribName];
+    
+    return baseNodes;
   },
   
   addRepeatBaseNode : function(tmp_node){
