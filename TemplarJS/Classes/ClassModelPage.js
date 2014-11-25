@@ -22,6 +22,8 @@ Model.prototype.limit = function(attribName){
         Model.update(attribName);
       }
       
+    }else{
+      delete Model.limitTable[attribName];
     }
   };
   return chain;
@@ -34,7 +36,7 @@ Model.prototype.gotoPage = function(pageNum){
   chain.of = function(attribName){
     limitTable = Model.limitTable[attribName];
     if(_.isDef(limitTable) && pageNum > 0 && pageNum <= limitTable.totalPages){
-      limitTable.page = pageNum;
+      limitTable.page = limitTable.currentPage = pageNum;
       Interpolate.interpolate(Model.modelName, attribName, Map.getAttribute(Model.modelName, attribName));
     }
   };
@@ -59,18 +61,24 @@ Model.prototype.gotoPreviousPageOf = function(attribName){
 
 Model.prototype.currentPageOf = function(attribName){
   var Model = this,
-      limitTable = Model.limitTable[attribName];
+      limitTable = Model.limitTable[attribName],
+      result = 0;
   if(_.isDef(limitTable)){
-    return limitTable.currentPage;
+    result = limitTable.currentPage;
   }
+  
+  return result;
 };
 
 Model.prototype.totalPagesOf = function(attribName){
   var Model = this,
-      limitTable = Model.limitTable[attribName];
+      limitTable = Model.limitTable[attribName],
+      result = 0;
   if(_.isDef(limitTable)){
-    return limitTable.totalPages;
+    result = limitTable.totalPages;
   }
+  
+  return result;
 };
 
 });
