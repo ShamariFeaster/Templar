@@ -38,5 +38,7 @@ describe('Regression Suite', function() {
     test('routing');
     test('templar-nodeTree');
     test('templar-interpolation-select');
+    test('templar-interpolation-attribute');
+    test('templar-interpolation-paging');
   });
 });
