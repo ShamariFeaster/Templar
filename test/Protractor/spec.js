@@ -40,5 +40,6 @@ describe('Regression Suite', function() {
     test('templar-interpolation-select');
     test('templar-interpolation-attribute');
     test('templar-interpolation-paging');
+    test('templar-interpolation-sort');
   });
 });

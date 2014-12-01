@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="../../../css/styles.css" /> 
+<link rel="stylesheet" href="../../lib/qunit.css" /> 
+
+<script src="../../../../structureJS/core/structureJS-core.js" id="structureJS"
+        data-project-manifest="../../lib/structureJS/test-manifest"
+        data-project-config="../../lib/structureJS/test-config">
+</script>
+
+<title>Templar</title>
+</head>
+<body>
+<div id="header">
+<h2>TemplarJS</h2>
+</div>
+<br>
+
+<div id="nav">
+
+</div>
+
+<div class="left pane">
+<div id="scalar" data-apl-repeat="Attributes.range">
+  <div class="scalar">{{}}</div>
+</div>      
+</div>
+
+<div class="left pane">
+<div class="left">
+  <div>P1</div>
+  <div>P2</div>
+  <div>P3</div>
+</div>
+<div class="left space" id="alpha" data-apl-repeat="Attributes.ns_alpha">
+  <div class="alpha-p1">{{p1}}</div>
+  <div class="alpha-p2">{{p2}}</div>
+  <div class="alpha-p3">{{p3}}</div>
+</div> 
+</div>    
+ 
+<div class="left pane">
+<div class="left">
+  <div>P1</div>
+  <div>P2</div>
+  <div>P3</div>
+</div>
+<div class="left space" id="numeric" data-apl-repeat="Attributes.ns_numeric">
+  <div class="numeric-p1">{{p1}}</div>
+  <div class="numeric-p2">{{p2}}</div>
+  <div class="numeric-p3">{{p3}}</div>
+</div> 
+</div>
+
+<div class="left pane">
+<div class="left">
+  <div>P1</div>
+  <div>P2</div>
+  <div>P3</div>
+</div>
+<div class="left space" id="mixed" data-apl-repeat="Attributes.ns_mixed">
+  <div class="mixed-p1">{{p1}}</div>
+  <div class="mixed-p2">{{p2}}</div>
+  <div class="mixed-p3">{{p3}}</div>
+</div> 
+</div>
+
+<div id="footer"></div>
+<div id="qunit" style="margin: 150px 0px 0px 0px;"></div>
+<div id="qunit-fixture"></div>
+</body>
+</html>
+
