@@ -2,6 +2,8 @@ structureJS.configure(
 {
   globals : ['lib/qunit',
              'lib/jquery', 
+             'bililite/bililiteRange',
+             'bililite/jquery.sendkeys',
             'templar/Constants', 
             'templar/Util', 
             'classes/ClassTMP_Node',
@@ -11,6 +13,7 @@ structureJS.configure(
   directory_aliases : {modules : 'Modules/', 
                       templar : '../../../TemplarJS/', 
                       classes : '../../../TemplarJS/Classes/',
-                      lib : '../../lib/'}
+                      lib : '../../lib/',
+                      bililite : '../../lib/bililiteRange/'}
 });
 
