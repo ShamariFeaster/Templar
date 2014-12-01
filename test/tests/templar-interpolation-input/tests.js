@@ -26,9 +26,8 @@ QUnit.asyncTest( 'Multiple onloads', function( assert ) {
 
 QUnit.frameworkLoaded(function(){
   var cModel, Map, System, DOM, _, 
-      _selectedText = null,
-      _selectedValue = null,
-      _selectedIndex = null;
+      $input = $('#input');
+      
   QUnit.module('Input Elements', 
   {
     setup : function(){
@@ -38,31 +37,45 @@ QUnit.frameworkLoaded(function(){
       DOM = structureJS.require('DOM');
       _ = structureJS.config.context;
       
-      
-
     },
     teardown : function(){
-
+      cModel.unlisten('searchInput');
+      while($('#input').val() != ''){
+        $input.sendkeys('{backspace}');
+      }
     }
   });
   
   /*Helpers*/
 
   /*END Helpers*/
-  /*Using https://github.com/dwachss/bililiteRange
-          http://bililite.com/blog/*/
-  QUnit.asyncTest('Input interp',function( assert ){
-    var $input = $('#input');
+  /*
+  Using https://github.com/dwachss/bililiteRange
+          http://bililite.com/blog/
+  */
+  QUnit.asyncTest('Input interp 1',function( assert ){
+
     $input.sendkeys('t');
-    
+    $input.sendkeys('y');
+    $input.sendkeys('{backspace}');
+    QUnit.start();
     cModel.listen('searchInput', function(){
       assert.equal(cModel.searchInput, 't', 'Input model sequencing correct');
-      QUnit.start();
     })
     
   });
   
+  QUnit.asyncTest('Input interp 2',function( assert ){
 
+    $input.sendkeys('t');
+    $input.sendkeys('{backspace}');
+    QUnit.start();
+    cModel.listen('searchInput', function(){
+      assert.equal('',cModel.searchInput, 'Input model sequencing correct');
+      
+    })
+    
+  });
 
   
 });
