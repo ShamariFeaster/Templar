@@ -9,7 +9,7 @@ var Interpolate = require('Interpolate');
 Model.prototype.sort = function(attribName, pageNum){
   var chain = Object.create(null),
       Model = this,
-      oldPageNum = 0,
+      oldPageNum = (_.isDef(Model.limitTable[attribName])) ? Model.limitTable[attribName].page : 0,
       oldLimit = 0,
       A_FIRST = -1,
       B_FIRST = 1,
@@ -19,7 +19,7 @@ Model.prototype.sort = function(attribName, pageNum){
   /*substituting target for the page slice. Also need to set the 'page' meta-data
     to the requested page for getPageSlice() and other slice-concerned functions
     to work. The previous values are reinstated later*/
-  if(_.isDef(pageNum) && _.isDef(Model.limitTable[attribName]) && pageNum > 0){
+  if(_.isDef(pageNum) && pageNum > 0 && _.isDef(Model.limitTable[attribName]) ){
     oldPageNum = Model.limitTable[attribName].page;
     Model.limitTable[attribName].page = pageNum;
     chain.target = Map.getPageSlice(Model, attribName, chain.target);
@@ -31,10 +31,10 @@ Model.prototype.sort = function(attribName, pageNum){
   /*in a page sort chain.target is a slice of the full target*/
   chain.insertSortedSlice = function(targetSlice, Model, attribName, pageNum){
     /*Short circuit this so we don't set limitTable.page to undefined*/
-    if(!_.isDef(pageNum) || !_.isDef(Model.limitTable[attribName]))
+    if(!_.isDef(Model.limitTable[attribName]))
       return;
       
-    Model.limitTable[attribName].page = pageNum;
+    Model.limitTable[attribName].page = (_.isDef(pageNum)) ? pageNum : oldPageNum;
     /*we have to trick getAttribute() to give us the full slice*/
     oldLimit = Model.limitTable[attribName].limit;
     Model.limitTable[attribName].limit = 0;
@@ -78,7 +78,7 @@ Model.prototype.sort = function(attribName, pageNum){
     
     a = (isNaN(intA)) ? a : intA;
     b = (isNaN(intB)) ? b : intB;
-    sortAction = (b < a) ? B_FIRST : A_FIRST;
+    sortAction = (b == a) ? NO_CHANGE : (b < a) ? B_FIRST : A_FIRST;
     sortAction = (pastPropsAligned == true) ? sortAction : NO_CHANGE;
     return sortAction
   };
