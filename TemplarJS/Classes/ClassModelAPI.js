@@ -26,6 +26,8 @@ Model.prototype.listen = function(attributeName, listener){
     Map.setListener(this.modelName, attributeName, listener);
 };
 
-
+Model.prototype.unlisten = function(attributeName){
+  Map.removeListener(this.modelName, attributeName);
+};
 
 });

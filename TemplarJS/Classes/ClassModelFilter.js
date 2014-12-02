@@ -116,14 +116,17 @@ Model.prototype.filter = function(attribName){
 
           var passedInputFilter = true,
               defaultFilterOverride = false;
-          /*Filter with live 'and' functions*/
+          /*Filter with live 'and' functions. Default 'startsWith' filter is overridden on
+            functions /w arity == 2*/
           for(var i = 0; i < chain.liveAndFuncs.length && passedInputFilter == true; i++){
             var isInputFilter = (chain.liveAndFuncs[i].length == 1);
             passedInputFilter = chain.liveAndFuncs[i].funct.call(null, data.text, chain.propName, isInputFilter);
             defaultFilterOverride |= !isInputFilter; 
           }
           _.log('defaultFilterOverride: ' + defaultFilterOverride);
-          /*if we passed input filter, we shoould move on to default filter*/
+          /*if we passed input filter, we shoould move on to default filter.
+          IMPORTANT!!! If input filter fails, interp never happens and listeners on the filtered 
+          attribs never fire*/
           if(passedInputFilter == true && defaultFilterOverride == false){
             /*default filter for model attribute is a 'startsWith' string compare*/
             Model.filterWarapper(attribName, chain.propName, data.text, function(input, item){
