@@ -1,4 +1,4 @@
-
+/*Note that scope-related cleanup  is tested here*/
 
 QUnit.frameworkLoaded(function(){
   var ControlNode, Map, System, DOM, _, nodeTree, controlTree, $gotoHome, $gotoLogin, getCount,

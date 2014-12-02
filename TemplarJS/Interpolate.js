@@ -279,6 +279,7 @@ return {
           /*Stop outter loop. We build the updated repeat nodes in one pass*/
           outerCtx.stop = true;
           updateObj.type = 'repeat';
+          updateObj.value = attributeVal;
           break;
         }
       
