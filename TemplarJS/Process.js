@@ -232,6 +232,7 @@ return {
           modelNameParts = Process.parseModelAttribName(matches[2]);
           DOM_Node.model = modelNameParts[0];
           DOM_Node.name = modelNameParts[1];
+          /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
           DOM_Node.addEventListener('keyup', function(e){
             Map.setAttribute(this.model, this.name, e.target.value);
             Interpolate.interpolate(this.model, this.name, e.target.value );

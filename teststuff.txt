@@ -217,6 +217,7 @@ Templar('startVideo').hidden() /*check display and visibilty property*/
   LoginModel.resetFilter('items');
  
   //Live filter with input filtering and overridding default startsWith filtering
+  //Note using clause only accepts single-argument live filters
   LoginModel.filter('items')
     .by('title')
     .using('userInput')

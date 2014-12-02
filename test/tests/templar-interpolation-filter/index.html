@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="../../../css/styles.css" /> 
+<link rel="stylesheet" href="../../lib/qunit.css" /> 
+
+<script src="../../../../structureJS/core/structureJS-core.js" id="structureJS"
+        data-project-manifest="../../lib/structureJS/test-manifest"
+        data-project-config="../../lib/structureJS/test-config">
+</script>
+
+<title>Templar</title>
+</head>
+<body>
+<div id="header">
+<h2>TemplarJS</h2>
+</div>
+<br>
+
+<div id="nav">
+
+</div>
+<input id="input" value="{{Comments.searchInput}}"/>
+
+<div class="left pane">
+  <div class="left">
+    <div>first name: </div>
+    <div>last name: </div>
+  </div>
+  <div class="left space" id="comments" data-apl-repeat="Comments.comments">
+    <div class="comments-fn">{{fn}}</div>
+    <div class="comments-ln">{{ln}}</div>
+
+  </div> 
+</div>    
+
+<div class="left pane">
+  <div class="left">
+    <div>Range </div>
+  </div>
+  <div class="left space" id="range" data-apl-repeat="Comments.range">
+    <div class="range-{{$index}}">{{}}</div>
+  </div> 
+</div>    
+
+<div class="left pane">
+  <div class="left">
+    <div>Range3 </div>
+  </div>
+  <div class="left space" id="range3" data-apl-repeat="Comments.range3">
+    <div class="range3-{{$index}}">{{}}</div>
+  </div> 
+</div>   
+ 
+<div id="footer"></div>
+<div id="qunit" style="margin: 150px 0px 0px 0px;"></div>
+<div id="qunit-fixture"></div>
+</body>
+</html>
+

@@ -160,7 +160,7 @@ return {
         updateObj = Object.create(null),
         nodeScopeParts = null,
         node = null;
-    
+    /*Note that listeners are only fired for attribs that are in the nodeTree (ie, visible in the UI)*/
     Map.forEach(modelName, attributeName, function(ctx, tmp_node){
              
       /*On Link() only interp nodes belonging to the linked scope*/
