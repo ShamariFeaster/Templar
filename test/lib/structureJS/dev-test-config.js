@@ -4,12 +4,16 @@ structureJS.configure(
              'lib/jquery', 
              'bililite/bililiteRange',
              'bililite/jquery.sendkeys',
-             'build/templar-0.0.1-12-9-14.build'],
+            'templar/Constants', 
+            'templar/Util', 
+            'classes/ClassTMP_Node',
+            'classes/ClassControlNode',
+            'classes/ClassModel',
+            'templar/DOM'],
   directory_aliases : {modules : 'Modules/', 
                       templar : '../../../TemplarJS/', 
                       classes : '../../../TemplarJS/Classes/',
                       lib : '../../lib/',
-                      bililite : '../../lib/bililiteRange/',
-                      build : '../../../target/'}
+                      bililite : '../../lib/bililiteRange/'}
 });
 
