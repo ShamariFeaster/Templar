@@ -11,7 +11,7 @@
 
 <title>Templar</title>
 </head>
-<body class="apl-default-hidden">
+<body>
 <div id="header">
 <h2>TemplarJS</h2>
 </div>
@@ -24,6 +24,10 @@
 <input id="simplecb" type="checkbox" value="{{test.checkbox}}"/>
 
 <input id="complexcb" type="checkbox" value="{{test.complex_checkbox}}"/>
+
+<div data-apl-repeat="test.range">
+  <input id="repeatcb" type="checkbox" value="{{test.repeat_checkbox}}"/>
+</div>
 
 <div id="footer"></div>
 <div id="qunit"></div>

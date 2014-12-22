@@ -1,7 +1,8 @@
 QUnit.frameworkLoaded(function(){
   var tModel, _, 
       $simplecb = $('[name="checkbox"]'),
-      $complexcb = $('[name="complex_checkbox"]');
+      $complexcb = $('[name="complex_checkbox"]'),
+      $repeatcb = $('[name="repeat_checkbox"]');
       
   QUnit.module('Checkbox Elements', 
   {
@@ -46,7 +47,7 @@ QUnit.frameworkLoaded(function(){
       assert.equal(e.checked, true, 'simple checkbox event fired correctly: checked');
     });
     
-    $('[value="yellow"]')[0].click();
+    $simplecb[0].click();
     QUnit.start();
   });
 
@@ -56,7 +57,7 @@ QUnit.frameworkLoaded(function(){
       assert.equal(e.checked, true, 'complex checkbox event fired correctly: checked');
     });
     
-    $('[value="yellow"]')[1].click();
+    $complexcb[0].click();
     QUnit.start();
   });
 

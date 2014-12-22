@@ -153,7 +153,7 @@ return {
     
     /*if no NTs found, repeatNode innerHTML must be empty to be clobbered over by model attrib value*/
     TMP_repeatedNode.hasNonTerminals = (TMP_repeatedNode.hasNonTerminals == false) ? 
-                                        !_isNullOrEmpty(TMP_repeatedNode.node.innerHTML) :
+                                        !_.isNullOrEmpty(TMP_repeatedNode.node.innerHTML) :
                                         TMP_repeatedNode.hasNonTerminals;
 
     this.preProcessControl(TMP_repeatedNode);
@@ -161,6 +161,26 @@ return {
     return TMP_repeatedNode;
   },
   preProcessInputNode : function(DOM_Node, scope){
+    var NONTERMINAL_REGEX = /(\{\{(\w+\.\w+)(\[(\d+)\])*(?:\.)*(\w+)*?\}\})/g,
+        regex = /(\{\{(\w+\.\w+)\}\})/g,
+        match = null,
+        modelNameParts = null,
+        partMap = {},
+        propName = '',
+        index = 0,
+        tmp_node = null;
+    /*id embedded node*/
+    if(  (match = NONTERMINAL_REGEX.exec(DOM_Node.getAttribute('value'))) != null){
+      modelNameParts = this.parseModelAttribName(match[2]);
+      DOM_Node.model = modelNameParts[0];
+      DOM_Node.name = modelNameParts[1];
+      propName = match[5];
+    }else if( (match = regex.exec(DOM_Node.getAttribute('value'))) !== null){
+      modelNameParts = Process.parseModelAttribName(matches[2]);
+      DOM_Node.model = modelNameParts[0];
+      DOM_Node.name = modelNameParts[1];
+    }
+
     switch(DOM_Node.getAttribute('type')){
       case 'checkbox':  
         var attrib = Map.getAttribute(DOM_Node.model, DOM_Node.name),
@@ -183,9 +203,20 @@ return {
             TMP_checkbox.scope = scope;
             TMP_checkbox.node.model = TMP_checkbox.modelName;
             TMP_checkbox.node.name = TMP_checkbox.attribName;
-            TMP_checkbox.node.setAttribute('type','checkbox');
+            DOM.cloneAttributes(DOM_Node, TMP_checkbox.node);
             TMP_checkbox.node.setAttribute('value', value);
-            TMP_checkbox.node.setAttribute('name', DOM_Node.name);
+
+            
+            /*check to see if it's embedded and annotate*/
+            if(!_.isNullOrEmpty(propName) && propName.indexOf('zTMPzDOT') != _.UNINDEXED){
+              repeatAnnotationParts = propName.split('DOT');
+              TMP_checkbox.repeatModelName = repeatAnnotationParts[1];
+              TMP_checkbox.repeatAttribName = repeatAnnotationParts[2]; 
+              TMP_checkbox.repeatIndex = (_.isDef(partMap['index'])) ? parseInt(partMap['index']) : -1;;
+              TMP_checkbox.index = _.UNINDEXED;
+              TMP_checkbox.prop = '';
+            }
+            
             DOM.appendTo(TMP_checkbox.node, parentNode);
             DOM.appendTo(document.createTextNode(description), TMP_checkbox.node);
             TMP_checkbox.node.addEventListener('click',function(e){
@@ -279,13 +310,8 @@ return {
         });
         break;
       case 'INPUT':
-
-        if( (matches = regex.exec(DOM_Node.getAttribute('value'))) !== null){
-          modelNameParts = Process.parseModelAttribName(matches[2]);
-          DOM_Node.model = modelNameParts[0];
-          DOM_Node.name = modelNameParts[1];
           this.preProcessInputNode(DOM_Node, scope);
-        }
+        
         /*tmp_node is pushed during preProcessNodeAttributes()*/
         
         /*we don't push DOM_Node here because we can only bind to input using the value attribute
