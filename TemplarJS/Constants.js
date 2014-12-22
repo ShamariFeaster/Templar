@@ -27,7 +27,8 @@ structureJS.module('Constants', function(require){
                            LIST_TYPE : _.QUEUE};
   _.MODEL_EVENT_TYPES = {
     interp_change : 'i_change',
-    select_change : 's_change'
+    select_change : 's_change',
+    checkbox_change : 'cb_change'
   };
   structureJS.extendContext(_); 
 });

@@ -48,7 +48,7 @@ return {
           tmp_node = new TMP_Node(node, match[1], match[2]);         
           tmp_node.symbolMap[attributes[i].name] = attributes[i].value;
           tmp_node.scope = scope;
-          hasAttribNonTerminal = true;
+          hasAttribNonTerminal = true;/*global polution: should be removed*/
           Map.pushNodes(tmp_node);
           /*This is necessary for repeats as their child nodes aren't added to Interpolation array
             Rather they are recompiled using repeated elements as the base. It makes sense since
@@ -160,7 +160,59 @@ return {
     
     return TMP_repeatedNode;
   },
-  
+  preProcessInputNode : function(DOM_Node, scope){
+    switch(DOM_Node.getAttribute('type')){
+      case 'checkbox':  
+        var attrib = Map.getAttribute(DOM_Node.model, DOM_Node.name),
+            TMP_checkbox = null,
+            parentNode = null,
+            value = '',
+            description = '';
+        if(!_.isNull(attrib) && _.isArray(attrib) 
+          && (parentNode = DOM_Node.parentNode) !== null 
+          && !_.isNullOrEmpty(scope)){
+
+          for(var i = 0; i < attrib.length; i++){
+            if(_.isString(attrib[i])){
+              value = description = attrib[i];
+            } else {
+              value = (_.isDef(attrib[i].value)) ? attrib[i].value : value;
+              description = (_.isDef(attrib[i].description)) ? attrib[i].description : description;
+            }
+            TMP_checkbox = new TMP_Node(document.createElement('input'),DOM_Node.model, DOM_Node.name, i) ;
+            TMP_checkbox.scope = scope;
+            TMP_checkbox.node.model = TMP_checkbox.modelName;
+            TMP_checkbox.node.name = TMP_checkbox.attribName;
+            TMP_checkbox.node.setAttribute('type','checkbox');
+            TMP_checkbox.node.setAttribute('value', value);
+            TMP_checkbox.node.setAttribute('name', DOM_Node.name);
+            DOM.appendTo(TMP_checkbox.node, parentNode);
+            DOM.appendTo(document.createTextNode(description), TMP_checkbox.node);
+            TMP_checkbox.node.addEventListener('click',function(e){
+              Interpolate.dispatchListeners(
+                Map.getListeners(this.model, this.name)
+                , {type : _.MODEL_EVENT_TYPES.checkbox_change
+                , checked : (e.target.checked === true)
+                , value : e.target.value
+                }
+              ); 
+            });
+            Map.pushNodes(TMP_checkbox);
+            
+          }
+          
+          parentNode.removeChild(DOM_Node);
+        }
+        break;
+      default:
+        /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
+        DOM_Node.addEventListener('keyup', function(e){
+          Map.setAttribute(this.model, this.name, e.target.value);
+          Interpolate.interpolate(this.model, this.name, e.target.value );
+        });
+        break;
+    }
+  },
   preProcessNode : function(DOM_Node, modelName, attribName, scope){
     if(!_.isDef(DOM_Node) || DOM_Node === null )
       return;
@@ -232,11 +284,7 @@ return {
           modelNameParts = Process.parseModelAttribName(matches[2]);
           DOM_Node.model = modelNameParts[0];
           DOM_Node.name = modelNameParts[1];
-          /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
-          DOM_Node.addEventListener('keyup', function(e){
-            Map.setAttribute(this.model, this.name, e.target.value);
-            Interpolate.interpolate(this.model, this.name, e.target.value );
-          });
+          this.preProcessInputNode(DOM_Node, scope);
         }
         /*tmp_node is pushed during preProcessNodeAttributes()*/
         

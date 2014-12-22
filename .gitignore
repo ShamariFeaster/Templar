@@ -5,3 +5,4 @@ plugins/
 www/lib/structureJS/
 media/
 images/
+build/node_modules/
