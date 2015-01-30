@@ -171,10 +171,15 @@ return {
         tmp_node = null;
     /*id embedded node*/
     if(  (match = NONTERMINAL_REGEX.exec(DOM_Node.getAttribute('value'))) != null){
+      /*IF the NT has an index, this signals NT is repeat property and NOT embedded. 
+        Short circuit input preprocessing.*/
+      if(_.isDef(match[3]) && _.isDef(propName = match[5]) 
+          && propName.indexOf('zTMPzDOT') == _.UNINDEXED)
+        return;
       modelNameParts = this.parseModelAttribName(match[2]);
       DOM_Node.model = modelNameParts[0];
       DOM_Node.name = modelNameParts[1];
-      propName = match[5];
+      
     }else if( (match = regex.exec(DOM_Node.getAttribute('value'))) !== null){
       modelNameParts = Process.parseModelAttribName(matches[2]);
       DOM_Node.model = modelNameParts[0];
