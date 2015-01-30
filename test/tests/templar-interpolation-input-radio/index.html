@@ -21,17 +21,17 @@
 
 </div>
 
-<input id="simplecb" type="checkbox" value="{{test.checkbox}}"/>
+<input id="simplecb" type="radio" value="{{test.checkbox}}"/>
 
-<input id="complexcb" type="checkbox" value="{{test.complex_checkbox}}"/>
+<input id="complexcb" type="radio" value="{{test.complex_checkbox}}"/>
 
 <div data-apl-repeat="test.range">
-  <input id="repeatcb" type="checkbox" value="{{test.repeat_checkbox}}"/>
+  <input id="repeatcb" type="radio" value="{{test.repeat_checkbox}}"/>
 </div>
 
 <div data-apl-repeat="test.form1">
-  <input class="cba" name="cba" type="checkbox" value="{{cb_val1}}"/><span id="descA-{{$index}}">{{cb_desc1}}</span><br>
-  <input class="cbb" name="cba" type="checkbox" value="{{cb_val2}}"/><span id="descB-{{$index}}">{{cb_desc2}}</span>
+  <input class="cba" name="cba" type="radio" value="{{cb_val1}}"/><span id="descA-{{$index}}">{{cb_desc1}}</span><br>
+  <input class="cbb" name="cba" type="radio" value="{{cb_val2}}"/><span id="descB-{{$index}}">{{cb_desc2}}</span>
 
 </div>
 

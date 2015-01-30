@@ -168,7 +168,9 @@ return {
         partMap = {},
         propName = '',
         index = 0,
-        tmp_node = null;
+        tmp_node = null,
+        inputType = DOM_Node.getAttribute('type') || '';
+    inputType = inputType.toLowerCase();
     /*id embedded node*/
     if(  (match = NONTERMINAL_REGEX.exec(DOM_Node.getAttribute('value'))) != null){
       /*IF the NT has an index, this signals NT is repeat property and NOT embedded. 
@@ -185,69 +187,66 @@ return {
       DOM_Node.model = modelNameParts[0];
       DOM_Node.name = modelNameParts[1];
     }
+    if(inputType == 'checkbox' || inputType == 'radio'){
+      var attrib = Map.getAttribute(DOM_Node.model, DOM_Node.name),
+          TMP_checkbox = null,
+          parentNode = null,
+          value = '',
+          description = '';
+      if(!_.isNull(attrib) && _.isArray(attrib) 
+        && (parentNode = DOM_Node.parentNode) !== null 
+        && !_.isNullOrEmpty(scope)){
 
-    switch(DOM_Node.getAttribute('type')){
-      case 'checkbox':  
-        var attrib = Map.getAttribute(DOM_Node.model, DOM_Node.name),
-            TMP_checkbox = null,
-            parentNode = null,
-            value = '',
-            description = '';
-        if(!_.isNull(attrib) && _.isArray(attrib) 
-          && (parentNode = DOM_Node.parentNode) !== null 
-          && !_.isNullOrEmpty(scope)){
+        for(var i = 0; i < attrib.length; i++){
+          if(_.isString(attrib[i])){
+            value = description = attrib[i];
+          } else {
+            value = (_.isDef(attrib[i].value)) ? attrib[i].value : value;
+            description = (_.isDef(attrib[i].description)) ? attrib[i].description : description;
+          }
+          TMP_checkbox = new TMP_Node(document.createElement('input'),DOM_Node.model, DOM_Node.name, i) ;
+          TMP_checkbox.scope = scope;
+          TMP_checkbox.node.model = TMP_checkbox.modelName;
+          TMP_checkbox.node.name = TMP_checkbox.attribName;
+          DOM.cloneAttributes(DOM_Node, TMP_checkbox.node);
+          TMP_checkbox.node.setAttribute('value', value);
 
-          for(var i = 0; i < attrib.length; i++){
-            if(_.isString(attrib[i])){
-              value = description = attrib[i];
-            } else {
-              value = (_.isDef(attrib[i].value)) ? attrib[i].value : value;
-              description = (_.isDef(attrib[i].description)) ? attrib[i].description : description;
-            }
-            TMP_checkbox = new TMP_Node(document.createElement('input'),DOM_Node.model, DOM_Node.name, i) ;
-            TMP_checkbox.scope = scope;
-            TMP_checkbox.node.model = TMP_checkbox.modelName;
-            TMP_checkbox.node.name = TMP_checkbox.attribName;
-            DOM.cloneAttributes(DOM_Node, TMP_checkbox.node);
-            TMP_checkbox.node.setAttribute('value', value);
-
-            
-            /*check to see if it's embedded and annotate*/
-            if(!_.isNullOrEmpty(propName) && propName.indexOf('zTMPzDOT') != _.UNINDEXED){
-              repeatAnnotationParts = propName.split('DOT');
-              TMP_checkbox.repeatModelName = repeatAnnotationParts[1];
-              TMP_checkbox.repeatAttribName = repeatAnnotationParts[2]; 
-              TMP_checkbox.repeatIndex = (_.isDef(partMap['index'])) ? parseInt(partMap['index']) : -1;;
-              TMP_checkbox.index = _.UNINDEXED;
-              TMP_checkbox.prop = '';
-            }
-            
-            DOM.appendTo(TMP_checkbox.node, parentNode);
-            DOM.appendTo(document.createTextNode(description), TMP_checkbox.node);
-            TMP_checkbox.node.addEventListener('click',function(e){
-              Interpolate.dispatchListeners(
-                Map.getListeners(this.model, this.name)
-                , {type : _.MODEL_EVENT_TYPES.checkbox_change
-                , checked : (e.target.checked === true)
-                , value : e.target.value
-                }
-              ); 
-            });
-            Map.pushNodes(TMP_checkbox);
-            
+          
+          /*check to see if it's embedded and annotate*/
+          if(!_.isNullOrEmpty(propName) && propName.indexOf('zTMPzDOT') != _.UNINDEXED){
+            repeatAnnotationParts = propName.split('DOT');
+            TMP_checkbox.repeatModelName = repeatAnnotationParts[1];
+            TMP_checkbox.repeatAttribName = repeatAnnotationParts[2]; 
+            TMP_checkbox.repeatIndex = (_.isDef(partMap['index'])) ? parseInt(partMap['index']) : -1;;
+            TMP_checkbox.index = _.UNINDEXED;
+            TMP_checkbox.prop = '';
           }
           
-          parentNode.removeChild(DOM_Node);
+          DOM.appendTo(TMP_checkbox.node, parentNode);
+          DOM.appendTo(document.createTextNode(description), TMP_checkbox.node);
+          TMP_checkbox.node.addEventListener('click',function(e){
+            Interpolate.dispatchListeners(
+              Map.getListeners(this.model, this.name)
+              , {type : _.MODEL_EVENT_TYPES.checkbox_change
+              , checked : (e.target.checked === true)
+              , value : e.target.value
+              }
+            ); 
+          });
+          Map.pushNodes(TMP_checkbox);
+          
         }
-        break;
-      default:
-        /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
-        DOM_Node.addEventListener('keyup', function(e){
-          Map.setAttribute(this.model, this.name, e.target.value);
-          Interpolate.interpolate(this.model, this.name, e.target.value );
-        });
-        break;
+        
+        parentNode.removeChild(DOM_Node);
+      }
+    }else{
+      /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
+      DOM_Node.addEventListener('keyup', function(e){
+        Map.setAttribute(this.model, this.name, e.target.value);
+        Interpolate.interpolate(this.model, this.name, e.target.value );
+      });
     }
+
   },
   preProcessNode : function(DOM_Node, modelName, attribName, scope){
     if(!_.isDef(DOM_Node) || DOM_Node === null )
