@@ -44,5 +44,8 @@ describe('Regression Suite', function() {
     test('templar-interpolation-filter');
     test('templar-interpolation-input');
     test('templar-model-listener');
+    test('templar-interpolation-input');
+    test('templar-interpolation-input-checkbox');
+    test('templar-interpolation-input-radio');
   });
 });

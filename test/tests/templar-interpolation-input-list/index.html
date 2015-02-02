@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="../../../css/styles.css" /> 
+<link rel="stylesheet" href="../../lib/qunit.css" /> 
+
+<script src="../../../../structureJS/core/structureJS-core.js" id="structureJS"
+        data-project-manifest="../../lib/structureJS/test-manifest"
+        data-project-config="../../lib/structureJS/test-config">
+</script>
+
+<title>Templar</title>
+</head>
+<body class="apl-default-hidden">
+<div id="header">
+<h2>TemplarJS</h2>
+</div>
+<br>
+
+<div id="nav">
+
+</div>
+<!-- This is a good example of the issue of tradeoff b/w backend/user 
+code complexity and feature richness. I was thinking of allowing the user
+to tie a model atribute to an input's "list" attribute. 
+
+This would require Templar to build a "datalist" element, inject it into the DOM,
+then perform a bunch of book keeping to make that datalist responsive to data
+changes. 
+
+After auditing all of the backend code changes I decided to nix the feature.
+I dislike the idea of creating "shadow" DOM. I don't want a user to look at their
+DOM and say "what is this doing here?" I also didn't like putting something in the 
+DOM simply so the browser could consume it as data. At least I didn't like Templar
+doing that behind the scenes. 
+
+I ultimately felt as though a user's DOM would be more readable if the user 
+constructred a datalist using a repeat. This provide the win-win of a user being able
+to look at their DOM with less framework artifacts as well as keeping my backend code 
+a little less complex.
+-->
+<input id="input" list="{{Comments.range}}" value="{{Comments.searchInput}}"/>
+
+<div id="footer"></div>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+</body>
+</html>
+

@@ -171,6 +171,7 @@ return {
         tmp_node = null,
         inputType = DOM_Node.getAttribute('type') || '';
     inputType = inputType.toLowerCase();
+    
     /*id embedded node*/
     if(  (match = NONTERMINAL_REGEX.exec(DOM_Node.getAttribute('value'))) != null){
       /*IF the NT has an index, this signals NT is repeat property and NOT embedded. 
@@ -181,12 +182,14 @@ return {
       modelNameParts = this.parseModelAttribName(match[2]);
       DOM_Node.model = modelNameParts[0];
       DOM_Node.name = modelNameParts[1];
-      
+    
+    /*block below most likely redundant*/  
     }else if( (match = regex.exec(DOM_Node.getAttribute('value'))) !== null){
       modelNameParts = Process.parseModelAttribName(matches[2]);
       DOM_Node.model = modelNameParts[0];
       DOM_Node.name = modelNameParts[1];
     }
+    
     if(inputType == 'checkbox' || inputType == 'radio'){
       var attrib = Map.getAttribute(DOM_Node.model, DOM_Node.name),
           TMP_checkbox = null,
@@ -198,19 +201,20 @@ return {
         && !_.isNullOrEmpty(scope)){
 
         for(var i = 0; i < attrib.length; i++){
+        
           if(_.isString(attrib[i])){
             value = description = attrib[i];
           } else {
             value = (_.isDef(attrib[i].value)) ? attrib[i].value : value;
             description = (_.isDef(attrib[i].description)) ? attrib[i].description : description;
           }
+          
           TMP_checkbox = new TMP_Node(document.createElement('input'),DOM_Node.model, DOM_Node.name, i) ;
           TMP_checkbox.scope = scope;
           TMP_checkbox.node.model = TMP_checkbox.modelName;
           TMP_checkbox.node.name = TMP_checkbox.attribName;
           DOM.cloneAttributes(DOM_Node, TMP_checkbox.node);
           TMP_checkbox.node.setAttribute('value', value);
-
           
           /*check to see if it's embedded and annotate*/
           if(!_.isNullOrEmpty(propName) && propName.indexOf('zTMPzDOT') != _.UNINDEXED){
