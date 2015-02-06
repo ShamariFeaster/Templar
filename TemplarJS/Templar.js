@@ -6,11 +6,13 @@ var Map = require('Map');
 var Route = require('Route');
 var Model = require('ModelHeader');
 var System = require('System');
+var DOM = require('DOM');
 
 var Templar = function(controlName){
   var control = new ControlNode(),
       lateBind = null;
-    control.controlBaseNodes = Map.getBaseControls(controlName);
+      
+  control.controlBaseNodes = Map.getBaseControls(controlName);
   /*This is primarily for repated controls which won't exist until AFTER interpolation. B/c they
     are objects we can bind an assignment that will happen later than the assignment in the controller.
     We late bind the binding of any listeners attached to controls. This is because those listeners will
@@ -34,6 +36,20 @@ var Templar = function(controlName){
 };
 
 Templar._onloadHandlerMap = Object.create(null);
+Templar._components = Object.create(null);
+Templar._components.length = 0;
+
+Templar.Component = function(attributes, onCreate, templateURL){
+  if(!(this instanceof Templar.Component))
+    return new Templar.Component();
+    
+  this.attributes = attributes || Object.create(null);
+  this.onCreate = onCreate || function(){};
+  this.templateURL = templateURL || '';
+  this.templateContent = '';
+  this.templateStyle = null;
+  this.templateDOMTree = null;
+};
 
 Templar.success = function(partialFileName, onloadFunction){
   if(!_.isDef(this._onloadHandlerMap[partialFileName])){
@@ -65,6 +81,41 @@ Templar.dataModel = function(modelName, modelObj){
 Templar.Route = function(routeObj){
   Route.buildRouteTree(routeObj);
 };
+
+Templar.component = function(name, definitionObj){
+  if(!_.isString(name) || !_.isDef(definitionObj)) return;
+  var component = new Templar.Component();
+  for(var prop in definitionObj){
+    if(definitionObj.hasOwnProperty(prop)){
+      switch(prop){
+        case 'templateURL' :
+          var url = definitionObj['templateURL'];
+          
+          if(!_.isNullOrEmpty(url)){
+            component.templateURL = url;
+            Templar._components.length++;
+          }else{
+            throw 'Component declaration must have a URL.'
+          }
+          
+          break;
+        case 'attributes' :
+          var attribs = definitionObj['attributes'];
+          component.attributes = (_.isObject('test')) ? attribs : Object.create(null);
+          break;
+        case 'onCreate' :
+          var onCreate = definitionObj['onCreate'];
+          component.onCreate = (_.isString(onCreate)) ? onCreate : function(){};
+          break;
+      }
+    }
+  }
+  
+  Templar._components[name.toLowerCase()] = component;
+  
+  //blah
+};
+
 Templar.RouteObj = Route;
 Templar.Map = Map;
 

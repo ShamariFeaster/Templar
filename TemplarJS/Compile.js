@@ -139,6 +139,14 @@ return {
           partMap.length = 0;
           prevLength = 0;
         }else if(DOM_Node.nodeType == _.ELEMENT_NODE){
+          var component = Templar._components[DOM_Node.tagName.toLowerCase()];
+          if(_.isDef(component)
+              && !_.isNullOrEmpty(component.templateContent)
+              && !_.isNull(DOM_Node.parentNode)){
+            _.log('Is Defined Component: ' + DOM_Node.tagName);
+            //DOM_Node.parentNode.replaceChild(,DOM_Node)
+            
+          }
           //log('Recursing on :' + DOM_Node.tagName);
           var repeatKey = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);
           if(!_.isNullOrEmpty(repeatKey)){

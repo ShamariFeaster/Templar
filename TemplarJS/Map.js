@@ -239,8 +239,12 @@ return {
   },
   
   getAttribute : function(modelName, attribName, index, property){
+    if(!_.isDef(_map[modelName])) 
+      return null;
+      
     var returnVal = null,
         Model = _map[modelName]['api'];
+    
     
     if(_.isDef(_map[modelName]) && _.isDef(_map[modelName]['modelObj'][attribName])){
       returnVal = _map[modelName]['modelObj'][attribName];

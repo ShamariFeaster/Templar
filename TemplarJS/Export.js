@@ -14,6 +14,23 @@ var _ = this;
 
     /******Initialization*******/
 
+function beginBootstrap(scope){
+  var defaultNodeToHide;
+  Compile.compile( document.getElementsByTagName('body')[0], scope ); 
+  Link.bindModel( State.compiledScopes );
+  Bootstrap.bindTargetSetter();
+  
+  var defaultHiddenNodeList = document.querySelectorAll('.apl-default-hidden');
+  if(!_.isNull(defaultHiddenNodeList)){
+    for(var i = 0; i < defaultHiddenNodeList.length; i++){
+      defaultNodeToHide = defaultHiddenNodeList[i];
+      DOM.modifyClasses(defaultNodeToHide,'','apl-default-hidden');
+    }
+  }
+  
+  _.log('Body COMPILATION DONE');
+}
+    
 structureJS.done(function(){
   if(!_.isDef( console )){
     console = { log : function(){} };
@@ -53,21 +70,45 @@ structureJS.done(function(){
     }
     
   }
-    
-    
-  Compile.compile( document.getElementsByTagName('body')[0], scope ); 
-  Link.bindModel( State.compiledScopes );
-  Bootstrap.bindTargetSetter();
   
-  var defaultHiddenNodeList = document.querySelectorAll('.apl-default-hidden');
-  if(!_.isNull(defaultHiddenNodeList)){
-    for(var i = 0; i < defaultHiddenNodeList.length; i++){
-      defaultNodeToHide = defaultHiddenNodeList[i];
-      DOM.modifyClasses(defaultNodeToHide,'','apl-default-hidden');
+//Fetch components  
+  
+  var initComponentLength = Templar._components.length;
+  
+  for(cName in Templar._components){
+    if(cName === 'length') continue;
+
+    var component = Templar._components[cName];
+    
+    var callback = function(){
+    var component = this.targetNode;
+      component.templateContent = this.responseText;
+      var container = document.createElement('div');
+      container.innerHTML = component.templateContent;
+
+      var styles = container.getElementsByTagName('style');
+      var style = null;
+      for(var i = 0; i < styles.length; i++){
+        component.templateStyle = (i == 0) ? styles[i] : component.templateStyle;
+        container.removeChild(styles[i]);
+      }
+      component.templateDOMTree = container.children;
+      _.log(component.templateStyle);
+      _.log(component.templateDOMTree);
+      if(--Templar._components.length < 1){
+        beginBootstrap(scope);
+      };
+    };
+    
+    if(!_.isNullOrEmpty(component.templateURL)){
+      DOM.asynGetPartial(component.templateURL,callback, '', component);
     }
   }
-
-  _.log('Body COMPILATION DONE');
+  
+  if(initComponentLength < 1){
+    beginBootstrap(scope);
+  }
+  
 });
 
 
