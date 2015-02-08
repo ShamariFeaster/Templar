@@ -48,7 +48,7 @@ Templar.Component = function(attributes, onCreate, templateURL){
   this.templateURL = templateURL || '';
   this.templateContent = '';
   this.templateStyle = null;
-  this.templateDOMTree = null;
+  this.transclude = false;
 };
 
 Templar.success = function(partialFileName, onloadFunction){

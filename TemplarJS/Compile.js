@@ -144,7 +144,11 @@ return {
               && !_.isNullOrEmpty(component.templateContent)
               && !_.isNull(DOM_Node.parentNode)){
             _.log('Is Defined Component: ' + DOM_Node.tagName);
-            //DOM_Node.parentNode.replaceChild(,DOM_Node)
+            if(component.transclude == true){
+              component.templateContent = component.templateContent.replace('<content></content>', DOM_Node.innerHTML);
+            }
+            DOM_Node.insertAdjacentHTML('afterend', component.templateContent);
+            DOM_Node.parentNode.removeChild(DOM_Node);
             
           }
           //log('Recursing on :' + DOM_Node.tagName);

@@ -78,23 +78,34 @@ structureJS.done(function(){
   for(cName in Templar._components){
     if(cName === 'length') continue;
 
-    var component = Templar._components[cName];
+    var component = Templar._components[cName],
+        callback;
     
-    var callback = function(){
-    var component = this.targetNode;
-      component.templateContent = this.responseText;
-      var container = document.createElement('div');
-      container.innerHTML = component.templateContent;
-
-      var styles = container.getElementsByTagName('style');
-      var style = null;
+    callback = function(){
+      var component = this.targetNode,
+          container = document.createElement('div'),
+          styles = container.getElementsByTagName('style'),
+          style = null,
+          head = document.getElementsByTagName('head')[0];;
+      
+      
+      container.innerHTML = this.responseText;
+      component.transclude = (container.getElementsByTagName('content').length > 0);
+      
       for(var i = 0; i < styles.length; i++){
-        component.templateStyle = (i == 0) ? styles[i] : component.templateStyle;
-        container.removeChild(styles[i]);
+        
+        if(i == 0){
+          head.appendChild(styles[i]);
+        }else{
+          container.removeChild(styles[i]);
+        }
+       
+        
       }
-      component.templateDOMTree = container.children;
+      
+      component.templateContent = container.innerHTML;
       _.log(component.templateStyle);
-      _.log(component.templateDOMTree);
+
       if(--Templar._components.length < 1){
         beginBootstrap(scope);
       };
