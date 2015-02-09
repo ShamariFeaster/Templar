@@ -111,6 +111,11 @@ Templar.component = function(name, definitionObj){
           var attribs = definitionObj['attributes'];
           try{
             component.attributes = (_.isObject(attribs)) ? attribs : Object.create(null);
+            for(var attrib in component.attributes){
+              component.attributes[attrib] = (_.isFunc(component.attributes[attrib])) ? 
+                                                component.attributes[attrib] : 
+                                                function(){};
+            }
           }catch(e){
             /*Firefox throws type error on isObject*/
             _.log('Component "attributes" is not an object');

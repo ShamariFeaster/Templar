@@ -139,15 +139,27 @@ return {
           partMap.length = 0;
           prevLength = 0;
         }else if(DOM_Node.nodeType == _.ELEMENT_NODE){
+          /* TODO: Move to 'Component' Class
+            Initial component replacement*/
           var component = Templar._components[DOM_Node.tagName.toLowerCase()];
           if(_.isDef(component)
               && !_.isNullOrEmpty(component.templateContent)
               && !_.isNull(DOM_Node.parentNode)){
             _.log('Is Defined Component: ' + DOM_Node.tagName);
+            
+            /*Transclude content*/
             if(component.transclude == true){
               component.templateContent = component.templateContent.replace('<content></content>', DOM_Node.innerHTML);
             }
             DOM_Node.insertAdjacentHTML('afterend', component.templateContent);
+            
+            /*Initalization of custom attributes*/
+            var attribVal;
+            for(attrib in component.attributes){
+              if(!_.isNullOrEmpty(attribVal = DOM_Node.getAttribute(attrib))){
+                component.attributes[attrib].call(null, DOM_Node.nextElementSibling, attribVal);
+              }
+            }
             DOM_Node.parentNode.removeChild(DOM_Node);
             
           }

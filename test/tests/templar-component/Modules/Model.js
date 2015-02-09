@@ -12,7 +12,7 @@ Templar.component('bad_def',{
     
     },
     height : function(self, val){
-    
+      
     }
   },
   onCreate : function(self){
@@ -24,11 +24,11 @@ Templar.component('bad_def',{
 Templar.component('dialog',{
   templateURL : 'prelim-spec-for-template.html',
   attributes : {
-    width : function(self, val){
-    
+    color : function(self, val){
+      self.setAttribute('style', 'color: ' + val + ';');
     },
     height : function(self, val){
-    
+      self.setAttribute('style', 'font-size: ' + val + 'px;');
     }
   },
   onCreate : function(self){
