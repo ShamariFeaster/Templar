@@ -71,8 +71,9 @@ structureJS.done(function(){
     
   }
   
-//Fetch components  
-  
+
+  /*The length of _components indicated the # of valid declared components.
+    Validity being determined by whether the delcariont obj had a template url*/
   var initComponentLength = Templar._components.length;
   
   for(cName in Templar._components){
@@ -90,8 +91,12 @@ structureJS.done(function(){
       
       
       container.innerHTML = this.responseText;
+      /*This serves as flag that Compile.compile() uses to perform transclusion*/
       component.transclude = (container.getElementsByTagName('content').length > 0);
-      
+      /*Take the first style element from template and inject it into doc,
+        remove it and subsequent style tags from template so they don't get injected
+        in the wrong place (ie, not in head tag)*/
+        
       for(var i = 0; i < styles.length; i++){
         
         if(i == 0){
@@ -104,18 +109,18 @@ structureJS.done(function(){
       }
       
       component.templateContent = container.innerHTML;
-      _.log(component.templateStyle);
-
+      /*Kick off bottstrap when all components have been loaded*/
       if(--Templar._components.length < 1){
         beginBootstrap(scope);
       };
     };
-    
+    /*Fires off "threads" that fetch each component template. At the conclusion
+    of template fetching, callback starts bootsrap process*/
     if(!_.isNullOrEmpty(component.templateURL)){
       DOM.asynGetPartial(component.templateURL,callback, '', component);
     }
   }
-  
+  /*IF there are no components to fetch, start bootsrap*/
   if(initComponentLength < 1){
     beginBootstrap(scope);
   }

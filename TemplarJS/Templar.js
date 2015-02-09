@@ -84,7 +84,9 @@ Templar.Route = function(routeObj){
 
 Templar.component = function(name, definitionObj){
   if(!_.isString(name) || !_.isDef(definitionObj)) return;
+  
   var component = new Templar.Component();
+  
   for(var prop in definitionObj){
     if(definitionObj.hasOwnProperty(prop)){
       switch(prop){
@@ -95,17 +97,30 @@ Templar.component = function(name, definitionObj){
             component.templateURL = url;
             Templar._components.length++;
           }else{
-            throw 'Component declaration must have a URL.'
+            /*Throwing an error causes the rest of the code in whatever
+            file is holding the bad compoent declaration to stop. However the
+            loading of Templar is not halted b/c Export.js, which kicks off the
+            bootstrap is another file, executed in it's own sandbox. I should
+            have a system flag to 'bubble' up blocking errors to the bootstrap
+            process instead of throwing errors at different places.*/
+            _.log('Component "' + name + '" ignored. Declaration must have a URL.');
           }
           
           break;
         case 'attributes' :
           var attribs = definitionObj['attributes'];
-          component.attributes = (_.isObject('test')) ? attribs : Object.create(null);
+          try{
+            component.attributes = (_.isObject(attribs)) ? attribs : Object.create(null);
+          }catch(e){
+            /*Firefox throws type error on isObject*/
+            _.log('Component "attributes" is not an object');
+            component.attributes = Object.create(null);
+          }
+          
           break;
         case 'onCreate' :
           var onCreate = definitionObj['onCreate'];
-          component.onCreate = (_.isString(onCreate)) ? onCreate : function(){};
+          component.onCreate = (_.isFunc(onCreate)) ? onCreate : function(){};
           break;
       }
     }

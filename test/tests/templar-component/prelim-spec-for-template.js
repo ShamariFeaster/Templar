@@ -14,4 +14,20 @@ Templar.component('dialog',{
 
 });
 
+Templar.component('bad_def',{
+  templateURL : '',
+  attributes : {
+    width : function(self, val){
+    
+    },
+    height : function(self, val){
+    
+    }
+  },
+  onCreate : function(self){
+  
+  }
+
+});
+
 
