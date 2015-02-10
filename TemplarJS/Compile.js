@@ -163,10 +163,11 @@ return {
             /*Iniatialization of component attrib values happen in preProcessNodeAttributes(),
               which calls Interpolate.updateNodeAttributes() where the magic actually happens*/
             TMP_processed_components = Process.preProcessNodeAttributes(DOM_component, scope);
-            
-            for(var i = 0; i < TMP_processed_components.length; i++){
-              TMP_processed_components[i].isComponent = true;
-              TMP_processed_components[i].componentName = componentName;
+            /*Strange lesson here. The iter variable was named 'i'. This 'i' was clobbering
+            the value of the main loop's 'i' and 'sending the main loop back in time'. */
+            for(var z = 0; z < TMP_processed_components.length; z++){
+              TMP_processed_components[z].isComponent = true;
+              TMP_processed_components[z].componentName = componentName;
             }
             
             
