@@ -144,7 +144,7 @@ return {
           var componentName = DOM_Node.tagName.toLowerCase(),
               component = Templar._components[componentName],
               DOM_component = null,
-              TMP_component = null,
+              TMP_processed_components = null,
               attribVal,
               matches = null;
           if(_.isDef(component)
@@ -162,9 +162,13 @@ return {
             DOM.cloneAttributes(DOM_Node, DOM_component);
             /*Iniatialization of component attrib values happen in preProcessNodeAttributes(),
               which calls Interpolate.updateNodeAttributes() where the magic actually happens*/
-            TMP_component = Process.preProcessNodeAttributes(DOM_component, scope);
-            TMP_component.isComponent = true;
-            TMP_component.componentName = componentName;
+            TMP_processed_components = Process.preProcessNodeAttributes(DOM_component, scope);
+            
+            for(var i = 0; i < TMP_processed_components.length; i++){
+              TMP_processed_components[i].isComponent = true;
+              TMP_processed_components[i].componentName = componentName;
+            }
+            
             
             /*Initalization of custom attributes*/
 

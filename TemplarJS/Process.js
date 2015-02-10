@@ -32,7 +32,8 @@ return {
         match = null,
         regex = /\{\{(\w+)\.(\w+)(\[(\d+)\])*(?:\.)*(\w+)*?\}\}/g,
         modelNameParts = null,
-        tmp_node = null;
+        tmp_node = null,
+        preProcessedTMPNodes = [];
     
     /*Options don't need to be in the node tree due to having NTs in 'value' attribute*/
     if(node.hasAttributes() && node.tagName != 'OPTION'){
@@ -56,13 +57,14 @@ return {
             in repeats*/
           Interpolate.updateNodeAttributes(tmp_node, tmp_node.modelName, tmp_node.attribName);
           /*annotate node with symbolMap and push it onto modelMap */
+          preProcessedTMPNodes.push(tmp_node);
         }
         
       }
 
     }
     
-    return tmp_node;
+    return preProcessedTMPNodes;
   },
   preProcessControl : function(tmp_node){
     /*Annotate control names for compiler*/

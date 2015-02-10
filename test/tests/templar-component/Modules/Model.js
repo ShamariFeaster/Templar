@@ -4,7 +4,7 @@ Templar.dataModel('test',{
   dialogHeight : 50,
   dialogColor : 'brown'
 });
-
+/*
 Templar.component('bad_def',{
   templateURL : '',
   attributes : {
@@ -20,12 +20,12 @@ Templar.component('bad_def',{
   }
 
 });
-
+*/
 Templar.component('dialog',{
   templateURL : 'prelim-spec-for-template.html',
   attributes : {
     color : function(self, val){
-      self.setAttribute('style', 'color: ' + val + ';');
+      self.setAttribute('class',  val );
     },
     height : function(self, val){
       self.setAttribute('style', 'font-size: ' + val + 'px;');
