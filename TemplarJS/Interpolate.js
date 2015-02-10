@@ -88,7 +88,10 @@ return {
       }
     }else if(tmp_node.isComponent == true){
       component = Templar._components[tmp_node.componentName];
-      
+      /*Due to the way Process.preProcessNodeAttribute() works a component's symbolMap
+        will have a single key. This key can be used to tell us which update function to
+        run. This sinlge key situation is not the case w/ non-component tmp's as they can
+        have multiple keys (aka multiple attributes-per-node that need interpolation)*/
       if( 
           (key = Object.keys(tmp_node.symbolMap)).length > 0 
           && _.isFunc(updateFunc = component.attributes[key[0]])
@@ -186,11 +189,10 @@ return {
       }
         
       node = tmp_node.node;
-      tagName = node.tagName;
+      tagName = (tmp_node.isComponent == true) ? 'COMPONENT' : node.tagName;
       
       if(ctx.hasAttributes == true){
         updateObject = Interpolate.updateNodeAttributes(tmp_node, modelName, attributeName);
-        tagName = 'COMPONENT';
       }
         
         

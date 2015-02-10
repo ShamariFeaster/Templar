@@ -59,7 +59,9 @@ Templar.success = function(partialFileName, onloadFunction){
   if(_.isFunc(onloadFunction)){
     this._onloadHandlerMap[partialFileName].push(onloadFunction);
   }
-  
+  /*Success w/ no file name binds to interpolation_done system event. It should be
+    noted that this will only be fired once after intial body compilation. See
+    Link.bindModel() and note that all listeners to this event are cleared after exection*/
   if(_.isFunc(partialFileName)){
     System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, function(){
       partialFileName.call(null);

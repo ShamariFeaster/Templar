@@ -6,13 +6,11 @@ var Templar = structureJS.require('Templar'),
   var changeSizeCtrl = Templar('changeSize');
   
   changeSizeCtrl.listenTo('up').forEvent('click', function(){
-    TestModel.dialogHeight = TestModel.dialogHeight + 1;
-    console.log(TestModel.dialogHeight);
+    TestModel.dialogHeight++;
   });
 
   changeSizeCtrl.listenTo('down').forEvent('click', function(){
-    TestModel.dialogHeight = TestModel.dialogHeight - 1;
-    console.log(TestModel.dialogHeight);
+    TestModel.dialogHeight--;
   });
 
 });    
