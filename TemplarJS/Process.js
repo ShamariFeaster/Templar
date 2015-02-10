@@ -61,6 +61,8 @@ return {
       }
 
     }
+    
+    return tmp_node;
   },
   preProcessControl : function(tmp_node){
     /*Annotate control names for compiler*/

@@ -18,6 +18,8 @@ var TMP_Node = function(node, modelName, attribName, index){
   this.repeatModelName = '';
   this.repeatAttribName = '';
   this.repeatIndex = _.UNINDEXED;
+  this.isComponent = false;
+  this.componentName = '';
 };
 
 return TMP_Node;

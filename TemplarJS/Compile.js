@@ -141,7 +141,12 @@ return {
         }else if(DOM_Node.nodeType == _.ELEMENT_NODE){
           /* TODO: Move to 'Component' Class
             Initial component replacement*/
-          var component = Templar._components[DOM_Node.tagName.toLowerCase()];
+          var componentName = DOM_Node.tagName.toLowerCase(),
+              component = Templar._components[componentName],
+              DOM_component = null,
+              TMP_component = null,
+              attribVal,
+              matches = null;
           if(_.isDef(component)
               && !_.isNullOrEmpty(component.templateContent)
               && !_.isNull(DOM_Node.parentNode)){
@@ -152,16 +157,24 @@ return {
               component.templateContent = component.templateContent.replace('<content></content>', DOM_Node.innerHTML);
             }
             DOM_Node.insertAdjacentHTML('afterend', component.templateContent);
+            DOM_component = DOM_Node.nextElementSibling;
+            /*probably unecessary*/
+            DOM.cloneAttributes(DOM_Node, DOM_component);
+            /*Iniatialization of component attrib values happen in preProcessNodeAttributes(),
+              which calls Interpolate.updateNodeAttributes() where the magic actually happens*/
+            TMP_component = Process.preProcessNodeAttributes(DOM_component, scope);
+            TMP_component.isComponent = true;
+            TMP_component.componentName = componentName;
             
             /*Initalization of custom attributes*/
-            var attribVal;
+
             for(attrib in component.attributes){
               if(!_.isNullOrEmpty(attribVal = DOM_Node.getAttribute(attrib))){
-                component.attributes[attrib].call(null, DOM_Node.nextElementSibling, attribVal);
+                component.attributes[attrib].call(null, DOM_component, attribVal);
               }
             }
             DOM_Node.parentNode.removeChild(DOM_Node);
-            
+            DOM_Node = null;
           }
           //log('Recursing on :' + DOM_Node.tagName);
           var repeatKey = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);

@@ -59,6 +59,12 @@ Templar.success = function(partialFileName, onloadFunction){
   if(_.isFunc(onloadFunction)){
     this._onloadHandlerMap[partialFileName].push(onloadFunction);
   }
+  
+  if(_.isFunc(partialFileName)){
+    System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, function(){
+      partialFileName.call(null);
+  });
+  }
 };
 
 Templar.getPartialOnlodHandler = function(partialFileName){

@@ -1,8 +1,8 @@
 Templar = structureJS.require('Templar');
 
 Templar.dataModel('test',{
-  dialogWidth : 50,
-  dialogHeight : 50
+  dialogHeight : 50,
+  dialogColor : 'brown'
 });
 
 Templar.component('bad_def',{

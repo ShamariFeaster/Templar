@@ -48,7 +48,7 @@ return {
   updateNodeAttributes : function(tmp_node, modelName, attributeName){
     var updateObject = Object.create(null);
     var node = tmp_node.node;
-    if(node.hasAttributes()){
+    if(node.hasAttributes() && tmp_node.isComponent == false){
       var regex = /(\{\{(\w+\.\w+)\}\})/g, 
       //result array -> [1] = {{a.b}}, [2] = a.b, 4 = index, 5 = prop
           ntRegex = /(\{\{(\w+\.\w+)(\[(\d+)\])*(?:\.)*(\w+)*?\}\})/g,
@@ -58,7 +58,10 @@ return {
           uninterpolatedString = '',
           elemAttribName = '',
           currAttribVal = '',
-          elemAttributes = node.attributes;
+          elemAttributes = node.attributes,
+          component,
+          key,
+          updateFunc;
       
       for(var i = 0; i < elemAttributes.length; i++){
         elemAttribName = elemAttributes[i].name;
@@ -83,6 +86,18 @@ return {
           updateObject[elemAttribName] = intermediateValue;
         }
       }
+    }else if(tmp_node.isComponent == true){
+      component = Templar._components[tmp_node.componentName];
+      
+      if( 
+          (key = Object.keys(tmp_node.symbolMap)).length > 0 
+          && _.isFunc(updateFunc = component.attributes[key[0]])
+          && !_.isNullOrEmpty(attribVal = Map.getAttribute(modelName, attributeName))
+        ){
+        
+        updateFunc.call(null, node, attribVal);
+      }
+
     }
 
     return updateObject;
@@ -159,7 +174,8 @@ return {
         TMP_repeatBaseNode = null,
         updateObj = Object.create(null),
         nodeScopeParts = null,
-        node = null;
+        node = null,
+        tagName = '';
     /*Note that listeners are only fired for attribs that are in the nodeTree (ie, visible in the UI)*/
     Map.forEach(modelName, attributeName, function(ctx, tmp_node){
              
@@ -170,11 +186,15 @@ return {
       }
         
       node = tmp_node.node;
-      if(ctx.hasAttributes == true)
+      tagName = node.tagName;
+      
+      if(ctx.hasAttributes == true){
         updateObject = Interpolate.updateNodeAttributes(tmp_node, modelName, attributeName);
+        tagName = 'COMPONENT';
+      }
         
         
-      switch(node.tagName){
+      switch(tagName){
         
         case 'SELECT':
           /*Make sure it's an array*/
@@ -232,6 +252,8 @@ return {
         case 'INPUT':
           updateObj.text = node.value;
           updateObj.type = node.tagName.toLowerCase();
+          break;
+        case 'COMPONENT':
           break;
         default:
           var TMP_newRepeatNode = null,
