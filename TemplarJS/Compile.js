@@ -146,6 +146,7 @@ return {
               DOM_component = null,
               TMP_processed_components = null,
               attribVal,
+              templateContent,
               matches = null;
           if(_.isDef(component)
               && !_.isNullOrEmpty(component.templateContent)
@@ -154,12 +155,26 @@ return {
             
             /*Transclude content*/
             if(component.transclude == true){
-              component.templateContent = component.templateContent.replace('<content></content>', DOM_Node.innerHTML);
+              templateContent = component.templateContent.replace('<content></content>', DOM_Node.innerHTML);
             }
-            DOM_Node.insertAdjacentHTML('afterend', component.templateContent);
+            DOM_Node.insertAdjacentHTML('afterend', templateContent);
             DOM_component = DOM_Node.nextElementSibling;
+            DOM_component.tmp_component = component;
             /*probably unecessary*/
             DOM.cloneAttributes(DOM_Node, DOM_component);
+            
+            var origSetAttrib = DOM_component.setAttribute;
+            DOM_component.setAttribute = function(name, val){
+              var component = this.tmp_component,
+                  updateFunc;
+
+              if(_.isFunc(updateFunc = component.attributes[name])){
+                updateFunc.call(null, this, val);
+              }
+              
+              origSetAttrib.call(this,name, val);
+            };
+            
             /*Iniatialization of component attrib values happen in preProcessNodeAttributes(),
               which calls Interpolate.updateNodeAttributes() where the magic actually happens*/
             TMP_processed_components = Process.preProcessNodeAttributes(DOM_component, scope);

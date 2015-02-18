@@ -26,8 +26,8 @@
     Here are the test cases that need tests written:
     
     1. component is itself a control
-    2. component is wrapped in control
-    3. control uses parts of component
+    2. component is wrapped in control (control doesn't use component parts)
+    3. control uses parts of component (won't work unless parts are direct children of control)
     4. control is embedded in component
     
     
@@ -40,6 +40,23 @@
     <button id="down" name="down">-</button>
  
 </dialog>
+
+
+<dialog  color="{{test.dialogColor}}" height="{{test.dialogHeight}}" >
+  Hello
+  <div data-apl-control="changeSize">
+    <button id="up" name="up">+</button>
+    <button id="down" name="down">-</button>
+  </div>
+</dialog>
+
+<div data-apl-control="changeSize">
+  <dialog  color="{{test.dialogColor}}" height="{{test.dialogHeight}}" >
+    Hello
+  </dialog>
+  <button id="up" name="up">+</button>
+  <button id="down" name="down">-</button>
+</div>
 
 <div id="footer"></div>
 <div id="qunit"></div>

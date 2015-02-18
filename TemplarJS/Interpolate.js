@@ -19,8 +19,7 @@ return {
         }
       }
     }
-    
-    
+
   },
   
   dispatchSystemListeners : function(type){
