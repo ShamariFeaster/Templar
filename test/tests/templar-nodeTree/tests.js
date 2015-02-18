@@ -12,7 +12,6 @@ QUnit.frameworkLoaded(function(){
       DOM = structureJS.require('DOM');
       _ = structureJS.config.context;
       nodeTree = Map.getMap();
-      controlTree = Map.getControls();
       
       getCount = function(modelName, attribName){
         var cnt = 0;

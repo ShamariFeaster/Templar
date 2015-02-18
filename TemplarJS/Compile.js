@@ -162,7 +162,8 @@ return {
             DOM_component.tmp_component = component;
             /*probably unecessary*/
             DOM.cloneAttributes(DOM_Node, DOM_component);
-            
+            /*Override setAttribute() so controlling node through Control will
+              work as expected*/
             var origSetAttrib = DOM_component.setAttribute;
             DOM_component.setAttribute = function(name, val){
               var component = this.tmp_component,
@@ -208,14 +209,7 @@ return {
             during preprocessing. Once we reach that node during recursive compiling, we create a ControlNode
             using the annotated data and add it to our control list*/
           compileMe = Process.preProcessNode(DOM_Node, modelName, attribName, scope);
-          var controlKey = DOM.getDataAttribute(DOM_Node, _.IE_CTRL_ATTRIB_KEY)
-           //1 = ctrl name, 3 = mdlName, 4 = attribName, 6 = index 
-          if(!_.isNullOrEmpty(controlKey)
-            && (ctrlRegexResult = /(\w+)(\|(\w+)\.(\w+)(\.(\d+))*)*/g.exec(controlKey)) !== null){
-            controlNode = new ControlNode(DOM_Node, ctrlRegexResult[1], ctrlRegexResult[3],ctrlRegexResult[4],ctrlRegexResult[6] );
-            controlNode.scope = scope;
-            Map.addControlNode(controlNode);
-          }
+
           
           /*Repeat base nodes serve as templates and should remain uncompiled*/
           if(compileMe  == true)

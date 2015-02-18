@@ -35,13 +35,7 @@ return {
     }
       _repeatTable[tmp_node.modelName][tmp_node.attribName].push(tmp_node);
   },
-  
-  addControlNode : function(ControlNode){
-    if(!_.isDef(_controlTable[ControlNode.id]))
-      _controlTable[ControlNode.id] = [];
-    
-    _controlTable[ControlNode.id].push(ControlNode);
-  },
+
   
   exists : function(modelName){
     return (_.isDef(_map[modelName]));
@@ -92,37 +86,6 @@ return {
     return inScope;
   },
 
-  Control : {
-    forEach : function(mapFunction){
-      var ControlNode = null;
-      if(!_.isFunc(mapFunction))
-        return;
-        
-      var ctrlIdArray = null,
-          ctx = Object.create(null);
-          ctx.index = 0; 
-          ctx.id = ''; 
-          ctx.length = 0; 
-          ctx.stop = false; 
-          ctx.target = [];
-          ctx.removeItem = function(i){
-            this.target.splice(i, 1);
-            this.length = this.target.length;
-          };
-                
-      for(var id in _controlTable){
-        ctrlIdArray = ctx.target = _controlTable[id];
-        ctx.length = ctrlIdArray.length;
-        ctx.id = id;
-        for(var i = 0; i < ctrlIdArray.length; i++){
-          ctx.index = i;
-          ControlNode = ctrlIdArray[i];
-          mapFunction.call(null, ctx, ControlNode);
-          if(ctx.stop == true ) break;
-        }
-      }
-    }
-  },
   forEach : function(modelName, attribName, mapFunction){
     //__modelMap[modelName] = {modelObj : modelObj, nodes : Object.create(null), api : api, listeners : Object.create(null)};
     var target = null;
@@ -361,54 +324,8 @@ return {
                       limitTable : model_obj.limitTable, filterResults : model_obj.filterResults};
                       
   },
-  pruneControlNodesByIndex : function(tmp_node, modelName, attribName, index){
-    var Map = this,
-        scopeParts = tmp_node.scope.split(' '),
-        nodeScopeParts = null,
-        deleteNodes = true;
-    /*Remove embedded controls*/  
-    
-    Map.Control.forEach(function(ctrlCtx, ctrlNode){
 
-      nodeScopeParts = ctrlNode.scope.split(' ');
 
-      if( (nodeScopeParts[0] == scopeParts[0] && nodeScopeParts[1] == scopeParts[1])
-          && ctrlNode.index == index 
-          && ctrlNode.modelName == modelName 
-          && ctrlNode.attribName == attribName
-      ){
-        _.log('Pruning Controll Node ' + ctrlNode.node.tagName + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
-        ctrlCtx.removeItem(ctrlCtx.index);
-      }
-      
-      
-    });
-    
-  },
-  
-  pruneControlNodesByScope : function(modelName, attribName, index, compiledScopes){
-    var Map = this,
-        nodeScopeParts = null,
-        deleteNodes = true;
-    /*Remove embedded controls*/  
-    
-    Map.Control.forEach(function(ctrlCtx, ctrlNode){
-
-      nodeScopeParts = ctrlNode.scope.split(' ');
-
-      if( (Map.isInScopeList(ctrlNode.scope, compiledScopes) && !Map.isInScopeList(ctrlNode.scope, compiledScopes, true))
-          && ctrlNode.index == index 
-          /*non-repeat controls have '' for model/atrrib names*/
-          && (ctrlNode.modelName == modelName || _.isNullOrEmpty(ctrlNode.modelName))
-          && (ctrlNode.attribName == attribName || _.isNullOrEmpty(ctrlNode.attribName))
-      ){
-        _.log('Pruning Controll Node ' + ctrlNode.node.tagName + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
-        ctrlCtx.removeItem(ctrlCtx.index);
-      }
-      
-      
-    });
-  },
   
   pruneEmbeddedNodes : function(tmp_baseNode, repeatModelName, repeatAttribName, index){
     var Map = this,
@@ -454,7 +371,6 @@ return {
           if(( nodeScopeParts = tmp_node.scope.split(' ')) !== null){
             if(Map.isInScopeList(tmp_node.scope, compiledScopes) && !Map.isInScopeList(tmp_node.scope, compiledScopes, true)){
               ctx.removeItem(ctx.index);
-              Map.pruneControlNodesByScope(ctx.modelName, ctx.modelAtrribName, repeatIndex, compiledScopes );
               //Map.removeListener(ctx.modelName, ctx.modelAtrribName);
               _.log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName 
                   + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
@@ -477,16 +393,8 @@ return {
     return _map;
   },
   
-  getControls : function(){
-    return _controlTable;
-  },
-  
   getRepeat : function(){
     return _repeatTable;
-  },
-  /*returns an array of ControlNode(s). These have valid elements as their 'node' property*/
-  getBaseControls : function(controlName){
-    return (_.isDef(_controlTable[controlName])) ? _controlTable[controlName] : null;;
   }
 };
 

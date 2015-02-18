@@ -268,7 +268,6 @@ return {
           /*Kill existing repeat tree*/
           Map.forEach(modelName, attributeName, function(ctx, tmp_node){
             /*un-track all nodes*/
-            Map.pruneControlNodesByIndex(tmp_node, modelName, attributeName, tmp_node.index);
             ctx.removeItem(ctx.index);
             /*only remove visible elements from DOM, don't remove base node from DOM*/
             if(!_.isNull(tmp_node.node.parentNode) && tmp_node.index > _.UNINDEXED)

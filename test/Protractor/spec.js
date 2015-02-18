@@ -34,7 +34,7 @@ describe('Regression Suite', function() {
   it('Run Regression Suite', function() {
     test('body-interp');
     test('templar-success');
-    test('templar-controlNode');
+    //test('templar-controlNode');
     test('routing');
     test('templar-nodeTree');
     test('templar-interpolation-select');

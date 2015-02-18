@@ -9,30 +9,6 @@ var System = require('System');
 var DOM = require('DOM');
 
 var Templar = function(controlName){
-  var control = new ControlNode(),
-      lateBind = null;
-      
-  control.controlBaseNodes = Map.getBaseControls(controlName);
-  /*This is primarily for repated controls which won't exist until AFTER interpolation. B/c they
-    are objects we can bind an assignment that will happen later than the assignment in the controller.
-    We late bind the binding of any listeners attached to controls. This is because those listeners will
-    typically operate on children of a given control. Those children won't exist at the time of the client's
-    listner bindings. By delaying the bind until the system notifies us all repeats are drawn (interpolation_done)
-    , we can ensure that the client's listeners will have valid nodes to operate on.
-    */
-    
-  var lateBind = (function(control, controlName){
-      
-      return function(){
-        control.controlBaseNodes = Map.getBaseControls(controlName);
-      };
-    })(control, controlName);
-    
-  /*if interpolation_done already fired( ie, DOM is mature), immediately execute the lateBind*/
-  lateBind.call(null);
-  System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, lateBind); 
-    
-  return control;
 };
 
 Templar._onloadHandlerMap = Object.create(null);

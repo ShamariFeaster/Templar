@@ -6,7 +6,7 @@ var Map = require('Map');
 var DOM = require('DOM');
 
 return {
-  CONTROL_REGEX : new RegExp(_.CTRL_ATTRIB_STRING + '=' + '"(\\w+)"', 'g'),
+
   parseModelAttribName : function(qualifiedAttribName){
     var modelNameParts = ['',''];
     if( _.isDef(qualifiedAttribName) && ((modelNameParts = qualifiedAttribName.split('.')).length > 1)  ){
@@ -19,10 +19,7 @@ return {
     var propertyName = (_.isNullOrEmpty(propertyName)) ? '' : '.' + propertyName;
     return '{{' + modelName + '.' + modelAtrribName + '[' + index + ']' + propertyName + '}}';
   },
-  buildControlNonTerminal : function(modelName, modelAtrribName, ctrlName, index){
-    index = (_.isDef(index)) ? '.' + index : '';
-    return '|' + modelName + '.' +  modelAtrribName + index;
-  },
+
   buildRepeatNonTerminal : function(modelName, modelAtrribName, parentModel, parentAttrib, index){
     var propertyName = (_.isNullOrEmpty(propertyName)) ? '' : propertyName;
     return '{{' + modelName + '.' + modelAtrribName + '[' + index + '].zTMPzDOT' + parentModel +'DOT' + parentAttrib + '}}';
@@ -65,25 +62,6 @@ return {
     }
     
     return preProcessedTMPNodes;
-  },
-  preProcessControl : function(tmp_node){
-    /*Annotate control names for compiler*/
-    /*Indexed nodes get array pointing to embedded controls. This repeat DOM_Node's model, attrib
-      index are used to identify the control and delete it when this DOM_Node is removed*/
-    var intraCompilation = tmp_node.node.innerHTML,
-        ctrlRegexResults = null,
-        nonTerminal = '';
-    while( ((ctrlRegexResults = new RegExp(_.CTRL_ATTRIB_STRING + '=' + '"(\\w+)"', 'g').exec(tmp_node.node.innerHTML.trim())) != null )
-          && !_.isNullOrEmpty(tmp_node.modelName) && !_.isNullOrEmpty(tmp_node.attribName)){
-
-      tmp_node.embeddedControls.push(ctrlRegexResults[1]);
-      nonTerminal = _.CTRL_ATTRIB_STRING + '=' + '"' + ctrlRegexResults[1] 
-              + this.buildControlNonTerminal(tmp_node.modelName, tmp_node.attribName, ctrlRegexResults[1], tmp_node.index) + '"';
-        
-        tmp_node.node.innerHTML = intraCompilation =  
-          intraCompilation.replace(ctrlRegexResults[0], nonTerminal);
-    }
-
   },
   
   preProcessRepeatNode : function(TMP_baseNode, index){
@@ -160,8 +138,7 @@ return {
                                         !_.isNullOrEmpty(TMP_repeatedNode.node.innerHTML) :
                                         TMP_repeatedNode.hasNonTerminals;
 
-    this.preProcessControl(TMP_repeatedNode);
-    
+   
     return TMP_repeatedNode;
   },
   preProcessInputNode : function(DOM_Node, scope){
@@ -346,9 +323,6 @@ return {
         break;
 
       default: 
-        TMP_unknown = new TMP_Node(DOM_Node, modelName, attribName);
-        /*add controls on all non-repeat elements with control directive*/
-        this.preProcessControl(TMP_unknown);
         break;
     }
     
