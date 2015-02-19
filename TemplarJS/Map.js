@@ -325,8 +325,6 @@ return {
                       
   },
 
-
-  
   pruneEmbeddedNodes : function(tmp_baseNode, repeatModelName, repeatAttribName, index){
     var Map = this,
         embeddedAttribs = Object.keys(tmp_baseNode.embeddedModelAttribs),

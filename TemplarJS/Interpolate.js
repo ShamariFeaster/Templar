@@ -93,11 +93,9 @@ return {
         have multiple keys (aka multiple attributes-per-node that need interpolation)*/
       if( 
           (key = Object.keys(tmp_node.symbolMap)).length > 0 
-          && _.isFunc(updateFunc = component.attributes[key[0]])
           && !_.isNullOrEmpty(attribVal = Map.getAttribute(modelName, attributeName))
         ){
-        
-        updateFunc.call(null, node, attribVal);
+        node.setAttribute(key[0], attribVal);
       }
 
     }

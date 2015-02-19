@@ -2,25 +2,10 @@ Templar = structureJS.require('Templar');
 
 Templar.dataModel('test',{
   dialogHeight : 50,
-  dialogColor : 'brown'
+  dialogColor : 'brown',
+  range : [1,2,3,4,5,6]
 });
-/*
-Templar.component('bad_def',{
-  templateURL : '',
-  attributes : {
-    width : function(self, val){
-    
-    },
-    height : function(self, val){
-      
-    }
-  },
-  onCreate : function(self){
-  
-  }
 
-});
-*/
 Templar.component('dialog',{
   templateURL : 'prelim-spec-for-template.html',
   attributes : {
@@ -32,7 +17,16 @@ Templar.component('dialog',{
     }
   },
   onCreate : function(self){
-  
+    $('#up', self).click(function(){
+        var $self = $(self);
+        $self.attr('height', parseInt($self.attr('height')) + 1);
+    });
+    
+    $('#down', self).click(function(){
+        var $self = $(self);
+        $self.attr('height', parseInt($self.attr('height')) - 1);
+    });
+    console.log('onCreate Called');
   }
 
 });

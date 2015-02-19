@@ -12,7 +12,6 @@ structureJS.declare('classes/ClassModelAPI');
 structureJS.declare('classes/ClassModelSort');
 structureJS.declare('classes/ClassModelPage');
 structureJS.declare('classes/ClassModelFilter');
-structureJS.declare('classes/ClassControlNodeAPI');
 /*API*/
 structureJS.declare('templar/Route');
 structureJS.declare('templar/Templar');

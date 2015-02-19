@@ -16,47 +16,30 @@
 <h2>TemplarJS</h2>
 </div>
 <br>
-<!-- Note that this works only if the <content> elem is NOT wrapped in any other elem
-     This is due to the fact that Controls only register direct children of the control
-     node. Therefore, if the <content> is wrapped and the innerHTML of the component is
-    used as replacement for <content>, by the time the compiler sees the control 
-    creates a ControlNode (where the children are then wrapped in ControlNodes and other
-    book keeping stuff happens) the <content> is no longer a direct child.
     
-    Here are the test cases that need tests written:
-    
-    1. component is itself a control
-    2. component is wrapped in control (control doesn't use component parts)
-    3. control uses parts of component (won't work unless parts are direct children of control)
-    4. control is embedded in component
-    
-    
-    -->
-    
-<dialog data-apl-control="changeSize" color="{{test.dialogColor}}" height="{{test.dialogHeight}}" >
-  Hello
-
-    <button id="up" name="up">+</button>
-    <button id="down" name="down">-</button>
- 
-</dialog>
-
-
-<dialog  color="{{test.dialogColor}}" height="{{test.dialogHeight}}" >
-  Hello
-  <div data-apl-control="changeSize">
-    <button id="up" name="up">+</button>
-    <button id="down" name="down">-</button>
-  </div>
-</dialog>
-
-<div data-apl-control="changeSize">
-  <dialog id="dialog" color="green" height="{{test.dialogHeight}}" >
+<dialog id="dialog1" color="{{test.dialogColor}}" height="{{test.dialogHeight}}" >
     Hello
+</dialog>
+
+<dialog id="dialog" color="{{test.dialogColor}}" height="{{test.dialogHeight}}" >
+    Welcome To The Hotel
+</dialog>
+
+<!-- notice class attrib is not interpolated right. I's being annotated as an embed
+    but something's going wrong. I'm willing to live with this bug for now. 
+    
+    Note:  Tests not written for this
+    TODO: fix bug and write tests fot this
+    -->
+<div data-apl-repeat="test.range">
+  <dialog id="dialog" color="{{test.dialogColor}}" height="{{test.dialogHeight}}" >
+      Option {{$index}}
   </dialog>
-  <button id="up" name="up">+</button>
-  <button id="down" name="down">-</button>
 </div>
+
+<button id="attrib_up" name="up">Attrib +</button>
+<button id="attrib_down" name="down">Attrib -</button>
+
 
 <div id="footer"></div>
 <div id="qunit"></div>

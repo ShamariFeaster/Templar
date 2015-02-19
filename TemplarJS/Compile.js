@@ -162,6 +162,13 @@ return {
             DOM_component.tmp_component = component;
             /*probably unecessary*/
             DOM.cloneAttributes(DOM_Node, DOM_component);
+            
+            
+            /*Iniatialization of component attrib values happen in preProcessNodeAttributes(),
+              which calls Interpolate.updateNodeAttributes() where the magic actually happens.
+              Note: this only preprocesses attributes with NTs as values*/
+            TMP_processed_components = Process.preProcessNodeAttributes(DOM_component, scope);
+            
             /*Override setAttribute() so controlling node through Control will
               work as expected*/
             var origSetAttrib = DOM_component.setAttribute;
@@ -176,9 +183,6 @@ return {
               origSetAttrib.call(this,name, val);
             };
             
-            /*Iniatialization of component attrib values happen in preProcessNodeAttributes(),
-              which calls Interpolate.updateNodeAttributes() where the magic actually happens*/
-            TMP_processed_components = Process.preProcessNodeAttributes(DOM_component, scope);
             /*Strange lesson here. The iter variable was named 'i'. This 'i' was clobbering
             the value of the main loop's 'i' and 'sending the main loop back in time'. */
             for(var z = 0; z < TMP_processed_components.length; z++){
@@ -186,14 +190,17 @@ return {
               TMP_processed_components[z].componentName = componentName;
             }
             
-            
-            /*Initalization of custom attributes*/
-
+            /*Initalization of custom attributes using setter functions. This is for hard-coded
+              attribute values that aren't NTs*/
             for(attrib in component.attributes){
               if(!_.isNullOrEmpty(attribVal = DOM_Node.getAttribute(attrib))){
                 component.attributes[attrib].call(null, DOM_component, attribVal);
               }
             }
+            
+            /*fire onCreate*/
+            component.onCreate.call(null, DOM_component);
+            
             DOM_Node.parentNode.removeChild(DOM_Node);
             DOM_Node = null;
           }
@@ -204,10 +211,6 @@ return {
             modelName = modelNameParts[0];
             attribName = modelNameParts[1];
           }
-          /*Annotate Control Node*/
-          /*DOM_Node control value is annotated with model, attrib, and index data that is used to id and delete
-            during preprocessing. Once we reach that node during recursive compiling, we create a ControlNode
-            using the annotated data and add it to our control list*/
           compileMe = Process.preProcessNode(DOM_Node, modelName, attribName, scope);
 
           
