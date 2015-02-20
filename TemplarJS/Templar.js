@@ -1,7 +1,6 @@
 structureJS.module('Templar', function(require){
 
 var _ = this;
-var ControlNode = require('ControlNodeHeader');
 var Map = require('Map');
 var Route = require('Route');
 var Model = require('ModelHeader');
@@ -64,6 +63,14 @@ Templar.dataModel = function(modelName, modelObj){
 
 Templar.Route = function(routeObj){
   Route.buildRouteTree(routeObj);
+};
+
+Templar.setAuthorizer = function(func){
+  Route.setAuthorizer(func);
+};
+
+Templar.setAuthenticator = function(func){
+  Route.setAuthenticator(func);
 };
 
 Templar.component = function(name, definitionObj){

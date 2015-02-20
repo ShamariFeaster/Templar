@@ -2,12 +2,17 @@ structureJS.module('Route', function(require){
 
 var _ = this,
     _routeTree = Object.create(null),
+    _authorizationSet = false,
+    _authorizationFunc = function(){ return true;},
+    _authenticatorSet = false,
+    _authenticatorFunc = function(){ return true;},
+    _clientCookie = {},
     State = require('State'),
     DOM = require('DOM'),
     Map = require('Map'),
     Interpolate = require('Interpolate'),
     Bootstrap = require('Bootstrap');
-_.log(Bootstrap);
+
 return {
   routeTree : Object.create(null),
   buildRouteTree : function(routes){
@@ -131,10 +136,44 @@ return {
     routePart.nonTerminalValues = nonTerminalValues;
     return routePart;
   },
+  setAuthenticator : function(func){
+    if(_authenticatorSet === false){
+      if(_.isFunc(func)){
+        _authenticatorFunc = func;
+      }
+      _authenticatorSet = true;
+    }else{
+      _.log('ERROR: Authenticator already set');
+    }
+  },
+  
+  setAuthorizer : function(func){
+    if(_authorizationSet === false){
+      if(_.isFunc(func)){
+        _authorizationFunc = func;
+      }
+      _authorizationSet = true;
+    }else{
+      _.log('ERROR: Authenticator already set');
+    }
+  },
+  /*Authorizer function has access to object which acts as a cookie w/ session
+    persistence. It should not be readible/writable to any other context and should
+    not be stealible - it remeains to be seen whether or not this is true.
+    
+    authorize() is public and is used to set authorization and check it (on route switch)
+    */
+  authorize : function(data){
+    return _authorizationFunc.call(_clientCookie, data);
+  },
+  
+  authenticate : function(data){
+    return _authenticatorFunc.call(_clientCookie, data);
+  },
   
   handleRoute : function(url){
     var href = DOM.getHashValue(url);
-
+    
     /*Hide target node, we will unhide after compilation. Prevents seeing uncompiled template*/
     var targetId = '',
         targetNode = document.getElementById(targetId),
@@ -144,16 +183,22 @@ return {
         
     if(State.hasDeclaredRoutes == true){
       try{
-        resolvedRouteObject = Route.resolveRoute(href);
-        resolvedRouteObject.target = (!_.isNullOrEmpty(resolvedRouteObject.target)) ? 
-                          resolvedRouteObject.target : 'apl-content';
-        NTDirectives = resolvedRouteObject.nonTerminalValues;
-        
-        for(var i = 0; i < NTDirectives.length; i++){
-          modelParts = NTDirectives[i][0].split(':');
-          Map.setAttribute(modelParts[0], modelParts[1], NTDirectives[i][1]);
-          Interpolate.interpolate(modelParts[0], modelParts[1], NTDirectives[i][1] );
+        if(this.authorize.call(null, {route : href}) === true){
+          resolvedRouteObject = Route.resolveRoute(href);
+          resolvedRouteObject.target = (!_.isNullOrEmpty(resolvedRouteObject.target)) ? 
+                            resolvedRouteObject.target : 'apl-content';
+          NTDirectives = resolvedRouteObject.nonTerminalValues;
+          
+          for(var i = 0; i < NTDirectives.length; i++){
+            modelParts = NTDirectives[i][0].split(':');
+            Map.setAttribute(modelParts[0], modelParts[1], NTDirectives[i][1]);
+            Interpolate.interpolate(modelParts[0], modelParts[1], NTDirectives[i][1] );
+          }
+        }else{
+          resolvedRouteObject = _.RESTRICTED;
+          throw 'User not authorized for url: ' + url;
         }
+        
         
       }catch(e){
         _.log(e);

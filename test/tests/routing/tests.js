@@ -9,6 +9,47 @@ QUnit.asyncTest( 'Routing', function( assert ) {
     route : '#/setfooter/Environment:footer',
 
   }]);
+
+  Templar.setAuthenticator(function(data){
+    var result = {},
+        data = {userName : 'me', password : 'abc123' };
+    if(_.isDef(data) 
+      && !_.isNullOrEmpty(data.userName)
+      && !_.isNullOrEmpty(data.password)){
+      //would be remote in real life
+      result = { status : 200, role : 'Admin', expires : '19:00'};
+    }
+    
+    return result;
+  });
+  
+  Templar.setAuthorizer(function(data){
+
+    var _ = structureJS.require('Util'),
+        Route = structureJS.require('Route'),
+        State = structureJS.require('State'),
+        result = false,
+        cookie;
+        
+    cookie = Route.authenticate({});       
+    for(var prop in cookie){this[prop] = cookie[prop];}
+
+    if(_.isDef(this.status) && this.status == 200){
+      //check if cookie expired and set status accordingly
+      switch(this.role){
+        case 'Admin':
+          result = true;
+          _.log('User is Admin - Access To everything. Route ' + data.route);
+          break;
+        case 'User':
+          //block admin pages
+          _.log('User: checking requested route: ' + data.route);
+          break;
+      }
+    }
+    return result;
+  });
+
   
   var $target = $('#target'),
       baseUrl = window.location.href,

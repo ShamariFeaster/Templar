@@ -30,5 +30,7 @@ structureJS.module('Constants', function(require){
     select_change : 's_change',
     checkbox_change : 'cb_change'
   };
+  
+  _.RESTRICTED = 'RESTRICTED';
   structureJS.extendContext(_); 
 });

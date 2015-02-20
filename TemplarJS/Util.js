@@ -11,4 +11,5 @@ structureJS.module('Util', function(require){
   _.log = function(a){console.log(a);};
 
   structureJS.extendContext(_); 
+  return _;
 });
