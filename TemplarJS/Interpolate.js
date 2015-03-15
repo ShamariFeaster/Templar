@@ -190,7 +190,7 @@ return {
       
       if(ctx.hasAttributes == true){
         updateObject = Interpolate.updateNodeAttributes(tmp_node, modelName, attributeName);
-      }
+      } 
         
         
       switch(tagName){
@@ -251,6 +251,7 @@ return {
         case 'INPUT':
           updateObj.text = node.value;
           updateObj.type = node.tagName.toLowerCase();
+          updateObj.target = node;
           break;
         case 'COMPONENT':
           break;
@@ -265,16 +266,23 @@ return {
          
           /*Kill existing repeat tree*/
           Map.forEach(modelName, attributeName, function(ctx, tmp_node){
-            /*un-track all nodes*/
+
             ctx.removeItem(ctx.index);
+
             /*only remove visible elements from DOM, don't remove base node from DOM*/
-            if(!_.isNull(tmp_node.node.parentNode) && tmp_node.index > _.UNINDEXED)
+            if(!_.isNull(tmp_node.node.parentNode) && tmp_node.index > _.UNINDEXED){
               tmp_node.node.parentNode.removeChild(tmp_node.node);
+              
+            }
           });
          
           baseNodes = Map.getRepeatBaseNodes(modelName, attributeName);
+
           for(var z = 0; z < baseNodes.length; z++){
             TMP_repeatBaseNode = baseNodes[z];
+            
+            if(baseNodes[z].node.parentNode)
+              ctx.target.unshift(TMP_repeatBaseNode);
             /*If base node has no parent then it is not in the current DOM.
             NOTE (11/24/14): if we use 'apl-default-hidden' class on BODY repeats will not interp.
             I've never liked the default hidden class anyways so for now I'm not going to

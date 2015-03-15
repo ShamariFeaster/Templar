@@ -1,0 +1,26 @@
+3/13/15
+In dealing with the validation messages, I've found it may be desirable to allow
+the use of objects with named properties (ie, 1-D arrays with named indexes).
+
+This would require a change to the way repeats are interpolated; namely the 'for'
+loop would have to be changed to a 'for-in.' This is possible w/o substantial
+disruption, but for now I am goin to leave it.
+
+It should also be noted that I made a change to the way DOM.isVisble() determines
+visibility. This in turn affects the nodeTable. With repeats, this function is 
+used to determine whether nodes get put on the table and hence the change is 
+blowing up nodeTable regression tests. In light of the fact that the change affects 
+nothing else, I may just change tests to reflect the 'new normal.' 
+
+3/15/15
+
+I am still on the 'component' branch. I guess I'll just continue the demo work
+on this branch. I don't think any of this should be merged into master until the
+tests are written; however, this branch should be merged into test after the demo is 
+done.
+
+Here are a couple of things that I feel should be added, based on limitations I'm 
+hitting during construction of the demo:
+
+1. UI States
+2. Working browser forward/back navigation

@@ -52,7 +52,7 @@ return {
     if(_.isNull(DOM_node))
       return false;
     
-    return (DOM_node.offsetWidth > 0 && DOM_node.offsetHeight > 0);
+    return (DOM_node.offsetWidth > 0 || DOM_node.offsetHeight > 0);
   },
   
   asynGetPartial : function(fileName, callback, targetId, node){

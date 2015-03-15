@@ -2,6 +2,7 @@ structureJS.module('Route', function(require){
 
 var _ = this,
     _routeTree = Object.create(null),
+    _routeObjArray = [],
     _authorizationSet = false,
     _authorizationFunc = function(){ return true;},
     _authenticatorSet = false,
@@ -11,13 +12,14 @@ var _ = this,
     DOM = require('DOM'),
     Map = require('Map'),
     Interpolate = require('Interpolate'),
-    Bootstrap = require('Bootstrap');
+    Circular = structureJS.circular();
 
 return {
   routeTree : Object.create(null),
   buildRouteTree : function(routes){
     var  routeObj = Object.create(null),
          ambiguityTree = Object.create(null),
+         _routeObjArray = (_.isArray(routes)) ? routes.slice(0): [],
          normalizedName = null,
          routePartName = '',
          tmp = null,
@@ -100,7 +102,10 @@ return {
     State.hasDeclaredRoutes = true;
   
   },
-  
+  addRoute : function(routeObj){
+    _routeObjArray.push(routeObj);
+    this.buildRouteTree(_routeObjArray);
+  },
   resolveRoute : function(route){
     var parts = route.trim().split('/'),
       nonTerminalValues = [],
@@ -170,7 +175,7 @@ return {
   authenticate : function(data){
     return _authenticatorFunc.call(_clientCookie, data);
   },
-  
+  /*need de-authenticator function too*/
   handleRoute : function(url){
     var href = DOM.getHashValue(url);
     
@@ -183,7 +188,7 @@ return {
         
     if(State.hasDeclaredRoutes == true){
       try{
-        if(this.authorize.call(null, {route : href}) === true){
+        if(this.authorize.call(_clientCookie, {route : href}) === true){
           resolvedRouteObject = Route.resolveRoute(href);
           resolvedRouteObject.target = (!_.isNullOrEmpty(resolvedRouteObject.target)) ? 
                             resolvedRouteObject.target : 'apl-content';
@@ -207,6 +212,15 @@ return {
     
     
     return resolvedRouteObject;
+  },
+  
+  open : function(routeId){
+
+    if((resolvedRouteObj = this.handleRoute(routeId)) != null){
+      State.onloadFileQueue.push(resolvedRouteObj.partial);
+      DOM.asynGetPartial(resolvedRouteObj.partial, Circular('Bootstrap').loadPartialIntoTemplate, resolvedRouteObj.target);
+      window.location.href = window.location.href + resolvedRouteObj.route;
+    }
   }
   
 };
