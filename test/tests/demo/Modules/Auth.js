@@ -1,7 +1,10 @@
-var _ = structureJS.require('Util'),
-    Route = structureJS.require('Route');
+structureJS.module('AuthModule', function(require){
 
-Templar.setAuthenticator(function(inputObj){
+var _ = require('Util'),
+    _Templar = Templar,
+    Route = require('Route');
+
+_Templar.setAuthenticator(function(inputObj){
     var cookie = this;
     $.ajax('server/authenticate.php',{
       method : 'POST',
@@ -25,7 +28,7 @@ Templar.setAuthenticator(function(inputObj){
     });
   });
 
-Templar.setAuthorizer(function(data){
+_Templar.setAuthorizer(function(data){
   var cookie = this,
       url = data.route;
   
@@ -34,3 +37,6 @@ Templar.setAuthorizer(function(data){
   else
     return false;
 });
+
+});
+

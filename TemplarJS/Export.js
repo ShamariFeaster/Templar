@@ -42,6 +42,12 @@ structureJS.done(function(){
       defaultKey = '';
 
   window.onhashchange  = function(event) {
+    /*Short-circuit if using Route.open()*/
+    if(State.ignoreHashChange === true){
+      State.ignoreHashChange = false;
+      return;
+    }
+    
     var hashValue = '', resolvedRouteObj = null;
     if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){
       State.onloadFileQueue.push(resolvedRouteObj.partial);

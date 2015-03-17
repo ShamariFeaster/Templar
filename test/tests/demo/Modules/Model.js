@@ -1,20 +1,18 @@
-Templar = structureJS.require('Templar');
-
 Templar.dataModel('Environment',
 {
-
   siteName :  'SellShit.com',
   error : '',
-  pw : '',
-  un : '',
-  email : '',
-  confirm_pw : '',
+  pw : '_Drumnba422',
+  un : 'alistproducer1',
+  email : 'a@b.com',
+  confirm_pw : '_Drumnba422',
   validation_msgs : new Array(5)
 });
 
 Templar.dataModel('LandingPage',
 {
-  title :  'Profile'
+  title :  'Profile',
+  msg : 'Please Upload Your Proile Picture.'
 });
             
             

@@ -219,6 +219,7 @@ return {
     if((resolvedRouteObj = this.handleRoute(routeId)) != null){
       State.onloadFileQueue.push(resolvedRouteObj.partial);
       DOM.asynGetPartial(resolvedRouteObj.partial, Circular('Bootstrap').loadPartialIntoTemplate, resolvedRouteObj.target);
+      State.ignoreHashChange = true;
       window.location.href = window.location.href + resolvedRouteObj.route;
     }
   }

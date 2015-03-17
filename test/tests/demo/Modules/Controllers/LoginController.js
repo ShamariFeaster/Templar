@@ -1,11 +1,15 @@
-var _ = structureJS.require('Util'),
-    Route = structureJS.require('Route'),
-    EnvModel = Templar.getModel('Environment');
+structureJS.module('LoginPage', function(require){
+
+var _ = require('Util'),
+    Route = require('Route'),
+    _Templar = Templar,
+    EnvModel = _Templar.getModel('Environment'),
+    _$ = $;   /*stop unecessary scope lookup*/
     
 
-Templar.success("partials/login-screen.html", function(){
+_Templar.success("partials/login-screen.html", function(){
 
-  $('#loginform').submit(function(e){
+  _$('#loginform').submit(function(e){
 
     Route.authenticate({
       un : EnvModel.un,
@@ -19,12 +23,12 @@ Templar.success("partials/login-screen.html", function(){
     
     return false;
   });
-  var $formSignUp = $('#form-sign-up'),
-      $btnSignUp = $('#btn-sign-up');
+  var $formSignUp = _$('#form-sign-up'),
+      $btnSignUp = _$('#btn-sign-up');
       
   $formSignUp.submit(function(e){
     
-    $.ajax('server/sign-up.php',{
+    _$.ajax('server/sign-up.php',{
       method : 'POST',
       dataType : 'json',
       data : {username: EnvModel.un,
@@ -34,11 +38,18 @@ Templar.success("partials/login-screen.html", function(){
         
         if(!_.isNullOrEmpty(data.error)){
           EnvModel.error = data.error;
+        }else{
+          Route.authenticate({
+            un : EnvModel.un,
+            pw : EnvModel.pw,
+            landingPage : '/landingPage'
+          });
+        
         }
 
       },
       error : function(data, status, jqXHR){
-        EnvModel.error = data.error;
+        EnvModel.error = 'FATAL: ' + data.error;
       }
     });
 
@@ -74,7 +85,7 @@ Templar.success("partials/login-screen.html", function(){
         EnvModel.update('validation_msgs');
       },
       error : function(data, status, jqXHR){
-        EnvModel.error = data.error;
+        EnvModel.error = 'FATAL: ' + data.error;
       }
     });
   
@@ -133,4 +144,10 @@ Templar.success("partials/login-screen.html", function(){
   $('#modaltrigger1').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
   $('#modaltrigger2').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
 });
+    
+});
+
+    
+
+
 

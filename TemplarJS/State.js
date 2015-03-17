@@ -6,6 +6,7 @@ return {
   compilationThreadCount : 0,
   onloadFileQueue : [],
   hasDeclaredRoutes : false,
-  compiledScopes : ''
+  compiledScopes : '',
+  ignoreHashChange : false
 };
 });
