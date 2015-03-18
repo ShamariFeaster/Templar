@@ -5,7 +5,6 @@ var _ = require('Util'),
     _Templar = Templar,
     EnvModel = _Templar.getModel('Environment'),
     _$ = $;   /*stop unecessary scope lookup*/
-    
 
 _Templar.success("partials/login-screen.html", function(){
 

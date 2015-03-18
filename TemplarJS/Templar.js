@@ -34,12 +34,11 @@ Templar.success = function(partialFileName, onloadFunction){
   if(_.isFunc(onloadFunction)){
     this._onloadHandlerMap[partialFileName].push(onloadFunction);
   }
-  /*Success w/ no file name binds to interpolation_done system event. It should be
-    noted that this will only be fired once after intial body compilation. See
-    Link.bindModel() and note that all listeners to this event are cleared after exection*/
+  /*Success w/ no file name binds to framework_loaded system event. It should be
+    noted that this will only be fired once after intial body compilation.*/
   if(_.isFunc(partialFileName)){
-    System.setSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done, function(){
-      partialFileName.call(null);
+    System.setSystemListeners(_.SYSTEM_EVENT_TYPES.framework_loaded, function(){
+    partialFileName.call(null);
   });
   }
 };
@@ -71,6 +70,10 @@ Templar.setAuthorizer = function(func){
 
 Templar.setAuthenticator = function(func){
   Route.setAuthenticator(func);
+};
+
+Templar.setDeAuthenticator = function(func){
+  Route.setDeAuthenticator(func);
 };
 
 Templar.component = function(name, definitionObj){

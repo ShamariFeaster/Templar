@@ -24,6 +24,7 @@ structureJS.module('Constants', function(require){
   _.SYSTEM_EVENT_TYPES = { system : 'TMP_SYSTEM', 
                            interpolation_done : 'interp_done',
                            repeat_built : 'repeat_built',
+                           framework_loaded : 'fw_loaded',
                            LIST_TYPE : _.QUEUE};
   _.MODEL_EVENT_TYPES = {
     interp_change : 'i_change',

@@ -24,5 +24,6 @@ structureJS.declare('templar/Export');
 structureJS.declare('modules/Auth');
 structureJS.declare('modules/Routes');
 structureJS.declare('modules/Model');
+structureJS.declare('controllers/NavigationController');
 structureJS.declare('controllers/LoginController');
 structureJS.declare('controllers/LandingPageController');

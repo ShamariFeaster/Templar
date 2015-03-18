@@ -6,7 +6,8 @@ Templar.dataModel('Environment',
   un : 'alistproducer1',
   email : 'a@b.com',
   confirm_pw : '_Drumnba422',
-  validation_msgs : new Array(5)
+  validation_msgs : new Array(5),
+  pic_submission_url : 'server/upload-picture.php'
 });
 
 Templar.dataModel('LandingPage',

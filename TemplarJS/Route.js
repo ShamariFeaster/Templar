@@ -7,7 +7,9 @@ var _ = this,
     _authorizationFunc = function(){ return true;},
     _authenticatorSet = false,
     _authenticatorFunc = function(){ return true;},
-    _clientCookie = {},
+    _deAuthenticatorSet = false,
+    _deAuthenticatorFunc = function(){ return true;},
+    _clientCookie = (_.isDef(Storage)) ? sessionStorage : {},
     State = require('State'),
     DOM = require('DOM'),
     Map = require('Map'),
@@ -152,6 +154,17 @@ return {
     }
   },
   
+  setDeAuthenticator : function(func){
+    if(_deAuthenticatorSet === false){
+      if(_.isFunc(func)){
+        _deAuthenticatorFunc = func;
+      }
+      _authenticatorSet = true;
+    }else{
+      _.log('ERROR: DeAuthenticator already set');
+    }
+  },
+  
   setAuthorizer : function(func){
     if(_authorizationSet === false){
       if(_.isFunc(func)){
@@ -175,6 +188,11 @@ return {
   authenticate : function(data){
     return _authenticatorFunc.call(_clientCookie, data);
   },
+  
+  logout : function(data){
+    return _deAuthenticatorFunc.call(_clientCookie, data);
+  },
+  
   /*need de-authenticator function too*/
   handleRoute : function(url){
     var href = DOM.getHashValue(url);
@@ -220,7 +238,13 @@ return {
       State.onloadFileQueue.push(resolvedRouteObj.partial);
       DOM.asynGetPartial(resolvedRouteObj.partial, Circular('Bootstrap').loadPartialIntoTemplate, resolvedRouteObj.target);
       State.ignoreHashChange = true;
-      window.location.href = window.location.href + resolvedRouteObj.route;
+      var endIndex, href = window.location.href;
+      /*look for existing route anchors and remove them*/
+      if( (endIndex = href.indexOf('#')) > -1 ){
+        href = window.location.href.slice(0, endIndex);
+      }
+
+      window.location.href = href + resolvedRouteObj.route;
     }
   }
   

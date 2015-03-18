@@ -28,14 +28,33 @@ _Templar.setAuthenticator(function(inputObj){
     });
   });
 
+_Templar.setDeAuthenticator(function(inputObj){
+  var cookie = this;
+  cookie['status'] = 403;
+});
+  
 _Templar.setAuthorizer(function(data){
   var cookie = this,
-      url = data.route;
+      url = (_.isString(data.route)) ? data.route.replace('#','') : ''.
+      isAuthorized = false;
   
-  if(_.isDef(cookie['status']) && cookie['status'] == 200)
-    return true;
-  else
-    return false;
+  switch(url){
+  
+    case '/login':
+      isAuthorized = true;
+      break;
+      
+    case '/landingPage':
+      if(_.isDef(cookie['status']) && cookie['status'] == 200){
+        isAuthorized = true;
+      }
+      break;
+      
+    default:
+      break;
+  }
+   return isAuthorized;
+
 });
 
 });

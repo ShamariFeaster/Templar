@@ -10,7 +10,8 @@ var _ = this;
     Route = require('Route'),
     Link = require('Link'),
     Interpolate = require('Interpolate'),
-    Process = require('Process');
+    Process = require('Process'),
+    System = require('System');;
 
     /******Initialization*******/
 
@@ -18,6 +19,8 @@ function beginBootstrap(scope){
   var defaultNodeToHide;
   Compile.compile( document.getElementsByTagName('body')[0], scope ); 
   Link.bindModel( State.compiledScopes );
+  Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.framework_loaded);
+  System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.framework_loaded);
   Bootstrap.bindTargetSetter();
   
   var defaultHiddenNodeList = document.querySelectorAll('.apl-default-hidden');

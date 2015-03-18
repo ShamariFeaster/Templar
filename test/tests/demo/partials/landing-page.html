@@ -8,8 +8,10 @@
 
 
 <div id="">
-  <form id="form_pp_pic" name="form_pp_pic" method="post" type="multipart/form-data" action="">
+  <form id="form_pp_pic" name="form_pp_pic" method="post" type="multipart/form-data" action="{{Environment.pic_submission_url}}">
     <label for="profile_pic">Profile Image:</label>
-    <input type="file" name="profile_pic" id="profile_pic" tabindex="1">
+    <input type="file" name="profile_pic[]" id="profile_pic" tabindex="1">
+    <button type="submit">Upload Image</button>
   </form>
+  <img id="preview"/>
 </div>
