@@ -171,7 +171,7 @@ return {
       DOM_Node.name = modelNameParts[1];
     }
     
-    if(inputType == 'checkbox' || inputType == 'radio'){
+    if(inputType == 'checkbox' || inputType == 'radio' && match != null){
       var attrib = Map.getAttribute(DOM_Node.model, DOM_Node.name),
           TMP_checkbox = null,
           parentNode = null,
@@ -206,9 +206,10 @@ return {
             TMP_checkbox.index = _.UNINDEXED;
             TMP_checkbox.prop = '';
           }
-          
-          DOM.appendTo(TMP_checkbox.node, parentNode);
-          DOM.appendTo(document.createTextNode(description), TMP_checkbox.node);
+          parentNode.insertBefore(TMP_checkbox.node, DOM_Node);
+          parentNode.insertBefore(document.createTextNode(description), DOM_Node);
+          //DOM.appendTo(TMP_checkbox.node, DOM_Node);
+          //DOM.appendTo(document.createTextNode(description), TMP_checkbox.node);
           TMP_checkbox.node.addEventListener('click',function(e){
             Interpolate.dispatchListeners(
               Map.getListeners(this.model, this.name)
@@ -299,8 +300,8 @@ return {
         });
         break;
       case 'INPUT':
-          this.preProcessInputNode(DOM_Node, scope);
-        
+        this.preProcessInputNode(DOM_Node, scope);
+        compileMe = false;
         /*tmp_node is pushed during preProcessNodeAttributes()*/
         
         /*we don't push DOM_Node here because we can only bind to input using the value attribute
