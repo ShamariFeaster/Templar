@@ -8,9 +8,20 @@ var _ = require('Util'),
 
 _Templar.success(function(){
 
-$('#logout').click(function(e){
+$('#goto-logout').click(function(e){
+  EnvModel.error = '';
   Route.logout();
   Route.open('/login');
+});
+
+$('#goto-profile').click(function(e){
+  EnvModel.error = '';
+  Route.open('/profile');
+});
+
+$('#goto-edit-profile').click(function(e){
+  EnvModel.error = '';
+  Route.open('/editProfile');
 });
 
 });

@@ -1,6 +1,7 @@
 Templar.dataModel('Environment',
 {
   siteName :  'GenericSocialNetwork.com',
+  banner : '',
   error : '',
   pw : '_Drumnba422',
   un : 'alistproducer1',
@@ -13,8 +14,6 @@ Templar.dataModel('Environment',
 
 Templar.dataModel('ProfileForm',
 {
-  title :  'Profile',
-  msg : 'Update Your Profile Here',
   uploadStatus : '',
   fn : '',
   ln : '',
@@ -33,6 +32,7 @@ Templar.dataModel('ProfileForm',
         {description :'Yes Please', value : 'na'}],
   description : ''
 });
+
             
             
 Templar.dataModel('UserProfile',
@@ -42,6 +42,12 @@ Templar.dataModel('UserProfile',
   email : '',
   fn : '',
   ln : '',
+  state : '',
+  city : '',
+  age : '',
+  sex : '',
+  role : '',
+  description : '',
   pp_src : ''
 });
 

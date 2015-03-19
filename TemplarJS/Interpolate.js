@@ -255,6 +255,12 @@ return {
           updateObj.type = node.tagName.toLowerCase();
           updateObj.target = node;
           break;
+        case 'TEXTAREA':
+          tmp_node.node.value = attributeVal;
+          updateObj.text = node.value;
+          updateObj.type = node.tagName.toLowerCase();
+          updateObj.target = node;
+          break;
         case 'COMPONENT':
           break;
         case 'IMG':

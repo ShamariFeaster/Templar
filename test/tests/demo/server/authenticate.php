@@ -5,7 +5,7 @@ include 'setup/connect.php';
 $response = array('error' => '', 'id' => -1
                   , 'cookie' => array('status' => 403));
 $errors = array();
-
+$pp_dir = 'server/profile_pics/';
 /*SS Validation*/
 if(($len = strlen($_REQUEST['username'])) < 8 || $len > 20 ){
   $response['error'] .= 'Invalid Username Length ';
@@ -36,8 +36,31 @@ if ($res->num_rows > 0) {
 
   if(strcmp($encrpytedPw, $dbPw) === 0){
     $response['cookie']['status'] = 200;
-    $response['cookie']['uid'] = $row['uid'];
+    $response['cookie']['uid'] = $uid = $row['uid'];
     $response['cookie']['un'] = $_REQUEST['username'];
+    
+$query = <<<EOD
+  SELECT role, sex, fn, ln, age, state, city, description, profile_pic_uri
+  FROM user 
+  WHERE uid = '$uid'
+EOD;
+
+    $result = $mysqli->query($query);
+    if($result->num_rows > 0){  
+      $row = $result->fetch_assoc();
+      $response['cookie']['role'] = $row['role'];
+      $response['cookie']['sex'] = $row['sex'];
+      $response['cookie']['fn'] = $row['fn'];
+      $response['cookie']['ln'] = $row['ln'];
+      $response['cookie']['age'] = $row['age'];
+      $response['cookie']['state'] = $row['state'];
+      $response['cookie']['city'] = $row['city'];
+      $response['cookie']['description'] = $row['description'];
+      $response['cookie']['pp_src'] = $pp_dir.$row['profile_pic_uri'];
+      $response['cookie']['profileExists'] = true;
+    }else{
+      $response['error'] .= $mysqli->error;
+    }
   }
 }
 

@@ -244,7 +244,7 @@ return {
   
   open : function(routeId){
 
-    if((resolvedRouteObj = this.handleRoute(routeId)) != null){
+    if((resolvedRouteObj = this.handleRoute(routeId)) != null && resolvedRouteObj !== _.RESTRICTED){
       State.onloadFileQueue.push(resolvedRouteObj.partial);
       DOM.asynGetPartial(resolvedRouteObj.partial, Circular('Bootstrap').loadPartialIntoTemplate, resolvedRouteObj.target);
       State.ignoreHashChange = true;

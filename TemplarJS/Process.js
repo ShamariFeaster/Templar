@@ -328,6 +328,13 @@ return {
         /*we don't push DOM_Node here because we can only bind to input using the value attribute
           which is a guarantee that DOM_Node will be pushed during preProcessNodeAttributes() */
         break;
+      case 'TEXTAREA':
+        this.preProcessInputNode(DOM_Node, scope);
+        /*tmp_node is pushed during preProcessNodeAttributes()*/
+        
+        /*we don't push DOM_Node here because we can only bind to input using the value attribute
+          which is a guarantee that DOM_Node will be pushed during preProcessNodeAttributes() */
+        break;
       case 'REPEAT':
         attributeVal = Map.getAttribute(modelName, attribName);
         DOM_Node.model = modelName;

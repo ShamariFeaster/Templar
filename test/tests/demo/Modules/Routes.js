@@ -1,11 +1,15 @@
 Templar.Route([
 {
-    route : '#/landingPage',
-    partial : 'partials/landing-page.html'
+    route : '#/editProfile',
+    partial : 'partials/edit-profile.html'
 },
 {
-    route : '#/landingPage/LandingPage:uploadStatus/Error/Environment:error/',
-    partial : 'partials/landing-page.html'
+    route : '#/editProfile/ProfileForm:uploadStatus/',
+    partial : 'partials/edit-profile.html'
+},
+{
+    route : '#/profile',
+    partial : 'partials/profile.html'
 },
 {
     route : '#/login',

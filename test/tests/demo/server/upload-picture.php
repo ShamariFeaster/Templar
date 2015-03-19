@@ -15,7 +15,14 @@ $hashedName = md5($uid.$img_size.$img_name);
 $targetFile = $uploadDir . $hashedName;//should throw in timestamp
 
 if(move_uploaded_file($img_path, $targetFile)){
-  $query = "UPDATE user SET profile_pic_uri = '$hashedName', pp_mime = '$image_mime' WHERE uid = '$uid'";
+
+$query = <<<EOD
+  UPDATE user SET 
+  profile_pic_uri = '$hashedName', 
+  pp_mime = '$image_mime' 
+  WHERE uid = '$uid'
+EOD;
+
   $mysqli->query($query);
   $response['error'] = (strlen($mysqli->error) < 1) ? 'none' : $mysqli->error;
   $response['uploadStatus'] = (strlen($mysqli->error) < 1) ? 1 : 0;
@@ -23,7 +30,7 @@ if(move_uploaded_file($img_path, $targetFile)){
 }
 
 $response['extra'] = 'Image Path: '.$targetFile.' | Mime: '.$image_mime;
-header('Location: /Templar/test/tests/demo/#/landingPage/'.$response['uploadStatus'].'/error/'.$response['error'].'/');
+header('Location: /Templar/test/tests/demo/#/editProfile/'.$response['uploadStatus']);
 
 
 /*

@@ -1,15 +1,18 @@
-<h1>{{ProfileForm.title}}</h1>
+<h1>{{Environment.banner}}</h1>
 
 <div class="center">
   <p>Welcome <strong>{{UserProfile.un}}</strong></p>
-  <p>{{ProfileForm.msg}}</p>
+  <p>Update Your Profile Here</p>
   <h2>{{Environment.error}}</h2>
   <h2>{{Environment.success_msg}}</h2>
 </div>
 
 
 
-  <form id="form_pp_pic" name="form_pp_pic" method="post" enctype="multipart/form-data" action="{{Environment.pic_submission_url}}">
+  <form id="form_pp_pic" name="form_pp_pic" 
+        method="post" enctype="multipart/form-data" 
+        action="{{Environment.pic_submission_url}}"
+        autocomplete="off">
     <row>
       <img id="pp_preview" src="{{UserProfile.pp_src}}" >
     </row>
@@ -27,12 +30,12 @@
     
     <row>
       <label for="first-name">First Name:</label>
-      <input type="text" name="first-name" value="{{UserProfile.fn}}">
+      <input type="text" name="first-name" value="{{ProfileForm.fn}}">
     </row>
     
     <row>
       <label for="last-name">Last Name:</label>
-      <input type="text" name="last-name" value="{{UserProfile.ln}}">
+      <input type="text" name="last-name" value="{{ProfileForm.ln}}">
     </row>
     
     <row>

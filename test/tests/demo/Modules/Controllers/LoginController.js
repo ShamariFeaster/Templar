@@ -2,6 +2,7 @@ structureJS.module('LoginPage', function(require){
 
 var _ = require('Util'),
     Route = require('Route'),
+    Helper = require('Helper'),
     _Templar = Templar,
     EnvModel = _Templar.getModel('Environment'),
     UserProfileModel = _Templar.getModel('UserProfile'),
@@ -14,7 +15,6 @@ _Templar.success("partials/login-screen.html", function(){
     Route.authenticate({
       un : EnvModel.un,
       pw : EnvModel.pw,
-      landingPage : '/landingPage',
       UserProfile : UserProfileModel,
       badPassword : function(msg){
         EnvModel.error = msg;
@@ -24,35 +24,27 @@ _Templar.success("partials/login-screen.html", function(){
     
     return false;
   });
+  
   var $formSignUp = _$('#form-sign-up'),
       $btnSignUp = _$('#btn-sign-up');
       
   $formSignUp.submit(function(e){
-    
-    _$.ajax('server/sign-up.php',{
-      method : 'POST',
-      dataType : 'json',
-      data : {username: EnvModel.un,
-              password : EnvModel.pw,
-              email : EnvModel.email},
-      success : function(data, status, jqXHR){
-        
-        if(!_.isNullOrEmpty(data.error)){
-          EnvModel.error = data.error;
-        }else{
-          Route.authenticate({
-            un : EnvModel.un,
-            pw : EnvModel.pw,
-            landingPage : '/landingPage'
-          });
-        
-        }
-
+  
+    Helper.ajax(
+      'server/sign-up.php',
+      {
+        username: EnvModel.un,
+        password : EnvModel.pw,
+        email : EnvModel.email
       },
-      error : function(data, status, jqXHR){
-        EnvModel.error = 'FATAL: ' + data.error;
-      }
-    });
+      function(data, status, jqXHR){
+        Route.authenticate({
+          un : EnvModel.un,
+          pw : EnvModel.pw,
+          UserProfile : UserProfileModel,
+          landingPage : '/editProfile'
+        });
+      });
 
     return false;
   });
@@ -70,6 +62,7 @@ _Templar.success("partials/login-screen.html", function(){
   }
   
   EnvModel.listen('un', function(e){
+
     _$.ajax('server/check-unique.php',{
       method : 'POST',
       data : {username: EnvModel.un},

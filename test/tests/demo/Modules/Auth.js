@@ -21,7 +21,27 @@ _Templar.setAuthenticator(function(inputObj){
         }else{
           cookie['uid'] = UserProfile.uid = data.cookie.uid;
           cookie['un'] = UserProfile.un = data.cookie.un;
-          Route.open(inputObj.landingPage);
+          
+          cookie['role'] = UserProfile.role = data.cookie.role;
+          cookie['sex'] = UserProfile.sex = data.cookie.sex;
+          cookie['fn'] = UserProfile.fn = data.cookie.fn;
+          cookie['ln'] = UserProfile.ln = data.cookie.ln;
+          cookie['age'] = UserProfile.age = data.cookie.age;
+          cookie['state'] = UserProfile.state = data.cookie.state;
+          cookie['city'] = UserProfile.city = data.cookie.city;
+          cookie['description'] = UserProfile.description = data.cookie.description;
+          cookie['pp_src'] = UserProfile.pp_src = data.cookie.pp_src;
+          
+          if(_.isDef(inputObj.landingPage)){
+            Route.open(inputObj.landingPage);
+          }else{
+            /*No explicit landing page means choose profile page if profile exists*/
+            if(_.isDef(data.cookie.profileExists)){
+              Route.open('/profile');
+            }else{
+              Route.open('/editProfile');
+            }
+          }
         }
       },
       
@@ -43,7 +63,9 @@ _Templar.setAuthorizer(function(data){
       
   if(url.indexOf('/login') == 0){
     isAuthorized = true;
-  }else if(url.indexOf('/landingPage') == 0){
+  }else if(url.indexOf('/profile') == 0
+          || url.indexOf('/editProfile') == 0){
+          
     if(_.isDef(cookie['status']) && cookie['status'] == 200){
         isAuthorized = true;
       }
