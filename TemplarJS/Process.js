@@ -176,24 +176,27 @@ return {
           TMP_checkbox = null,
           parentNode = null,
           value = '',
-          description = '';
+          description = '',
+          checked = false;
       if(!_.isNull(attrib) && _.isArray(attrib) 
         && (parentNode = DOM_Node.parentNode) !== null 
         && !_.isNullOrEmpty(scope)){
 
-        for(var i = 0; i < attrib.length; i++){
+        for(var i = 0; i < attrib.length; i++, checked = false){
         
           if(_.isString(attrib[i])){
             value = description = attrib[i];
           } else {
             value = (_.isDef(attrib[i].value)) ? attrib[i].value : value;
             description = (_.isDef(attrib[i].description)) ? attrib[i].description : description;
+            checked = (_.isDef(attrib[i].checked)) ? attrib[i].checked : checked;
           }
           
           TMP_checkbox = new TMP_Node(document.createElement('input'),DOM_Node.model, DOM_Node.name, i) ;
           TMP_checkbox.scope = scope;
           TMP_checkbox.node.model = TMP_checkbox.modelName;
           TMP_checkbox.node.name = TMP_checkbox.attribName;
+          TMP_checkbox.node.checked = checked;
           DOM.cloneAttributes(DOM_Node, TMP_checkbox.node);
           TMP_checkbox.node.setAttribute('value', value);
           
@@ -208,8 +211,15 @@ return {
           }
           parentNode.insertBefore(TMP_checkbox.node, DOM_Node);
           parentNode.insertBefore(document.createTextNode(description), DOM_Node);
-          //DOM.appendTo(TMP_checkbox.node, DOM_Node);
-          //DOM.appendTo(document.createTextNode(description), TMP_checkbox.node);
+          
+          if(checked == true){
+            attrib.current_selection = {
+              type : _.MODEL_EVENT_TYPES.checkbox_change
+              , checked : true
+              , value : value
+            }
+          }
+          
           TMP_checkbox.node.addEventListener('click',function(e){
             var attrib = Map.getAttribute(this.model, this.name),
               selectObj = 

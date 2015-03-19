@@ -25,7 +25,7 @@ Templar.dataModel('LandingPage',
           return range;
         })(),
   sex : [
-        {description : 'Male', value : 'm'}, 
+        {description : 'Male', value : 'm', checked : true}, 
         {description : 'Female', value : 'f'}, 
         {description :'Yes Please', value : 'na'}],
   description : ''

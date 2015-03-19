@@ -234,6 +234,7 @@ return {
             updateObj.text = node.parentNode.options[node.parentNode.selectedIndex].text;
             updateObj.type = _.MODEL_EVENT_TYPES.interp_change;
             updateObj.index = node.parentNode.selectedIndex;
+            attributeVal.current_selection = updateObj;
             /*New model data, shorter than existing data, kill extra nodes*/
             if(ctx.modelAttribIndex >= attributeVal.length){
               ctx.removeItem(ctx.index); /*from indexes[key] = []*/
