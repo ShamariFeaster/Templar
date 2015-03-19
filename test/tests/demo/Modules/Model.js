@@ -7,14 +7,17 @@ Templar.dataModel('Environment',
   email : 'a@b.com',
   confirm_pw : '_Drumnba422',
   validation_msgs : new Array(5),
+  success_msg : '',
   pic_submission_url : 'server/upload-picture.php'
 });
 
-Templar.dataModel('LandingPage',
+Templar.dataModel('ProfileForm',
 {
   title :  'Profile',
   msg : 'Update Your Profile Here',
   uploadStatus : '',
+  fn : '',
+  ln : '',
   states : structureJS.require('GeoInfo-US').states,
   cities : [],
   age : (function(){
@@ -39,7 +42,6 @@ Templar.dataModel('UserProfile',
   email : '',
   fn : '',
   ln : '',
-  pw : '',
   pp_src : ''
 });
 

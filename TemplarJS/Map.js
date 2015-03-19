@@ -172,6 +172,12 @@ return {
     var tmp_node = DOMorTMPNode;
     if(!(tmp_node instanceof TMP_Node))
       tmp_node = new TMP_Node(DOMorTMPNode, modelName, attribName, index);
+    
+    /*If user references unknown model in template we get this error*/
+    if(!_.isDef(_map[tmp_node.modelName])){
+      throw 'FATAL ERROR: Model "' + tmp_node.modelName + ' Is Undeclared.';
+    }
+       
     if( !_.isDef(_map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]) ){
       _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName] = { nodes : []};
 
@@ -314,6 +320,8 @@ return {
     var model = null;
     if(this.exists(modelName)){
       model = _map[modelName]['api'];
+    }else{
+      _.log('WARNING: Attempt To Get Model "' + modelName + '" Failed.');
     }
     return model;
   },

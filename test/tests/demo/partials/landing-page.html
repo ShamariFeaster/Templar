@@ -1,9 +1,10 @@
-<h1>{{LandingPage.title}}</h1>
+<h1>{{ProfileForm.title}}</h1>
 
 <div class="center">
   <p>Welcome <strong>{{UserProfile.un}}</strong></p>
-  <p>{{LandingPage.msg}}</p>
+  <p>{{ProfileForm.msg}}</p>
   <h2>{{Environment.error}}</h2>
+  <h2>{{Environment.success_msg}}</h2>
 </div>
 
 
@@ -36,27 +37,27 @@
     
     <row>
       <label for="age">Age:</label>
-      <select name="age">{{LandingPage.age}}</select>
+      <select name="age">{{ProfileForm.age}}</select>
     </row>
     
     <row>
       <label for="sex">Sex:</label>
-      <input type="radio" name="sex" value="{{LandingPage.sex}}"/>
+      <input type="radio" name="sex" value="{{ProfileForm.sex}}"/>
     </row>
     
     <row>
       <label for="state">State:</label>
-      <select name="state">{{LandingPage.states}}</select>
+      <select name="state">{{ProfileForm.states}}</select>
     </row>
     
     <row>
       <label for="city">City:</label>
-      <select name="city">{{LandingPage.cities}}</select>
+      <select name="city">{{ProfileForm.cities}}</select>
     </row>
     
     <row>
       <label for="city">Description:</label>
-      <textarea rows="3" name="description" value="{{LandingPage.description}}"></textarea>
+      <textarea rows="3" name="description" value="{{ProfileForm.description}}"></textarea>
     </row>
     
     
