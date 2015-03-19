@@ -211,12 +211,18 @@ return {
           //DOM.appendTo(TMP_checkbox.node, DOM_Node);
           //DOM.appendTo(document.createTextNode(description), TMP_checkbox.node);
           TMP_checkbox.node.addEventListener('click',function(e){
+            var attrib = Map.getAttribute(this.model, this.name),
+              selectObj = 
+                {
+                  type : _.MODEL_EVENT_TYPES.checkbox_change
+                  , checked : (e.target.checked === true)
+                  , value : e.target.value
+                };
+          
+            attrib.current_selection = selectObj;
             Interpolate.dispatchListeners(
               Map.getListeners(this.model, this.name)
-              , {type : _.MODEL_EVENT_TYPES.checkbox_change
-              , checked : (e.target.checked === true)
-              , value : e.target.value
-              }
+              , selectObj
             ); 
           });
           Map.pushNodes(TMP_checkbox);
@@ -289,13 +295,19 @@ return {
           
         }
         DOM_Node.addEventListener('change', function(e){
+          var attrib = Map.getAttribute(this.model, this.name),
+              selectObj = 
+                {
+                  type : _.MODEL_EVENT_TYPES.select_change
+                  , value : e.target.options[e.target.selectedIndex].value
+                  , text : e.target.options[e.target.selectedIndex].text
+                  , index : e.target.selectedIndex
+                };
+          
+          attrib.current_selection = selectObj;
           Interpolate.dispatchListeners(
             Map.getListeners(this.model, this.name)
-            , {type : _.MODEL_EVENT_TYPES.select_change
-            , value : e.target.options[e.target.selectedIndex].value
-            , text : e.target.options[e.target.selectedIndex].text
-            , index : e.target.selectedIndex
-              }
+            , selectObj
           );                  
         });
         break;

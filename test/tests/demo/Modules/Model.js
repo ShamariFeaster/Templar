@@ -1,6 +1,6 @@
 Templar.dataModel('Environment',
 {
-  siteName :  'SellShit.com',
+  siteName :  'GenericSocialNetwork.com',
   error : '',
   pw : '_Drumnba422',
   un : 'alistproducer1',
@@ -13,7 +13,7 @@ Templar.dataModel('Environment',
 Templar.dataModel('LandingPage',
 {
   title :  'Profile',
-  msg : 'Please Upload Your Proile Picture.',
+  msg : 'Update Your Profile Here',
   uploadStatus : '',
   states : structureJS.require('GeoInfo-US').states,
   cities : [],
@@ -24,7 +24,11 @@ Templar.dataModel('LandingPage',
           }
           return range;
         })(),
-  sex : ['Male', 'Female', 'Yes Please']
+  sex : [
+        {description : 'Male', value : 'm'}, 
+        {description : 'Female', value : 'f'}, 
+        {description :'Yes Please', value : 'na'}],
+  description : ''
 });
             
             

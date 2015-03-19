@@ -307,6 +307,12 @@ form#form_pp_pic label {
   display: inline-block;
 }
 
-form#form_pp_pic input[type=text], form#form_pp_pic select{
+form#form_pp_pic input[type=text], 
+form#form_pp_pic select,
+form#form_pp_pic textarea{
   min-width: 200px;
+}
+
+#btn-update-profile {
+  min-width : 283px;
 }

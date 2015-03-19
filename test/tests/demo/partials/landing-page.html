@@ -1,7 +1,7 @@
-<h1>{{LandingPage.title}}!</h1>
+<h1>{{LandingPage.title}}</h1>
 
 <div class="center">
-  <p>Welcome {{UserProfile.un}}</p>
+  <p>Welcome <strong>{{UserProfile.un}}</strong></p>
   <p>{{LandingPage.msg}}</p>
   <h2>{{Environment.error}}</h2>
 </div>
@@ -53,7 +53,19 @@
       <label for="city">City:</label>
       <select name="city">{{LandingPage.cities}}</select>
     </row>
+    
+    <row>
+      <label for="city">Description:</label>
+      <textarea rows="3" name="description" value="{{LandingPage.description}}"></textarea>
+    </row>
+    
+    
+    
   </form>
 
+  <row>
+    <button class="flatbtn" id="btn-update-profile">Update</button>
+  </row>
+    
   <div style="clear: both;">
 
