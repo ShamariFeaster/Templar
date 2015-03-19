@@ -4,6 +4,7 @@ var _ = require('Util'),
     Route = require('Route'),
     _Templar = Templar,
     EnvModel = _Templar.getModel('Environment'),
+    UserProfileModel = _Templar.getModel('UserProfile'),
     _$ = $;   /*stop unecessary scope lookup*/
 
 _Templar.success("partials/login-screen.html", function(){
@@ -14,6 +15,7 @@ _Templar.success("partials/login-screen.html", function(){
       un : EnvModel.un,
       pw : EnvModel.pw,
       landingPage : '/landingPage',
+      UserProfile : UserProfileModel,
       badPassword : function(msg){
         EnvModel.error = msg;
       }
@@ -68,7 +70,7 @@ _Templar.success("partials/login-screen.html", function(){
   }
   
   EnvModel.listen('un', function(e){
-    $.ajax('server/check-unique.php',{
+    _$.ajax('server/check-unique.php',{
       method : 'POST',
       data : {username: EnvModel.un},
       
@@ -140,8 +142,8 @@ _Templar.success("partials/login-screen.html", function(){
     EnvModel.update('validation_msgs');
   });
   
-  $('#modaltrigger1').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
-  $('#modaltrigger2').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
+  _$('#modaltrigger1').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
+  _$('#modaltrigger2').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
 });
     
 });

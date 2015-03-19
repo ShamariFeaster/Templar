@@ -142,7 +142,7 @@ return {
           /* TODO: Move to 'Component' Class
             Initial component replacement*/
           var componentName = DOM_Node.tagName.toLowerCase(),
-              component = Templar._components[componentName],
+              component = Templar._components[componentName], /*this is of type Component*/
               DOM_component = null,
               TMP_processed_components = null,
               attribVal,
@@ -153,12 +153,23 @@ return {
               && !_.isNull(DOM_Node.parentNode)){
             _.log('Is Defined Component: ' + DOM_Node.tagName);
             
+            
+            DOM_Node.insertAdjacentHTML('afterend', component.templateContent);
+            DOM_component = DOM_Node.nextElementSibling;
+            
             /*Transclude content*/
             if(component.transclude == true){
-              templateContent = component.templateContent.replace('<content></content>', DOM_Node.innerHTML);
+              var contentNode;
+              if(!_.isNullOrEmpty(contentNode = DOM_component.getElementsByTagName('CONTENT'))){
+                contentNode = contentNode[0];
+                for(var q = 0; q < DOM_Node.childNodes.length; q++){
+                  DOM_component.insertBefore(DOM_Node.childNodes[q], contentNode);
+                  q--;/*Live list, insertBefore() shortents childNodes by 1*/
+                }
+                DOM_component.removeChild(contentNode);
+              }
             }
-            DOM_Node.insertAdjacentHTML('afterend', templateContent);
-            DOM_component = DOM_Node.nextElementSibling;
+            
             DOM_component.tmp_component = component;
             /*probably unecessary*/
             DOM.cloneAttributes(DOM_Node, DOM_component);

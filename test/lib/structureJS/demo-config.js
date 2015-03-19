@@ -3,6 +3,7 @@ structureJS.configure(
   styles : ['css/style'],
   globals : [
              'lib/jquery', 
+             'lib/GeoInfo',
              'js/jquery.leanModal.min',
              'bililite/bililiteRange',
              'bililite/jquery.sendkeys',
@@ -13,6 +14,7 @@ structureJS.configure(
             'templar/DOM'],
   directory_aliases : {modules : 'Modules/',
                        controllers : 'Modules/Controllers/',
+                       components : 'Modules/Components/',
                       templar : '../../../TemplarJS/', 
                       classes : '../../../TemplarJS/Classes/',
                       lib : '../../lib/',

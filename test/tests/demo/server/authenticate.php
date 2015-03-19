@@ -36,7 +36,8 @@ if ($res->num_rows > 0) {
 
   if(strcmp($encrpytedPw, $dbPw) === 0){
     $response['cookie']['status'] = 200;
-    $response['cookie']['uid'] = $row['uid'];;
+    $response['cookie']['uid'] = $row['uid'];
+    $response['cookie']['un'] = $_REQUEST['username'];
   }
 }
 

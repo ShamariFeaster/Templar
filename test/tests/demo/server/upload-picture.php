@@ -2,19 +2,29 @@
 
 include 'setup/connect.php'; 
 
-$response = array('error' => '', 'extra' => '');
-print_r($_FILES);
-$img_path = $_FILES['profile_pic']['tmp_name'];
-$image_mime = $_FILES['profile_pic']['type'];
+$response = array('error' => '', 'extra' => '', 'uploadStatus' => 0);
 
-$response['extra'] = 'Image Path: '.$img_path.' | Mime: '.$image_mime;
+$img_path = $_FILES['profile_pic']['tmp_name'][0];
+$image_mime = $_FILES['profile_pic']['type'][0];
+$img_size = $_FILES['profile_pic']['size'][0];
+$img_name = $_FILES['profile_pic']['name'][0];
+$uid = $_REQUEST['uid'];
 
-$blob = fopen($img_path,'rb');
+$uploadDir = 'profile_pics/';
+$hashedName = md5($uid.$img_size.$img_name);
+$targetFile = $uploadDir . $hashedName;//should throw in timestamp
 
-$mysqli->query("INSERT profile_pic, pp_mime INTO user VALUES ('$blob', '$image_mime')");
-$response['error'] = $mysqli->error;
+if(move_uploaded_file($img_path, $targetFile)){
+  $query = "UPDATE user SET profile_pic_uri = '$hashedName', pp_mime = '$image_mime' WHERE uid = '$uid'";
+  $mysqli->query($query);
+  $response['error'] = (strlen($mysqli->error) < 1) ? 'none' : $mysqli->error;
+  $response['uploadStatus'] = (strlen($mysqli->error) < 1) ? 1 : 0;
+  /*Not propagating error back to client*/
+}
 
-echo json_encode($response);
+$response['extra'] = 'Image Path: '.$targetFile.' | Mime: '.$image_mime;
+header('Location: /Templar/test/tests/demo/#/landingPage/'.$response['uploadStatus'].'/error/'.$response['error'].'/');
+
 
 /*
 $username = mysql_real_escape_string($_REQUEST['username']);  

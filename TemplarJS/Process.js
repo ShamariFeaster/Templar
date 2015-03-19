@@ -301,7 +301,6 @@ return {
         break;
       case 'INPUT':
         this.preProcessInputNode(DOM_Node, scope);
-        compileMe = false;
         /*tmp_node is pushed during preProcessNodeAttributes()*/
         
         /*we don't push DOM_Node here because we can only bind to input using the value attribute

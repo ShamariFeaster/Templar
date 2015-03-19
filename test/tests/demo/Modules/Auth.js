@@ -5,7 +5,8 @@ var _ = require('Util'),
     Route = require('Route');
 
 _Templar.setAuthenticator(function(inputObj){
-    var cookie = this;
+    var cookie = this,
+        UserProfile = inputObj.UserProfile;
     $.ajax('server/authenticate.php',{
       method : 'POST',
       dataType : 'json',
@@ -18,6 +19,8 @@ _Templar.setAuthenticator(function(inputObj){
         if(cookie['status'] == 403){
           inputObj.badPassword.call(null, 'Invalid Password');
         }else{
+          cookie['uid'] = UserProfile.uid = data.cookie.uid;
+          cookie['un'] = UserProfile.un = data.cookie.un;
           Route.open(inputObj.landingPage);
         }
       },
@@ -35,24 +38,19 @@ _Templar.setDeAuthenticator(function(inputObj){
   
 _Templar.setAuthorizer(function(data){
   var cookie = this,
-      url = (_.isString(data.route)) ? data.route.replace('#','') : ''.
+      url = (_.isString(data.route)) ? data.route.replace('#','') : '',
       isAuthorized = false;
-  
-  switch(url){
-  
-    case '/login':
-      isAuthorized = true;
-      break;
       
-    case '/landingPage':
-      if(_.isDef(cookie['status']) && cookie['status'] == 200){
+  if(url.indexOf('/login') == 0){
+    isAuthorized = true;
+  }else if(url.indexOf('/landingPage') == 0){
+    if(_.isDef(cookie['status']) && cookie['status'] == 200){
         isAuthorized = true;
       }
-      break;
-      
-    default:
-      break;
+  }else{
+    //noop
   }
+
    return isAuthorized;
 
 });

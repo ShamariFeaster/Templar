@@ -13,17 +13,30 @@ Templar.dataModel('Environment',
 Templar.dataModel('LandingPage',
 {
   title :  'Profile',
-  msg : 'Please Upload Your Proile Picture.'
+  msg : 'Please Upload Your Proile Picture.',
+  uploadStatus : '',
+  states : structureJS.require('GeoInfo-US').states,
+  cities : [],
+  age : (function(){
+          var range = [];
+          for(var i = 18; i < 51; i++){ 
+            range.push(i);
+          }
+          return range;
+        })(),
+  sex : ['Male', 'Female', 'Yes Please']
 });
             
             
 Templar.dataModel('UserProfile',
 {
   un :  '',
+  uid : '',
   email : '',
   fn : '',
   ln : '',
-  pw : ''
+  pw : '',
+  pp_src : ''
 });
 
 

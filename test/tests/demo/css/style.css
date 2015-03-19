@@ -299,3 +299,14 @@ p {
 
 .error {color : red;}
 .success {color : green;}
+
+#pp_preview {width : 80px; height : 80px;}
+
+form#form_pp_pic label { 
+  min-width: 80px;
+  display: inline-block;
+}
+
+form#form_pp_pic input[type=text], form#form_pp_pic select{
+  min-width: 200px;
+}

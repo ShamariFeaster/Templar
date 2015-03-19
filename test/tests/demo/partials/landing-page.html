@@ -7,11 +7,53 @@
 </div>
 
 
-<div id="">
-  <form id="form_pp_pic" name="form_pp_pic" method="post" type="multipart/form-data" action="{{Environment.pic_submission_url}}">
-    <label for="profile_pic">Profile Image:</label>
-    <input type="file" name="profile_pic[]" id="profile_pic" tabindex="1">
-    <button type="submit">Upload Image</button>
+
+  <form id="form_pp_pic" name="form_pp_pic" method="post" enctype="multipart/form-data" action="{{Environment.pic_submission_url}}">
+    <row>
+      <img id="pp_preview" src="{{UserProfile.pp_src}}" >
+    </row>
+    
+    <row>
+      <label for="profile_pic">Profile Image:</label>
+      <input type="file" name="profile_pic[]" id="profile_pic" tabindex="1">
+      <input type="hidden" name="uid" value="{{UserProfile.uid}}">
+    </row>
+    
+    <row>
+      <label></label>
+      <button type="submit">Upload Image</button>
+    </row>
+    
+    <row>
+      <label for="first-name">First Name:</label>
+      <input type="text" name="first-name" value="{{UserProfile.fn}}">
+    </row>
+    
+    <row>
+      <label for="last-name">Last Name:</label>
+      <input type="text" name="last-name" value="{{UserProfile.ln}}">
+    </row>
+    
+    <row>
+      <label for="age">Age:</label>
+      <select name="age">{{LandingPage.age}}</select>
+    </row>
+    
+    <row>
+      <label for="sex">Sex:</label>
+      <input type="radio" name="sex" value="{{LandingPage.sex}}"/>
+    </row>
+    
+    <row>
+      <label for="state">State:</label>
+      <select name="state">{{LandingPage.states}}</select>
+    </row>
+    
+    <row>
+      <label for="city">City:</label>
+      <select name="city">{{LandingPage.cities}}</select>
+    </row>
   </form>
-  <img id="preview"/>
-</div>
+
+  <div style="clear: both;">
+

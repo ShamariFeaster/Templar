@@ -24,3 +24,11 @@ hitting during construction of the demo:
 
 1. UI States
 2. Working browser forward/back navigation
+
+3/18/15
+
+Found serious problem with route resolution algo. HAs to do with a node spawning 
+multiple NT branches. Currently the algo despends on the use of lookaheads to know
+where to go next; however, this breaks down in the case of multiple branches b/c
+I'm limited to a single lookahead. The route itself can't tell me which of the possible
+branches to take b/c the route parts are anonymous data. Gotta sleep on it.
