@@ -57,7 +57,12 @@ return {
         nextPart = (x+1 < parts.length) ? parts[x+1] : null;
         nextType = (!_.isNull(nextPart)) ? 
           (_.NT_REGEX.test(nextPart)) ? _.NON_TERMINAL : _.TERMINAL : null;
-          
+        /*To keep resolution effient we constrain routes with 2 subsequent NTs. The
+          alternative is depth-first traversal w/ backtracking until we find a match.
+          This would defeat the purpose of the algo*/
+        if(thisType == _.NON_TERMINAL && nextType == _.NON_TERMINAL){
+          throw 'ERROR: Route Contains two consecutive variables.';
+        }  
         routePartName = (thisType == _.NON_TERMINAL) ? parts[x] : parts[x].toLowerCase();  
         /*Basically we flatten the tree by normalizing NT names*/
         normalizedName = (_.NT_REGEX.test(parts[x])) ? 'NT' : routePartName;
@@ -65,10 +70,15 @@ return {
         if(!_.isDef(tmp[routePartName])){
           tmp[routePartName] = Object.create(null);
           tmp[routePartName].endOfChain = false;
-          tmp[routePartName].lookaheadVal = (nextType == _.NON_TERMINAL) ? nextPart : '';
-          tmp[routePartName].lookaheadType = nextType;
+          tmp[routePartName].thisVal = routePartName;
+          tmp[routePartName].thisType = thisType;
           terminalBranchCreated = true; 
         }
+        /*New, longer routes may add lookaheads, by taking this out of the above block,
+          we allow for this.*/
+        tmp[routePartName].lookaheadVal = (nextType == _.NON_TERMINAL) ? nextPart : '';
+        tmp[routePartName].lookaheadType = nextType;
+        
         /*Make parallel tree with NT names normalized so they don't spawn branches. */
         if(!_.isDef(tat[normalizedName])){
           tat[normalizedName] = Object.create(null);
@@ -77,6 +87,9 @@ return {
         
         
         tmp = tmp[routePartName];
+        
+        
+        
         tat = tat[normalizedName];
 
         route = routes[i].route;
