@@ -204,12 +204,13 @@ return {
               /*amount of nodes needed*/
               var newNodeCnt = attributeVal.length - ctx.modelAttribLength,
                   /*where to start the new indexes in the 'indexes' table*/
-                  newNodeIndex = attributeVal.length - newNodeCnt;
+                  newNodeIndex = attributeVal.length - newNodeCnt,
+                  text, value;
               
               for(var q = 0; q < newNodeCnt; q++, newNodeIndex++, ctx.modelAttribLength++){
                 var tmp_option = new TMP_Node(document.createElement("option"),modelName, attributeName, newNodeIndex);
-                tmp_option.node.text = attributeVal[newNodeIndex].text;
-                tmp_option.node.value = attributeVal[newNodeIndex].value;
+                tmp_option.node.text = ( _.isDef(text = attributeVal[newNodeIndex].text) ) ? text : attributeVal[newNodeIndex];
+                tmp_option.node.value = ( _.isDef(value = attributeVal[newNodeIndex].value) ) ? value : attributeVal[newNodeIndex];
                 node.appendChild(tmp_option.node);
                 tmp_option.scope = tmp_node.scope;
                 Map.pushNodes(tmp_option);
@@ -222,8 +223,8 @@ return {
         case 'OPTION':
           if(_.isArray(attributeVal)){
             if(attributeVal.length <= ctx.modelAttribLength && ctx.modelAttribIndex < attributeVal.length){
-                node.text = attributeVal[ctx.modelAttribIndex].text;
-                node.value = attributeVal[ctx.modelAttribIndex].value;
+                node.text = ( _.isDef(text = attributeVal[ctx.modelAttribIndex].text) ) ? text : attributeVal[ctx.modelAttribIndex];
+                node.value = ( _.isDef(value = attributeVal[ctx.modelAttribIndex].value) ) ? value : attributeVal[ctx.modelAttribIndex];
                 node.parentNode.selectedIndex = 
                   (_.isDef(attributeVal[ctx.modelAttribIndex].selected) && attributeVal[ctx.modelAttribIndex].selected == true) ? 
                     ctx.modelAttribIndex : node.parentNode.selectedIndex;
@@ -254,6 +255,8 @@ return {
           updateObj.target = node;
           break;
         case 'COMPONENT':
+          break;
+        case 'IMG':
           break;
         default:
           var TMP_newRepeatNode = null,

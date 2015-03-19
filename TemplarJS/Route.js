@@ -85,11 +85,8 @@ return {
           nonAmbiguousBranchCreated = true;
         }
         
-        
         tmp = tmp[routePartName];
-        
-        
-        
+                
         tat = tat[normalizedName];
 
         route = routes[i].route;
