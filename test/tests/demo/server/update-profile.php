@@ -23,17 +23,19 @@ $desc = $_REQUEST['description'];
 $query = <<<EOD
           UPDATE user 
           SET
-          fn = '$fn',
-          ln = '$ln',
-          age = '$age',
-          sex = '$sex',
-          state = '$state',
-          city = '$city',
-          description = '$desc'
-          WHERE uid = '$uid';
+          fn = ?,
+          ln = ?,
+          age = ?,
+          sex = ?,
+          state = ?,
+          city = ?,
+          description = ?
+          WHERE uid = ?;
 EOD;
+$stmt = $mysqli->prepare($query);
+$stmt->bind_param("sssssssi", $fn, $ln, $age, $sex, $state, $city, $desc, $uid);
+$stmt->execute();
 
-$mysqli->query($query);
 $response['error'] = $mysqli->error;
 
 if(strlen($response['error']) == 0){

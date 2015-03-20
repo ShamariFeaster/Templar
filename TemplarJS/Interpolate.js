@@ -251,6 +251,12 @@ return {
           updateObj.type = node.tagName.toLowerCase();
           break;
         case 'INPUT':
+          
+          /*New list passed, rebuild checkboxes or radios*/
+          if(!_.isArray(attributeVal)){
+            tmp_node.node.value = attributeVal;
+          }
+          
           updateObj.text = node.value;
           updateObj.type = node.tagName.toLowerCase();
           updateObj.target = node;
