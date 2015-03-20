@@ -286,7 +286,7 @@ return {
           break;
         case 'INPUT':
           /*array would mean bound to checkbox*/
-          if(!_.isArray(attributeVal)){
+          if(!_.isArray(attributeVal) && State.ignoreKeyUp == false){
             tmp_node.node.value = attributeVal;
           }
           

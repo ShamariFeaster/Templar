@@ -7,6 +7,7 @@ return {
   onloadFileQueue : [],
   hasDeclaredRoutes : false,
   compiledScopes : '',
-  ignoreHashChange : false
+  ignoreHashChange : false,
+  ignoreKeyUp : false
 };
 });

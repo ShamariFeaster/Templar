@@ -262,7 +262,11 @@ return {
       /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
       DOM_Node.addEventListener('keyup', function(e){
         Map.setAttribute(this.model, this.name, e.target.value);
+        /*a change to an input that is interpolated will redraw the input value pushing the cursor 
+          to the end. This prevents that.*/
+        State.ignoreKeyUp = true; 
         Interpolate.interpolate(this.model, this.name, e.target.value );
+        State.ignoreKeyUp = false;
       });
     }
 

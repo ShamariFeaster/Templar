@@ -9,48 +9,40 @@ var _ = require('Util'),
     LoginFormMdl = _Templar.getModel('LoginForm'),
     _$ = $;   /*stop unecessary scope lookup*/
 
-_Templar.success("partials/login-screen.html", function(){
-
-  _$('#loginform').submit(function(e){
-
-    Route.authenticate({
-      un : LoginFormMdl.un,
-      pw : LoginFormMdl.pw,
-      UserProfile : UserProfileModel,
-      badPassword : function(msg){
-        EnvModel.error = msg;
-      }
-    });
-    
-    
-    return false;
+function loginHandler(e){
+  Route.authenticate({
+    un : LoginFormMdl.un,
+    pw : LoginFormMdl.pw,
+    UserProfile : UserProfileModel,
+    badPassword : function(msg){
+      EnvModel.error = msg;
+    }
   });
   
-  var $formSignUp = _$('#form-sign-up'),
-      $btnSignUp = _$('#btn-sign-up');
-      
-  $formSignUp.submit(function(e){
-  
-    Helper.ajax(
-      'server/sign-up.php',
-      {
-        username: LoginFormMdl.un,
-        password : LoginFormMdl.pw,
-        email : LoginFormMdl.email
-      },
-      function(data, status, jqXHR){
-        Route.authenticate({
-          un : LoginFormMdl.un,
-          pw : LoginFormMdl.pw,
-          UserProfile : UserProfileModel,
-          landingPage : '/editProfile'
-        });
+  return false;
+}
+
+function signupHandler(e){
+  Helper.ajax(
+    'server/sign-up.php',
+    {
+      username: LoginFormMdl.un,
+      password : LoginFormMdl.pw,
+      email : LoginFormMdl.email
+    },
+    function(data, status, jqXHR){
+      Route.authenticate({
+        un : LoginFormMdl.un,
+        pw : LoginFormMdl.pw,
+        UserProfile : UserProfileModel,
+        landingPage : '/editProfile'
       });
+    });
 
-    return false;
-  });
-  
-  function enableSubmission(){
+  return false;
+}
+
+function enableSubmission(){
     if(
       !LoginFormMdl.validation_msgs[0] && 
       !LoginFormMdl.validation_msgs[1] && 
@@ -61,6 +53,14 @@ _Templar.success("partials/login-screen.html", function(){
       LoginFormMdl.submissionDisabled = false;
     }
   }
+  
+_Templar.success("partials/login-screen.html", function(){
+
+  _$('#loginform').submit(loginHandler);     
+  _$('#form-sign-up').submit(signupHandler);
+  _$('#modaltrigger1').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
+  _$('#modaltrigger2').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
+  
   
   LoginFormMdl.listen('un', function(e){
 
@@ -136,8 +136,6 @@ _Templar.success("partials/login-screen.html", function(){
     LoginFormMdl.update('validation_msgs');
   });
   
-  _$('#modaltrigger1').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
-  _$('#modaltrigger2').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
 });
     
 });
