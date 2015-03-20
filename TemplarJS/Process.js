@@ -232,9 +232,9 @@ return {
           }
           parentNode.insertBefore(TMP_checkbox.node, DOM_Node);
           parentNode.insertBefore(document.createTextNode(description), DOM_Node);
-          
+          /*sets current_selection w/o firing setter.*/
           if(checked == true){
-            attrib.current_selection = value;
+            attrib._value_ = value;
           }
           
           TMP_checkbox.node.addEventListener('click',function(e){
@@ -246,7 +246,7 @@ return {
                     , value : e.target.value
                   };
           
-            attrib.current_selection = e.target.value;
+            attrib._value_ = e.target.value;
             Interpolate.dispatchListeners(
               Map.getListeners(this.model, this.name)
               , selectObj
@@ -306,7 +306,7 @@ return {
         TMP_select.scope = scope;
         //push select onto 'interpolate' array
         Map.pushNodes(TMP_select);
-        if(DOM_Node.children.length < 1){
+        if(DOM_Node.children.length < 1 && _.isArray(attributeVal)){
           
           for(var i = 0; i < attributeVal.length; i++){
             TMP_option = new TMP_Node(document.createElement("option"),modelNameParts[0], modelNameParts[1], i) ;
@@ -331,7 +331,7 @@ return {
                   , index : e.target.selectedIndex
                 };
           
-          attrib.current_selection = selectObj;
+          attrib.current_selection = selectObj.value;
           Interpolate.dispatchListeners(
             Map.getListeners(this.model, this.name)
             , selectObj

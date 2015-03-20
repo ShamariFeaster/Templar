@@ -89,10 +89,9 @@ var Bootstrap = {
       times and prematurely causing unecessary overhead and misfiring of our onload handlers. Dangers of
       multiple interps is tearing down/rebuilding repeats which destroys control nodes causing control failure*/
     if(State.compilationThreadCount <= 0){
-      
       Map.pruneNodeTreeByScope( State.compiledScopes ); 
-      Bootstrap.fireOnloads();
       Link.bindModel( State.compiledScopes );
+      Bootstrap.fireOnloads();
       Bootstrap.bindTargetSetter();
       State.compilationThreadCount = 0;
     }

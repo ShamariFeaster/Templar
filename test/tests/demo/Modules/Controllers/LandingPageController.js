@@ -16,22 +16,27 @@ _Templar.success("partials/edit-profile.html", function(){
                       'Your Profile Picture Upload Failed' : '';
   EnvModel.success_msg = '';
   
+  ProfileFormMdl.listen('states', function(e){
+    ProfileFormMdl.cities = GeoInfo['city_map'][e.text];
+  });
+  
   ProfileFormMdl.fn = UserProfileModel.fn;
   ProfileFormMdl.ln = UserProfileModel.ln;
   ProfileFormMdl.description = UserProfileModel.description; 
   ProfileFormMdl.sex.current_selection = UserProfileModel.sex;
+  ProfileFormMdl.states.current_selection = UserProfileModel.state;
+  ProfileFormMdl.age.current_selection = UserProfileModel.age;
+  ProfileFormMdl.cities.current_selection = UserProfileModel.city;
   /*
-  ProfileFormMdl.age = UserProfileModel.age;
-  ProfileFormMdl.states = UserProfileModel.fn;
+  
+  
   ProfileFormMdl.cities = UserProfileModel.fn;
   */
   
   UserProfileModel.un = (_.isNullOrEmpty(UserProfileModel.un)) ? sessionStorage['un'] : UserProfileModel.un;
   UserProfileModel.uid = (_.isNullOrEmpty(UserProfileModel.uid)) ? sessionStorage['uid'] : UserProfileModel.uid;
   
-  ProfileFormMdl.listen('states', function(e){
-    ProfileFormMdl.cities = GeoInfo['city_map'][e.text];
-  });
+  
   
   Helper.ajax('server/profile-pic-src.php', 
     {uid: UserProfileModel.uid},
@@ -45,10 +50,10 @@ _Templar.success("partials/edit-profile.html", function(){
         uid: UserProfileModel.uid,
         fn : ProfileFormMdl.fn,
         ln : ProfileFormMdl.ln,
-        age : ProfileFormMdl.age.current_selection.value,
+        age : ProfileFormMdl.age.current_selection,
         sex : ProfileFormMdl.sex.current_selection,
-        state : ProfileFormMdl.states.current_selection.value,
-        city : ProfileFormMdl.cities.current_selection.value,
+        state : ProfileFormMdl.states.current_selection,
+        city : ProfileFormMdl.cities.current_selection,
         description : ProfileFormMdl.description
       }, 
       function(data, status, jqXHR){
