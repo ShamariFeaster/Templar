@@ -112,6 +112,8 @@ return {
       node.innerText = node.innerHTML = attributeVal;
     }else if(!_.isNullOrEmpty(tmp_node.prop) && tmp_node.index >= 0 && _.isDef(attributeVal[tmp_node.index]) && tmp_node.index < attributeVal.length){
       node.innerText = node.innerHTML = attributeVal[tmp_node.index][tmp_node.prop];     
+    }else{
+      node.innerText = node.innerHTML = '';
     } 
     
     
@@ -126,8 +128,8 @@ return {
     if(_.isDef(Model.limitTable[attributeName])){
       page = Model.limitTable[attributeName].page;
       limit = Model.limitTable[attributeName].limit;
-      length = (((limit * page))  <= target.length) ? 
-               ((limit * page)) : target.length;
+      length = ((limit * page) <= target.length) ? 
+               (limit * page) : target.length;
       start = ( ((page * limit) - limit) < length) ?
               (page * limit) - limit : 0;
       results = target.slice(start, length);
@@ -187,7 +189,7 @@ return {
         
       node = tmp_node.node;
       tagName = (tmp_node.isComponent == true) ? 'COMPONENT' : node.tagName;
-      
+      tagName = (Map.isRepeatedAttribute(modelName, attributeName) == true) ? 'REPEAT' : node.tagName;
       if(ctx.hasAttributes == true){
         updateObject = Interpolate.updateNodeAttributes(tmp_node, modelName, attributeName);
       } 
@@ -298,11 +300,7 @@ return {
           updateObj.type = node.tagName.toLowerCase();
           updateObj.target = node;
           break;
-        case 'COMPONENT':
-          break;
-        case 'IMG':
-          break;
-        default:
+        case 'REPEAT':
           var TMP_newRepeatNode = null,
               TMP_repeatedNode = null,
               outerCtx = ctx,
@@ -355,6 +353,8 @@ return {
           outerCtx.stop = true;
           updateObj.type = 'repeat';
           updateObj.value = attributeVal;
+          break;
+        default:
           break;
         }
       

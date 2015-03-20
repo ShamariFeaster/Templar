@@ -32,3 +32,8 @@ multiple NT branches. Currently the algo despends on the use of lookaheads to kn
 where to go next; however, this breaks down in the case of multiple branches b/c
 I'm limited to a single lookahead. The route itself can't tell me which of the possible
 branches to take b/c the route parts are anonymous data. Gotta sleep on it.
+
+3/20/15
+
+attributes on button not interping correctly. I think it's b/c they aren't a recognized node
+and aren't getting cached. will work tomorrow.

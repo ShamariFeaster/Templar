@@ -25,6 +25,10 @@ return {
     return baseNodes;
   },
   
+  isRepeatedAttribute : function(modelName, attribName){
+    return (this.getRepeatBaseNodes(modelName, attribName).length > 0);
+  },
+  
   addRepeatBaseNode : function(tmp_node){
     if(!_.isDef(_repeatTable[tmp_node.modelName])){
       _repeatTable[tmp_node.modelName] = Object.create(null);

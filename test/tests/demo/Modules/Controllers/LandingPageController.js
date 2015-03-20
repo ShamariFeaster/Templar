@@ -27,11 +27,6 @@ _Templar.success("partials/edit-profile.html", function(){
   ProfileFormMdl.states.current_selection = UserProfileModel.state;
   ProfileFormMdl.age.current_selection = UserProfileModel.age;
   ProfileFormMdl.cities.current_selection = UserProfileModel.city;
-  /*
-  
-  
-  ProfileFormMdl.cities = UserProfileModel.fn;
-  */
   
   UserProfileModel.un = (_.isNullOrEmpty(UserProfileModel.un)) ? sessionStorage['un'] : UserProfileModel.un;
   UserProfileModel.uid = (_.isNullOrEmpty(UserProfileModel.uid)) ? sessionStorage['uid'] : UserProfileModel.uid;

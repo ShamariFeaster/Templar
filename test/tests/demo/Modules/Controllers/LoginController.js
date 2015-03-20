@@ -6,6 +6,7 @@ var _ = require('Util'),
     _Templar = Templar,
     EnvModel = _Templar.getModel('Environment'),
     UserProfileModel = _Templar.getModel('UserProfile'),
+    LoginFormMdl = _Templar.getModel('LoginForm'),
     _$ = $;   /*stop unecessary scope lookup*/
 
 _Templar.success("partials/login-screen.html", function(){
@@ -13,8 +14,8 @@ _Templar.success("partials/login-screen.html", function(){
   _$('#loginform').submit(function(e){
 
     Route.authenticate({
-      un : EnvModel.un,
-      pw : EnvModel.pw,
+      un : LoginFormMdl.un,
+      pw : LoginFormMdl.pw,
       UserProfile : UserProfileModel,
       badPassword : function(msg){
         EnvModel.error = msg;
@@ -33,14 +34,14 @@ _Templar.success("partials/login-screen.html", function(){
     Helper.ajax(
       'server/sign-up.php',
       {
-        username: EnvModel.un,
-        password : EnvModel.pw,
-        email : EnvModel.email
+        username: LoginFormMdl.un,
+        password : LoginFormMdl.pw,
+        email : LoginFormMdl.email
       },
       function(data, status, jqXHR){
         Route.authenticate({
-          un : EnvModel.un,
-          pw : EnvModel.pw,
+          un : LoginFormMdl.un,
+          pw : LoginFormMdl.pw,
           UserProfile : UserProfileModel,
           landingPage : '/editProfile'
         });
@@ -51,32 +52,32 @@ _Templar.success("partials/login-screen.html", function(){
   
   function enableSubmission(){
     if(
-      !EnvModel.validation_msgs[0] && 
-      !EnvModel.validation_msgs[1] && 
-      !EnvModel.validation_msgs[2] &&
-      !EnvModel.validation_msgs[3] &&
-      !EnvModel.validation_msgs[4]
+      !LoginFormMdl.validation_msgs[0] && 
+      !LoginFormMdl.validation_msgs[1] && 
+      !LoginFormMdl.validation_msgs[2] &&
+      !LoginFormMdl.validation_msgs[3] &&
+      !LoginFormMdl.validation_msgs[4]
       ){
-      $btnSignUp.prop('disabled',false);
+      LoginFormMdl.submissionDisabled = false;
     }
   }
   
-  EnvModel.listen('un', function(e){
+  LoginFormMdl.listen('un', function(e){
 
     _$.ajax('server/check-unique.php',{
       method : 'POST',
-      data : {username: EnvModel.un},
+      data : {username: LoginFormMdl.un},
       
       success : function(data, status, jqXHR){
         if(data < 1){
-          EnvModel.validation_msgs[4] = EnvModel.un + ' Is Already In Use';
-          $btnSignUp.prop('disabled',true);
+          LoginFormMdl.validation_msgs[4] = LoginFormMdl.un + ' Is Already In Use';
+          LoginFormMdl.submissionDisabled = true;
         }else{
-          EnvModel.validation_msgs[4] = '';
+          LoginFormMdl.validation_msgs[4] = '';
           enableSubmission();
         }
         
-        EnvModel.update('validation_msgs');
+        LoginFormMdl.update('validation_msgs');
       },
       error : function(data, status, jqXHR){
         EnvModel.error = 'FATAL: ' + data.error;
@@ -84,55 +85,55 @@ _Templar.success("partials/login-screen.html", function(){
     });
   
     if(e.text.length < 8){
-      EnvModel.validation_msgs[0] = 'Username Must At Least 8 Characters';
-      $btnSignUp.prop('disabled',true);
+      LoginFormMdl.validation_msgs[0] = 'Username Must At Least 8 Characters';
+      LoginFormMdl.submissionDisabled = true;
     }else if(e.text.length > 20){
-      EnvModel.validation_msgs[0] = 'Username Must Be Less Than 21 Characters';
-      $btnSignUp.prop('disabled',true);
+      LoginFormMdl.validation_msgs[0] = 'Username Must Be Less Than 21 Characters';
+      LoginFormMdl.submissionDisabled = true;
     }else{
-      EnvModel.validation_msgs[0] = '';
+      LoginFormMdl.validation_msgs[0] = '';
       enableSubmission();
     }
-    EnvModel.update('validation_msgs');
+    LoginFormMdl.update('validation_msgs');
   });
   
-  EnvModel.listen('email', function(e){
+  LoginFormMdl.listen('email', function(e){
     if(!/.+@.+\.\w+/.test(e.text)){
-      EnvModel.validation_msgs[3] = 'Invalid Email Address Format';
-      $btnSignUp.prop('disabled',true);
+      LoginFormMdl.validation_msgs[3] = 'Invalid Email Address Format';
+      LoginFormMdl.submissionDisabled = true;
     }else if(e.text.length > 51){
-      EnvModel.validation_msgs[3] = 'Email Must Be Less Than 51 Characters';
-      $btnSignUp.prop('disabled',true);
+      LoginFormMdl.validation_msgs[3] = 'Email Must Be Less Than 51 Characters';
+      LoginFormMdl.submissionDisabled = true;
     }else{
-      EnvModel.validation_msgs[3] = '';
+      LoginFormMdl.validation_msgs[3] = '';
       enableSubmission();
     }
-    EnvModel.update('validation_msgs');
+    LoginFormMdl.update('validation_msgs');
   });
   
-  EnvModel.listen('pw', function(e){
+  LoginFormMdl.listen('pw', function(e){
     if(e.text.length < 8){
-      EnvModel.validation_msgs[1] = 'Password Must Be At Least 8 Characters';
-      $btnSignUp.prop('disabled',true);
+      LoginFormMdl.validation_msgs[1] = 'Password Must Be At Least 8 Characters';
+      LoginFormMdl.submissionDisabled = true;
     }else if(e.text.length > 20){
-      EnvModel.validation_msgs[1] = 'Password Must Be Less Than 26 Characters';
-      $btnSignUp.prop('disabled',true);
+      LoginFormMdl.validation_msgs[1] = 'Password Must Be Less Than 26 Characters';
+      LoginFormMdl.submissionDisabled = true;
     }else{
-      EnvModel.validation_msgs[1] = '';
+      LoginFormMdl.validation_msgs[1] = '';
       enableSubmission();
     }
-    EnvModel.update('validation_msgs');
+    LoginFormMdl.update('validation_msgs');
   });
   
-  EnvModel.listen('confirm_pw', function(e){
-    if((!e.text && !EnvModel.pw) || e.text != EnvModel.pw){
-      EnvModel.validation_msgs[2] = 'Password And Confirm Password Don\'t Match';
-      $btnSignUp.prop('disabled',true);
+  LoginFormMdl.listen('confirm_pw', function(e){
+    if((!e.text && !LoginFormMdl.pw) || e.text != LoginFormMdl.pw){
+      LoginFormMdl.validation_msgs[2] = 'Password And Confirm Password Don\'t Match';
+      LoginFormMdl.submissionDisabled = true;
     }else{
-      EnvModel.validation_msgs[2] = '';
+      LoginFormMdl.validation_msgs[2] = '';
       enableSubmission();
     }
-    EnvModel.update('validation_msgs');
+    LoginFormMdl.update('validation_msgs');
   });
   
   _$('#modaltrigger1').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });

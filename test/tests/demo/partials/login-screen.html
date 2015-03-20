@@ -14,10 +14,10 @@
     <h1>User Login</h1>
     <form id="loginform" name="loginform" method="post" action="index.html">
       <label for="username">Username:</label>
-      <input value="{{Environment.un}}" type="text" name="username" id="username" class="txtfield" tabindex="1">
+      <input value="{{LoginForm.un}}" type="text" name="username" id="username" class="txtfield" tabindex="1">
       
       <label for="password">Password:</label>
-      <input value="{{Environment.pw}}" type="password" name="password" id="password" class="txtfield" tabindex="2">
+      <input value="{{LoginForm.pw}}" type="password" name="password" id="password" class="txtfield" tabindex="2">
       
       <div class="center">
         <input type="submit" name="loginbtn" id="loginbtn" class="flatbtn-blu hidemodal" value="Log In" tabindex="3">
@@ -29,24 +29,26 @@
   <div id="sign-up-modal" style="display:none;">
     <h1>User Login</h1>
     <div class="center error">
-      <h2 data-apl-repeat="Environment.validation_msgs">{{}}</h2>
+      <h2 data-apl-repeat="LoginForm.validation_msgs">{{}}</h2>
     </div>
 
     <form id="form-sign-up" name="form-sign-up" method="post" action="index.html">
       <label for="username">Username:</label>
-      <input value="{{Environment.un}}" type="text" name="username" id="username" class="txtfield" tabindex="1">
+      <input value="{{LoginForm.un}}" type="text" name="username" id="username" class="txtfield" tabindex="1">
       
       <label for="username">Email:</label>
-      <input value="{{Environment.email}}" type="text" name="email" id="email" class="txtfield" tabindex="1">
+      <input value="{{LoginForm.email}}" type="text" name="email" id="email" class="txtfield" tabindex="1">
       
       <label for="password">Password:</label>
-      <input value="{{Environment.pw}}" type="password" name="password" id="password" class="txtfield" tabindex="2">
+      <input value="{{LoginForm.pw}}" type="password" name="password" id="password" class="txtfield" tabindex="2">
       
       <label for="password">Confirm Password:</label>
-      <input value="{{Environment.confirm_pw}}" type="password" name="password" id="password" class="txtfield" tabindex="2">
+      <input value="{{LoginForm.confirm_pw}}" type="password" name="password" id="password" class="txtfield" tabindex="2">
       
       <div class="center">
-        <input type="submit" name="btn-sign-up" id="btn-sign-up" class="flatbtn-blu hidemodal" value="Sign Up" tabindex="3">
+        <button type="submit" disabled="{{LoginForm.submissionDisabled}}" name="btn-sign-up" id="btn-sign-up" class="flatbtn-blu hidemodal" tabindex="3">
+          Sign Up
+        </button>
       </div>
     </form>
   </div>

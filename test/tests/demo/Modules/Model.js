@@ -3,13 +3,18 @@ Templar.dataModel('Environment',
   siteName :  'GenericSocialNetwork.com',
   banner : '',
   error : '',
+  success_msg : '',
+  pic_submission_url : 'server/upload-picture.php'
+});
+
+Templar.dataModel('LoginForm',
+{
   pw : '_Drumnba422',
   un : 'alistproducer1',
   email : 'a@b.com',
   confirm_pw : '_Drumnba422',
   validation_msgs : new Array(5),
-  success_msg : '',
-  pic_submission_url : 'server/upload-picture.php'
+  submissionDisabled : true
 });
 
 Templar.dataModel('ProfileForm',
@@ -21,9 +26,7 @@ Templar.dataModel('ProfileForm',
   cities : [],
   age : (function(){
           var range = [];
-          for(var i = 18; i < 51; i++){ 
-            range.push(i);
-          }
+          for(var i = 18; i < 51; i++){ range.push(i); }
           return range;
         })(),
   sex : [
