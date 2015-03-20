@@ -200,6 +200,27 @@ return {
           DOM.cloneAttributes(DOM_Node, TMP_checkbox.node);
           TMP_checkbox.node.setAttribute('value', value);
           
+          /*Make current_selection assignment update the DOM*/
+          if(!_.isDef(attrib.current_selection)){
+            (function(name){
+              
+              Object.defineProperty(attrib, 'current_selection', {
+                configurable : true,
+                set : function(value){
+                  this._value_ = value;
+                  var checkboxes = document.querySelectorAll('input[name='+name+']');
+                  for(var w = 0; w < checkboxes.length; w++){
+                    if(checkboxes[w].value == value){
+                      checkboxes[w].checked = true;
+                    }
+                  }
+                },
+                get : function(){
+                  return this._value_;
+                }
+              });
+            })(DOM_Node.name);
+          }
           /*check to see if it's embedded and annotate*/
           if(!_.isNullOrEmpty(propName) && propName.indexOf('zTMPzDOT') != _.UNINDEXED){
             repeatAnnotationParts = propName.split('DOT');
@@ -213,23 +234,19 @@ return {
           parentNode.insertBefore(document.createTextNode(description), DOM_Node);
           
           if(checked == true){
-            attrib.current_selection = {
-              type : _.MODEL_EVENT_TYPES.checkbox_change
-              , checked : true
-              , value : value
-            }
+            attrib.current_selection = value;
           }
           
           TMP_checkbox.node.addEventListener('click',function(e){
             var attrib = Map.getAttribute(this.model, this.name),
-              selectObj = 
-                {
-                  type : _.MODEL_EVENT_TYPES.checkbox_change
-                  , checked : (e.target.checked === true)
-                  , value : e.target.value
-                };
+                selectObj = 
+                  {
+                    type : _.MODEL_EVENT_TYPES.checkbox_change
+                    , checked : (e.target.checked === true)
+                    , value : e.target.value
+                  };
           
-            attrib.current_selection = selectObj;
+            attrib.current_selection = e.target.value;
             Interpolate.dispatchListeners(
               Map.getListeners(this.model, this.name)
               , selectObj

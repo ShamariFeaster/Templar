@@ -19,8 +19,8 @@ _Templar.success("partials/edit-profile.html", function(){
   ProfileFormMdl.fn = UserProfileModel.fn;
   ProfileFormMdl.ln = UserProfileModel.ln;
   ProfileFormMdl.description = UserProfileModel.description; 
+  ProfileFormMdl.sex.current_selection = UserProfileModel.sex;
   /*
-  ProfileFormMdl.sex = UserProfileModel.fn;
   ProfileFormMdl.age = UserProfileModel.age;
   ProfileFormMdl.states = UserProfileModel.fn;
   ProfileFormMdl.cities = UserProfileModel.fn;
@@ -46,7 +46,7 @@ _Templar.success("partials/edit-profile.html", function(){
         fn : ProfileFormMdl.fn,
         ln : ProfileFormMdl.ln,
         age : ProfileFormMdl.age.current_selection.value,
-        sex : ProfileFormMdl.sex.current_selection.value,
+        sex : ProfileFormMdl.sex.current_selection,
         state : ProfileFormMdl.states.current_selection.value,
         city : ProfileFormMdl.cities.current_selection.value,
         description : ProfileFormMdl.description
