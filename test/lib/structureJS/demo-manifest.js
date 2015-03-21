@@ -28,4 +28,5 @@ structureJS.declare('modules/Helper');
 structureJS.declare('controllers/NavigationController');
 structureJS.declare('components/Row');
 structureJS.declare('controllers/LoginController');
-structureJS.declare('controllers/LandingPageController');
+structureJS.declare('controllers/EditProfileController');
+structureJS.declare('controllers/MyProfileController');
