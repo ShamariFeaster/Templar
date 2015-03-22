@@ -1,11 +1,20 @@
 <h1>{{Environment.banner}}</h1>
 
 <div class="center">
-  <p>Welcome <strong>{{UserProfile.un}}</strong></p>
   <h2>{{Environment.error}}</h2>
   <h2>{{Environment.success_msg}}</h2>
 </div>
 
+<row>
+  <a class="menu-btn" id="goto-new-ad" href="#/new-ad">New Ad</a>
+  <a class="menu-btn" id="goto-my-ads" href="#/my-ads">My Ads</a>
+  <a class="menu-btn" id="goto-messages" href="#/messages">Messages</a>
+  <a class="menu-btn" id="goto-wall" href="#/wall">Wall</a>
+</row>
+
+<div style="clear: both;">
+
+<div id="profile-left-col">
 <row>
   <img id="pp_preview" src="{{UserProfile.pp_src}}" >
 </row>
@@ -39,4 +48,8 @@
   <label for="city">Description:</label> {{UserProfile.description}}
 </row>
 
+</div>
+
+<div id="profile-right-col" data-apl-default="partials/Profile/wall.html">
+</div>
 <div style="clear: both;">

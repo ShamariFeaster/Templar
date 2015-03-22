@@ -210,7 +210,7 @@ return {
             }
             
             /*fire onCreate*/
-            component.onCreate.call(null, DOM_component);
+            component.onCreate.call(component, DOM_component);
             
             DOM_Node.parentNode.removeChild(DOM_Node);
             DOM_Node = null;

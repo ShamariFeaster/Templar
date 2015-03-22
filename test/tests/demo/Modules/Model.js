@@ -36,7 +36,26 @@ Templar.dataModel('ProfileForm',
   description : ''
 });
 
-            
+Templar.dataModel('AdForm',
+{
+  title : '',
+  description : '',
+  adType : [],
+  category : [],
+  ln : '',
+  states : structureJS.require('GeoInfo-US').states,
+  cities : [],
+  age : (function(){
+          var range = [];
+          for(var i = 18; i < 51; i++){ range.push(i); }
+          return range;
+        })(),
+  sex : [
+        {description : 'Male', value : 'm', checked : true}, 
+        {description : 'Female', value : 'f'}, 
+        {description :'Yes Please', value : 'na'}]
+  
+});
             
 Templar.dataModel('UserProfile',
 {

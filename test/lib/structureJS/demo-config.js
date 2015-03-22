@@ -4,6 +4,7 @@ structureJS.configure(
   globals : [
              'lib/jquery', 
              'lib/GeoInfo',
+             'modules/Data/Type-Category-Map',
              'js/jquery.leanModal.min',
              'bililite/bililiteRange',
              'bililite/jquery.sendkeys',

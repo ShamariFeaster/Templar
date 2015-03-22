@@ -13,7 +13,6 @@ function loginHandler(e){
   Route.authenticate({
     un : LoginFormMdl.un,
     pw : LoginFormMdl.pw,
-    UserProfile : UserProfileModel,
     badPassword : function(msg){
       EnvModel.error = msg;
     }
@@ -34,7 +33,6 @@ function signupHandler(e){
       Route.authenticate({
         un : LoginFormMdl.un,
         pw : LoginFormMdl.pw,
-        UserProfile : UserProfileModel,
         landingPage : '/editProfile'
       });
     });

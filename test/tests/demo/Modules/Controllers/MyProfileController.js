@@ -9,7 +9,7 @@ var _ = require('Util'),
     _$ = $;   /*stop unecessary scope lookup*/
     
 function bindHandlers(){
-
+  
 }
 
 _Templar.success("partials/profile.html", function(){

@@ -53,6 +53,7 @@ function updateProfileHandler(e){
 }
 
 function bindHandlers(){
+  /*Cascade value of state select*/
   ProfileFormMdl.listen('states', function(e){
     ProfileFormMdl.cities = GeoInfo['city_map'][e.text];
   });
@@ -62,9 +63,10 @@ function bindHandlers(){
 
 _Templar.success("partials/edit-profile.html", function(){
   init();
+  Helper.loadProfile(UserProfileModel);
   bindHandlers();
   repopulateEditForm();
-  Helper.loadProfile(UserProfileModel);
+  
 });
     
 });

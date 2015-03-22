@@ -85,19 +85,16 @@ Templar.component = function(name, definitionObj){
     if(definitionObj.hasOwnProperty(prop)){
       switch(prop){
         case 'templateURL' :
-          var url = definitionObj['templateURL'];
+          component.templateURL = definitionObj['templateURL'];
           
-          if(!_.isNullOrEmpty(url)){
-            component.templateURL = url;
-            Templar._components.length++;
-          }else{
+          if(_.isNullOrEmpty(component.templateURL)){
             /*Throwing an error causes the rest of the code in whatever
             file is holding the bad compoent declaration to stop. However the
             loading of Templar is not halted b/c Export.js, which kicks off the
             bootstrap is another file, executed in it's own sandbox. I should
             have a system flag to 'bubble' up blocking errors to the bootstrap
             process instead of throwing errors at different places.*/
-            _.log('Component "' + name + '" ignored. Declaration must have a URL.');
+            _.log('WARNING: Component declaration for "' + name + '" ignored. Declaration must have a URL.');
           }
           
           break;
@@ -125,7 +122,10 @@ Templar.component = function(name, definitionObj){
     }
   }
   
-  Templar._components[name.toLowerCase()] = component;
+  if(!_.isNullOrEmpty(component.templateURL) && !_.isDef(Templar._components[name.toLowerCase()])){
+    Templar._components[name.toLowerCase()] = component;
+    Templar._components.length++;
+  }
   
   //blah
 };
