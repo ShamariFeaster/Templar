@@ -188,7 +188,7 @@ return {
                   updateFunc;
 
               if(_.isFunc(updateFunc = component.attributes[name])){
-                updateFunc.call(null, this, val);
+                updateFunc.call(component, this, val);
               }
               
               origSetAttrib.call(this,name, val);
@@ -201,17 +201,17 @@ return {
               TMP_processed_components[z].componentName = componentName;
             }
             
+            /*fire onCreate*/
+            component.onCreate.call(component, DOM_component);
+            
             /*Initalization of custom attributes using setter functions. This is for hard-coded
               attribute values that aren't NTs*/
             for(attrib in component.attributes){
               if(!_.isNullOrEmpty(attribVal = DOM_Node.getAttribute(attrib))){
-                component.attributes[attrib].call(null, DOM_component, attribVal);
+                component.attributes[attrib].call(component, DOM_component, attribVal);
               }
             }
-            
-            /*fire onCreate*/
-            component.onCreate.call(component, DOM_component);
-            
+
             DOM_Node.parentNode.removeChild(DOM_Node);
             DOM_Node = null;
           }

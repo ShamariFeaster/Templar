@@ -347,9 +347,11 @@ form#form_pp_pic textarea{
 }
 #profile-left-col {
   float : left;
+  width : 13%;
 }
 
 #profile-right-col {
   float : left;
   margin-left : 10px;
+  width : 80%;
 }

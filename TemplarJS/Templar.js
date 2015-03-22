@@ -125,6 +125,8 @@ Templar.component = function(name, definitionObj){
   if(!_.isNullOrEmpty(component.templateURL) && !_.isDef(Templar._components[name.toLowerCase()])){
     Templar._components[name.toLowerCase()] = component;
     Templar._components.length++;
+  }else{
+    _.log('WARNING: Component "' + name + '" is declared more than once. Only the last declaration will be used.');
   }
   
   //blah
