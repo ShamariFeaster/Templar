@@ -66,7 +66,7 @@ function init(bannerMsg){
   ProfileFormMdl.cities = GeoInfo['city_map'][ProfileFormMdl.states.current_selection];
 }
 
-_Templar.success("partials/edit-profile.html", function(){
+_Templar.success("#/editProfile", function(){
   init('Edit My Profile');
   Helper.loadProfile(UserProfileModel);
   repopulateEditForm();

@@ -53,9 +53,7 @@ structureJS.done(function(){
     
     var hashValue = '', resolvedRouteObj = null;
     if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){
-      //State.onloadFileQueue.push(resolvedRouteObj.partial);
       DOM.asynFetchRoutes(resolvedRouteObj);
-      //DOM.asynGetPartial(resolvedRouteObj.partial, Bootstrap.loadPartialIntoTemplate, resolvedRouteObj.target);
     }else{
       hashValue = DOM.getHashValue(window.location.href);
       State.onloadFileQueue.push(hashValue);

@@ -79,7 +79,8 @@ return {
   
   asynFetchRoutes : function(routeObj, onComplete){
     var currFile = '',
-        routes = [];
+        routes = [],
+        routeName = routeObj.route;
         routes.onComplete = onComplete || function(){};
     
     function deferenceRoutes(inArr, outArr){
@@ -158,6 +159,7 @@ return {
       routes.push(routeObj);
     }
     
+    State.onloadFileQueue.push(routeName);
     getFileContents(routes);
   },
   

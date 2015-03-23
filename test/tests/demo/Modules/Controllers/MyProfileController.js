@@ -12,7 +12,7 @@ function bindHandlers(){
   
 }
 
-_Templar.success("partials/profile.html", function(){
+_Templar.success("#/profile", function(){
   Helper.init('My Profile');
   bindHandlers();
   Helper.loadProfile(UserProfileModel);
