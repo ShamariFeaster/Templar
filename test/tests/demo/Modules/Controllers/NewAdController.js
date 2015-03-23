@@ -9,21 +9,21 @@ var _ = require('Util'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     AdFormMdl = _Templar.getModel('AdForm'),
     _$ = $;   
-
-function init(bannerMsg){
-  Helper.init(bannerMsg);
-  AdFormMdl.adType = AdTypeMap.AdTypes;
-}
     
 function bindHandlers(){
   AdFormMdl.listen('adType', function(e){
-    AdFormMdl.category = AdTypeMap[e.value];
+    AdFormMdl.category = AdTypeMap.Categories[e.value];
   });
+}
+
+function init(bannerMsg){
+  Helper.init(bannerMsg);
+  bindHandlers();
+  AdFormMdl.adType = AdTypeMap.AdTypes;
 }
 
 _Templar.success("partials/Profile/new-ad-part-2.html", function(){
   init('New Ad');
-  bindHandlers();
   //Helper.loadProfile(UserProfileModel);
 });
 

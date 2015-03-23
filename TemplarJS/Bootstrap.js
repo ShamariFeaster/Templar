@@ -53,7 +53,9 @@ var Bootstrap = {
         defaultNodeToHide = null,
         href = document.location.href,
         timestamp = new Date().getTime(),
-        scope = fileName +  ' ' + timestamp;
+        scope = fileName +  ' ' + timestamp,
+        DOMGetFileContents = this.callback || function(){},
+        routes = this.callbackParam1 || [];
   
     if(!_.isNull(targetNode)){
       targetNode.innerHTML = partialContents;
@@ -94,6 +96,7 @@ var Bootstrap = {
       Bootstrap.fireOnloads();
       Bootstrap.bindTargetSetter();
       State.compilationThreadCount = 0;
+      DOMGetFileContents.call(this);
     }
 
   }

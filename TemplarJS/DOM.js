@@ -1,5 +1,7 @@
 structureJS.module('DOM', function(require){
 
+var Circular = structureJS.circular();
+
 return {
   modifyClasses : function(node, add, remove){
     var nodeClassList = '',
@@ -74,6 +76,75 @@ return {
     }
     
   },
+  
+  asynFetchRoutes : function(routeObj, onComplete){
+    var currFile = '',
+        routes = [];
+        routes.onComplete = onComplete || function(){};
+    
+    function deferenceRoutes(inArr, outArr){
+      var routeName = null,//route1
+          routeObj = '',
+          inArr = inArr.slice(0);
+      while((routeName = inArr.shift()) != null){
+      
+        if(Circular('Route').isRoute(routeName)){//true
+          routeObj = Circular('Route').getRouteObj(routeName);
+          if(_.isArray(routeObj.partial)){
+            deferenceRoutes(routeObj.partial, outArr);
+          }else{
+            outArr.push(routeObj);
+          }
+        }else{
+          outArr.push(routeName);
+        }
+        
+      }
+      
+    }
+    
+    function getFileContents(routes){
+      var xhr = new XMLHttpRequest(),
+          routeObj = null;
+      
+      if((routeObj = routes.shift()) != null){
+        xhr.onload = Circular('Bootstrap').loadPartialIntoTemplate;
+        xhr.fileName = routeObj.partial;
+        xhr.targetId = routeObj.target;
+        xhr.callbackOnComplete = routes.onComplete || function(){},
+        xhr.callbackParam1 = routes.slice(0);
+        xhr.callback = function(){
+          State.onloadFileQueue.push(this.fileName);
+          getFileContents.call(null, this.callbackParam1);
+          if(this.callbackParam1.length == 0){
+            this.callbackOnComplete.call(null);
+          }
+        }
+        
+        xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4){   //if complete
+            if(xhr.status !== 200){  //check if "OK" (200)
+              //throw error
+            }
+          } 
+        }
+        if(!_.isNullOrEmpty(xhr.fileName)){
+          xhr.open('get',  xhr.fileName, true);
+          xhr.send();
+        }
+      }
+      
+    }
+    
+    if(_.isArray(routeObj.partial)){
+      deferenceRoutes(routeObj.partial, routes);
+    }else{
+      routes.push(routeObj);
+    }
+    
+    getFileContents(routes);
+  },
+  
   /*Solution from: http://stackoverflow.com/questions/7378186/ie9-childnodes-not-updated-after-splittext*/
   insertAfter : function(node, precedingNode) {
     var nextNode = precedingNode.nextSibling, parent = precedingNode.parentNode;

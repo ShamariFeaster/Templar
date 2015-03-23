@@ -50,8 +50,8 @@ structureJS.module('Helper', function(require){
         return;
       }
       UserProfile[prop] = (_.isNullOrEmpty(UserProfile[prop])) ? sessionStorage[prop] : UserProfile[prop];
-      if(_.isFunc(fallBack) && !_.isNullOrEmpty(UserProfile[prop])){
-        fallBack.call(null, UserProfile, prop);
+      if(_.isFunc(fallBack) && _.isNullOrEmpty(UserProfile[prop])){
+        fallBack.call(this, UserProfile, prop);
       }
     },
     

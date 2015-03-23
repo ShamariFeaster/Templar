@@ -53,8 +53,9 @@ structureJS.done(function(){
     
     var hashValue = '', resolvedRouteObj = null;
     if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){
-      State.onloadFileQueue.push(resolvedRouteObj.partial);
-      DOM.asynGetPartial(resolvedRouteObj.partial, Bootstrap.loadPartialIntoTemplate, resolvedRouteObj.target);
+      //State.onloadFileQueue.push(resolvedRouteObj.partial);
+      DOM.asynFetchRoutes(resolvedRouteObj);
+      //DOM.asynGetPartial(resolvedRouteObj.partial, Bootstrap.loadPartialIntoTemplate, resolvedRouteObj.target);
     }else{
       hashValue = DOM.getHashValue(window.location.href);
       State.onloadFileQueue.push(hashValue);
@@ -72,9 +73,9 @@ structureJS.done(function(){
       if(!_.isNull(routeContentNode) && !_.isNullOrEmpty(defaultKey)){
         routeContentNode.setAttribute('data-' + _.IE_DEFAULT_ATTRIB_KEY, '')
       }
-      
-      State.onloadFileQueue.push(resolvedRouteObj.partial);
-      DOM.asynGetPartial(resolvedRouteObj.partial, Bootstrap.loadPartialIntoTemplate, resolvedRouteObj.target);
+      DOM.asynFetchRoutes(resolvedRouteObj);
+      //State.onloadFileQueue.push(resolvedRouteObj.partial);
+      //DOM.asynGetPartial(resolvedRouteObj.partial, Bootstrap.loadPartialIntoTemplate, resolvedRouteObj.target);
       
     }
     

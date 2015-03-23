@@ -23,13 +23,18 @@ Templar.Route([
 },
 {
     route : '#/new-ad',
-    partial : 'partials/Profile/new-ad-part-1.html',
-    target : '#profile-right-col'
+    partial : [
+      '#/profile',
+      { 
+        partial : 'partials/Profile/new-ad-part-1.html', 
+        target : '#profile-right-col'
+      }]
 },
 {
     route : '#/new-ad-part-2',
     partial : 'partials/Profile/new-ad-part-2.html',
-    target : '#profile-right-col'
+    target : '#profile-right-col',
+    fallback : '#/new-ad'
 },
 {
     route : '#/wall',

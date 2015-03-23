@@ -48,15 +48,19 @@ EOD;
     $result = $mysqli->query($query);
     if($result->num_rows > 0){  
       $row = $result->fetch_assoc();
+      /*Send back empty string if not found*/
+      $row['profile_pic_uri'] = (strlen($row['profile_pic_uri']) > 0) ? 
+        $pp_dir.$row['profile_pic_uri'] :
+        '';
       $response['cookie']['role'] = $row['role'];
       $response['cookie']['sex'] = $row['sex'];
       $response['cookie']['fn'] = $row['fn'];
       $response['cookie']['ln'] = $row['ln'];
-      $response['cookie']['age'] = $row['age'];
+      $response['cookie']['age'] = (strcmp($row['age'],'0') == 0) ? '' : $row['age'];
       $response['cookie']['state'] = $row['state'];
       $response['cookie']['city'] = $row['city'];
       $response['cookie']['description'] = $row['description'];
-      $response['cookie']['pp_src'] = $pp_dir.$row['profile_pic_uri'];
+      $response['cookie']['pp_src'] = $row['profile_pic_uri'];
       $response['cookie']['profileExists'] = true;
     }else{
       $response['error'] .= $mysqli->error;

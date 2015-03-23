@@ -237,11 +237,6 @@ return {
             updateObj.type = _.MODEL_EVENT_TYPES.interp_change;
             updateObj.index = node.parentNode.selectedIndex;
             updateObj._attrib_ = attributeVal;
-            /*New model data, shorter than existing data, kill extra nodes*/
-            if(ctx.modelAttribIndex >= attributeVal.length){
-              ctx.removeItem(ctx.index); /*from indexes[key] = []*/
-              node.parentNode.removeChild(node);
-            }
             
             /*This is here & not in preProcess... b/c when attrib is replaced as
             is the case with a cascading select, the preProcessor isn't called again,
@@ -251,11 +246,15 @@ return {
               Object.defineProperty(attributeVal, 'current_selection', {
                 configurable : true,
                 set : function(value){
+                  if(value == '')
+                    return;
+                    
                   this._value_ = value;
-
+      
                   for(var s = 0; s < select.children.length; s++){
                     if(select.children[s].value == value){
                       select.selectedIndex = s;
+                      
                       Interpolate.dispatchListeners(
                         Map.getListeners(select.model, select.name)
                         , {
@@ -265,6 +264,7 @@ return {
                             , index : select.selectedIndex
                           }
                       );
+                      
                     }
                   }
                 },
@@ -273,6 +273,14 @@ return {
                 }
               });
             })(node.parentNode);
+            
+            /*New model data, shorter than existing data, kill extra nodes*/
+            if(ctx.modelAttribIndex >= attributeVal.length){
+              ctx.removeItem(ctx.index); /*from indexes[key] = []*/
+              node.parentNode.removeChild(node);
+            }
+            
+            
           
             
           }

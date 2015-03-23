@@ -11,11 +11,7 @@ var _ = require('Util'),
     _$ = $;   /*stop unecessary scope lookup*/
 
 
-function init(){
-  Helper.init('Edit My Profile');
-  EnvModel.error = (ProfileFormMdl.uploadStatus === '0') ? 
-                      'Your Profile Picture Upload Failed' : '';
-}
+
 
 
 function repopulateEditForm(){
@@ -53,18 +49,26 @@ function updateProfileHandler(e){
 }
 
 function bindHandlers(){
+  $('#btn-update-profile').click(updateProfileHandler);
+  
   /*Cascade value of state select*/
   ProfileFormMdl.listen('states', function(e){
     ProfileFormMdl.cities = GeoInfo['city_map'][e.text];
   });
   
-  $('#btn-update-profile').click(updateProfileHandler);
+}
+
+function init(bannerMsg){
+  Helper.init(bannerMsg);
+  EnvModel.error = (ProfileFormMdl.uploadStatus === '0') ? 
+                      'Your Profile Picture Upload Failed' : '';
+  bindHandlers();
+  ProfileFormMdl.cities = GeoInfo['city_map'][ProfileFormMdl.states.current_selection];
 }
 
 _Templar.success("partials/edit-profile.html", function(){
-  init();
+  init('Edit My Profile');
   Helper.loadProfile(UserProfileModel);
-  bindHandlers();
   repopulateEditForm();
   
 });

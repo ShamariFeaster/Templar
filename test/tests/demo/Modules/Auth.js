@@ -7,6 +7,7 @@ var _ = require('Util'),
 _Templar.setAuthenticator(function(inputObj){
     var cookie = this,
         UserProfile = inputObj.UserProfile;
+    sessionStorage.clear();
     $.ajax('server/authenticate.php',{
       method : 'POST',
       dataType : 'json',

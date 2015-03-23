@@ -21,7 +21,6 @@ return {
   buildRouteTree : function(routes){
     var  routeObj = Object.create(null),
          ambiguityTree = Object.create(null),
-         _routeObjArray = (_.isArray(routes)) ? routes.slice(0): [],
          normalizedName = null,
          routePartName = '',
          tmp = null,
@@ -40,7 +39,7 @@ return {
   
 
     for(var i = 0; i < routes.length; i++){
-
+      _routeObjArray.push(routes[i]);
       parts = routes[i].route.trim().split('/'); 
       target = routes[i].target;
       partial = routes[i].partial;
@@ -245,17 +244,42 @@ return {
   open : function(routeId){
 
     if((resolvedRouteObj = this.handleRoute(routeId)) != null && resolvedRouteObj !== _.RESTRICTED){
-      State.onloadFileQueue.push(resolvedRouteObj.partial);
-      DOM.asynGetPartial(resolvedRouteObj.partial, Circular('Bootstrap').loadPartialIntoTemplate, resolvedRouteObj.target);
-      State.ignoreHashChange = true;
-      var endIndex, href = window.location.href;
-      /*look for existing route anchors and remove them*/
-      if( (endIndex = href.indexOf('#')) > -1 ){
-        href = window.location.href.slice(0, endIndex);
-      }
+      //State.onloadFileQueue.push(resolvedRouteObj.partial);
+      DOM.asynFetchRoutes(resolvedRouteObj, function(){
+        State.ignoreHashChange = true;
+        var endIndex, href = window.location.href;
+        /*look for existing route anchors and remove them*/
+        if( (endIndex = href.indexOf('#')) > -1 ){
+          href = window.location.href.slice(0, endIndex);
+        }
 
-      window.location.href = href + resolvedRouteObj.route;
+        window.location.href = href + resolvedRouteObj.route;
+      });
+      
     }
+  },
+  
+  isRoute : function(url){
+    if(!_.isString(url))
+      return false;
+      
+    var isRoute = false;
+    for(var i = 0 ; i < _routeObjArray.length; i++){
+      if(_routeObjArray[i].route == url){
+        isRoute = true;
+      }
+    }
+    return isRoute;
+  },
+  
+  getRouteObj : function(url){
+    var obj = null;
+    for(var i = 0 ; i < _routeObjArray.length; i++){
+      if(_routeObjArray[i].route == url){
+        obj = _routeObjArray[i];
+      }
+    }
+    return obj;
   }
   
 };

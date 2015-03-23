@@ -11,6 +11,7 @@ _Templar.success(function(){
 $('#goto-logout').click(function(e){
   EnvModel.error = '';
   Route.logout();
+  sessionStorage.clear();
   Route.open('/login');
 });
 

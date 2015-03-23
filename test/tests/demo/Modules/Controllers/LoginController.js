@@ -54,8 +54,8 @@ function enableSubmission(){
   
 _Templar.success("partials/login-screen.html", function(){
 
-  _$('#loginform').submit(loginHandler);     
-  _$('#form-sign-up').submit(signupHandler);
+  _$('#loginbtn').click(loginHandler);     
+  _$('#btn-sign-up').click(signupHandler);
   _$('#modaltrigger1').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
   _$('#modaltrigger2').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
   

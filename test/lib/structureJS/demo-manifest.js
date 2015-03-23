@@ -31,3 +31,4 @@ structureJS.declare('components/Column');
 structureJS.declare('controllers/LoginController');
 structureJS.declare('controllers/EditProfileController');
 structureJS.declare('controllers/MyProfileController');
+structureJS.declare('controllers/NewAdController');
