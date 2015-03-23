@@ -37,3 +37,17 @@ branches to take b/c the route parts are anonymous data. Gotta sleep on it.
 
 attributes on button not interping correctly. I think it's b/c they aren't a recognized node
 and aren't getting cached. will work tomorrow.
+
+3/22/15
+
+Started UI states. 
+
+TEST NOTE: I have not tested that infinite route deference depth works.  
+
+Fallback property for routes now allows for fallbacks to 2 scenarios:
+1. partial not found (404)
+2. target node not found
+
+TEST NOTE: theoretically fallback properties should be treated as partials. Meaning
+they can be composed of a single route name or an array with a mix of route names
+and route definition objects. UNTESTED.

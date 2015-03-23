@@ -7,6 +7,7 @@ var Link = require('Link');
 var State = require('State');
 var Compile = require('Compile');
 var DOM = require('DOM');
+var Route = require('Route'); 
 
 var Bootstrap = {
 
@@ -41,6 +42,9 @@ var Bootstrap = {
   },
   /*Preloading audio players will hang the framework.*/
   loadPartialIntoTemplate : function(){
+    /*Graceful fail on file not found. Error is logged from aync function*/
+    if(this.status != 200) return;
+    
     var partialContents = this.responseText,
         fileName = this.fileName,
         targetId = (!_.isNullOrEmpty(this.targetId)) ? 
@@ -54,14 +58,23 @@ var Bootstrap = {
         href = document.location.href,
         timestamp = new Date().getTime(),
         scope = fileName +  ' ' + timestamp,
-        DOMGetFileContents = this.callback || function(){},
-        routes = this.callbackParam1 || [];
+        /*These are for calls from DOM.asynFetchRoutes(). The context is set
+          as the xhr object*/
+        DOMGetFileContents = this.callback || function(){};
   
     if(!_.isNull(targetNode)){
       targetNode.innerHTML = partialContents;
     }else
     if((targetNode = document.getElementById(targetId)) != null){
       targetNode.innerHTML = partialContents;
+    }else{
+      /*Target node was not found, fallback*/
+      _.log('WARNING: TARGET NODE NOT FOUND FOR ROUTE "'+this.route+'".');
+      if(!_.isNullOrEmpty(this.fallback)){
+        _.log('WARNING: ATTEMPTING FALLBACK ROUTE "'+this.fallback+'".');
+        Route.open(this.fallback);
+      }
+      return;
     }
 
     aplHideNode = document.getElementById('apl-hide');

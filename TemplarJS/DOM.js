@@ -66,7 +66,7 @@ return {
     xhr.onreadystatechange = function() {
     if (xhr.readyState === 4){   //if complete
         if(xhr.status !== 200){  //check if "OK" (200)
-          //throw error
+          _.log('WARNING(404): FILE "'+xhr.fileName+'" NOT FOUND');
         }
       } 
     }
@@ -85,20 +85,24 @@ return {
     function deferenceRoutes(inArr, outArr){
       var routeName = null,//route1
           routeObj = '',
-          inArr = inArr.slice(0);
+          /*by value b/c we need the partial array for subsequent calls to 
+            DOM.asynFetchRoutes(). We can't consume it so we use the value.*/
+          inArr = inArr.slice(0),
+          isRoute,
+          isString;
       while((routeName = inArr.shift()) != null){
       
-        if(Circular('Route').isRoute(routeName)){//true
+        if((isString = _.isString(routeName)) && (isRoute = Circular('Route').isRoute(routeName))){
           routeObj = Circular('Route').getRouteObj(routeName);
           if(_.isArray(routeObj.partial)){
             deferenceRoutes(routeObj.partial, outArr);
           }else{
             outArr.push(routeObj);
           }
-        }else{
+        }else if(!isString){
           outArr.push(routeName);
         }
-        
+        /*noop if routeName was a string but didn't match a route*/
       }
       
     }
@@ -111,20 +115,32 @@ return {
         xhr.onload = Circular('Bootstrap').loadPartialIntoTemplate;
         xhr.fileName = routeObj.partial;
         xhr.targetId = routeObj.target;
+        xhr.route = routeObj.route;
+        xhr.fallback = routeObj.fallback || '';
         xhr.callbackOnComplete = routes.onComplete || function(){},
+        /*We copy the route array b/c the next xhr call will alter the reference
+          and will blow up the length check we use to determine when to call
+          onComplete*/
         xhr.callbackParam1 = routes.slice(0);
+        /*the context is the previously loaded route. All properties of 'this' are
+        'looking back' at the last route that was loaded.*/
         xhr.callback = function(){
           State.onloadFileQueue.push(this.fileName);
           getFileContents.call(null, this.callbackParam1);
           if(this.callbackParam1.length == 0){
+            Circular('Bootstrap').fireOnloads();
             this.callbackOnComplete.call(null);
           }
         }
         
         xhr.onreadystatechange = function() {
         if (xhr.readyState === 4){   //if complete
-            if(xhr.status !== 200){  //check if "OK" (200)
-              //throw error
+            if(xhr.status === 404){  //check if "OK" (200)
+              _.log('WARNING(404): FILE "'+xhr.fileName+'" NOT FOUND');
+              if(!_.isNullOrEmpty(xhr.fallback)){
+                _.log('WARNING (404): ATTEMPTING FALLBACK ROUTE "'+xhr.fallback+'".');
+                Circular('Route').open(xhr.fallback);
+              }
             }
           } 
         }

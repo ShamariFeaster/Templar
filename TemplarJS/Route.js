@@ -35,7 +35,8 @@ return {
          nextPart = null,
          nextType = null,
          target = '',
-         partial = '';
+         partial = '',
+         fallback = '';
   
 
     for(var i = 0; i < routes.length; i++){
@@ -43,6 +44,7 @@ return {
       parts = routes[i].route.trim().split('/'); 
       target = routes[i].target;
       partial = routes[i].partial;
+      fallback = routes[i].fallback;
       tmp = routeObj;
       tat = ambiguityTree;
       
@@ -105,6 +107,7 @@ return {
       tmp.route = route;
       tmp.partial = (_.isDef(partial)) ? partial : '' ;
       tmp.target = (_.isDef(target)) ? target : '';
+      tmp.fallback = (_.isDef(fallback)) ? fallback : '';
       terminalBranchCreated = false;
       nonAmbiguousBranchCreated = false;
     }
@@ -245,6 +248,7 @@ return {
 
     if((resolvedRouteObj = this.handleRoute(routeId)) != null && resolvedRouteObj !== _.RESTRICTED){
       //State.onloadFileQueue.push(resolvedRouteObj.partial);
+
       DOM.asynFetchRoutes(resolvedRouteObj, function(){
         State.ignoreHashChange = true;
         var endIndex, href = window.location.href;
@@ -255,13 +259,11 @@ return {
 
         window.location.href = href + resolvedRouteObj.route;
       });
-      
+     
     }
   },
   
   isRoute : function(url){
-    if(!_.isString(url))
-      return false;
       
     var isRoute = false;
     for(var i = 0 ; i < _routeObjArray.length; i++){
