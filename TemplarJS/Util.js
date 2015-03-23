@@ -1,4 +1,7 @@
 structureJS.module('Util', function(require){
+  document.addEventListener('load', function(){
+    console.log('LOAD FIRED!!!!!!!!!!!!!!!!!');
+  });
   _ = Object.create(null);
   
   _.isDef = function(a){return (typeof a !== 'undefined');};

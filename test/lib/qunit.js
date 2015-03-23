@@ -226,7 +226,7 @@ config = {
 	queue: [],
 
 	// block until document ready
-	blocking: true,
+	blocking: false,
 
 	// when enabled, show only failing tests
 	// gets persisted through sessionStorage and can be changed in UI via checkbox
@@ -572,6 +572,7 @@ if ( !defined.document || document.readyState === "complete" ) {
 }
 
 QUnit.load = function() {
+
 	runLoggingCallbacks( "begin", QUnit, {} );
 
 	// Initialize the config, saving the execution queue
@@ -810,7 +811,6 @@ window.onerror = function ( error, filePath, linerNr ) {
 
 function done() {
 	config.autorun = true;
-
 	// Log the last module results
 	if ( config.previousModule ) {
 		runLoggingCallbacks( "moduleDone", QUnit, {
@@ -1280,7 +1280,6 @@ Test.prototype = {
 	},
 	run: function() {
 		config.current = this;
-
 		var running = id( "qunit-testresult" );
 
 		if ( running ) {
