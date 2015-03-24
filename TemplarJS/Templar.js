@@ -72,23 +72,31 @@ Templar.setDeAuthenticator = function(func){
 Templar.attribute = function(name, definitionObj){
   if(!_.isString(name) || !_.isDef(definitionObj)) return;
   
-  var attribute = new Attribute();
+  var attribute = new Attribute(name.toLowerCase()),
+      onCreate = function(){},
+      onChange = function(){};
   for(var prop in definitionObj){
     if(definitionObj.hasOwnProperty(prop)){
       switch(prop){
         case 'onCreate' :
-          var onCreate = definitionObj['onCreate'];
-          attribute.onCreate = (_.isFunc(onCreate)) ? onCreate : function(){};
+          onCreate = definitionObj['onCreate'];
+          attribute.onCreate = onCreate = (_.isFunc(onCreate)) ? onCreate : function(){};
           break;
         case 'onChange' :
-          var onChange = definitionObj['onChange'];
-          attribute.onChange = (_.isFunc(onChange)) ? onChange : function(){};
+          onChange = definitionObj['onChange'];
+          attribute.onChange = onChange = (_.isFunc(onChange)) ? onChange : function(){};
           break;
       }
     }
   }
-  
-  Templar._attributes[name.toLowerCase()] = attribute;
+  attribute.onCreate = function(DOM_node){
+    /*This implicit call to onChange is for when user uses a static value for the 
+      attribute value. We assume he wants that value to be used to transform the
+      target.*/
+    attribute.onChange.call(attribute, DOM_node, DOM_node.getAttribute(attribute.name));
+    onCreate.call(attribute, DOM_node);
+  }
+  Templar._attributes[attribute.name] = attribute;
 }
 
 Templar.component = function(name, definitionObj){

@@ -2,13 +2,13 @@ structureJS.module('Attribute', function(require){
 
 var _ = this;
 
-var Attribute = function(onCreate, onChange){
+var Attribute = function(name){
   if(!(this instanceof Attribute))
     return new Attribute();
 
-  this.onCreate = onCreate || function(){};
-  this.onChange = onChange|| function(){};
-
+  this.onCreate = function(){};
+  this.onChange = function(){};
+  this.name = name || '';
 };
 
 var _isAttribute = function(name){
@@ -18,8 +18,6 @@ var _isAttribute = function(name){
   }
   return result;
 }
-
-
 
 Attribute.prototype.getAttribute = function(name){
   var result = null;

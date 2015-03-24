@@ -5,8 +5,5 @@ Templar.attribute('isDisabled',{
     }else{
       self.removeAttribute('disabled');
     }
-  },
-  onCreate : function(DOM_node){
-
   }
 });

@@ -51,3 +51,9 @@ Fallback property for routes now allows for fallbacks to 2 scenarios:
 TEST NOTE: theoretically fallback properties should be treated as partials. Meaning
 they can be composed of a single route name or an array with a mix of route names
 and route definition objects. UNTESTED.
+
+3/23/2015
+
+Reduce memory footprint by storing references to cahced nodes instead of the nodes 
+themselves. Not a change I'm considering now, but when it's out in the wild this 
+optimization would be great for mobile and low power devices.

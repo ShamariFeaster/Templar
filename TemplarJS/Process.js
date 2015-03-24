@@ -32,31 +32,32 @@ return {
         modelNameParts = null,
         tmp_node = null,
         preProcessedTMPNodes = [],
-        customAttribute;
+        customAttribute,
+        origValue;
     
     /*Options don't need to be in the node tree due to having NTs in 'value' attribute*/
     if(node.hasAttributes() && node.tagName != 'OPTION'){
       attributes = node.attributes;
       /*search node attributes for non-terminals*/
       for(var i = 0; i < attributes.length; i++){
-
-        while( (match = regex.exec(attributes[i].value)) != null ){
+        origValue = attributes[i].value;
+        if((customAttribute = Attribute.getAttribute(attributes[i].name)) != null){
+          
+          node._setAttribute = node.setAttribute;
+          node.__customAttribute__ = customAttribute;
+          node.setAttribute = function(name, val){
+            this.__customAttribute__.onChange.call(this.__customAttribute__, this, val);
+            this._setAttribute.call(this, name, val);
+          };
+          /*This is called after the _setAttribute assignment b/c onCreate calls onChange
+            implicitly which may make use of it.*/
+          customAttribute.onCreate.call(customAttribute, node);
+        }
+        
+        while( (match = regex.exec(origValue)) != null ){
           tmp_node = new TMP_Node(node, match[1], match[2]);         
-          tmp_node.symbolMap[attributes[i].name] = attributes[i].value;
+          tmp_node.symbolMap[attributes[i].name] = origValue;
           tmp_node.scope = scope;
-          
-          if((customAttribute = Attribute.getAttribute(attributes[i].name)) != null){
-            customAttribute.onCreate.call(customAttribute, tmp_node.node);
-            
-            var origSetAttrib = tmp_node.node.setAttribute;
-            tmp_node.node.setAttribute = function(name, val){
-              tmp_node.node._setAttribute = origSetAttrib;
-              customAttribute.onChange.call(customAttribute, this, val);
-              origSetAttrib.call(this, name, val);
-              
-            };
-          }
-          
           
           hasAttribNonTerminal = true;/*global polution: should be removed*/
           Map.pushNodes(tmp_node);
