@@ -13,6 +13,8 @@ var _ = require('Util'),
 function bindHandlers(){
   AdFormMdl.listen('adType', function(e){
     AdFormMdl.category = AdTypeMap.Categories[e.value];
+    AdFormMdl.sort('category');
+    AdFormMdl.update('category');
   });
 }
 
@@ -20,11 +22,14 @@ function init(bannerMsg){
   Helper.init(bannerMsg);
   bindHandlers();
   AdFormMdl.adType = AdTypeMap.AdTypes;
+  AdFormMdl.sort('category');
+  AdFormMdl.update('category');
+  
 }
 
-_Templar.success("partials/Profile/new-ad-part-2.html", function(){
+_Templar.success("#/new-ad-part-2", function(){
   init('New Ad');
-  //Helper.loadProfile(UserProfileModel);
+
 });
 
 });
