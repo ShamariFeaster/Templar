@@ -6,6 +6,8 @@ var Route = require('Route');
 var Model = require('ModelHeader');
 var System = require('System');
 var DOM = require('DOM');
+var Attribute = require('Attribute');
+var Component = require('Component');
 
 var Templar = function(controlName){
 };
@@ -14,17 +16,8 @@ Templar._onloadHandlerMap = Object.create(null);
 Templar._components = Object.create(null);
 Templar._components.length = 0;
 
-Templar.Component = function(attributes, onCreate, templateURL){
-  if(!(this instanceof Templar.Component))
-    return new Templar.Component();
-    
-  this.attributes = attributes || Object.create(null);
-  this.onCreate = onCreate || function(){};
-  this.templateURL = templateURL || '';
-  this.templateContent = '';
-  this.templateStyle = null;
-  this.transclude = false;
-};
+Templar._attributes = Object.create(null);
+Templar._attributes.length = 0;
 
 Templar.success = function(partialFileName, onloadFunction){
   if(!_.isDef(this._onloadHandlerMap[partialFileName])){
@@ -76,10 +69,32 @@ Templar.setDeAuthenticator = function(func){
   Route.setDeAuthenticator(func);
 };
 
+Templar.attribute = function(name, definitionObj){
+  if(!_.isString(name) || !_.isDef(definitionObj)) return;
+  
+  var attribute = new Attribute();
+  for(var prop in definitionObj){
+    if(definitionObj.hasOwnProperty(prop)){
+      switch(prop){
+        case 'onCreate' :
+          var onCreate = definitionObj['onCreate'];
+          attribute.onCreate = (_.isFunc(onCreate)) ? onCreate : function(){};
+          break;
+        case 'onChange' :
+          var onChange = definitionObj['onChange'];
+          attribute.onChange = (_.isFunc(onChange)) ? onChange : function(){};
+          break;
+      }
+    }
+  }
+  
+  Templar._attributes[name.toLowerCase()] = attribute;
+}
+
 Templar.component = function(name, definitionObj){
   if(!_.isString(name) || !_.isDef(definitionObj)) return;
   
-  var component = new Templar.Component();
+  var component = new Component();
   
   for(var prop in definitionObj){
     if(definitionObj.hasOwnProperty(prop)){

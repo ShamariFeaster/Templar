@@ -12,6 +12,8 @@ structureJS.configure(
             'templar/Util', 
             'classes/ClassTMP_Node',
             'classes/ClassModel',
+            'classes/Attribute.class',
+            'classes/Component.class',
             'templar/DOM'],
   directory_aliases : {modules : 'Modules/',
                        controllers : 'Modules/Controllers/',

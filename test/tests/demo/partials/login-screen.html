@@ -45,11 +45,9 @@
       
       <label for="password">Confirm Password:</label>
       <input value="{{LoginForm.confirm_pw}}" type="password" name="password" id="password" class="txtfield" tabindex="2">
-      
-      <!--disabled="{{LoginForm.submissionDisabled}}"-->
-      
+
       <div class="center">
-        <button name="btn-sign-up" id="btn-sign-up" class="flatbtn-blu hidemodal" tabindex="3">
+        <button isDisabled={{LoginForm.submissionDisabled}} name="btn-sign-up" id="btn-sign-up" class="flatbtn-blu hidemodal" tabindex="3">
           Sign Up
         </button>
       </div>

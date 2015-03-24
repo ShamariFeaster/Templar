@@ -1,3 +1,5 @@
+QUnit.frameworkLoaded(function(){
+
 QUnit.module('Templar', 
 {
   setup : function(){
@@ -10,3 +12,6 @@ QUnit.module('Templar',
 QUnit.test('templar.interpolation',function( assert ){
   assert.ok(true,'worked');
 });
+
+});
+

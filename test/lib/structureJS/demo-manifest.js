@@ -26,6 +26,7 @@ structureJS.declare('modules/Routes');
 structureJS.declare('modules/Model');
 structureJS.declare('modules/Helper');
 structureJS.declare('controllers/NavigationController');
+structureJS.declare('components/Attributes');
 structureJS.declare('components/Row');
 structureJS.declare('components/Column');
 structureJS.declare('controllers/LoginController');

@@ -190,7 +190,7 @@ return {
               if(_.isFunc(updateFunc = component.attributes[name])){
                 updateFunc.call(component, this, val);
               }
-              
+              DOM_component._setAttribute = origSetAttrib;
               origSetAttrib.call(this,name, val);
             };
             
@@ -223,7 +223,6 @@ return {
             attribName = modelNameParts[1];
           }
           compileMe = Process.preProcessNode(DOM_Node, modelName, attribName, scope);
-
           
           /*Repeat base nodes serve as templates and should remain uncompiled*/
           if(compileMe  == true)

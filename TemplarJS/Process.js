@@ -4,6 +4,7 @@ var _ = this;
 var TMP_Node = require('TMP_Node');
 var Map = require('Map');
 var DOM = require('DOM');
+var Attribute = require('Attribute')();
 
 return {
 
@@ -30,22 +31,33 @@ return {
         regex = /\{\{(\w+)\.(\w+)(\[(\d+)\])*(?:\.)*(\w+)*?\}\}/g,
         modelNameParts = null,
         tmp_node = null,
-        preProcessedTMPNodes = [];
+        preProcessedTMPNodes = [],
+        customAttribute;
     
     /*Options don't need to be in the node tree due to having NTs in 'value' attribute*/
     if(node.hasAttributes() && node.tagName != 'OPTION'){
       attributes = node.attributes;
       /*search node attributes for non-terminals*/
       for(var i = 0; i < attributes.length; i++){
-        /*disallow style and class interpolation*/
-        if(attributes[i].name == 'style' || attributes[i].name == 'class'){
-          continue;
-        }
 
         while( (match = regex.exec(attributes[i].value)) != null ){
           tmp_node = new TMP_Node(node, match[1], match[2]);         
           tmp_node.symbolMap[attributes[i].name] = attributes[i].value;
           tmp_node.scope = scope;
+          
+          if((customAttribute = Attribute.getAttribute(attributes[i].name)) != null){
+            customAttribute.onCreate.call(customAttribute, tmp_node.node);
+            
+            var origSetAttrib = tmp_node.node.setAttribute;
+            tmp_node.node.setAttribute = function(name, val){
+              tmp_node.node._setAttribute = origSetAttrib;
+              customAttribute.onChange.call(customAttribute, this, val);
+              origSetAttrib.call(this, name, val);
+              
+            };
+          }
+          
+          
           hasAttribNonTerminal = true;/*global polution: should be removed*/
           Map.pushNodes(tmp_node);
           /*This is necessary for repeats as their child nodes aren't added to Interpolation array
