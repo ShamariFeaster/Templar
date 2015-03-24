@@ -258,6 +258,31 @@ return {
     return returnVal;
   },
   
+  dereferenceAttribute : function(TMP_node){
+    if(!_.isDef(_map[TMP_node.modelName])) 
+      return null;
+      
+    var returnVal = null,
+        attribute = null,
+        prop = null,
+        queue = TMP_node.indexQueue.slice(0),
+        modelName = TMP_node.modelName,
+        attribName = TMP_node.attribName;
+    
+    if(_.isDef(_map[modelName]['modelObj'][attribName])){
+      attribute = _map[modelName]['modelObj'][attribName];
+      if(_.isArray(attribute)){
+        while((prop = queue.shift())){
+          returnVal = attribute = attribute[prop];
+        }
+        
+        _.log('DEREFERENCED VALUE: ' + returnVal);
+      }
+      
+    }
+    return returnVal;
+  },
+  
   setAttribute : function(modelName, attribName, value){
     var returnVal = null;
     if(_.isDef(_map[modelName]) && _.isDef(_map[modelName]['modelObj'][attribName])){

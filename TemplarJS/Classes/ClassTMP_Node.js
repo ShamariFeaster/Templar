@@ -7,7 +7,7 @@ var TMP_Node = function(node, modelName, attribName, index){
   this.node = node;
   this.modelName = modelName;
   this.attribName = attribName;
-  this.index = (_.isDef(index))? index : -1;
+  this.index = (!_.isArray(index))? index : -1;
   this.prop = '';
   this.symbolMap = Object.create(null);
   this.hasNonTerminals = false;
@@ -20,6 +20,7 @@ var TMP_Node = function(node, modelName, attribName, index){
   this.repeatIndex = _.UNINDEXED;
   this.isComponent = false;
   this.componentName = '';
+  this.indexQueue = (_.isArray(index))? index : [];
 };
 
 return TMP_Node;

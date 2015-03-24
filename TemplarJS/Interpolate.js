@@ -102,21 +102,11 @@ return {
 
     return updateObject;
   },
-  interpolateSpan : function(tmp_node, attributeVal){
+  interpolateSpan : function(tmp_node){
     var node = tmp_node.node;
-    /*Notice the sequence of the if/else ladder. the first test was last but firefox 33
-      was ignoring the test and running the blcok.*/
-    if(_.isNullOrEmpty(tmp_node.prop) && tmp_node.index >= 0 && _.isDef(attributeVal[tmp_node.index]) && tmp_node.index < attributeVal.length){
-        node.innerText = node.innerHTML = attributeVal[tmp_node.index];
-    }else if(_.isNullOrEmpty(tmp_node.prop) && tmp_node.index == _.UNINDEXED){
-      node.innerText = node.innerHTML = attributeVal;
-    }else if(!_.isNullOrEmpty(tmp_node.prop) && tmp_node.index >= 0 && _.isDef(attributeVal[tmp_node.index]) && tmp_node.index < attributeVal.length){
-      node.innerText = node.innerHTML = attributeVal[tmp_node.index][tmp_node.prop];     
-    }else{
-      node.innerText = node.innerHTML = '';
-    } 
-    
-    
+    node.innerText = node.innerHTML = 
+      Map.dereferenceAttribute(tmp_node) || '';
+
   },
   /*Returns the whole attribute if no limit is defined for this attribute*/
   getPageSlice : function(Model, attributeName, target){

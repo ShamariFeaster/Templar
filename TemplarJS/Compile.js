@@ -43,7 +43,10 @@ return {
         
         compileMe = false,
         //2 = a.b, 3 = [0], 4 = 0, 5 = propertyName  
-        NONTERMINAL_REGEX = /(\{\{(\w+\.\w+)(\[(\d+)\])*(?:\.)*(\w+)*?\}\})/g;
+        NONTERMINAL_REGEX = /(\{\{(\w+\.\w+)(\[(\d+)\])*(?:\.)*(\w+)*?\}\})/g,
+        EXP_NT = /\{\{(\w+\.\w+)([^}]*)*/,
+        IDX_NT = /\[(\w+|\d+)\]|\.(\w+)/g,
+        idxQueue = [];
         
 
     for(var i = 0; i < nodes.length; i++){
@@ -51,16 +54,30 @@ return {
         parentNode = DOM_Node.parentNode;
         /*option innerText should not be compiled*/
         if(DOM_Node.nodeType == _.TEXT_NODE && (!_.isNull(parentNode) && parentNode.tagName !== 'OPTION') ){
-          text = DOM_Node.wholeText;
+          text = DOM_Node.wholeText,
+          part = {idxQueue : []};
           /**/
           while(  (match = NONTERMINAL_REGEX.exec(text)) != null){
             modelNameParts = Process.parseModelAttribName(match[2]);
-            
-            partMap.push({ start : match.index, end : NONTERMINAL_REGEX.lastIndex, 
-                          modelName : modelNameParts[0], attribName : modelNameParts[1],
-                          fullToken : match[1], index : match[4] , propertyName : match[5]});
+            part.start =  match.index;
+            part.end =  NONTERMINAL_REGEX.lastIndex;
+            part.modelName =  modelNameParts[0];
+            part.attribName =  modelNameParts[1];
+            part.fullToken =  match[1];
 
           }
+          
+          if((match = EXP_NT.exec(text)) != null){
+            var indexes = null,
+                prop;
+
+            while((indexes = IDX_NT.exec(match[2])) != null){
+                prop = (!_.isDef(indexes[1])) ? indexes[2] : indexes[1];
+                part.idxQueue.push(prop);
+            }
+          }
+          
+          partMap.push(part);
           
           /*splitNode is right split, DOM_Node is left of split (ie original DOM_Node) */
           
@@ -71,15 +88,12 @@ return {
             attribName = partMap[x]['attribName'];
             
             var span = document.createElement('span');
-            /*interpolateIndex and interpolateProperty are passed with DOM_Node to 
-              Interpolate.interpolate where it is used to properly dereference the model attrib*/
-            propName = partMap[x]['propertyName'];
-            index = (_.isDef(partMap[x]['index'])) ? parseInt(partMap[x]['index']) : -1;
-            tmp_node = new TMP_Node(span, modelName, attribName, index);
-            tmp_node.prop = propName;
+
+            tmp_node = new TMP_Node(span, modelName, attribName, partMap[x].idxQueue);
+
             /*Look for pattern created during preProcessRepeatNode() to indicate this node is an
               embedded interpolation node inside a repeat; however the model and/or attrib behind
-              the node differ from that of the repeat*/
+              the node differ from that of the repeat
             if(!_.isNullOrEmpty(propName) && propName.indexOf('zTMPzDOT') != _.UNINDEXED){
               repeatAnnotationParts = propName.split('DOT');
               tmp_node.repeatModelName = repeatAnnotationParts[1];
@@ -88,7 +102,7 @@ return {
               tmp_node.index = _.UNINDEXED;
               tmp_node.prop = '';
             }
-            
+            */
             tmp_node.scope = scope;
             splitNode = DOM.splitText(DOM_Node, partMap[x]['start'] - prevLength)
             //splitNode = DOM_Node.splitText(partMap[x]['start'] - prevLength);
@@ -96,14 +110,14 @@ return {
             /*{{Auth.items[0].text}}*/
             if(splitNode.nodeValue.trim() == partMap[x]['fullToken']){
               tmp_node.node.innerText = splitNode.nodeValue;
-              Interpolate.interpolateSpan(tmp_node, Map.getAttribute(modelName, attribName));
+              Interpolate.interpolateSpan(tmp_node);
               parentNode.replaceChild(tmp_node.node, splitNode);
               Map.pushNodes(tmp_node);             
               //log('1Parent Tag Name: ' + parentTagName + ' ' + partMap[x]['fullToken']);
             }
             if(DOM_Node.nodeValue.trim() == partMap[x]['fullToken']){
               tmp_node.node.innerText = DOM_Node.nodeValue;
-              Interpolate.interpolateSpan(tmp_node, Map.getAttribute(modelName, attribName));
+              Interpolate.interpolateSpan(tmp_node);
               parentNode.replaceChild(tmp_node.node, DOM_Node);
               Map.pushNodes(tmp_node); 
               //log('2Parent Tag Name: ' + parentTagName + ' ' + partMap[x]['fullToken']);
@@ -118,14 +132,14 @@ return {
             
             if(splitNode.nodeValue.trim() == partMap[x]['fullToken']){
               tmp_node.node.innerText = splitNode.nodeValue;
-              Interpolate.interpolateSpan(tmp_node, Map.getAttribute(modelName, attribName));
+              Interpolate.interpolateSpan(tmp_node);
               parentNode.replaceChild(tmp_node.node, splitNode);
               Map.pushNodes( tmp_node); 
               //log('3Parent Tag Name: ' + parentTagName + ' ' + partMap[x]['fullToken']);
             }
             if(DOM_Node.nodeValue.trim() == partMap[x]['fullToken']){
               tmp_node.node.innerText = DOM_Node.nodeValue;
-              Interpolate.interpolateSpan(tmp_node, Map.getAttribute(modelName, attribName));
+              Interpolate.interpolateSpan(tmp_node);
               parentNode.replaceChild(tmp_node.node, DOM_Node);
               Map.pushNodes( tmp_node ); 
               //log('4Parent Tag Name: ' + parentTagName + ' ' + partMap[x]['fullToken']);
