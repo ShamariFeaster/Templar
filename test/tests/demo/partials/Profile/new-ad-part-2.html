@@ -1,24 +1,26 @@
 <row>
   <column colnum="0">
-    <label>Ad Type</label>
+    <row>
+      <label>Ad Type</label>
+    </row>
+    <row>
+      <select>{{AdForm.adType}}</select> 
+    </row>
   </column>
   
-  <column colnum="3">
-    <label>Category</label>
-  </column>
-</row>
-<row>
-  <column colnum="0">
-    <select>{{AdForm.adType}}</select> 
-  </column>
-  
-  <column colnum="3">
-    <select>{{AdForm.category}}</select>
+  <column colnum="2.5">
+    <row>
+      <label>Category</label>
+    </row>
+    <row>
+      <select>{{AdForm.category}}</select>
+    </row>
   </column>
 </row>
 
 <row>
   <a class="flatbtn" id="#/goto-new-ad-1">Back</a>
   <a class="flatbtn" id="#/goto-new-ad-fhdh2">Next</a>
+
 </row>
 

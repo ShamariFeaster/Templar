@@ -1,3 +1,8 @@
+structureJS.module('Model', function(require){
+
+var AdTypes = require('Type-Category-Map').AdTypes,
+    Categories = require('Type-Category-Map').Categories;
+
 Templar.dataModel('Environment',
 {
   siteName :  'GenericSocialNetwork.com',
@@ -40,8 +45,8 @@ Templar.dataModel('AdForm',
 {
   title : '',
   description : '',
-  adType : [],
-  category : [],
+  adType : AdTypes,
+  category : Categories[AdTypes[0]],
   ln : '',
   states : structureJS.require('GeoInfo-US').states,
   cities : [],
@@ -73,4 +78,4 @@ Templar.dataModel('UserProfile',
   pp_src : ''
 });
 
-
+});

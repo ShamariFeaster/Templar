@@ -69,6 +69,11 @@ Templar.setDeAuthenticator = function(func){
   Route.setDeAuthenticator(func);
 };
 
+Templar.onLink = function( func){
+  System.setSystemListeners(_.SYSTEM_EVENT_TYPES.link_done, func);
+};
+
+
 Templar.attribute = function(name, definitionObj){
   if(!_.isString(name) || !_.isDef(definitionObj)) return;
   

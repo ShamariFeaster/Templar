@@ -190,7 +190,7 @@ return {
               if(_.isFunc(updateFunc = component.attributes[name])){
                 updateFunc.call(component, this, val);
               }
-              DOM_component._setAttribute = origSetAttrib;
+              this._setAttribute = origSetAttrib;
               origSetAttrib.call(this,name, val);
             };
             
@@ -204,14 +204,16 @@ return {
             /*fire onCreate*/
             component.onCreate.call(component, DOM_component);
             
-            /*Initalization of custom attributes using setter functions. This is for hard-coded
-              attribute values that aren't NTs*/
+            /*I am commenting this our b/c assuming the user wants initialization to happen
+              here is problematic. I could make it configurable but that requires a component
+              option which increases intellectual overhead.
+              
             for(attrib in component.attributes){
               if(!_.isNullOrEmpty(attribVal = DOM_Node.getAttribute(attrib))){
                 component.attributes[attrib].call(component, DOM_component, attribVal);
               }
             }
-
+            */
             DOM_Node.parentNode.removeChild(DOM_Node);
             DOM_Node = null;
           }

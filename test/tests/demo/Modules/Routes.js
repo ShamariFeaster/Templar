@@ -1,4 +1,10 @@
 Templar.Route([
+/*---LOGIN---*/
+{
+    route : '#/login',
+    partial : 'partials/login-screen.html'
+},
+/*---EDIT PROFILE---*/
 {
     route : '#/editProfile',
     partial : 'partials/edit-profile.html'
@@ -7,41 +13,50 @@ Templar.Route([
     route : '#/editProfile/ProfileForm:uploadStatus/',
     partial : 'partials/edit-profile.html'
 },
+/*---PROFILE---*/
 {
     route : '#/profile',
     partial : 'partials/profile.html'
 },
+/*Messages*/
 {
     route : '#/messages',
-    partial : 'partials/Profile/messages.html',
-    target : '#profile-right-col'
+    partial : ['#/profile',
+    {
+      partial : 'partials/Profile/messages.html',
+      target : '#profile-right-col'
+    }]
 },
+/*Wall*/
+{
+    route : '#/wall',
+    partial : ['#/profile',
+    {
+      partial : 'partials/Profile/wall.html',
+      target : '#profile-right-col'
+    }]
+},
+/*My Ads*/
 {
     route : '#/my-ads',
-    partial : 'partials/Profile/my-ads.html',
-    target : '#profile-right-col'
+    partial : ['#/profile',
+    {
+      partial : 'partials/Profile/my-ads.html',
+      target : '#profile-right-col'
+    }]
 },
+/*New Ad*/
 {
     route : '#/new-ad',
-    partial : [
-      '#/profile',
-      { 
-        partial : 'partials/Profile/new-ad-part-1.html', 
-        target : '#profile-right-col'
-      }]
+    partial : ['#/profile',
+    { 
+      partial : 'partials/Profile/new-ad-part-1.html', 
+      target : '#profile-right-col'
+    }]
 },
 {
     route : '#/new-ad-part-2',
     partial : 'partials/Profile/new-ad-part-2.html',
     target : '#profile-right-col',
     fallback : '#/new-ad'
-},
-{
-    route : '#/wall',
-    partial : 'partials/Profile/wall.html',
-    target : '#profile-right-col'
-},
-{
-    route : '#/login',
-    partial : 'partials/login-screen.html'
 }]);

@@ -51,10 +51,7 @@ var Bootstrap = {
                       this.targetId.replace('#','') : 'apl-content',
         targetNode = (!_.isNull(this.targetNode)) ? this.targetNode : null,
         /*a partial can define parent template dom elements to be hidden*/
-        aplHideNode = null,
         nodeToShow = null,
-        defaultHiddenNodeList = null,
-        defaultNodeToHide = null,
         href = document.location.href,
         timestamp = new Date().getTime(),
         scope = fileName +  ' ' + timestamp,
@@ -77,28 +74,12 @@ var Bootstrap = {
       return;
     }
 
-    aplHideNode = document.getElementById('apl-hide');
-    
-    /*Show nodes hidden from last partial load*/
-      nodesPreviouslyHidden = State.aplHideList.split(_.CLASS_SEPARATOR);
-      for(var i = 0; i < nodesPreviouslyHidden.length; i++){
-          nodeToShow = document.getElementById(nodesPreviouslyHidden[i]);
-          DOM.modifyClasses(nodeToShow,'apl-show','apl-show,apl-hide');
-        }
-
-    if(!_.isNull(aplHideNode)){
-      State.aplHideList = aplHideNode.getAttribute('data-apl-hide');
-      DOM.hideByIdList(State.aplHideList);
-    }
-    
     _.log('Compiling <' + fileName + '> w/ scope <' + scope + '>');
     /*remove this pending comp*/
     State.compilationThreadCount--;
     State.compiledScopes += scope + ',';
     Compile.compile( targetNode, scope );
-    
-    /*unhide target node after compilation*/
-    DOM.modifyClasses(targetNode,'apl-show','apl-hide,apl-show');
+
     /*if a default-template tag found, recursive compilations will be spun off async during compile()
       .without a way to determine if there are still unfinished 'threads' we will interpolate multiple
       times and prematurely causing unecessary overhead and misfiring of our onload handlers. Dangers of
