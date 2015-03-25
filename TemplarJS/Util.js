@@ -10,7 +10,7 @@ structureJS.module('Util', function(require){
   _.isNull = function(a){ return (!_.isDef(a) || a == null);};
   _.isObject = function(a){ return (_.isDef(a) && Object.keys(a).length > 0);};
   _.isNullOrEmpty = function(a){ return (!_.isDef(a) || (a === null || a === ''));};
-  _.isArray = function(a){return (!_.isNull(a) && typeof a !== 'string' && _.isDef(a.length))};
+  _.isArray = function(a){return (!_.isNull(a) && Array.isArray(a))};
   _.log = function(a){console.log(a);};
 
   structureJS.extendContext(_); 

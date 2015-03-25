@@ -20,7 +20,18 @@ return {
     var propertyName = (_.isNullOrEmpty(propertyName)) ? '' : '.' + propertyName;
     return '{{' + modelName + '.' + modelAtrribName + '[' + index + ']' + propertyName + '}}';
   },
-
+  _buildNonTerminal : function(Token, i){
+  
+    var NT = Token.modelName + '.' + Token.attribName,
+        prop,
+        queue = Token.indexQueue.slice(0),
+        index = (_.isDef(i)) ? '[' + i + ']' : '' ;
+        
+    while( (prop = queue.shift(queue)) != null ){
+      NT += '[' + prop + ']';
+    }
+    return '{{' + NT + index + '}}';
+  },
   buildRepeatNonTerminal : function(modelName, modelAtrribName, parentModel, parentAttrib, index){
     var propertyName = (_.isNullOrEmpty(propertyName)) ? '' : propertyName;
     return '{{' + modelName + '.' + modelAtrribName + '[' + index + '].zTMPzDOT' + parentModel +'DOT' + parentAttrib + '}}';
@@ -147,50 +158,36 @@ return {
    
     return TMP_repeatedNode;
   },
+  
   preProcessInputNode : function(DOM_Node, scope){
-    var NONTERMINAL_REGEX = /(\{\{(\w+\.\w+)(\[(\d+)\])*(?:\.)*(\w+)*?\}\})/g,
-        regex = /(\{\{(\w+\.\w+)\}\})/g,
-        match = null,
-        modelNameParts = null,
-        partMap = {},
-        propName = '',
-        index = 0,
-        tmp_node = null,
-        inputType = DOM_Node.getAttribute('type') || '';
+    var match = null,
+        inputType = DOM_Node.getAttribute('type') || '',
+        tokens = Circular('Compile').getTokens(DOM_Node.getAttribute('value')),
+        token;
+        
+    if( tokens.length < 1 )
+      return;
+    
+    token = tokens[0];
+    
+    DOM_Node.model = token.modelName;
+    DOM_Node.name = token.attribName
+    DOM_Node.token = token;
+    
     inputType = inputType.toLowerCase();
-    
-    /*id embedded node*/
-    if(  (match = NONTERMINAL_REGEX.exec(DOM_Node.getAttribute('value'))) != null){
-      /*IF the NT has an index, this signals NT is repeat property and NOT embedded. 
-        Short circuit input preprocessing.*/
-      if(_.isDef(match[3]) && _.isDef(propName = match[5]) 
-          && propName.indexOf('zTMPzDOT') == _.UNINDEXED)
-        return;
-      modelNameParts = this.parseModelAttribName(match[2]);
-      DOM_Node.model = modelNameParts[0];
-      DOM_Node.name = modelNameParts[1];
-    
-    /*block below most likely redundant*/  
-    }else if( (match = regex.exec(DOM_Node.getAttribute('value'))) !== null){
-      modelNameParts = Process.parseModelAttribName(matches[2]);
-      DOM_Node.model = modelNameParts[0];
-      DOM_Node.name = modelNameParts[1];
-    }
-    
-    if(inputType == 'checkbox' || inputType == 'radio' && match != null){
-      var attrib = Map.getAttribute(DOM_Node.model, DOM_Node.name),
+
+    if(inputType == 'checkbox' || inputType == 'radio'){
+      var attrib,
           TMP_checkbox = null,
-          parentNode = null,
           value = '',
           description = '',
           checked = false;
-      if(!_.isNull(attrib) && _.isArray(attrib) 
-        && (parentNode = DOM_Node.parentNode) !== null 
-        && !_.isNullOrEmpty(scope)){
 
+      attrib = Map.dereferenceAttribute(token);
+      if(_.isArray(attrib)){
         for(var i = 0; i < attrib.length; i++, checked = false){
         
-          if(_.isString(attrib[i])){
+          if(!_.isDef(attrib[i].description) && !_.isDef(attrib[i].value)){
             value = description = attrib[i];
           } else {
             value = (_.isDef(attrib[i].value)) ? attrib[i].value : value;
@@ -200,12 +197,15 @@ return {
           
           TMP_checkbox = new TMP_Node(document.createElement('input'),DOM_Node.model, DOM_Node.name, i) ;
           TMP_checkbox.scope = scope;
+          TMP_checkbox.node.token = TMP_checkbox.token = token;
           TMP_checkbox.node.model = TMP_checkbox.modelName;
           TMP_checkbox.node.name = TMP_checkbox.attribName;
           TMP_checkbox.node.checked = checked;
           DOM.cloneAttributes(DOM_Node, TMP_checkbox.node);
           TMP_checkbox.node.setAttribute('value', value);
           
+          /*check to see if it's embedded and annotate*/
+
           /*Make current_selection assignment update the DOM*/
           if(!_.isDef(attrib.current_selection)){
             (function(name){
@@ -227,24 +227,16 @@ return {
               });
             })(DOM_Node.name);
           }
-          /*check to see if it's embedded and annotate*/
-          if(!_.isNullOrEmpty(propName) && propName.indexOf('zTMPzDOT') != _.UNINDEXED){
-            repeatAnnotationParts = propName.split('DOT');
-            TMP_checkbox.repeatModelName = repeatAnnotationParts[1];
-            TMP_checkbox.repeatAttribName = repeatAnnotationParts[2]; 
-            TMP_checkbox.repeatIndex = (_.isDef(partMap['index'])) ? parseInt(partMap['index']) : -1;;
-            TMP_checkbox.index = _.UNINDEXED;
-            TMP_checkbox.prop = '';
-          }
-          parentNode.insertBefore(TMP_checkbox.node, DOM_Node);
-          parentNode.insertBefore(document.createTextNode(description), DOM_Node);
+          
+          DOM_Node.parentNode.insertBefore(TMP_checkbox.node, DOM_Node);
+          DOM_Node.parentNode.insertBefore(document.createTextNode(description), DOM_Node);
           /*sets current_selection w/o firing setter.*/
           if(checked == true){
             attrib._value_ = value;
           }
           
           TMP_checkbox.node.addEventListener('click',function(e){
-            var attrib = Map.getAttribute(this.model, this.name),
+            var attrib = Map.dereferenceAttribute(this.token),
                 selectObj = 
                   {
                     type : _.MODEL_EVENT_TYPES.checkbox_change
@@ -261,9 +253,10 @@ return {
           Map.pushNodes(TMP_checkbox);
           
         }
-        
-        parentNode.removeChild(DOM_Node);
       }
+
+      DOM_Node.parentNode.removeChild(DOM_Node);
+ 
     }else{
       /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
       DOM_Node.addEventListener('keyup', function(e){
@@ -280,24 +273,16 @@ return {
   preProcessNode : function(DOM_Node, modelName, attribName, scope){
     if(!_.isDef(DOM_Node) || DOM_Node === null )
       return;
+      
     var repeatValue = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);
     var type = (!_.isNullOrEmpty(repeatValue)) 
                   ? 'REPEAT' :
                     DOM_Node.tagName;
-    var attributeVal = null,
-        regex = /(\{\{(\w+\.\w+)\}\})/g,
-        indexRegex = /\{\{(\$*\w+)*\}\}/g,
-        tokens = [],
-        intermediateValue = '',
+    var tokens = [],
         uninterpolatedString = '',
-        baseRepeatNode = null,
         TMP_RepeatBase = null,
         TMP_select = null,
-        TMP_option = null,
-        TMP_input = null,
-        TMP_unknown = null,
-        compileMe = true,
-        Process = this;
+        compileMe = true;
     
     switch(type){
     
@@ -316,25 +301,9 @@ return {
         TMP_select = new TMP_Node(DOM_Node, modelName, attribName);
         TMP_select.scope = scope;
         TMP_select.token = tokens[0];
-        attributeVal = Map.dereferenceAttribute(TMP_select.token);
         //push select onto 'interpolate' array
         Map.pushNodes(TMP_select);
-        if(DOM_Node.children.length < 1 && _.isArray(attributeVal)){
-          
-          for(var i = 0; i < attributeVal.length; i++){
-            TMP_option = new TMP_Node(document.createElement("option"),modelName, attribName, i) ;
-            TMP_option.token = TMP_select.token;
-            TMP_option.scope = scope;
-            TMP_option.node.text = (_.isDef(attributeVal[i].text)) ? attributeVal[i].text : attributeVal[i];
-            TMP_option.node.value = (_.isDef(attributeVal[i].value)) ? attributeVal[i].value : attributeVal[i];
-            DOM_Node.appendChild(TMP_option.node);
-            DOM_Node.selectedIndex = 
-              (_.isDef(attributeVal[i].selected) && attributeVal[i].selected == true) ? 
-                i : DOM_Node.selectedIndex;
-            Map.pushNodes(TMP_option);
-          }
-          
-        }
+
         DOM_Node.addEventListener('change', function(e){
           var attrib = Map.dereferenceAttribute(this.token),
               selectObj = 
@@ -353,6 +322,7 @@ return {
         });
         break;
       case 'INPUT':
+
         this.preProcessInputNode(DOM_Node, scope);
         /*tmp_node is pushed during preProcessNodeAttributes()*/
         
@@ -367,7 +337,6 @@ return {
           which is a guarantee that DOM_Node will be pushed during preProcessNodeAttributes() */
         break;
       case 'REPEAT':
-        attributeVal = Map.getAttribute(modelName, attribName);
         DOM_Node.model = modelName;
         DOM_Node.name = attribName;
         /*push source repeat DOM_Node onto 'interpolate' array*/

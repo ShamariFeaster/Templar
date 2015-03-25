@@ -11,5 +11,15 @@ Templar.dataModel('Environment',
               time : '',
               test : [{uno : 'value1'},{uno : 'value2'}],
               image_templar : 'images/Cross_Templar.svg',
-              selects : [[1,2,3,], { test : [4,5,6]}]
+              selects : [[1,2,3,], { test : [4,5,6]}],
+              cb : [1,2,3],
+              complex_repeat : [
+                {title : 'hello world', 
+                author : 'Shamari Feaster', 
+                other_books : ['fruit','basket','days']
+                },
+                {title : 'I love u', 
+                author : 'Roxanne Feaster', 
+                other_books : ['uno','dos','tres']
+                }]
             });

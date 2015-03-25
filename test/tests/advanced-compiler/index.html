@@ -12,6 +12,7 @@
 <title>Templar</title>
 </head>
 <body>
+
 <div id="header">
   <h2 id="{{Environment.test[0].uno}}">{{Environment.test[0].uno}}</h2>
 </div>
@@ -21,6 +22,14 @@
 </div>
 
 <select>{{Environment.selects[1].test}}</select>
+
+<div data-apl-repeat="Environment.complex_repeat">
+  {{author}} , {{title}}
+  <div data-apl-repeat="Environment.complex_repeat[$index].other_books">
+  </div>
+</div>
+
+<input type="radio" value="{{Environment.cb}}"/>
 
 <div id="footer"></div>
 <div id="qunit"></div>
