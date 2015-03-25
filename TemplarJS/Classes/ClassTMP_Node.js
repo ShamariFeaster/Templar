@@ -21,6 +21,7 @@ var TMP_Node = function(node, modelName, attribName, index){
   this.isComponent = false;
   this.componentName = '';
   this.indexQueue = (_.isArray(index))? index : [];
+  this.token = {};
 };
 
 return TMP_Node;

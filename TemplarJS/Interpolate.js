@@ -184,7 +184,7 @@ return {
         
         case 'SELECT':
           /*Make sure it's an array*/
-          if(_.isArray(attributeVal)){
+          if(_.isArray(attributeVal = Map.dereferenceAttribute(tmp_node.token))){
           
             /*New model data, longer than existing data, add extra nodes*/
             if(attributeVal.length > ctx.modelAttribLength){
@@ -208,7 +208,7 @@ return {
            
           break;
         case 'OPTION':
-          if(_.isArray(attributeVal)){
+          if(_.isArray(attributeVal = Map.dereferenceAttribute(tmp_node.token))){
             if(attributeVal.length <= ctx.modelAttribLength && ctx.modelAttribIndex < attributeVal.length){
                 node.text = ( _.isDef(text = attributeVal[ctx.modelAttribIndex].text) ) ? text : attributeVal[ctx.modelAttribIndex];
                 node.value = ( _.isDef(value = attributeVal[ctx.modelAttribIndex].value) ) ? value : attributeVal[ctx.modelAttribIndex];

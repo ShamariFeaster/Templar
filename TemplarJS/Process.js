@@ -5,7 +5,7 @@ var TMP_Node = require('TMP_Node');
 var Map = require('Map');
 var DOM = require('DOM');
 var Attribute = require('Attribute')();
-
+var Circular = structureJS.circular();
 return {
 
   parseModelAttribName : function(qualifiedAttribName){
@@ -78,18 +78,12 @@ return {
   preProcessRepeatNode : function(TMP_baseNode, index){
     var newId = null,
         repeatedProperties = null,
-        embeddedInterpolations = null,
         uncompiledTemplate = '',
-        uncompiledTemplate = ''
         intraCompilation = '',
         idvRepeatedProperty = null,
         nonTerminal = '',
         newDomNode = document.createElement(TMP_baseNode.node.tagName.toLowerCase()),
         TMP_repeatedNode = new TMP_Node(newDomNode, TMP_baseNode.modelName, TMP_baseNode.attribName, index),
-        ctrlRegexResults = null,
-        NONTERMINAL_REGEX = /(\{\{((\w+)\.(\w+))\}\})/g,
-        ntFound = false,/*nonTerminalFound*/
-        Process = this,
         match = null,
         templateText = TMP_baseNode.node.innerHTML;
         
@@ -293,8 +287,7 @@ return {
     var attributeVal = null,
         regex = /(\{\{(\w+\.\w+)\}\})/g,
         indexRegex = /\{\{(\$*\w+)*\}\}/g,
-        matches = null,
-        modelNameParts = null,
+        tokens = [],
         intermediateValue = '',
         uninterpolatedString = '',
         baseRepeatNode = null,
@@ -309,26 +302,31 @@ return {
     switch(type){
     
       case 'SELECT':
-
-        if( (matches = regex.exec(DOM_Node.innerHTML)) === null) 
+        var modelName, attribName;
+        _.RX_M_ATTR.lastIndex = 0;
+        if( (tokens = Circular('Compile').getTokens(DOM_Node.innerHTML)).length < 1) 
           break;
           
         DOM_Node.innerHTML = '';
-        modelNameParts = Process.parseModelAttribName(matches[2]);
-        attributeVal = Map.getAttribute(modelNameParts[0],modelNameParts[1]);
-        DOM_Node.model = modelNameParts[0];
-        DOM_Node.name = modelNameParts[1];
-        TMP_select = new TMP_Node(DOM_Node, modelNameParts[0], modelNameParts[1]);
+        modelName = tokens[0].modelName;
+        attribName = tokens[0].attribName;
+        DOM_Node.token = tokens[0];
+        DOM_Node.model = modelName;
+        DOM_Node.name = attribName;
+        TMP_select = new TMP_Node(DOM_Node, modelName, attribName);
         TMP_select.scope = scope;
+        TMP_select.token = tokens[0];
+        attributeVal = Map.dereferenceAttribute(TMP_select.token);
         //push select onto 'interpolate' array
         Map.pushNodes(TMP_select);
         if(DOM_Node.children.length < 1 && _.isArray(attributeVal)){
           
           for(var i = 0; i < attributeVal.length; i++){
-            TMP_option = new TMP_Node(document.createElement("option"),modelNameParts[0], modelNameParts[1], i) ;
+            TMP_option = new TMP_Node(document.createElement("option"),modelName, attribName, i) ;
+            TMP_option.token = TMP_select.token;
             TMP_option.scope = scope;
-            TMP_option.node.text = Process.buildNonTerminal(modelNameParts[0], modelNameParts[1], 'text', i);
-            TMP_option.node.value = Process.buildNonTerminal(modelNameParts[0], modelNameParts[1], 'value', i);
+            TMP_option.node.text = (_.isDef(attributeVal[i].text)) ? attributeVal[i].text : attributeVal[i];
+            TMP_option.node.value = (_.isDef(attributeVal[i].value)) ? attributeVal[i].value : attributeVal[i];
             DOM_Node.appendChild(TMP_option.node);
             DOM_Node.selectedIndex = 
               (_.isDef(attributeVal[i].selected) && attributeVal[i].selected == true) ? 
@@ -338,7 +336,7 @@ return {
           
         }
         DOM_Node.addEventListener('change', function(e){
-          var attrib = Map.getAttribute(this.model, this.name),
+          var attrib = Map.dereferenceAttribute(this.token),
               selectObj = 
                 {
                   type : _.MODEL_EVENT_TYPES.select_change

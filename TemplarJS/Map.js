@@ -270,18 +270,18 @@ return {
         attribName = TMP_node.attribName;
     
     if(_.isDef(_map[modelName]['modelObj'][attribName])){
-      attribute = _map[modelName]['modelObj'][attribName];
+      attribute = returnVal = _map[modelName]['modelObj'][attribName];
       if(_.isArray(attribute)){
         while((prop = queue.shift())){
           returnVal = attribute = attribute[prop];
         }
         
-        _.log('DEREFERENCED VALUE: ' + returnVal);
       }else{
         returnVal = attribute;
       }
       
     }
+    _.log('DEREFERENCED VALUE: ' + returnVal);
     return returnVal;
   },
   
