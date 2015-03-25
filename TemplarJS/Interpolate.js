@@ -45,22 +45,16 @@ return {
   },
   
   updateNodeAttributes : function(tmp_node, modelName, attributeName){
-    var updateObject = Object.create(null);
+    var updateObject = {};
     var node = tmp_node.node;
     if(node.hasAttributes() && tmp_node.isComponent == false){
-      var regex = /(\{\{(\w+\.\w+)\}\})/g, 
-      //result array -> [1] = {{a.b}}, [2] = a.b, 4 = index, 5 = prop
-          ntRegex = /(\{\{(\w+\.\w+)(\[(\d+)\])*(?:\.)*(\w+)*?\}\})/g,
-          match = null,
-          text = '',
-          intermediateValue = '',
+      var intermediateValue = '',
           uninterpolatedString = '',
           elemAttribName = '',
           currAttribVal = '',
           elemAttributes = node.attributes,
           component,
           key,
-          updateFunc,
           tokens;
       
       for(var i = 0; i < elemAttributes.length; i++){

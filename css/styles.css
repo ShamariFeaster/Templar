@@ -36,17 +36,7 @@ float : left;
   padding : 0px 5px;
 }
 
-.apl-hide {
-  display : none;
-}
 
-.apl-show {
-  display : block;
-}
-
-.apl-default-hidden{
-  display : none;
-}
 
 .pane {
 border : 1px black solid;

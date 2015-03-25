@@ -26,13 +26,13 @@ return {
       part.attribName =  modelNameParts[1];
       part.fullToken =  match[0];
       
-      _.RX_M_ATR.lastIndex = 0;
-      _.RX_IDX.lastIndex = 0;
-      if((match = _.RX_M_ATR.exec(input)) != null){
+      _.RX_ALL_INX.lastIndex = 0;
+      _.RX_IDX_ITER.lastIndex = 0;
+      if((match = _.RX_ALL_INX.exec(input)) != null){
         var indexes = null,
             prop;
 
-        while((indexes = _.RX_IDX.exec(match[2])) != null){
+        while((indexes = _.RX_IDX_ITER.exec(match[2])) != null){
             prop = (!_.isDef(indexes[1])) ? indexes[2] : indexes[1];
             part.indexQueue.push(prop);
         }

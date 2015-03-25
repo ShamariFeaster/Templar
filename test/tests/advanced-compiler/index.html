@@ -11,11 +11,14 @@
 
 <title>Templar</title>
 </head>
-<body class="apl-default-hidden">
+<body>
 <div id="header">
   <h2 id="{{Environment.test[0].uno}}">{{Environment.test[0].uno}}</h2>
 </div>
 
+<div data-apl-repeat="Environment.test">
+  {{Environment.siteName}}
+</div>
 
 <div id="footer"></div>
 <div id="qunit"></div>

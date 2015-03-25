@@ -28,8 +28,6 @@ return {
   preProcessNodeAttributes : function(node, scope){
     var attributes = null,
         match = null,
-        regex = /\{\{(\w+)\.(\w+)(\[(\d+)\])*(?:\.)*(\w+)*?\}\}/g,
-        modelNameParts = null,
         tmp_node = null,
         preProcessedTMPNodes = [],
         customAttribute,
@@ -54,12 +52,12 @@ return {
           customAttribute.onCreate.call(customAttribute, node);
         }
         
-        while( (match = regex.exec(origValue)) != null ){
+        _.RX_M_ATTR.lastIndex = 0;
+        while( (match = _.RX_M_ATTR.exec(origValue)) != null ){
           tmp_node = new TMP_Node(node, match[1], match[2]);         
           tmp_node.symbolMap[attributes[i].name] = origValue;
           tmp_node.scope = scope;
-          
-          hasAttribNonTerminal = true;/*global polution: should be removed*/
+
           Map.pushNodes(tmp_node);
           /*This is necessary for repeats as their child nodes aren't added to Interpolation array
             Rather they are recompiled using repeated elements as the base. It makes sense since
@@ -91,20 +89,21 @@ return {
         ctrlRegexResults = null,
         NONTERMINAL_REGEX = /(\{\{((\w+)\.(\w+))\}\})/g,
         ntFound = false,/*nonTerminalFound*/
-        Process = this;
+        Process = this,
+        match = null,
+        templateText = TMP_baseNode.node.innerHTML;
+        
     DOM.cloneAttributes(TMP_baseNode.node, TMP_repeatedNode.node);
-    TMP_repeatedNode.node.innerHTML = TMP_baseNode.node.innerHTML;
+    TMP_repeatedNode.node.innerHTML = templateText;
     /*auto enumeration of existing id attribute*/
     newId = TMP_baseNode.node.getAttribute('id');
     newId = ( newId == null) ? '' : TMP_repeatedNode.node.setAttribute('id', newId + '-' + index); 
     
-    /*Process embedded NTs belonging to other models*/
-    intraCompilation = TMP_repeatedNode.node.innerHTML;
-    if( (embeddedInterpolations = NONTERMINAL_REGEX.exec(TMP_repeatedNode.node.innerHTML)) != null){
-      TMP_baseNode.embeddedModelAttribs[embeddedInterpolations[3] + '.' + embeddedInterpolations[4]] = true;
-      nonTerminal = this.buildRepeatNonTerminal(embeddedInterpolations[3], embeddedInterpolations[4], TMP_baseNode.modelName, TMP_baseNode.attribName , index);
-            TMP_repeatedNode.node.innerHTML = intraCompilation =
-                    intraCompilation.replace(embeddedInterpolations[0], nonTerminal );
+    _.RX_M_ATTR.lastIndex = 0;
+    while((match = _.RX_M_ATTR.exec(templateText))){
+      if(match[1] != TMP_baseNode.modelName || match[2] != TMP_baseNode.attribName){
+        TMP_baseNode.embeddedModelAttribs[match[1] + '.' + match[2]] = true;
+      }
     }
     
     /*repeat template is original TMP_baseNode with repeat directive on it. The non terminals here

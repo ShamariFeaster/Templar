@@ -15,8 +15,9 @@ structureJS.module('Constants', function(require){
   _.CLASS_SEPARATOR = /,|\s/;
   _.NT_REGEX = /\w\:\w/;
   _.RX_TOKEN = /\{\{(\w+\.\w+)(.*)*/g;
-  _.RX_M_ATR = /\{\{(\w+\.\w+)([^}]*)*/;
-  _.RX_IDX = /\[(\w+|\d+)\]|\.(\w+)/g;
+  _.RX_ALL_INX = /\{\{(\w+\.\w+)([^}]*)*/;
+  _.RX_M_ATTR = /\{\{(\w+)\.(\w+)([^}]*)*/g;
+  _.RX_IDX_ITER = /\[(\w+|\d+)\]|\.(\w+)/g;
   _.TEXT_NODE = 3;
   _.ELEMENT_NODE = 1;
   _.UNINDEXED = -1;
