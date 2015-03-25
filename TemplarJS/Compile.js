@@ -11,14 +11,21 @@ var State = require('State');
 var Circular = structureJS.circular();
 
 return {
-  getTokens : function(input){
+  getTokens : function(input, isNT){
     var modelNameParts, 
         part = {indexQueue : []}, 
         match, 
-        tokens = [];
+        tokens = [],
+        pattern1 = _.RX_TOKEN,
+        pattern2 = _.RX_ALL_INX;
         
-    _.RX_TOKEN.lastIndex = 0;
-    while(  (match = _.RX_TOKEN.exec(input)) != null){
+    if(_.isDef(isNT) && isNT == true){
+      pattern1 = _.RX_RPT_M_ATTR;
+      pattern2 = _.RX_RPT_ALL_INX      
+    }
+    
+    pattern1.lastIndex = 0;
+    while(  (match = pattern1.exec(input)) != null){
       modelNameParts = Process.parseModelAttribName(match[1]);
       part.start =  match.index;
       part.end =  _.RX_TOKEN.lastIndex;
@@ -26,10 +33,10 @@ return {
       part.attribName =  modelNameParts[1];
       part.fullToken =  match[0];
       
-      _.RX_ALL_INX.lastIndex = 0;
+      pattern2.lastIndex = 0;
       _.RX_IDX_ITER.lastIndex = 0;
       _.RX_ANNOT.lastIndex = 0;
-      if((match = _.RX_ALL_INX.exec(input)) != null){
+      if((match = pattern2.exec(input)) != null){
         var indexes = null,
             prop,
             annotationString = (_.isDef(match[2])) ? match[2] : '',
@@ -64,6 +71,10 @@ return {
     return tokens;
   },
   
+  getRepeatToken : function(input){
+    return this.getTokens(input, true);
+  },
+  
   compile : function(root, scope){
   
     if(_.isNull(root) || _.isNull(root.childNodes))
@@ -94,7 +105,7 @@ return {
         modelName = '', attribName = '', qualifiedAttribName = '',
         propName = '',
         
-        compileMe = false;
+        __COMPILER_FLG__ = _.NO_COMPILE_ME;
         //2 = a.b, 3 = [0], 4 = 0, 5 = propertyName  
         
 
@@ -247,19 +258,29 @@ return {
             DOM_Node = null;
           }
           //log('Recursing on :' + DOM_Node.tagName);
-          var repeatKey = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);
-          if(!_.isNullOrEmpty(repeatKey)){
-            modelNameParts = Process.parseModelAttribName(repeatKey);
-            modelName = modelNameParts[0];
-            attribName = modelNameParts[1];
+          var repeatKey = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY),
+              tokens, token;
+          if(!_.isNullOrEmpty(repeatKey) && (tokens = this.getRepeatToken(repeatKey)).length > 0){
+            modelName = tokens[0].modelName;
+            attribName = tokens[0].attribName;
+            DOM_Node.token = tokens[0];
           }
-          compileMe = Process.preProcessNode(DOM_Node, modelName, attribName, scope);
+          __COMPILER_FLG__ = Process.preProcessNode(DOM_Node, modelName, attribName, scope);
           
           /*Repeat base nodes serve as templates and should remain uncompiled*/
-          if(compileMe  == true)
-            this.compile(DOM_Node, scope);
-        }
+          switch(__COMPILER_FLG__){
+            case _.COMPILE_ME:
+              this.compile(DOM_Node, scope);
+              break;
+            case _.NO_COMPILE_ME:
+              /*noop*/
+              break;
+            case _.RECOMPILE_ME:
+              i--;
+              break;
+          }
         
+        }
     }
 
     return scope;

@@ -20,6 +20,9 @@ structureJS.module('Constants', function(require){
   _.RX_M_ATTR_TOK = /\{\{(\w+)\.(\w+)(?:[^"'>\n\t\w]*)*/g;
   _.RX_IDX_ITER = /\[(\w+|\d+)\]|\.(\w+)/g;
   _.RX_ANNOT = /%(\w+)%([^%]+)%\/(?:\w+)%/g
+  /*Repeat Regex*/
+  _.RX_RPT_M_ATTR = /(\w+\.\w+)(.*)*/g;
+  _.RX_RPT_ALL_INX = /(\w+\.\w+)([^}]*)*/;
   _.TEXT_NODE = 3;
   _.ELEMENT_NODE = 1;
   _.UNINDEXED = -1;
@@ -27,6 +30,9 @@ structureJS.module('Constants', function(require){
   _.TERMINAL = 1;
   _.STACK = 0; 
   _.QUEUE = 1;
+  _.COMPILE_ME = 1;
+  _.NO_COMPILE_ME = 0;
+  _.RECOMPILE_ME = -1;
   _.SYSTEM_EVENT_TYPES = { system : 'TMP_SYSTEM', 
                            interpolation_done : 'interp_done',
                            link_done : 'interp_done',

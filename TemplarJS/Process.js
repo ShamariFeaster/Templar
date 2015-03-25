@@ -10,12 +10,13 @@ return {
 
   parseModelAttribName : function(qualifiedAttribName){
     var modelNameParts = ['',''];
+
     if( _.isDef(qualifiedAttribName) && ((modelNameParts = qualifiedAttribName.split('.')).length > 1)  ){
         ;//noop
     }
     return modelNameParts;
   },
-  
+
   buildNonTerminal : function(modelName, modelAtrribName, propertyName, index){
     var propertyName = (_.isNullOrEmpty(propertyName)) ? '' : '.' + propertyName;
     return '{{' + modelName + '.' + modelAtrribName + '[' + index + ']' + propertyName + '}}';
@@ -147,6 +148,12 @@ return {
                     intraCompilation.replace(idvRepeatedProperty[0], index);
           }
           
+          if(idvRepeatedProperty[0] == '{{$item}}'){
+            TMP_repeatedNode.node.innerHTML = intraCompilation =
+                    intraCompilation.replace(idvRepeatedProperty[0], 
+                    TMP_baseNode.modelName + '.' + TMP_baseNode.attribName + '[' + index + ']');
+          }
+          
           if(idvRepeatedProperty[0] != '{{}}' && idvRepeatedProperty[0] != '{{$index}}'){
             nonTerminal = this.buildNonTerminal(TMP_baseNode.modelName, TMP_baseNode.attribName, idvRepeatedProperty[1], index);
             TMP_repeatedNode.node.innerHTML = intraCompilation =
@@ -161,7 +168,7 @@ return {
     
     /*if no NTs found, repeatNode innerHTML must be empty to be clobbered over by model attrib value*/
     TMP_repeatedNode.hasNonTerminals = (TMP_repeatedNode.hasNonTerminals == false) ? 
-                                        !_.isNullOrEmpty(TMP_repeatedNode.node.innerHTML) :
+                                        !_.isNullOrEmpty(TMP_repeatedNode.node.innerHTML.trim()) :
                                         TMP_repeatedNode.hasNonTerminals;
 
    
@@ -181,7 +188,8 @@ return {
     var match = null,
         inputType = DOM_Node.getAttribute('type') || '',
         tokens = Circular('Compile').getTokens(DOM_Node.getAttribute('value')),
-        token;
+        token,
+        __COMPILER_FLG__ = _.COMPILE_ME;
         
     if( tokens.length < 1 )
       return;
@@ -275,9 +283,9 @@ return {
           
         }
       }
-
+      
       DOM_Node.parentNode.removeChild(DOM_Node);
- 
+      __COMPILER_FLG__ = _.RECOMPILE_ME;
     }else{
       /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
       DOM_Node.addEventListener('keyup', function(e){
@@ -289,7 +297,7 @@ return {
         State.ignoreKeyUp = false;
       });
     }
-
+    return __COMPILER_FLG__;
   },
   preProcessNode : function(DOM_Node, modelName, attribName, scope){
     if(!_.isDef(DOM_Node) || DOM_Node === null )
@@ -303,7 +311,7 @@ return {
         uninterpolatedString = '',
         TMP_RepeatBase = null,
         TMP_select = null,
-        compileMe = true;
+        __COMPILER_FLG__ = _.COMPILE_ME;
     
     switch(type){
     
@@ -320,8 +328,9 @@ return {
         DOM_Node.model = modelName;
         DOM_Node.attrib = attribName;
         TMP_select = new TMP_Node(DOM_Node, modelName, attribName);
+        this.inheritToken(TMP_select, tokens[0]);
         TMP_select.scope = scope;
-        TMP_select.token = tokens[0];
+
         //push select onto 'interpolate' array
         Map.pushNodes(TMP_select);
 
@@ -343,33 +352,21 @@ return {
         });
         break;
       case 'INPUT':
-
-        this.preProcessInputNode(DOM_Node, scope);
-        /*tmp_node is pushed during preProcessNodeAttributes()*/
-        
-        /*we don't push DOM_Node here because we can only bind to input using the value attribute
-          which is a guarantee that DOM_Node will be pushed during preProcessNodeAttributes() */
+        __COMPILER_FLG__ = this.preProcessInputNode(DOM_Node, scope);
         break;
       case 'TEXTAREA':
         this.preProcessInputNode(DOM_Node, scope);
-        /*tmp_node is pushed during preProcessNodeAttributes()*/
-        
-        /*we don't push DOM_Node here because we can only bind to input using the value attribute
-          which is a guarantee that DOM_Node will be pushed during preProcessNodeAttributes() */
         break;
       case 'REPEAT':
         DOM_Node.model = modelName;
         DOM_Node.name = attribName;
         /*push source repeat DOM_Node onto 'interpolate' array*/
         TMP_RepeatBase = new TMP_Node(DOM_Node, modelName, attribName);
+        this.inheritToken(TMP_RepeatBase, DOM_Node.token);
         TMP_RepeatBase.scope = scope;
         Map.addRepeatBaseNode(TMP_RepeatBase); 
         Map.pushNodes(TMP_RepeatBase); 
-        //TMP_RepeatBase.node.setAttribute('style','display:none;'); 
-
-        /*notice lack of preProcessControl(). This is so we don't add control declared in repeatBase.
-          we do call it during preProcessRepeatNode() on each of the repeated nodes*/
-        compileMe = false;
+        __COMPILER_FLG__ = _.NO_COMPILE_ME;
         break;
 
       default: 
@@ -378,7 +375,7 @@ return {
     /*Don't process and cached removed nodes*/
     if(DOM_Node.parentNode != null)
       this.preProcessNodeAttributes(DOM_Node, scope);
-    return compileMe;
+    return __COMPILER_FLG__;
   }
   
 };

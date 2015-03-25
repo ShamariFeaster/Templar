@@ -321,11 +321,15 @@ return {
             
             if(baseNodes[z].node.parentNode)
               ctx.target.unshift(TMP_repeatBaseNode);
+            
             /*If base node has no parent then it is not in the current DOM.
             NOTE (11/24/14): if we use 'apl-default-hidden' class on BODY repeats will not interp.
             I've never liked the default hidden class anyways so for now I'm not going to
             change logic here to support the continued use of the default hidden class.*/
-            if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode)){
+            if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode) && 
+              _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode.token)))
+            {
+
               /*rebuild new one*/
               for(var i = 0; i < attributeVal.length; i++){
                 Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, i);

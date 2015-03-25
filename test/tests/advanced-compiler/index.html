@@ -23,12 +23,13 @@
 
 <select>{{Environment.selects[1].test}}</select>
 
-<div data-apl-repeat="Environment.complex_repeat">
+<div data-apl-repeat="Environment.complex_repeat" id="repeat">
   {{author}} , {{title}}
-  <div data-apl-repeat="Environment.complex_repeat[$index].other_books">
+  <div data-apl-repeat="{{$item}}.other_books">
+    other shit : {{}}
   </div>
   
-  <input type="radio" value="{{Environment.cb}}"/>
+  <input type="radio" id={{author}} value="{{Environment.cb}}"/>
 </div>
 
 
