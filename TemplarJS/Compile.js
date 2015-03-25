@@ -28,14 +28,33 @@ return {
       
       _.RX_ALL_INX.lastIndex = 0;
       _.RX_IDX_ITER.lastIndex = 0;
+      _.RX_ANNOT.lastIndex = 0;
       if((match = _.RX_ALL_INX.exec(input)) != null){
         var indexes = null,
-            prop;
+            prop,
+            annotationString = (_.isDef(match[2])) ? match[2] : '',
+            annotations = null;
 
         while((indexes = _.RX_IDX_ITER.exec(match[2])) != null){
-            prop = (!_.isDef(indexes[1])) ? indexes[2] : indexes[1];
-            part.indexQueue.push(prop);
+          
+          prop = (!_.isDef(indexes[1])) ? indexes[2] : indexes[1];
+          part.indexQueue.push(prop);
         }
+        
+        while((annotations = _.RX_ANNOT.exec(annotationString)) != null){
+          switch(annotations[1]){
+            case 'mdl':
+              part.repeatModelName = annotations[2];
+              break;
+            case 'att':
+              part.repeatAttribName = annotations[2];
+              break;
+            case 'i':
+              part.repeatIndex = annotations[2];
+              break;
+          }
+        }
+
       }
       
       tokens.push(part);
@@ -97,20 +116,8 @@ return {
             
             var span = document.createElement('span');
 
-            tmp_node = new TMP_Node(span, modelName, attribName, tokens[x].indexQueue);
-
-            /*Look for pattern created during preProcessRepeatNode() to indicate this node is an
-              embedded interpolation node inside a repeat; however the model and/or attrib behind
-              the node differ from that of the repeat
-            if(!_.isNullOrEmpty(propName) && propName.indexOf('zTMPzDOT') != _.UNINDEXED){
-              repeatAnnotationParts = propName.split('DOT');
-              tmp_node.repeatModelName = repeatAnnotationParts[1];
-              tmp_node.repeatAttribName = repeatAnnotationParts[2]; 
-              tmp_node.repeatIndex = index;
-              tmp_node.index = _.UNINDEXED;
-              tmp_node.prop = '';
-            }
-            */
+            tmp_node = new TMP_Node(span, modelName, attribName);
+            Process.inheritToken(tmp_node, tokens[x]);
             tmp_node.scope = scope;
             splitNode = DOM.splitText(DOM_Node, tokens[x]['start'] - prevLength)
             //splitNode = DOM_Node.splitText(tokens[x]['start'] - prevLength);

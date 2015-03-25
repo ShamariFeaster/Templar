@@ -100,7 +100,7 @@ return {
   interpolateSpan : function(tmp_node){
     var node = tmp_node.node;
     node.innerText = node.innerHTML = 
-      Map.dereferenceAttribute(tmp_node) || '';
+      Map.dereferenceAttribute(tmp_node.token) || '';
 
   },
   /*Returns the whole attribute if no limit is defined for this attribute*/

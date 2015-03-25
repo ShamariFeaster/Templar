@@ -96,7 +96,8 @@ return {
         newDomNode = document.createElement(TMP_baseNode.node.tagName.toLowerCase()),
         TMP_repeatedNode = new TMP_Node(newDomNode, TMP_baseNode.modelName, TMP_baseNode.attribName, index),
         match = null,
-        templateText = TMP_baseNode.node.innerHTML;
+        templateText = TMP_baseNode.node.innerHTML,
+        annotatedNT = '';
         
     DOM.cloneAttributes(TMP_baseNode.node, TMP_repeatedNode.node);
     TMP_repeatedNode.node.innerHTML = templateText;
@@ -104,10 +105,18 @@ return {
     newId = TMP_baseNode.node.getAttribute('id');
     newId = ( newId == null) ? '' : TMP_repeatedNode.node.setAttribute('id', newId + '-' + index); 
     
-    _.RX_M_ATTR.lastIndex = 0;
-    while((match = _.RX_M_ATTR.exec(templateText))){
+    _.RX_M_ATTR_TOK.lastIndex = 0;
+    while((match = _.RX_M_ATTR_TOK.exec(templateText))){
       if(match[1] != TMP_baseNode.modelName || match[2] != TMP_baseNode.attribName){
         TMP_baseNode.embeddedModelAttribs[match[1] + '.' + match[2]] = true;
+        annotatedNT = 
+        match[0].replace('}}','') + 
+        '%mdl%' + TMP_baseNode.modelName + '%/mdl%' + 
+        '%att%' + TMP_baseNode.attribName + '%/att%' + 
+        '%i%' + index + '%/i%' + 
+        '}}';
+        TMP_repeatedNode.node.innerHTML = 
+          TMP_repeatedNode.node.innerHTML.replace(match[0], annotatedNT);
       }
     }
     
@@ -159,6 +168,15 @@ return {
     return TMP_repeatedNode;
   },
   
+  inheritToken : function(TMP_node, Token){
+    TMP_node.modelName = Token.modelName;
+    TMP_node.attribName = Token.attribName;
+    TMP_node.repeatModelName = Token.repeatModelName ;
+    TMP_node.repeatAttribName = Token.repeatAttribName ;
+    TMP_node.repeatIndex = Token.repeatIndex;
+    TMP_node.token = Token;
+  },
+  
   preProcessInputNode : function(DOM_Node, scope){
     var match = null,
         inputType = DOM_Node.getAttribute('type') || '',
@@ -171,7 +189,7 @@ return {
     token = tokens[0];
     
     DOM_Node.model = token.modelName;
-    DOM_Node.name = token.attribName
+    DOM_Node.attrib = token.attribName
     DOM_Node.token = token;
     
     inputType = inputType.toLowerCase();
@@ -197,8 +215,11 @@ return {
           
           TMP_checkbox = new TMP_Node(document.createElement('input'),DOM_Node.model, DOM_Node.name, i) ;
           TMP_checkbox.scope = scope;
+          this.inheritToken(TMP_checkbox, token);
+          
           TMP_checkbox.node.token = TMP_checkbox.token = token;
           TMP_checkbox.node.model = TMP_checkbox.modelName;
+          TMP_checkbox.node.attrib = TMP_checkbox.attribName;
           TMP_checkbox.node.name = TMP_checkbox.attribName;
           TMP_checkbox.node.checked = checked;
           DOM.cloneAttributes(DOM_Node, TMP_checkbox.node);
@@ -225,7 +246,7 @@ return {
                   return this._value_;
                 }
               });
-            })(DOM_Node.name);
+            })(DOM_Node.attrib);
           }
           
           DOM_Node.parentNode.insertBefore(TMP_checkbox.node, DOM_Node);
@@ -246,7 +267,7 @@ return {
           
             attrib._value_ = e.target.value;
             Interpolate.dispatchListeners(
-              Map.getListeners(this.model, this.name)
+              Map.getListeners(this.model, this.attrib)
               , selectObj
             ); 
           });
@@ -297,7 +318,7 @@ return {
         attribName = tokens[0].attribName;
         DOM_Node.token = tokens[0];
         DOM_Node.model = modelName;
-        DOM_Node.name = attribName;
+        DOM_Node.attrib = attribName;
         TMP_select = new TMP_Node(DOM_Node, modelName, attribName);
         TMP_select.scope = scope;
         TMP_select.token = tokens[0];
@@ -316,7 +337,7 @@ return {
           
           attrib.current_selection = selectObj.value;
           Interpolate.dispatchListeners(
-            Map.getListeners(this.model, this.name)
+            Map.getListeners(this.model, this.attrib)
             , selectObj
           );                  
         });
@@ -354,8 +375,9 @@ return {
       default: 
         break;
     }
-    
-    this.preProcessNodeAttributes(DOM_Node, scope);
+    /*Don't process and cached removed nodes*/
+    if(DOM_Node.parentNode != null)
+      this.preProcessNodeAttributes(DOM_Node, scope);
     return compileMe;
   }
   
