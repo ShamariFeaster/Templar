@@ -277,6 +277,8 @@ return {
         }
         
         _.log('DEREFERENCED VALUE: ' + returnVal);
+      }else{
+        returnVal = attribute;
       }
       
     }
@@ -401,8 +403,8 @@ return {
         /*remove listeners*/
           
         Map.forEach(ctx.modelName, ctx.modelAtrribName, function(ctx, tmp_node){
-          var node = tmp_node.node,
-              repeatIndex = tmp_node.index;
+          var node = tmp_node.node;
+          
           if(( nodeScopeParts = tmp_node.scope.split(' ')) !== null){
             if(Map.isInScopeList(tmp_node.scope, compiledScopes) && !Map.isInScopeList(tmp_node.scope, compiledScopes, true)){
               ctx.removeItem(ctx.index);

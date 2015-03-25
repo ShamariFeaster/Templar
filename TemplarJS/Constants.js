@@ -14,6 +14,9 @@ structureJS.module('Constants', function(require){
   _.IE_DEFAULT_ATTRIB_KEY = 'apl-default';
   _.CLASS_SEPARATOR = /,|\s/;
   _.NT_REGEX = /\w\:\w/;
+  _.RX_TOKEN = /\{\{(\w+\.\w+)(.*)*/g;
+  _.RX_M_ATR = /\{\{(\w+\.\w+)([^}]*)*/;
+  _.RX_IDX = /\[(\w+|\d+)\]|\.(\w+)/g;
   _.TEXT_NODE = 3;
   _.ELEMENT_NODE = 1;
   _.UNINDEXED = -1;

@@ -60,7 +60,8 @@ return {
           elemAttributes = node.attributes,
           component,
           key,
-          updateFunc;
+          updateFunc,
+          tokens;
       
       for(var i = 0; i < elemAttributes.length; i++){
         elemAttribName = elemAttributes[i].name;
@@ -70,14 +71,14 @@ return {
                                   '';
         /*short circuit: is this model attribute's non-terminal in the node attributes string?
           during compilation, any node with a non-terminal is annotated w/ a symbol map*/
-        if(_.isDef( uninterpolatedString ) && ntRegex.test(uninterpolatedString)){
+        if(!_.isNullOrEmpty( uninterpolatedString = tmp_node.symbolMap[elemAttribName]  ) ){
           /*get each non-terminal then, using text replacement, we update the node attribute
             value*/
-          ntRegex.lastIndex = 0;
-          while(  (match = ntRegex.exec(uninterpolatedString)) != null){
-            modelNameParts = Process.parseModelAttribName(match[2]);
-            currAttribVal = Map.getAttribute(modelNameParts[0], modelNameParts[1], match[4], match[5]);
-            intermediateValue = uninterpolatedString.replace(match[1], currAttribVal );
+            
+          tokens = Circular('Compile').getTokens( uninterpolatedString );
+          for(var x = 0; x < tokens.length; x++ ){
+            currAttribVal = Map.dereferenceAttribute(tokens[x]);
+            intermediateValue = uninterpolatedString.replace(tokens[x].fullToken, currAttribVal );
             uninterpolatedString = intermediateValue;
           }
           
@@ -278,7 +279,7 @@ return {
         
         case 'SPAN':
 
-          Interpolate.interpolateSpan(tmp_node, attributeVal);
+          Interpolate.interpolateSpan(tmp_node);
           updateObj.text = node.innerText;
           updateObj.type = node.tagName.toLowerCase();
           break;
