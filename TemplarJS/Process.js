@@ -309,15 +309,6 @@ return {
     return this._cloneBaseNode(TMP_baseNode, index);
   },
   
-  inheritToken : function(TMP_node, Token){
-    TMP_node.modelName = Token.modelName;
-    TMP_node.attribName = Token.attribName;
-    TMP_node.repeatModelName = Token.repeatModelName ;
-    TMP_node.repeatAttribName = Token.repeatAttribName ;
-    TMP_node.repeatIndex = Token.repeatIndex;
-    TMP_node.token = Token;
-  },
-  
   preProcessInputNode : function(DOM_Node, scope){
     var match = null,
         inputType = DOM_Node.getAttribute('type') || '',
@@ -330,9 +321,7 @@ return {
     
     token = tokens[0];
     
-    DOM_Node.model = token.modelName;
-    DOM_Node.attrib = token.attribName
-    DOM_Node.token = token;
+    DOM.annotateDOMNode(DOM_Node, token.modelName, token.attribName, token);
     
     inputType = inputType.toLowerCase();
 
@@ -355,15 +344,12 @@ return {
             checked = (_.isDef(attrib[i].checked)) ? attrib[i].checked : checked;
           }
           
-          TMP_checkbox = new TMP_Node(document.createElement('input'),DOM_Node.model, DOM_Node.name, i) ;
+          TMP_checkbox = new TMP_Node(document.createElement('input'),token.model, token.attrib, i) ;
           TMP_checkbox.scope = scope;
-          this.inheritToken(TMP_checkbox, token);
-          
-          TMP_checkbox.node.token = TMP_checkbox.token = token;
-          TMP_checkbox.node.model = TMP_checkbox.modelName;
-          TMP_checkbox.node.attrib = TMP_checkbox.attribName;
-          TMP_checkbox.node.name = TMP_checkbox.attribName;
-          TMP_checkbox.node.checked = checked;
+          TMP_checkbox.inheritToken(token);
+          DOM.annotateDOMNode(TMP_checkbox.node, token.modelName, token.attribName, token);
+          TMP_checkbox.node.setAttribute('name', token.attribName);
+          TMP_checkbox.node.setAttribute('checked', checked);
           DOM.cloneAttributes(DOM_Node, TMP_checkbox.node);
           TMP_checkbox.node.setAttribute('value', value);
           
@@ -405,11 +391,12 @@ return {
                     type : _.MODEL_EVENT_TYPES.checkbox_change
                     , checked : (e.target.checked === true)
                     , value : e.target.value
-                  };
+                  },
+                annotations = DOM.getDOMAnnotations(this);
           
             attrib._value_ = e.target.value;
             Interpolate.dispatchListeners(
-              Map.getListeners(this.model, this.attrib)
+              Map.getListeners(annotations.modelName, annotations.attribName)
               , selectObj
             ); 
           });
@@ -423,11 +410,12 @@ return {
     }else{
       /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
       DOM_Node.addEventListener('keyup', function(e){
-        Map.setAttribute(this.model, this.name, e.target.value);
+        var annotations = DOM.getDOMAnnotations(this);
+        Map.setAttribute(annotations.modelName, annotations.attribName, e.target.value);
         /*a change to an input that is interpolated will redraw the input value pushing the cursor 
           to the end. This prevents that.*/
         State.ignoreKeyUp = true; 
-        Interpolate.interpolate(this.model, this.name, e.target.value );
+        Interpolate.interpolate(annotations.modelName, annotations.attribName, e.target.value );
         State.ignoreKeyUp = false;
       });
     }
@@ -450,19 +438,16 @@ return {
     switch(type){
     
       case 'SELECT':
-        var modelName, attribName;
+        var modelName, attribName, token;
         _.RX_M_ATTR.lastIndex = 0;
         if( (tokens = Circular('Compile').getTokens(DOM_Node.innerHTML)).length < 1) 
           break;
-          
+        token = tokens[0];  
         DOM_Node.innerHTML = '';
-        modelName = tokens[0].modelName;
-        attribName = tokens[0].attribName;
-        DOM_Node.token = tokens[0];
-        DOM_Node.model = modelName;
-        DOM_Node.attrib = attribName;
-        TMP_select = new TMP_Node(DOM_Node, modelName, attribName);
-        this.inheritToken(TMP_select, tokens[0]);
+
+        DOM.annotateDOMNode(DOM_Node, token.modelName, token.attribName, token);
+        TMP_select = new TMP_Node(DOM_Node, token.modelName, token.attribName);
+        this.inheritToken(TMP_select, token);
         TMP_select.scope = scope;
 
         //push select onto 'interpolate' array
@@ -476,11 +461,12 @@ return {
                   , value : e.target.options[e.target.selectedIndex].value
                   , text : e.target.options[e.target.selectedIndex].text
                   , index : e.target.selectedIndex
-                };
+                },
+              annotations = DOM.getDOMAnnotations(this);
           
           attrib.current_selection = selectObj.value;
           Interpolate.dispatchListeners(
-            Map.getListeners(this.model, this.attrib)
+            Map.getListeners(annotations.modelName, annotations.attribName)
             , selectObj
           );                  
         });
@@ -492,8 +478,7 @@ return {
         this.preProcessInputNode(DOM_Node, scope);
         break;
       case 'REPEAT':
-        DOM_Node.model = modelName;
-        DOM_Node.name = attribName;
+        DOM.annotateDOMNode(DOM_Node, modelName, attribName);
         /*push source repeat DOM_Node onto 'interpolate' array*/
         TMP_RepeatBase = new TMP_Node(DOM_Node, modelName, attribName);
         this.inheritToken(TMP_RepeatBase, DOM_Node.token);

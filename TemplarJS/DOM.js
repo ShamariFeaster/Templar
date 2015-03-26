@@ -1,6 +1,7 @@
 structureJS.module('DOM', function(require){
 
-var Circular = structureJS.circular();
+var Circular = structureJS.circular()
+    _  = this;
 
 return {
   modifyClasses : function(node, add, remove){
@@ -204,6 +205,20 @@ return {
     }
 
     return (_.isNull(value)) ? '' : value;
+  },
+  
+  annotateDOMNode : function(DOM_Node, modelName, attribName, token){
+    DOM_Node[_.DOM_MDL_NAME] = modelName || '';
+    DOM_Node[_.DOM_ATTR_NAME] = attribName || '';
+    DOM_Node[_.DOM_TOKEN] = token || DOM_Node[_.DOM_TOKEN] || null;
+  },
+  
+  getDOMAnnotations : function(DOM_Node){
+    return { 
+            modelName : DOM_Node[_.DOM_MDL_NAME],
+            attribName : DOM_Node[_.DOM_ATTR_NAME],
+            token : DOM_Node[_.DOM_TOKEN]
+            };
   }
   
 }; 

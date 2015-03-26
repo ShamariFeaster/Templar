@@ -100,7 +100,7 @@ return {
   interpolateSpan : function(tmp_node){
     var node = tmp_node.node;
     node.innerText = node.innerHTML = 
-      Map.dereferenceAttribute(tmp_node.token) || '';
+      Map.dereferenceAttribute(tmp_node) || '';
 
   },
   /*Returns the whole attribute if no limit is defined for this attribute*/
@@ -184,7 +184,7 @@ return {
         
         case 'SELECT':
           /*Make sure it's an array*/
-          if(_.isArray(attributeVal = Map.dereferenceAttribute(tmp_node.token))){
+          if(_.isArray(attributeVal = Map.dereferenceAttribute(tmp_node))){
           
             /*New model data, longer than existing data, add extra nodes*/
             if(attributeVal.length > ctx.modelAttribLength){
@@ -208,7 +208,7 @@ return {
            
           break;
         case 'OPTION':
-          if(_.isArray(attributeVal = Map.dereferenceAttribute(tmp_node.token))){
+          if(_.isArray(attributeVal = Map.dereferenceAttribute(tmp_node))){
             if(attributeVal.length <= ctx.modelAttribLength && ctx.modelAttribIndex < attributeVal.length){
                 node.text = ( _.isDef(text = attributeVal[ctx.modelAttribIndex].text) ) ? text : attributeVal[ctx.modelAttribIndex];
                 node.value = ( _.isDef(value = attributeVal[ctx.modelAttribIndex].value) ) ? value : attributeVal[ctx.modelAttribIndex];
@@ -233,15 +233,15 @@ return {
                 set : function(value){
                   if(value == '')
                     return;
-                    
+                  var annotations;
                   this._value_ = value;
       
                   for(var s = 0; s < select.children.length; s++){
                     if(select.children[s].value == value){
                       select.selectedIndex = s;
-                      
+                      annotations = DOM.getDOMAnnotations(select);
                       Interpolate.dispatchListeners(
-                        Map.getListeners(select.model, select.name)
+                        Map.getListeners(annotations.modelName, annotations.attribName)
                         , {
                             type : _.MODEL_EVENT_TYPES.select_change
                             , value : select.children[s].value
@@ -327,7 +327,7 @@ return {
             I've never liked the default hidden class anyways so for now I'm not going to
             change logic here to support the continued use of the default hidden class.*/
             if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode) && 
-              _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode.token)))
+              _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode)))
             {
 
               /*rebuild new one*/

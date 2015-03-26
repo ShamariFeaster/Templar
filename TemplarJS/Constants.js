@@ -47,5 +47,8 @@ structureJS.module('Constants', function(require){
   };
   
   _.RESTRICTED = 'RESTRICTED';
+  _.DOM_MDL_NAME = 'model';
+  _.DOM_ATTR_NAME = 'attrib';
+  _.DOM_TOKEN = 'token';
   structureJS.extendContext(_); 
 });

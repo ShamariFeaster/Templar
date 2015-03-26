@@ -8,12 +8,13 @@ var DOM = require('DOM');
 var Interpolate = require('Interpolate');
 var Process = require('Process');
 var State = require('State');
+var Token = require('Token');
 var Circular = structureJS.circular();
 
 return {
-    getTokens : function(input, isNT){
+  getTokens : function(input, isNT){
     var modelNameParts, 
-        part = {indexQueue : []}, 
+        token = new Token(), 
         match,
         match2,        
         tokens = [],
@@ -36,43 +37,39 @@ return {
           annotationString = (_.isDef(match[3])) ? match[3] : '',
           annotations = null;
           
-      part.start =  match.index;
-      part.end =  pattern2.lastIndex;
-      part.fullToken =  match[1];
+      token.start =  match.index;
+      token.end =  pattern2.lastIndex;
+      token.fullToken =  match[1];
       
-      if(  (match2 = pattern1.exec(part.fullToken)) != null){
+      if(  (match2 = pattern1.exec(token.fullToken)) != null){
         modelNameParts = Process.parseModelAttribName(match2[1]); 
-        part.modelName =  modelNameParts[0];
-        part.attribName =  modelNameParts[1];
+        token.modelName =  modelNameParts[0];
+        token.attribName =  modelNameParts[1];
       }
       
       while((indexes = _.RX_IDX_ITER.exec(match[3])) != null){
         
         prop = (!_.isDef(indexes[1])) ? indexes[2] : indexes[1];
-        part.indexQueue.push(prop);
+        token.indexQueue.push(prop);
       }
       
       while((annotations = _.RX_ANNOT.exec(annotationString)) != null){
         switch(annotations[1]){
           case 'mdl':
-            part.repeatModelName = annotations[2];
+            token.repeatModelName = annotations[2];
             break;
           case 'att':
-            part.repeatAttribName = annotations[2];
+            token.repeatAttribName = annotations[2];
             break;
           case 'i':
-            part.repeatIndex = annotations[2];
+            token.repeatIndex = annotations[2];
             break;
         }
       }
-      tokens.push(part);
-      part = {indexQueue : []};
+      tokens.push(token);
+      part = new Token();
     }
-      
-      
-      
-    
-    
+
     return tokens;
   },
   
@@ -133,7 +130,7 @@ return {
             var span = document.createElement('span');
 
             tmp_node = new TMP_Node(span, modelName, attribName);
-            Process.inheritToken(tmp_node, tokens[x]);
+            tmp_node.inheritToken(tokens[x]);
             tmp_node.scope = scope;
             splitNode = DOM.splitText(DOM_Node, tokens[x]['start'] - prevLength)
             //splitNode = DOM_Node.splitText(tokens[x]['start'] - prevLength);
