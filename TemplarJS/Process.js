@@ -189,7 +189,8 @@ return {
         repeatedTags = null;
     
     _.RX_M_ATTR_TOK.lastIndex = 0;
-    while((match = _.RX_M_ATTR_TOK.exec(templateText))){
+    /*test if already been annotated as embed, we don't wantv to double that*/
+    while((match = _.RX_M_ATTR_TOK.exec(templateText)) != null && !/%(\w+)%/.test(templateText)){
       if(match[1] != TMP_node.modelName || match[2] != TMP_node.attribName){
         TMP_node.embeddedModelAttribs[match[1] + '.' + match[2]] = true;
         annotatedNT = 
@@ -295,7 +296,7 @@ return {
       }
 
       TMP_repeatNode = new TMP_Node(nodes[i], TMP_baseNode.modelName, TMP_baseNode.attribName, index);
-      this.inheritToken(TMP_repeatNode, TMP_baseNode);
+      TMP_repeatNode.inheritToken(TMP_baseNode);
       hasNonTerminals |= this._preprocessInPlace(TMP_repeatNode, index);
       
       
@@ -481,7 +482,7 @@ return {
         DOM.annotateDOMNode(DOM_Node, modelName, attribName);
         /*push source repeat DOM_Node onto 'interpolate' array*/
         TMP_RepeatBase = new TMP_Node(DOM_Node, modelName, attribName);
-        this.inheritToken(TMP_RepeatBase, DOM_Node.token);
+        TMP_RepeatBase.inheritToken(DOM_Node.token);
         TMP_RepeatBase.scope = scope;
         Map.addRepeatBaseNode(TMP_RepeatBase); 
         Map.pushNodes(TMP_RepeatBase); 
