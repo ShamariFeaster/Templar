@@ -333,7 +333,7 @@ return {
               /*rebuild new one*/
               for(var i = 0; i < attributeVal.length; i++){
                 Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, i);
-                TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
+                TMP_repeatedNode = Process.newPreProcessRepeatNode(TMP_repeatBaseNode, i);
                 TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
                 Map.pushNodes(TMP_repeatedNode);
                 if(TMP_repeatedNode.hasNonTerminals == false)

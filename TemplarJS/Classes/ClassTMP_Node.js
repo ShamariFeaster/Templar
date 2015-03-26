@@ -20,6 +20,7 @@ var TMP_Node = function(node, modelName, attribName, index){
   this.repeatIndex = _.UNINDEXED;
   this.isComponent = false;
   this.componentName = '';
+  this.indexQueue = [];
   this.token = {};
 };
 

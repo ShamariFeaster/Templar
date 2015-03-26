@@ -272,10 +272,10 @@ return {
     if(_.isDef(_map[modelName]['modelObj'][attribName])){
       attribute = returnVal = _map[modelName]['modelObj'][attribName];
       if(_.isArray(attribute)){
-        while((prop = queue.shift())){
+        while((prop = queue.shift()) != null && _.isDef(attribute[prop])){
           returnVal = attribute = attribute[prop];
         }
-        
+
       }else{
         returnVal = attribute;
       }

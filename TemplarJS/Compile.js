@@ -11,10 +11,11 @@ var State = require('State');
 var Circular = structureJS.circular();
 
 return {
-  getTokens : function(input, isNT){
+    getTokens : function(input, isNT){
     var modelNameParts, 
         part = {indexQueue : []}, 
-        match, 
+        match,
+        match2,        
         tokens = [],
         pattern1 = _.RX_TOKEN,
         pattern2 = _.RX_ALL_INX;
@@ -25,48 +26,52 @@ return {
     }
     
     pattern1.lastIndex = 0;
-    while(  (match = pattern1.exec(input)) != null){
-      modelNameParts = Process.parseModelAttribName(match[1]);
-      part.start =  match.index;
-      part.end =  _.RX_TOKEN.lastIndex;
-      part.modelName =  modelNameParts[0];
-      part.attribName =  modelNameParts[1];
-      part.fullToken =  match[0];
-      
-      pattern2.lastIndex = 0;
-      _.RX_IDX_ITER.lastIndex = 0;
-      _.RX_ANNOT.lastIndex = 0;
-      if((match = pattern2.exec(input)) != null){
-        var indexes = null,
-            prop,
-            annotationString = (_.isDef(match[2])) ? match[2] : '',
-            annotations = null;
+    pattern2.lastIndex = 0;
+    _.RX_IDX_ITER.lastIndex = 0;
+    _.RX_ANNOT.lastIndex = 0;
 
-        while((indexes = _.RX_IDX_ITER.exec(match[2])) != null){
+    while((match = pattern2.exec(input)) != null){
+      var indexes = null,
+          prop,
+          annotationString = (_.isDef(match[3])) ? match[3] : '',
+          annotations = null;
           
-          prop = (!_.isDef(indexes[1])) ? indexes[2] : indexes[1];
-          part.indexQueue.push(prop);
-        }
-        
-        while((annotations = _.RX_ANNOT.exec(annotationString)) != null){
-          switch(annotations[1]){
-            case 'mdl':
-              part.repeatModelName = annotations[2];
-              break;
-            case 'att':
-              part.repeatAttribName = annotations[2];
-              break;
-            case 'i':
-              part.repeatIndex = annotations[2];
-              break;
-          }
-        }
-
+      part.start =  match.index;
+      part.end =  pattern2.lastIndex;
+      part.fullToken =  match[1];
+      
+      if(  (match2 = pattern1.exec(part.fullToken)) != null){
+        modelNameParts = Process.parseModelAttribName(match2[1]); 
+        part.modelName =  modelNameParts[0];
+        part.attribName =  modelNameParts[1];
       }
       
-      tokens.push(part);
+      while((indexes = _.RX_IDX_ITER.exec(match[3])) != null){
+        
+        prop = (!_.isDef(indexes[1])) ? indexes[2] : indexes[1];
+        part.indexQueue.push(prop);
+      }
       
+      while((annotations = _.RX_ANNOT.exec(annotationString)) != null){
+        switch(annotations[1]){
+          case 'mdl':
+            part.repeatModelName = annotations[2];
+            break;
+          case 'att':
+            part.repeatAttribName = annotations[2];
+            break;
+          case 'i':
+            part.repeatIndex = annotations[2];
+            break;
+        }
+      }
+      tokens.push(part);
+      part = {indexQueue : []};
     }
+      
+      
+      
+    
     
     return tokens;
   },

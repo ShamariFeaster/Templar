@@ -25,11 +25,11 @@ return {
   
     var NT = Token.modelName + '.' + Token.attribName,
         prop,
-        queue = Token.indexQueue.slice(0),
+        queue = (_.isArray(Token.indexQueue)) ? Token.indexQueue : [],
         index = (_.isDef(i)) ? '[' + i + ']' : '' ;
         
     while( (prop = queue.shift(queue)) != null ){
-      NT += '[' + prop + ']';
+      index += '[' + prop + ']';
     }
     return '{{' + NT + index + '}}';
   },
@@ -98,7 +98,8 @@ return {
         TMP_repeatedNode = new TMP_Node(newDomNode, TMP_baseNode.modelName, TMP_baseNode.attribName, index),
         match = null,
         templateText = TMP_baseNode.node.innerHTML,
-        annotatedNT = '';
+        annotatedNT = '',
+        repeatedTags = null;
         
     DOM.cloneAttributes(TMP_baseNode.node, TMP_repeatedNode.node);
     TMP_repeatedNode.node.innerHTML = templateText;
@@ -132,6 +133,7 @@ return {
       TMP_repeatedNode.hasNonTerminals = true;
       
       uncompiledTemplate = intraCompilation = TMP_repeatedNode.node.innerHTML;
+      
       /*Cycle through them*/
       for(var z = 0; z < repeatedProperties.length; z++){
         
@@ -173,6 +175,138 @@ return {
 
    
     return TMP_repeatedNode;
+  },
+  
+  _preprocessInPlace : function(TMP_node, index){
+    var repeatedProperties = null,
+        uncompiledTemplate = '',
+        intraCompilation = '',
+        idvRepeatedProperty = null,
+        nonTerminal = '',
+        match = null,
+        templateText = TMP_node.node.wholeText,
+        annotatedNT = '',
+        repeatedTags = null;
+    
+    _.RX_M_ATTR_TOK.lastIndex = 0;
+    while((match = _.RX_M_ATTR_TOK.exec(templateText))){
+      if(match[1] != TMP_node.modelName || match[2] != TMP_node.attribName){
+        TMP_node.embeddedModelAttribs[match[1] + '.' + match[2]] = true;
+        annotatedNT = 
+        match[0].replace('}}','') + 
+        '%mdl%' + TMP_node.modelName + '%/mdl%' + 
+        '%att%' + TMP_node.attribName + '%/att%' + 
+        '%i%' + index + '%/i%' + 
+        '}}';
+        TMP_node.node.nodeValue = 
+          TMP_node.node.nodeValue.replace(match[0], annotatedNT);
+      }
+    }
+
+    if( (repeatedProperties = TMP_node.node.nodeValue.match(/\{\{(\$*\w+)*\}\}/g)) != null){
+      TMP_node.hasNonTerminals = true;
+      
+      uncompiledTemplate = intraCompilation = TMP_node.node.nodeValue;
+      
+      /*Cycle through them*/
+      for(var z = 0; z < repeatedProperties.length; z++){
+        
+        if( (idvRepeatedProperty = /\{\{(\$*\w+)*\}\}/.exec(repeatedProperties[z]) ) ){
+          
+          if(idvRepeatedProperty[0] == '{{}}'){
+
+            TMP_node.node.nodeValue = intraCompilation = 
+                    intraCompilation.replace(idvRepeatedProperty[0], this._buildNonTerminal(TMP_node.token, index) );
+           } 
+          
+          if(idvRepeatedProperty[0] == '{{$index}}'){
+            TMP_node.node.nodeValue = intraCompilation =
+                    intraCompilation.replace(idvRepeatedProperty[0], index);
+          }
+          
+          if(idvRepeatedProperty[0] == '{{$item}}'){
+            TMP_node.node.nodeValue = intraCompilation =
+                    intraCompilation.replace(idvRepeatedProperty[0], 
+                    this._buildNonTerminal(TMP_node.token, index));
+          }
+          
+          if(idvRepeatedProperty[0] != '{{}}' && idvRepeatedProperty[0] != '{{$index}}'){
+            TMP_node.token.indexQueue.push(idvRepeatedProperty[1]);
+            TMP_node.node.nodeValue = intraCompilation =
+                    intraCompilation.replace(idvRepeatedProperty[0], this._buildNonTerminal(TMP_node.token, index) );
+          }
+          
+        }
+
+      }
+      intraCompilation = uncompiledTemplate;
+    }
+    
+    /*if no NTs found, repeatNode innerHTML must be empty to be clobbered over by model attrib value*/
+    TMP_node.hasNonTerminals = (TMP_node.hasNonTerminals == false) ? 
+                                  !_.isNullOrEmpty(TMP_node.node.nodeValue.trim()) :
+                                  TMP_node.hasNonTerminals;
+
+   
+    return TMP_node.hasNonTerminals;
+  },
+  
+  _cloneBaseNode : function(TMP_baseNode, index){
+    var newId = null,
+        newDomNode = document.createElement(TMP_baseNode.node.tagName.toLowerCase()),
+        TMP_repeatedNode = new TMP_Node(newDomNode, TMP_baseNode.modelName, TMP_baseNode.attribName, index);
+
+    DOM.cloneAttributes(TMP_baseNode.node, TMP_repeatedNode.node);
+
+    /*auto enumeration of existing id attribute*/
+    newId = TMP_baseNode.node.getAttribute('id');
+    newId = ( newId == null) ? '' : TMP_repeatedNode.node.setAttribute('id', newId + '-' + index); 
+    TMP_repeatedNode.hasNonTerminals = TMP_baseNode.hasNonTerminals;
+    TMP_repeatedNode.node.innerHTML = TMP_baseNode.node.innerHTML;
+    return TMP_repeatedNode;
+  },
+  
+  _traverseRepeatNode : function(node, index, TMP_baseNode){
+    var nodes = node.childNodes,
+        TMP_repeatNode = null,
+        processedNode = null,
+        repeatKey = '',
+        tokens = null,
+        hasNonTerminals = false;
+    for(var i = 0; i < nodes.length; i++){
+      
+      if(nodes[i].nodeType == _.ELEMENT_NODE){
+        /*ignore nested repeat nodes*/
+        repeatKey = DOM.getDataAttribute(nodes[i], _.IE_MODEL_REPEAT_KEY);
+        repeatKey = repeatKey.replace('{{$item}}', TMP_baseNode.modelName + '.' + TMP_baseNode.attribName + '[' + index + ']');
+        
+        if((tokens = Circular('Compile').getRepeatToken(repeatKey)).length > 0){
+          nodes[i].token = tokens[0];
+        }
+        if(!_.isNullOrEmpty(repeatKey)){
+          nodes[i].setAttribute('data-' + _.IE_MODEL_REPEAT_KEY, repeatKey);
+          continue;
+        }
+        
+        if(nodes[i].hasChildNodes())
+          hasNonTerminals |= this._traverseRepeatNode(nodes[i], index, TMP_baseNode);
+        else
+          continue;
+      }
+
+      TMP_repeatNode = new TMP_Node(nodes[i], TMP_baseNode.modelName, TMP_baseNode.attribName, index);
+      this.inheritToken(TMP_repeatNode, TMP_baseNode);
+      hasNonTerminals |= this._preprocessInPlace(TMP_repeatNode, index);
+      
+      
+    }
+    
+    return hasNonTerminals;
+  },
+  
+  newPreProcessRepeatNode : function(TMP_baseNode, index){  
+    TMP_baseNode.hasNonTerminals = this._traverseRepeatNode(TMP_baseNode.node, index, TMP_baseNode);
+    return this._cloneBaseNode(TMP_baseNode, index);
   },
   
   inheritToken : function(TMP_node, Token){
