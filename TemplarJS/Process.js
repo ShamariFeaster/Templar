@@ -86,97 +86,7 @@ return {
     
     return preProcessedTMPNodes;
   },
-  
-  preProcessRepeatNode : function(TMP_baseNode, index){
-    var newId = null,
-        repeatedProperties = null,
-        uncompiledTemplate = '',
-        intraCompilation = '',
-        idvRepeatedProperty = null,
-        nonTerminal = '',
-        newDomNode = document.createElement(TMP_baseNode.node.tagName.toLowerCase()),
-        TMP_repeatedNode = new TMP_Node(newDomNode, TMP_baseNode.modelName, TMP_baseNode.attribName, index),
-        match = null,
-        templateText = TMP_baseNode.node.innerHTML,
-        annotatedNT = '',
-        repeatedTags = null;
-        
-    DOM.cloneAttributes(TMP_baseNode.node, TMP_repeatedNode.node);
-    TMP_repeatedNode.node.innerHTML = templateText;
-    /*auto enumeration of existing id attribute*/
-    newId = TMP_baseNode.node.getAttribute('id');
-    newId = ( newId == null) ? '' : TMP_repeatedNode.node.setAttribute('id', newId + '-' + index); 
-    
-    _.RX_M_ATTR_TOK.lastIndex = 0;
-    while((match = _.RX_M_ATTR_TOK.exec(templateText))){
-      if(match[1] != TMP_baseNode.modelName || match[2] != TMP_baseNode.attribName){
-        TMP_baseNode.embeddedModelAttribs[match[1] + '.' + match[2]] = true;
-        annotatedNT = 
-        match[0].replace('}}','') + 
-        '%mdl%' + TMP_baseNode.modelName + '%/mdl%' + 
-        '%att%' + TMP_baseNode.attribName + '%/att%' + 
-        '%i%' + index + '%/i%' + 
-        '}}';
-        TMP_repeatedNode.node.innerHTML = 
-          TMP_repeatedNode.node.innerHTML.replace(match[0], annotatedNT);
-      }
-    }
-    
-    /*repeat template is original TMP_baseNode with repeat directive on it. The non terminals here
-      do not have index or property info. intraCompilation is progressively compiled 
-      using text replacement. the comiled non-terminals now have prop and index info.
-      
-      For the next iteration through the repeat we reset intraCompilation to the un-compiled
-      version we stored in uncompiledTemplate
-      */
-    if( (repeatedProperties = TMP_repeatedNode.node.innerHTML.match(/\{\{(\$*\w+)*\}\}/g)) != null){
-      TMP_repeatedNode.hasNonTerminals = true;
-      
-      uncompiledTemplate = intraCompilation = TMP_repeatedNode.node.innerHTML;
-      
-      /*Cycle through them*/
-      for(var z = 0; z < repeatedProperties.length; z++){
-        
-        if( (idvRepeatedProperty = /\{\{(\$*\w+)*\}\}/.exec(repeatedProperties[z]) ) ){
-          
-          if(idvRepeatedProperty[0] == '{{}}'){
-            nonTerminal = this.buildNonTerminal(TMP_baseNode.modelName, TMP_baseNode.attribName, null, index);
-            TMP_repeatedNode.node.innerHTML = intraCompilation = 
-                    intraCompilation.replace(idvRepeatedProperty[0], nonTerminal );
-           } 
-          
-          if(idvRepeatedProperty[0] == '{{$index}}'){
-            TMP_repeatedNode.node.innerHTML = intraCompilation =
-                    intraCompilation.replace(idvRepeatedProperty[0], index);
-          }
-          
-          if(idvRepeatedProperty[0] == '{{$item}}'){
-            TMP_repeatedNode.node.innerHTML = intraCompilation =
-                    intraCompilation.replace(idvRepeatedProperty[0], 
-                    TMP_baseNode.modelName + '.' + TMP_baseNode.attribName + '[' + index + ']');
-          }
-          
-          if(idvRepeatedProperty[0] != '{{}}' && idvRepeatedProperty[0] != '{{$index}}'){
-            nonTerminal = this.buildNonTerminal(TMP_baseNode.modelName, TMP_baseNode.attribName, idvRepeatedProperty[1], index);
-            TMP_repeatedNode.node.innerHTML = intraCompilation =
-                    intraCompilation.replace(idvRepeatedProperty[0], nonTerminal );
-          }
-          
-        }
 
-      }
-      intraCompilation = uncompiledTemplate;
-    }
-    
-    /*if no NTs found, repeatNode innerHTML must be empty to be clobbered over by model attrib value*/
-    TMP_repeatedNode.hasNonTerminals = (TMP_repeatedNode.hasNonTerminals == false) ? 
-                                        !_.isNullOrEmpty(TMP_repeatedNode.node.innerHTML.trim()) :
-                                        TMP_repeatedNode.hasNonTerminals;
-
-   
-    return TMP_repeatedNode;
-  },
-  
   _preprocessInPlace : function(TMP_node, index){
     var repeatedProperties = null,
         uncompiledTemplate = '',
@@ -188,22 +98,6 @@ return {
         annotatedNT = '',
         repeatedTags = null;
     
-    _.RX_M_ATTR_TOK.lastIndex = 0;
-    /*test if already been annotated as embed, we don't wantv to double that*/
-    while((match = _.RX_M_ATTR_TOK.exec(templateText)) != null && !/%(\w+)%/.test(templateText)){
-      if(match[1] != TMP_node.modelName || match[2] != TMP_node.attribName){
-        TMP_node.embeddedModelAttribs[match[1] + '.' + match[2]] = true;
-        annotatedNT = 
-        match[0].replace('}}','') + 
-        '%mdl%' + TMP_node.modelName + '%/mdl%' + 
-        '%att%' + TMP_node.attribName + '%/att%' + 
-        '%i%' + index + '%/i%' + 
-        '}}';
-        TMP_node.node.nodeValue = 
-          TMP_node.node.nodeValue.replace(match[0], annotatedNT);
-      }
-    }
-
     if( (repeatedProperties = TMP_node.node.nodeValue.match(/\{\{(\$*\w+)*\}\}/g)) != null){
       TMP_node.hasNonTerminals = true;
       
@@ -243,6 +137,22 @@ return {
       intraCompilation = uncompiledTemplate;
     }
     
+    _.RX_M_ATTR_TOK.lastIndex = 0;
+    /*test if already been annotated as embed, we don't wantv to double that*/
+    while((match = _.RX_M_ATTR_TOK.exec(templateText)) != null && !/%(\w+)%/.test(templateText)){
+      if(match[1] != TMP_node.modelName || match[2] != TMP_node.attribName){
+        TMP_node.embeddedModelAttribs[match[1] + '.' + match[2]] = true;
+        annotatedNT = 
+        match[0].replace('}}','') + 
+        '%mdl%' + TMP_node.modelName + '%/mdl%' + 
+        '%att%' + TMP_node.attribName + '%/att%' + 
+        '%i%' + index + '%/i%' + 
+        '}}';
+        TMP_node.node.nodeValue = 
+          TMP_node.node.nodeValue.replace(match[0], annotatedNT);
+      }
+    }
+    
     /*if no NTs found, repeatNode innerHTML must be empty to be clobbered over by model attrib value*/
     TMP_node.hasNonTerminals = (TMP_node.hasNonTerminals == false) ? 
                                   !_.isNullOrEmpty(TMP_node.node.nodeValue.trim()) :
@@ -269,7 +179,7 @@ return {
   
   _traverseRepeatNode : function(node, index, TMP_baseNode){
     var nodes = node.childNodes,
-        TMP_repeatNode = null,
+        TMP_textNode = null,
         processedNode = null,
         repeatKey = '',
         tokens = null,
@@ -295,9 +205,9 @@ return {
           continue;
       }
 
-      TMP_repeatNode = new TMP_Node(nodes[i], TMP_baseNode.modelName, TMP_baseNode.attribName, index);
-      TMP_repeatNode.inheritToken(TMP_baseNode);
-      hasNonTerminals |= this._preprocessInPlace(TMP_repeatNode, index);
+      TMP_textNode = new TMP_Node(nodes[i], TMP_baseNode.modelName, TMP_baseNode.attribName, index);
+      TMP_textNode.inheritToken(TMP_baseNode);
+      hasNonTerminals |= this._preprocessInPlace(TMP_textNode, index);
       
       
     }
@@ -305,9 +215,10 @@ return {
     return hasNonTerminals;
   },
   
-  newPreProcessRepeatNode : function(TMP_baseNode, index){  
-    TMP_baseNode.hasNonTerminals = this._traverseRepeatNode(TMP_baseNode.node, index, TMP_baseNode);
-    return this._cloneBaseNode(TMP_baseNode, index);
+  newPreProcessRepeatNode : function(TMP_baseNode, index){
+    var PreProcessedNode = this._cloneBaseNode(TMP_baseNode, index);
+    PreProcessedNode.hasNonTerminals = this._traverseRepeatNode(PreProcessedNode.node, index, TMP_baseNode);
+    return PreProcessedNode;
   },
   
   preProcessInputNode : function(DOM_Node, scope){
@@ -422,7 +333,7 @@ return {
     }
     return __COMPILER_FLG__;
   },
-  preProcessNode : function(DOM_Node, modelName, attribName, scope){
+  preProcessNode : function(DOM_Node, scope){
     if(!_.isDef(DOM_Node) || DOM_Node === null )
       return;
       
@@ -479,9 +390,9 @@ return {
         this.preProcessInputNode(DOM_Node, scope);
         break;
       case 'REPEAT':
-        DOM.annotateDOMNode(DOM_Node, modelName, attribName);
         /*push source repeat DOM_Node onto 'interpolate' array*/
-        TMP_RepeatBase = new TMP_Node(DOM_Node, modelName, attribName);
+        var attributes = DOM.getDOMAnnotations(DOM_Node);
+        TMP_RepeatBase = new TMP_Node(DOM_Node, attributes.modelName, attributes.attribName);
         TMP_RepeatBase.inheritToken(DOM_Node.token);
         TMP_RepeatBase.scope = scope;
         Map.addRepeatBaseNode(TMP_RepeatBase); 

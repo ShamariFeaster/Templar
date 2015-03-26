@@ -18,7 +18,7 @@ structureJS.module('Constants', function(require){
   _.RX_ALL_INX = /(\{\{(\w+\.\w+)([^}]*)*\}\})+?/g;
 
   _.RX_M_ATTR = /\{\{(\w+)\.(\w+)([^}]*)*/g;
-  _.RX_M_ATTR_TOK = /\{\{(\w+)\.(\w+)(?:[^"'>\n\t\w]*)*/g;
+  _.RX_M_ATTR_TOK = /\{\{(\w+)\.([\w\d_\-\.\[\]]+)\}\}+?/gm;
   _.RX_IDX_ITER = /\[(\w+|\d+)\]|\.(\w+)/g;
   _.RX_ANNOT = /%(\w+)%([^%]+)%\/(?:\w+)%/g
   /*Repeat Regex*/

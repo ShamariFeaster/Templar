@@ -263,11 +263,10 @@ return {
           var repeatKey = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY),
               tokens, token;
           if(!_.isNullOrEmpty(repeatKey) && (tokens = this.getRepeatToken(repeatKey)).length > 0){
-            modelName = tokens[0].modelName;
-            attribName = tokens[0].attribName;
-            DOM_Node.token = tokens[0];
+            DOM.annotateDOMNode(DOM_Node, tokens[0].modelName, tokens[0].attribName, tokens[0] );
           }
-          __COMPILER_FLG__ = Process.preProcessNode(DOM_Node, modelName, attribName, scope);
+          
+          __COMPILER_FLG__ = Process.preProcessNode(DOM_Node, scope);
           
           /*Repeat base nodes serve as templates and should remain uncompiled*/
           switch(__COMPILER_FLG__){

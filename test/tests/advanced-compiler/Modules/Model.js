@@ -9,6 +9,7 @@ Templar.dataModel('Environment',
               
               /*Page Clock*/
               time : '',
+              range : [1,2,3],
               test : [{uno : 'value1'},{uno : 'value2'}],
               image_templar : 'images/Cross_Templar.svg',
               selects : [[1,2,3,], { test : [4,5,6]}],
