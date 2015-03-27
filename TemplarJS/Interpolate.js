@@ -196,6 +196,7 @@ return {
               
               for(var q = 0; q < newNodeCnt; q++, newNodeIndex++, ctx.modelAttribLength++){
                 var tmp_option = new TMP_Node(document.createElement("option"),modelName, attributeName, newNodeIndex);
+                tmp_option.inheritToken(tmp_node);
                 tmp_option.node.text = ( _.isDef(text = attributeVal[newNodeIndex].text) ) ? text : attributeVal[newNodeIndex];
                 tmp_option.node.value = ( _.isDef(value = attributeVal[newNodeIndex].value) ) ? value : attributeVal[newNodeIndex];
                 node.appendChild(tmp_option.node);

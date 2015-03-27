@@ -359,7 +359,7 @@ return {
 
         DOM.annotateDOMNode(DOM_Node, token.modelName, token.attribName, token);
         TMP_select = new TMP_Node(DOM_Node, token.modelName, token.attribName);
-        this.inheritToken(TMP_select, token);
+        TMP_select.inheritToken(token);
         TMP_select.scope = scope;
 
         //push select onto 'interpolate' array
