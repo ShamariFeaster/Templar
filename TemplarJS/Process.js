@@ -377,10 +377,10 @@ return {
         TMP_select = new TMP_Node(DOM_Node, token.modelName, token.attribName);
         TMP_select.inheritToken(token);
         TMP_select.scope = scope;
-
+        Interpolate.intializeSelect(TMP_select, true, 0);
         //push select onto 'interpolate' array
         Map.pushNodes(TMP_select);
-
+        
         DOM_Node.addEventListener('change', function(e){
           var attrib = Map.dereferenceAttribute(this.token),
               selectObj = 

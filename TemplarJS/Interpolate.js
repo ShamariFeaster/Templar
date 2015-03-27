@@ -194,6 +194,35 @@ return {
     
   },
   
+  intializeSelect : function(tmp_node, ifEmbedded, modelAttribLength){
+    var isEmbedded = (!_.isNullOrEmpty(tmp_node.repeatModelName) && !_.isNullOrEmpty(tmp_node.repeatAttribName));
+        run = (ifEmbedded) ? (ifEmbedded && isEmbedded) : (!ifEmbedded && !isEmbedded);
+    
+    var attributeVal, modelAttribLength, newNodeCnt, newNodeIndex, text, value,
+        modelName = tmp_node.modelName,
+        attributeName = tmp_node.attribName;
+    if(run && _.isArray(attributeVal = Map.dereferenceAttribute(tmp_node))){
+          
+      /*New model data, longer than existing data, add extra nodes*/
+      if(attributeVal.length > modelAttribLength){
+        /*amount of nodes needed*/
+        newNodeCnt = attributeVal.length - modelAttribLength;
+        /*where to start the new indexes in the 'indexes' table*/
+        newNodeIndex = attributeVal.length - newNodeCnt;
+
+        for(var q = 0; q < newNodeCnt; q++, newNodeIndex++, modelAttribLength++){
+          var tmp_option = new TMP_Node(document.createElement("option"),modelName, attributeName, newNodeIndex);
+          tmp_option.inheritToken(tmp_node);
+          tmp_option.node.text = ( _.isDef(text = attributeVal[newNodeIndex].text) ) ? text : attributeVal[newNodeIndex];
+          tmp_option.node.value = ( _.isDef(value = attributeVal[newNodeIndex].value) ) ? value : attributeVal[newNodeIndex];
+          tmp_node.node.appendChild(tmp_option.node);
+          tmp_option.scope = tmp_node.scope;
+          Map.pushNodes(tmp_option);
+        }
+      }
+        
+    }
+  },
   interpolate : function(modelName, attributeName, attributeVal, compiledScopes){  
     if(!Map.exists(modelName))
       return;
@@ -232,30 +261,7 @@ return {
       switch(tagName){
         
         case 'SELECT':
-          /*Make sure it's an array*/
-          if(_.isArray(attributeVal = Map.dereferenceAttribute(tmp_node))){
-          
-            /*New model data, longer than existing data, add extra nodes*/
-            if(attributeVal.length > ctx.modelAttribLength){
-              /*amount of nodes needed*/
-              var newNodeCnt = attributeVal.length - ctx.modelAttribLength,
-                  /*where to start the new indexes in the 'indexes' table*/
-                  newNodeIndex = attributeVal.length - newNodeCnt,
-                  text, value;
-              
-              for(var q = 0; q < newNodeCnt; q++, newNodeIndex++, ctx.modelAttribLength++){
-                var tmp_option = new TMP_Node(document.createElement("option"),modelName, attributeName, newNodeIndex);
-                tmp_option.inheritToken(tmp_node);
-                tmp_option.node.text = ( _.isDef(text = attributeVal[newNodeIndex].text) ) ? text : attributeVal[newNodeIndex];
-                tmp_option.node.value = ( _.isDef(value = attributeVal[newNodeIndex].value) ) ? value : attributeVal[newNodeIndex];
-                node.appendChild(tmp_option.node);
-                tmp_option.scope = tmp_node.scope;
-                Map.pushNodes(tmp_option);
-              }
-            }
-              
-          }
-           
+          Interpolate.intializeSelect(tmp_node, false, ctx.modelAttribLength);
           break;
         case 'OPTION':
           if(_.isArray(attributeVal = Map.dereferenceAttribute(tmp_node))){

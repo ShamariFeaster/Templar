@@ -6,8 +6,14 @@
         data-project-config="../../lib/structureJS/dev-test-config">
 </script></head>
 <body>
+<select>{{Environment.range}}</select>
+
 <div data-apl-repeat="Environment.complex_repeat" id="repeat">
-  {{A.a}}
+  <select>{{Environment.range}}</select>
+</div>
+<!-- 
+
+{{A.a}}
   <br>
   ____________________________________________ 
   <div data-apl-repeat="Environment.range">
@@ -16,11 +22,11 @@
   ____________________________________________
    
  <br>
-  
+  <select>{{Environment.range}}</select>
   {{author}} , {{title}} 
   <div data-apl-repeat="{{$item}}.other_books">
     other shit : {{}} {{A.a}}
   </div>
-</div>
-</div>
+
+-->
 </body></html>
