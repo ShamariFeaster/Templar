@@ -67,7 +67,7 @@ return {
         }
       }
       tokens.push(token);
-      part = new Token();
+      token = new Token();
     }
 
     return tokens;

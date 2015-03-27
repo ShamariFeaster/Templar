@@ -145,6 +145,51 @@ return {
     return results;
     
   },
+  
+  interpolateEmbeddedRepeats : function(TMP_node){
+    var baseNodes,
+        TMP_repeatBaseNode,
+        attributeVal,
+        modelName,
+        attributeName,
+        parts;
+        
+    for(var modelAttrib in TMP_node.embeddedRepeats){
+      if(TMP_node.embeddedRepeats.hasOwnProperty(modelAttrib)){
+      
+        parts = Process.parseModelAttribName(modelAttrib);
+        modelName = parts[0];
+        attributeName = parts[1];
+        baseNodes = Map.getRepeatBaseNodes(modelName, attributeName);
+
+        while((TMP_repeatBaseNode = baseNodes.shift()) != null){
+
+        if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode) && 
+            _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode)))
+          {
+
+            /*rebuild new one*/
+            for(var i = 0; i < attributeVal.length; i++){
+              Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, i);
+              TMP_repeatedNode = Process.newPreProcessRepeatNode(TMP_repeatBaseNode, i);
+              TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
+              Map.pushNodes(TMP_repeatedNode);
+              if(TMP_repeatedNode.hasNonTerminals == false)
+                TMP_repeatedNode.node.innerHTML = attributeVal[i];
+              DOM.appendTo(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
+              Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
+            }
+          }
+          TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 
+        }
+        
+      }
+      
+    }
+  
+    
+  },
+  
   interpolate : function(modelName, attributeName, attributeVal, compiledScopes){  
     if(!Map.exists(modelName))
       return;
@@ -322,11 +367,7 @@ return {
             
             if(baseNodes[z].node.parentNode)
               ctx.target.unshift(TMP_repeatBaseNode);
-            
-            /*If base node has no parent then it is not in the current DOM.
-            NOTE (11/24/14): if we use 'apl-default-hidden' class on BODY repeats will not interp.
-            I've never liked the default hidden class anyways so for now I'm not going to
-            change logic here to support the continued use of the default hidden class.*/
+
             if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode) && 
               _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode)))
             {
@@ -341,6 +382,7 @@ return {
                   TMP_repeatedNode.node.innerHTML = attributeVal[i];
                 DOM.appendTo(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
                 Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
+                Interpolate.interpolateEmbeddedRepeats(TMP_repeatBaseNode);
               }
             }
             TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 

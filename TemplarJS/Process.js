@@ -21,17 +21,17 @@ return {
     var propertyName = (_.isNullOrEmpty(propertyName)) ? '' : '.' + propertyName;
     return '{{' + modelName + '.' + modelAtrribName + '[' + index + ']' + propertyName + '}}';
   },
-  _buildNonTerminal : function(Token, i){
-  
+
+  _buildNonTerminal : function(Token){
     var NT = Token.modelName + '.' + Token.attribName,
-        prop,
-        queue = (_.isArray(Token.indexQueue)) ? Token.indexQueue : [],
-        index = (_.isDef(i)) ? '[' + i + ']' : '' ;
+      prop,
+      queue = (_.isArray(Token.indexQueue)) ? Token.indexQueue.slice(0) : [],
+      unfoldedIndexes = '';
         
     while( (prop = queue.shift(queue)) != null ){
-      index += '[' + prop + ']';
+      unfoldedIndexes += '[' + prop + ']';
     }
-    return '{{' + NT + index + '}}';
+    return '{{' + NT + unfoldedIndexes + '}}';
   },
   buildRepeatNonTerminal : function(modelName, modelAtrribName, parentModel, parentAttrib, index){
     var propertyName = (_.isNullOrEmpty(propertyName)) ? '' : propertyName;
@@ -107,11 +107,14 @@ return {
       for(var z = 0; z < repeatedProperties.length; z++){
         
         if( (idvRepeatedProperty = /\{\{(\$*\w+)*\}\}/.exec(repeatedProperties[z]) ) ){
-          
+          /*w/ this symbol our token already has instructions to build our NT.
+            we use the index of the repeated node to index the attrib our NT
+            refers to*/
           if(idvRepeatedProperty[0] == '{{}}'){
-
+            TMP_node.indexQueue.push(index);
             TMP_node.node.nodeValue = intraCompilation = 
-                    intraCompilation.replace(idvRepeatedProperty[0], this._buildNonTerminal(TMP_node.token, index) );
+                    intraCompilation.replace(idvRepeatedProperty[0], this._buildNonTerminal(TMP_node) );
+            TMP_node.indexQueue.pop();
            } 
           
           if(idvRepeatedProperty[0] == '{{$index}}'){
@@ -122,13 +125,16 @@ return {
           if(idvRepeatedProperty[0] == '{{$item}}'){
             TMP_node.node.nodeValue = intraCompilation =
                     intraCompilation.replace(idvRepeatedProperty[0], 
-                    this._buildNonTerminal(TMP_node.token, index));
+                    this._buildNonTerminal(TMP_node, index));
           }
-          
+          /*simple property access*/
           if(idvRepeatedProperty[0] != '{{}}' && idvRepeatedProperty[0] != '{{$index}}'){
-            TMP_node.token.indexQueue.push(idvRepeatedProperty[1]);
+            TMP_node.indexQueue.push(index);
+            TMP_node.indexQueue.push(idvRepeatedProperty[1]);
             TMP_node.node.nodeValue = intraCompilation =
-                    intraCompilation.replace(idvRepeatedProperty[0], this._buildNonTerminal(TMP_node.token, index) );
+                    intraCompilation.replace(idvRepeatedProperty[0], this._buildNonTerminal(TMP_node) );
+            TMP_node.indexQueue.pop();
+            TMP_node.indexQueue.pop();
           }
           
         }
@@ -196,6 +202,15 @@ return {
         }
         if(!_.isNullOrEmpty(repeatKey)){
           nodes[i].setAttribute('data-' + _.IE_MODEL_REPEAT_KEY, repeatKey);
+          
+          if(tokens[0].modelName != TMP_baseNode.modelName 
+             || tokens[0].attribName != TMP_baseNode.attribName){
+             
+            TMP_baseNode.embeddedRepeats[tokens[0].modelName + '.' + tokens[0].attribName] = true;
+          /*I need to signal to the interpolater to build this nested repeat b/c
+            the interpolator might already have iterated past this attrib and it 
+            won't be built. Maybe I can annotate Base node?*/  
+          }
           continue;
         }
         
@@ -208,8 +223,7 @@ return {
       TMP_textNode = new TMP_Node(nodes[i], TMP_baseNode.modelName, TMP_baseNode.attribName, index);
       TMP_textNode.inheritToken(TMP_baseNode);
       hasNonTerminals |= this._preprocessInPlace(TMP_textNode, index);
-      
-      
+
     }
     
     return hasNonTerminals;

@@ -1,4 +1,3 @@
-<select>{{Environment.selects[1].test}}</select>
 
 <div data-apl-repeat="Environment.complex_repeat" id="repeat">
   {{author}} , {{title}}
@@ -17,3 +16,9 @@
 <div data-apl-repeat="Environment.range">{{Environment.complex_repeat[0].other_books[{{$index}}]}}</div>
 <!-- PASSED-->
 <div data-apl-repeat="Environment.test">{{Environment.siteName}}</div>
+<!-- PASSED-->
+<select>{{Environment.selects[1].test}}</select>
+<!-- PASSED-->
+<div data-apl-repeat="Environment.complex_repeat" id="repeat">
+  {{author}} , {{title}}
+</div>
