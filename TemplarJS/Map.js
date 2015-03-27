@@ -1,6 +1,7 @@
 structureJS.module('Map', function(require){
 
 var _ = this;
+var DOM = require('DOM');
 var _repeatTable = Object.create(null);/*modelName : { attribName : node}*/
 var _controlTable = Object.create(null);/*ctrlId : [ctrl1, ctrl2,......]*/
 var _map = Object.create(null);/*no prototype chain, better iteration performance >= IE9*/
@@ -23,6 +24,18 @@ return {
       baseNodes = _repeatTable[modelName][attribName];
     
     return baseNodes;
+  },
+  /*This is designed for re-interps. We want to get dead base nodes out of the cache.
+    This is not only for performance reasons. Interpolate.interpolateEmbeddedRepeats()
+    uses the current index of the parent's repeat to pull the proper base node out
+    the cache. If dead nodes remain, this indexing is thrown out of alignment.*/
+  pruneBaseNodes : function(baseNodes){
+    for(var i = 0; i < baseNodes.length; i++){
+      if(_.isNull(baseNodes[i].node.parentNode) || !DOM.isVisible(baseNodes[i].node.parentNode)){
+        baseNodes.splice(i, 1);
+        i--;
+      }
+    }
   },
   
   isRepeatedAttribute : function(modelName, attribName){

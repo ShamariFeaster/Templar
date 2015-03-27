@@ -161,6 +161,7 @@ return {
         modelName = parts[0];
         attributeName = parts[1];
         baseNodes = Map.getRepeatBaseNodes(modelName, attributeName);
+        Map.pruneBaseNodes(baseNodes);
         /*In interpolate() the call to compile() preceeding  the call to this adds a
           baseNode to this attribs basenode array. The index of which corresponsd to
           the index of the repeated node. The point of doing it this way is to keep the
@@ -363,9 +364,9 @@ return {
               
             }
           });
-         
+          
           baseNodes = Map.getRepeatBaseNodes(modelName, attributeName);
-
+          Map.pruneBaseNodes(baseNodes);
           for(var z = 0; z < baseNodes.length; z++){
             TMP_repeatBaseNode = baseNodes[z];
             
