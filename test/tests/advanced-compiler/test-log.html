@@ -1,13 +1,4 @@
 
-<div data-apl-repeat="Environment.complex_repeat" id="repeat">
-  {{author}} , {{title}}
-  <div data-apl-repeat="{{$item}}.other_books">
-    other shit : {{}}
-  </div>
-  
-  <input type="radio" id={{author}} value="{{Environment.cb}}"/>
-</div>
-
 <!-- PASSED-->
 <h2 id="{{Environment.test[0].uno}}">{{Environment.test[0].uno}}</h2>
 <!-- PASSED-->
@@ -22,3 +13,59 @@
 <div data-apl-repeat="Environment.complex_repeat" id="repeat">
   {{author}} , {{title}}
 </div>
+
+<!-- Failed-->
+<div data-apl-repeat="Environment.complex_repeat" id="repeat">
+  
+  <div data-apl-repeat="Environment.range">
+    Range : {{}} 
+  </div>
+</div>
+
+
+<!-- Failed-->
+<!-- -->
+<div data-apl-repeat="Environment.complex_repeat" id="repeat">
+  {{A.a}}
+  ____________________________________________ 
+  <div data-apl-repeat="Environment.range">
+    Range : {{}} {{A.a}}
+  </div>
+  ____________________________________________
+   
+ 
+  
+  {{author}} , {{title}} 
+  <div data-apl-repeat="{{$item}}.other_books">
+    other shit : {{}} {{A.a}}
+  </div>
+</div>
+
+<!-- OUTPUT
+
+/* Derived Cases:
+1. embedded repeats are appending themselves to next element. It should be appending itself to the
+next nodes of any type. The result is the 2 lines being output and then 'author' and 'range'
+
+2. Foreign attribs not interped correctly
+2a. foreign scalars
+2b. foreign repeats
+
+*/
+
+____________________________________________ ____________________________________________ Shamari Feaster , hello world
+Range : 1
+Range : 2
+Range : 3
+other shit : fruit
+other shit : basket
+other shit : days
+____________________________________________ ____________________________________________ Roxanne Feaster , I love u
+Range : 1
+Range : 2
+Range : 3
+other shit : uno
+other shit : dos
+other shit : tres
+
+-->

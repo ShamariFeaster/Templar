@@ -145,8 +145,8 @@ return {
     return results;
     
   },
-  
-  interpolateEmbeddedRepeats : function(TMP_node){
+  /*TODO: COMMENT THIS*/
+  interpolateEmbeddedRepeats : function(TMP_node, index){
     var baseNodes,
         TMP_repeatBaseNode,
         attributeVal,
@@ -156,13 +156,17 @@ return {
         
     for(var modelAttrib in TMP_node.embeddedRepeats){
       if(TMP_node.embeddedRepeats.hasOwnProperty(modelAttrib)){
-      
+        
         parts = Process.parseModelAttribName(modelAttrib);
         modelName = parts[0];
         attributeName = parts[1];
         baseNodes = Map.getRepeatBaseNodes(modelName, attributeName);
-
-        while((TMP_repeatBaseNode = baseNodes.shift()) != null){
+        /*In interpolate() the call to compile() preceeding  the call to this adds a
+          baseNode to this attribs basenode array. The index of which corresponsd to
+          the index of the repeated node. The point of doing it this way is to keep the
+          baseNodes for embedded repeats intact so changes to those attribs can rebuild
+          the embedded repeat(s) in place in their containing repetitions.*/
+        if(!_.isNull(TMP_repeatBaseNode = baseNodes[index])){
 
         if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode) && 
             _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode)))
@@ -176,7 +180,7 @@ return {
               Map.pushNodes(TMP_repeatedNode);
               if(TMP_repeatedNode.hasNonTerminals == false)
                 TMP_repeatedNode.node.innerHTML = attributeVal[i];
-              DOM.appendTo(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
+              TMP_repeatBaseNode.node.parentNode.insertBefore(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
               Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
             }
           }
@@ -380,9 +384,9 @@ return {
                 Map.pushNodes(TMP_repeatedNode);
                 if(TMP_repeatedNode.hasNonTerminals == false)
                   TMP_repeatedNode.node.innerHTML = attributeVal[i];
-                DOM.appendTo(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
+                TMP_repeatBaseNode.node.parentNode.insertBefore(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
                 Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
-                Interpolate.interpolateEmbeddedRepeats(TMP_repeatBaseNode);
+                Interpolate.interpolateEmbeddedRepeats(TMP_repeatBaseNode, i);
               }
             }
             TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 

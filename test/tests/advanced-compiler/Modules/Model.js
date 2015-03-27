@@ -24,3 +24,5 @@ Templar.dataModel('Environment',
                 other_books : ['uno','dos','tres']
                 }]
             });
+Templar.dataModel('A',
+            {a : 'A', b : 'B'});

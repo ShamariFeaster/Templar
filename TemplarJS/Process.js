@@ -219,11 +219,12 @@ return {
         else
           continue;
       }
-
-      TMP_textNode = new TMP_Node(nodes[i], TMP_baseNode.modelName, TMP_baseNode.attribName, index);
-      TMP_textNode.inheritToken(TMP_baseNode);
-      hasNonTerminals |= this._preprocessInPlace(TMP_textNode, index);
-
+      
+      if(nodes[i].nodeType == _.TEXT_NODE){
+        TMP_textNode = new TMP_Node(nodes[i], TMP_baseNode.modelName, TMP_baseNode.attribName, index);
+        TMP_textNode.inheritToken(TMP_baseNode);
+        hasNonTerminals |= this._preprocessInPlace(TMP_textNode, index);
+      }
     }
     
     return hasNonTerminals;
