@@ -31,7 +31,8 @@ return {
     the cache. If dead nodes remain, this indexing is thrown out of alignment.*/
   pruneBaseNodes : function(baseNodes){
     for(var i = 0; i < baseNodes.length; i++){
-      if(_.isNull(baseNodes[i].node.parentNode) || !DOM.isVisible(baseNodes[i].node.parentNode)){
+      /*visibility is a bad check*/
+      if(_.isNull(baseNodes[i].node.parentNode) || !document.body.contains(baseNodes[i].node)){
         baseNodes.splice(i, 1);
         i--;
       }
@@ -376,31 +377,40 @@ return {
                       limitTable : model_obj.limitTable, filterResults : model_obj.filterResults};
                       
   },
+  /*----REPEAT INTERPOLATION CLEANUP-----------------*/
+  destroyRepeatTree : function(modelName, attribName){
+    this.forEach(modelName, attribName, function(ctx, tmp_node){
 
-  pruneEmbeddedNodes : function(tmp_baseNode, repeatModelName, repeatAttribName, index){
-    var Map = this,
-        embeddedAttribs = Object.keys(tmp_baseNode.embeddedModelAttribs),
-        splitAttrib = null;
+      ctx.removeItem(ctx.index);
 
-    for(var i = 0; i < embeddedAttribs.length; i++){
-      if(!_.isNullOrEmpty(embeddedAttribs[i])){
-        splitAttrib = embeddedAttribs[i].split('.');/*0 = modelName, 1 = attribName*/
+      /*only remove visible elements from DOM, don't remove base node from DOM*/
+      if(!_.isNull(tmp_node.node.parentNode) && tmp_node.index > _.UNINDEXED){
+        tmp_node.node.parentNode.removeChild(tmp_node.node);
         
-        Map.forEach(splitAttrib[0], splitAttrib[1], function(ctx, tmp_node){
-        
-          if(tmp_node.repeatModelName == repeatModelName 
-             && tmp_node.repeatAttribName == repeatAttribName 
-             && tmp_node.repeatIndex == index){
-              ctx.removeItem(ctx.index);
-              _.log('Pruning Embedded :' + tmp_node.node.tagName);
-
-          }
-          
-        });
       }
-    }
+    });
+  },
+  
+  pruneDeadEmbeds : function(){
+    var Map = this;
+        
+    Map.forEach(function(ctx, modelName){
+      Map.forEach(ctx.modelName, function(ctx, attribName){
+        Map.forEach(ctx.modelName, ctx.modelAtrribName, function(ctx, tmp_node){
+          var node = tmp_node.node;
+          if((!_.isNullOrEmpty(tmp_node.repeatModelName) && !_.isNullOrEmpty(tmp_node.repeatAttribName)) 
+            && !document.body.contains(node)){
+            ctx.removeItem(ctx.index);
+          }
+        });
+              
+      });
+    
+    });
     
   },
+  
+  /*----SCOPE CHANGE CLEANUP-----------------*/
   pruneNodeTreeByScope : function( compiledScopes ){
     if(_.isNullOrEmpty(compiledScopes) )
       return;
@@ -433,6 +443,7 @@ return {
     });
     
   },
+  /*----DEBUGGING-----------------*/
   getInternalModel : function(modelName){
     results = null;
     if(this.exists(modelName))

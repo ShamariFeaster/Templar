@@ -12,7 +12,13 @@ structureJS.module('Util', function(require){
   _.isNullOrEmpty = function(a){ return (!_.isDef(a) || (a === null || a === ''));};
   _.isArray = function(a){return (!_.isNull(a) && Array.isArray(a))};
   _.log = function(a){console.log(a);};
-  
+  _.mixin = function(from, to){
+    for(var k in from){
+      if(from.hasOwnProperty(k)){
+        to[k] = from[k];
+      }
+    }
+  };
   structureJS.extendContext(_); 
   return _;
 });

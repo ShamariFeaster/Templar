@@ -168,14 +168,13 @@ return {
           baseNodes for embedded repeats intact so changes to those attribs can rebuild
           the embedded repeat(s) in place in their containing repetitions.*/
         if(!_.isNull(TMP_repeatBaseNode = baseNodes[index])){
-
-        if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode) && 
+          
+          if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode) && 
             _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode)))
           {
 
             /*rebuild new one*/
             for(var i = 0; i < attributeVal.length; i++){
-              Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, i);
               TMP_repeatedNode = Process.newPreProcessRepeatNode(TMP_repeatBaseNode, i);
               TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
               Map.pushNodes(TMP_repeatedNode);
@@ -351,25 +350,14 @@ return {
               baseNodes = null,
               repeatStart = 0,
               repeatEnd = 0;
-         
-         
-          /*Kill existing repeat tree*/
-          Map.forEach(modelName, attributeName, function(ctx, tmp_node){
-
-            ctx.removeItem(ctx.index);
-
-            /*only remove visible elements from DOM, don't remove base node from DOM*/
-            if(!_.isNull(tmp_node.node.parentNode) && tmp_node.index > _.UNINDEXED){
-              tmp_node.node.parentNode.removeChild(tmp_node.node);
-              
-            }
-          });
+          /*cache and DOM housekeeping*/
+          Map.destroyRepeatTree(modelName, attributeName);
           
           baseNodes = Map.getRepeatBaseNodes(modelName, attributeName);
           Map.pruneBaseNodes(baseNodes);
+
           for(var z = 0; z < baseNodes.length; z++){
             TMP_repeatBaseNode = baseNodes[z];
-            
             if(baseNodes[z].node.parentNode)
               ctx.target.unshift(TMP_repeatBaseNode);
 
@@ -379,7 +367,6 @@ return {
 
               /*rebuild new one*/
               for(var i = 0; i < attributeVal.length; i++){
-                Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, i);
                 TMP_repeatedNode = Process.newPreProcessRepeatNode(TMP_repeatBaseNode, i);
                 TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
                 Map.pushNodes(TMP_repeatedNode);
@@ -392,6 +379,7 @@ return {
             }
             TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 
           }
+          Map.pruneDeadEmbeds();
           Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built); 
           System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built);
           /*Stop outter loop. We build the updated repeat nodes in one pass*/
