@@ -8,6 +8,7 @@ return {
   hasDeclaredRoutes : false,
   compiledScopes : '',
   ignoreHashChange : false,
-  ignoreKeyUp : false
+  ignoreKeyUp : false,
+  dispatchListeners : false
 };
 });

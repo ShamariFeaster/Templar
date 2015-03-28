@@ -94,7 +94,7 @@ return {
         idvRepeatedProperty = null,
         nonTerminal = '',
         match = null,
-        templateText = TMP_node.node.wholeText,
+        templateText = TMP_node.node.nodeValue,
         annotatedNT = '',
         repeatedTags = null;
     

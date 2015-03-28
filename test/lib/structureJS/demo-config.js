@@ -6,8 +6,6 @@ structureJS.configure(
              'lib/GeoInfo',
              'modules/Data/Type-Category-Map',
              'js/jquery.leanModal.min',
-             'bililite/bililiteRange',
-             'bililite/jquery.sendkeys',
             'templar/Constants', 
             'templar/Util', 
             'classes/ClassTMP_Node',

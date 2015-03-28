@@ -69,7 +69,7 @@ Templar.setDeAuthenticator = function(func){
   Route.setDeAuthenticator(func);
 };
 
-Templar.onLink = function( func){
+Templar.done = function( func){
   System.setSystemListeners(_.SYSTEM_EVENT_TYPES.link_done, func);
 };
 

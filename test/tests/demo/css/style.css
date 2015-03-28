@@ -355,3 +355,7 @@ form#form_pp_pic textarea{
   margin-left : 10px;
   width : 80%;
 }
+
+.no-margin {
+  margin : 0px 0px !important;
+}

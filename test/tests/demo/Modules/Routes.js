@@ -55,8 +55,14 @@ Templar.Route([
     }]
 },
 {
-    route : '#/new-ad-part-2',
+    route : '#/new-ad/2',
     partial : 'partials/Profile/new-ad-part-2.html',
+    target : '#profile-right-col',
+    fallback : '#/new-ad'
+},
+{
+    route : '#/new-ad/3',
+    partial : 'partials/Profile/new-ad-part-3.html',
     target : '#profile-right-col',
     fallback : '#/new-ad'
 }]);

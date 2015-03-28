@@ -37,15 +37,24 @@ return {
     parent.parentNode.insertBefore(child, child.nextSibling);
   },
   
-  cloneAttributes : function(fromNode, toNode){
+  cloneAttributes : function(fromNode, toNode, noClobber){
+    var noClobber = (!_.isDef(noClobber)) ? false : true,
+        toNodeAttrib;
     if(fromNode.hasAttributes()){
       attributes = fromNode.attributes;
       /*search node attributes for non-terminals*/
       for(var i = 0; i < attributes.length; i++){
         if(attributes[i].name == 'data-apl-repeat' || attributes[i].name == 'style')
           continue;
+          
+        if(noClobber == false){
+          toNode.setAttribute(attributes[i].name, attributes[i].value);
+        }else{
+          toNodeAttrib = (_.isNullOrEmpty(toNodeAttrib = toNode.getAttribute(attributes[i].name))) 
+                            ? '' : toNodeAttrib;
+          toNode.setAttribute(attributes[i].name, toNodeAttrib + ' ' + attributes[i].value);
+        }
         
-        toNode.setAttribute(attributes[i].name, attributes[i].value);
       }
 
     }

@@ -4,6 +4,7 @@ var _ = this;
 var Model = require('ModelHeader');
 var Map = require('Map');
 var Interpolate = require('Interpolate');
+var State = require('State');
 
 /************************GENERAL************************************/
 /*Non-clobbering updating of interface using new data. Note that */
@@ -20,6 +21,7 @@ Model.prototype.softset = function(attribName, value){
 Model.prototype.update = function(attribName){
   Interpolate.interpolate(this.modelName, attribName, Map.getAttribute(this.modelName, attribName));
 };
+
 /*public*/
 Model.prototype.listen = function(attributeName, listener){
   if(!Map.isDuplicateListener(this.modelName, attributeName, listener))

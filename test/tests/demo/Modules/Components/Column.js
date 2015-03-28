@@ -8,7 +8,7 @@ Templar.component('column',{
   templateURL : 'Modules/Components/Column.html',
   attributes : {
     colnum : function(self, val){
-    
+      val = (_.isNullOrEmpty(val)) ? 0 : val;
       var endLeft = ((this.colWidth * val)) + (this.parentLeft - self.offsetLeft);
       self.setAttribute('style', 'left : ' + endLeft + 'px;');
     }
@@ -16,7 +16,7 @@ Templar.component('column',{
   onCreate : function(DOM_component){
     var component = this;
     
-    Templar.onLink(function(){
+    Templar.done(function(){
       component.parentWidth = DOM_component.parentNode.offsetWidth;
       component.parentLeft = DOM_component.parentNode.offsetLeft;
       component.colWidth = component.parentWidth / 10;

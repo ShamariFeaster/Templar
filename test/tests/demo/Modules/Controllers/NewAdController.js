@@ -8,38 +8,47 @@ var _ = require('Util'),
     EnvModel = _Templar.getModel('Environment'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     AdFormMdl = _Templar.getModel('AdForm'),
-    _$ = $;   
+    _$ = $
+    NewAd = {part1 : {}, part2 : {}};   
 
-function sortCategories(){
+/*--------- PART 1 -------------------*/
+NewAd.part1.sortCategories = function(){
   AdFormMdl.sort('category');
   AdFormMdl.update('category');
 }
 
-function bindHandlers(){
+NewAd.part1.bindHandlers = function(){
+  var NewAd = this;
   AdFormMdl.listen('adType', function(e){
     AdFormMdl.category = AdTypeMap.Categories[e.value];
-    sortCategories();
+    NewAd.sortCategories();
   });
-  /*
-  AdFormMdl.listen('category', function(e){
-    AdFormMdl.category = AdTypeMap.Categories[e.value];
-    sortCategories();
-  });
-  */
 }
 
-function init(bannerMsg){
+NewAd.part1.init = function(bannerMsg){
   Helper.init(bannerMsg);
-  bindHandlers();
+  this.bindHandlers();
   AdFormMdl.sort('adType');
   AdFormMdl.adType = AdTypeMap.AdTypes;
-  sortCategories();
-
+  this.sortCategories();
 }
 
-_Templar.success("#/new-ad-part-2", function(){
-  init('New Ad');
+_Templar.success("#/new-ad/2", function(){
+  NewAd.part1.init('New Ad');
+});
 
+/*--------- PART 2 -------------------*/
+NewAd.part2.bindHandlers = function(){
+  _.log('PArt 2 Bound!!!!!!!!!!')
+}
+
+NewAd.part2.init = function(bannerMsg){
+  Helper.init(bannerMsg);
+  this.bindHandlers();
+}
+
+_Templar.success("#/new-ad/3", function(){
+  NewAd.part2.init('New Ad');
 });
 
 });

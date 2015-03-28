@@ -12,7 +12,7 @@ return {
 
   dispatchListeners : function(listeners, data){
 
-    if(_.isDef(listeners)){
+    if(_.isDef(listeners) && State.dispatchListeners == true){
       for(var id in listeners){
         if(_.isFunc(listeners[id])){
           listeners[id].call(null, data);
@@ -198,10 +198,52 @@ return {
     var isEmbedded = (!_.isNullOrEmpty(tmp_node.repeatModelName) && !_.isNullOrEmpty(tmp_node.repeatAttribName));
         run = (ifEmbedded) ? (ifEmbedded && isEmbedded) : (!ifEmbedded && !isEmbedded);
     
-    var attributeVal, modelAttribLength, newNodeCnt, newNodeIndex, text, value,
+    var attributeVal = Map.dereferenceAttribute(tmp_node),
+        modelAttribLength, newNodeCnt, newNodeIndex, text, value,
         modelName = tmp_node.modelName,
         attributeName = tmp_node.attribName;
-    if(run && _.isArray(attributeVal = Map.dereferenceAttribute(tmp_node))){
+        
+    (function(TMP_select){
+      var attrib = Map.dereferenceAttribute(TMP_select),
+          select = TMP_select.node;
+          
+      Object.defineProperty(attrib, 'current_selection', {
+        configurable : true,
+        set : function(value){
+          if(value == '')
+            return;
+          var annotations = DOM.getDOMAnnotations(select);
+          this._value_ = value;
+
+          for(var s = 0; s < select.children.length; s++){
+            if(select.children[s].value == value){
+              select.selectedIndex = s;
+              /*We want to reinterpolate the select on change of current_selection. we don't
+                want to fire listeners on this interp due to the fact user is likely setting
+                current_selection from a listener and we want to prevent infinite looping.*/
+              State.dispatchListeners = false;
+              Interpolate.interpolate(annotations.modelName, annotations.attribName);
+              State.dispatchListeners = true;
+              Interpolate.dispatchListeners(
+                Map.getListeners(annotations.modelName, annotations.attribName)
+                , {
+                    type : _.MODEL_EVENT_TYPES.select_change
+                    , value : select.children[s].value
+                    , text : select.children[s].text
+                    , index : select.selectedIndex
+                  }
+              );
+              
+            }
+          }
+        },
+        get : function(){
+          return this._value_;
+        }
+      });
+    })(tmp_node);
+    
+    if(run && _.isArray(attributeVal)){
           
       /*New model data, longer than existing data, add extra nodes*/
       if(attributeVal.length > modelAttribLength){
@@ -223,6 +265,7 @@ return {
         
     }
   },
+  
   interpolate : function(modelName, attributeName, attributeVal, compiledScopes){  
     if(!Map.exists(modelName))
       return;
@@ -282,38 +325,7 @@ return {
             /*This is here & not in preProcess... b/c when attrib is replaced as
             is the case with a cascading select, the preProcessor isn't called again,
             and therefore the setter isn't fired*/
-            (function(select){
-              
-              Object.defineProperty(attributeVal, 'current_selection', {
-                configurable : true,
-                set : function(value){
-                  if(value == '')
-                    return;
-                  var annotations;
-                  this._value_ = value;
-      
-                  for(var s = 0; s < select.children.length; s++){
-                    if(select.children[s].value == value){
-                      select.selectedIndex = s;
-                      annotations = DOM.getDOMAnnotations(select);
-                      Interpolate.dispatchListeners(
-                        Map.getListeners(annotations.modelName, annotations.attribName)
-                        , {
-                            type : _.MODEL_EVENT_TYPES.select_change
-                            , value : select.children[s].value
-                            , text : select.children[s].text
-                            , index : select.selectedIndex
-                          }
-                      );
-                      
-                    }
-                  }
-                },
-                get : function(){
-                  return this._value_;
-                }
-              });
-            })(node.parentNode);
+            
             
             /*New model data, shorter than existing data, kill extra nodes*/
             if(ctx.modelAttribIndex >= attributeVal.length){
@@ -400,9 +412,11 @@ return {
     });
     /*only dispatchListeners() for interps which change node values*/
     if(_.isDef(updateObj.type)){
+    
       if(updateObj.type == _.MODEL_EVENT_TYPES.interp_change){
-        updateObj._attrib_.current_selection = updateObj.value;
+        updateObj._attrib_._value_ = updateObj.value;
       }
+      
       Interpolate.dispatchListeners(listeners, updateObj);
     }
     

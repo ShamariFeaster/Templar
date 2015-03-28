@@ -116,7 +116,7 @@ return {
         parentNode = DOM_Node.parentNode;
         /*option innerText should not be compiled*/
         if(DOM_Node.nodeType == _.TEXT_NODE && (!_.isNull(parentNode) && parentNode.tagName !== 'OPTION') ){
-          text = DOM_Node.wholeText;
+          text = DOM_Node.nodeValue;
 
           tokens = this.getTokens(text);
           
@@ -214,7 +214,7 @@ return {
             
             DOM_component.tmp_component = component;
             /*probably unecessary*/
-            DOM.cloneAttributes(DOM_Node, DOM_component);
+            DOM.cloneAttributes(DOM_Node, DOM_component, true);
             
             
             /*Iniatialization of component attrib values happen in preProcessNodeAttributes(),

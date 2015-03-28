@@ -223,7 +223,8 @@ return {
           resolvedRouteObject.target = (!_.isNullOrEmpty(resolvedRouteObject.target)) ? 
                             resolvedRouteObject.target : 'apl-content';
           NTDirectives = resolvedRouteObject.nonTerminalValues;
-          
+          /*TODO: support advanced derefencing to support a.b.current_selection and the like. Would 
+            require an upgraded setAttribute.*/
           for(var i = 0; i < NTDirectives.length; i++){
             modelParts = NTDirectives[i][0].split(':');
             Map.setAttribute(modelParts[0], modelParts[1], NTDirectives[i][1]);

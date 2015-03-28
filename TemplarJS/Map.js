@@ -295,7 +295,7 @@ return {
       }
       
     }
-    _.log('DEREFERENCED VALUE: ' + returnVal);
+
     return returnVal;
   },
   
