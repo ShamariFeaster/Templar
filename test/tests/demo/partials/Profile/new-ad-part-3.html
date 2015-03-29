@@ -1,7 +1,7 @@
 <row>
 
   <column colnum="0">
-    <input type="checkbox" value="{{AdForm.priceCheckbox}}"/>
+    <input type="checkbox" value="{{AdForm.isItemFree}}"/>
   </column>
   
   <column colnum="1">
@@ -13,7 +13,8 @@
     
     <row class="no-margin">
       <column colnum="0">
-        <input type="text" size="10"/>
+        <input isDisabled="{{AdForm.disablePriceField}}" 
+               type="text" size="10" value="{{AdForm.itemPrice}}"/>
       </column>
     </row>
     

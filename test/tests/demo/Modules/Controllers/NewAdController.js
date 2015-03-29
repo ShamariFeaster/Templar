@@ -39,7 +39,13 @@ _Templar.success("#/new-ad/2", function(){
 
 /*--------- PART 2 -------------------*/
 NewAd.part2.bindHandlers = function(){
-  _.log('PArt 2 Bound!!!!!!!!!!')
+  AdFormMdl.listen('isItemFree', function(e){
+    if(e.checked == true){
+      AdFormMdl.disablePriceField = true;
+    }else{
+      AdFormMdl.disablePriceField = false;
+    }
+  });
 }
 
 NewAd.part2.init = function(bannerMsg){

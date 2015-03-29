@@ -277,7 +277,8 @@ return {
           TMP_checkbox.inheritToken(token);
           DOM.annotateDOMNode(TMP_checkbox.node, token.modelName, token.attribName, token);
           TMP_checkbox.node.setAttribute('name', token.attribName);
-          TMP_checkbox.node.setAttribute('checked', checked);
+          if(checked == true)
+            TMP_checkbox.node.setAttribute('checked', checked);
           DOM.cloneAttributes(DOM_Node, TMP_checkbox.node);
           TMP_checkbox.node.setAttribute('value', value);
           
@@ -420,7 +421,7 @@ return {
         break;
     }
     /*Don't process and cached removed nodes*/
-    if(DOM_Node.parentNode != null)
+    if(document.body.contains(DOM_Node))
       this.preProcessNodeAttributes(DOM_Node, scope);
     return __COMPILER_FLG__;
   }

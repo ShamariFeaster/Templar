@@ -283,7 +283,8 @@ return {
         updateObj = Object.create(null),
         nodeScopeParts = null,
         node = null,
-        tagName = '';
+        tagName = '',
+        attributes = null;
     /*Note that listeners are only fired for attribs that are in the nodeTree (ie, visible in the UI)*/
     Map.forEach(modelName, attributeName, function(ctx, tmp_node){
              
@@ -346,14 +347,23 @@ return {
           updateObj.type = node.tagName.toLowerCase();
           break;
         case 'INPUT':
-          /*array would mean bound to checkbox*/
-          if(!_.isArray(attributeVal) && State.ignoreKeyUp == false){
-            tmp_node.node.value = attributeVal;
-          }
+          attributes = DOM.getDOMAnnotations(tmp_node.node);
+          /*A mismatch here means this tmp_node is in the cache for attribute processing
+            . Such a node shouldn't update the DOM_node value or fire listeners.*/
           
-          updateObj.text = node.value;
-          updateObj.type = node.tagName.toLowerCase();
-          updateObj.target = node;
+          if(attributes.modelName == tmp_node.modelName 
+             && attributes.attribName == tmp_node.attribName){
+             
+             /*array would mean bound to checkbox*/
+            if(!_.isArray(attributeVal = Map.dereferenceAttribute(tmp_node)) && State.ignoreKeyUp == false){
+              node.value = attributeVal;
+            }
+            
+            updateObj.text = node.value;
+            updateObj.type = node.tagName.toLowerCase();
+            updateObj.target = node;
+           }
+          
           break;
         case 'TEXTAREA':
           tmp_node.node.value = attributeVal;

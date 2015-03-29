@@ -9,6 +9,6 @@ return {
   compiledScopes : '',
   ignoreHashChange : false,
   ignoreKeyUp : false,
-  dispatchListeners : false
+  dispatchListeners : true
 };
 });
