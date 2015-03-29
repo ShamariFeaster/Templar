@@ -1,15 +1,21 @@
 <row>
-<label>Title</label>
-</row>
-<row>
-  <input type="text" size="60" value="{{AdForm.title}}">
-</row>
-
-<row>
-<label>Description</label>
-</row>
-<row>
-  <textarea rows="6" cols="61" value="{{AdForm.description}}"></textarea>
+  <column colnum="0">
+    <row>
+      <label>Ad Type</label>
+    </row>
+    <row>
+      <select>{{AdForm.adType}}</select> 
+    </row>
+  </column>
+  
+  <column colnum="2.5">
+    <row>
+      <label>Category</label>
+    </row>
+    <row>
+      <select>{{AdForm.category}}</select>
+    </row>
+  </column>
 </row>
 
 <row>

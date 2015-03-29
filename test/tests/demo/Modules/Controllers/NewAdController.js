@@ -33,7 +33,7 @@ NewAd.part1.init = function(bannerMsg){
   this.sortCategories();
 }
 
-_Templar.success("#/new-ad/2", function(){
+_Templar.success("#/new-ad", function(){
   NewAd.part1.init('New Ad');
 });
 
@@ -42,6 +42,7 @@ NewAd.part2.bindHandlers = function(){
   AdFormMdl.listen('isItemFree', function(e){
     if(e.checked == true){
       AdFormMdl.disablePriceField = true;
+      AdFormMdl.itemPrice = '';
     }else{
       AdFormMdl.disablePriceField = false;
     }

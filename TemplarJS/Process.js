@@ -56,7 +56,11 @@ return {
           node._setAttribute = node.setAttribute;
           node.__customAttribute__ = customAttribute;
           node.setAttribute = function(name, val){
-            this.__customAttribute__.onChange.call(this.__customAttribute__, this, val);
+            /*If we don't check, we end up with onChange being called on every call to the
+            overriden setAttribute(). The side effects are that the user's cust attrib handler
+            will have unexpected behavior.*/
+            if(this.__customAttribute__.name == name)
+              this.__customAttribute__.onChange.call(this.__customAttribute__, this, val);
             this._setAttribute.call(this, name, val);
           };
           /*This is called after the _setAttribute assignment b/c onCreate calls onChange
