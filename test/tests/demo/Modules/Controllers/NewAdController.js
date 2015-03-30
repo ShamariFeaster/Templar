@@ -32,7 +32,11 @@ NewAd.part1.init = function(bannerMsg){
 };
 
 _Templar.success("#/new-ad", function(){
-  NewAd.part1.init('New Ad');
+  NewAd.part1.init('Ad Category');
+});
+
+_Templar.success("#/new-ad/2", function(){
+  Helper.init('Title & Description');
 });
 
 /*--------- PART 3: Details -------------------*/
@@ -46,7 +50,7 @@ NewAd.part2.init = function(bannerMsg){
 /*Sub-routing - this avoids the old hide/show paradigm. Allows for much cleaner
   HTML as well as modularization of complex logic for each partial*/
 _Templar.success("#/new-ad/typeform", function(){
-  NewAd.part2.init('New Ad');
+  NewAd.part2.init(AdFormMdl.adType.current_selection);
   
   switch(AdFormMdl.adType.current_selection){
     case 'For Sale': 

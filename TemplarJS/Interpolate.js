@@ -99,9 +99,10 @@ return {
     return updateObject;
   },
   interpolateSpan : function(tmp_node){
-    var node = tmp_node.node;
+    var node = tmp_node.node,
+        retVal = Map.dereferenceAttribute(tmp_node);
     node.innerText = node.innerHTML = 
-      Map.dereferenceAttribute(tmp_node) || '';
+      (_.isString(retVal)) ? retVal : '';
 
   },
   /*Returns the whole attribute if no limit is defined for this attribute*/

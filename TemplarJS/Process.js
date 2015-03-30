@@ -241,17 +241,18 @@ return {
     return PreProcessedNode;
   },
   
-  preProcessTextInput : function(DOM_Node){
+  preProcessTextInput : function(DOM_Node, eventType){
+    eventType = (_.isDef(eventType)) ? eventType : 'keyup';
     /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
-      DOM_Node.addEventListener('keyup', function(e){
-        var annotations = DOM.getDOMAnnotations(this);
-        Map.setAttribute(annotations.modelName, annotations.attribName, e.target.value);
-        /*a change to an input that is interpolated will redraw the input value pushing the cursor 
-          to the end. This prevents that.*/
-        State.ignoreKeyUp = true; 
-        Interpolate.interpolate(annotations.modelName, annotations.attribName, e.target.value );
-        State.ignoreKeyUp = false;
-      });
+    DOM_Node.addEventListener(eventType, function(e){
+      var annotations = DOM.getDOMAnnotations(this);
+      Map.setAttribute(annotations.modelName, annotations.attribName, e.target.value);
+      /*a change to an input that is interpolated will redraw the input value pushing the cursor 
+        to the end. This prevents that.*/
+      State.ignoreKeyUp = true; 
+      Interpolate.interpolate(annotations.modelName, annotations.attribName, e.target.value );
+      State.ignoreKeyUp = false;
+    });
   },
   
   addCurrentSelectionToCheckbox : function(DOM_Node, attrib){
@@ -384,9 +385,9 @@ return {
               value = (_.isDef(attrib[i].value)) ? attrib[i].value : value;
               description = (_.isDef(attrib[i].description)) ? attrib[i].description : description;
               checked = (_.isDef(attrib[i].checked)) ? attrib[i].checked : checked;
-              checkedStateId = (_.isDef(attrib[i].id)) ? attrib[i].id : i;
             }
             
+            checkedStateId = (_.isDef(attrib[i].id)) ? attrib[i].id : i;
             TMP_checkbox = new TMP_Node(document.createElement('input'),token.model, token.attrib, i) ;
             TMP_checkbox.scope = scope;
             TMP_checkbox.inheritToken(token);
@@ -421,6 +422,10 @@ return {
         break;
       case 'text':
         this.preProcessTextInput(DOM_Node);
+        break;
+      case 'date':
+        this.preProcessTextInput(DOM_Node);
+        this.preProcessTextInput(DOM_Node, 'blur');
         break;
       default:
         this.preProcessTextInput(DOM_Node);

@@ -1,4 +1,4 @@
-
+<!-- LOCATION -->
 <row>
   
   <column colnum="0">
@@ -10,11 +10,11 @@
 <row hideIf="{{AdForm.useMyLocation.checked[0]}}">
   
   <column colnum="0">
-    <select name="state">{{ProfileForm.states}}</select>
+    <select>{{ProfileForm.states}}</select>
   </column>
   
   <column colnum="3">
-    <select name="state">{{ProfileForm.cities}}</select>
+    <select isDisabled="{{AdForm.useCustomCity.checked[0]}}">{{ProfileForm.cities}}</select>
   </column>
   
   <column colnum="6">
@@ -22,17 +22,18 @@
   </column>
 
   <row showIf="{{AdForm.useCustomCity.checked[0]}}">
-    <label>City : </label>
-    <column colnum="0">
-      <input type="text" size="30" value="{{AdForm.customCity}}"/>
+
+      <label>Write Your City Name Here: </label>
+
+    <column colnum="3">
+      <input type="text" size="20" value="{{AdForm.customCity}}"/>
     </column>
     
   </row>
   
 </row>
 
-
-
+<!-- PRICE -->
 <row>
 
   <column colnum="0">
@@ -42,7 +43,7 @@
   <column colnum="3" hideIf="{{AdForm.isItemFree.checked[0]}}">
     <row>
       <column colnum="0">
-        <label>Price</label>
+        <label>Price (dollars)</label>
       </column>
     </row>
     
@@ -55,7 +56,36 @@
   </column>
 
 </row>
-<!--
-<input type="checkbox" value="{{AdForm.isItemFree}}"/>
-<div isVisible="{{AdForm.isItemFree.checked[0]}}">Toggle ME</div>
--->
+
+<!-- LOCATION -->
+<row>
+  <input type="checkbox" value="{{AdForm.shouldExpire}}"/>
+  
+  <column colnum="3" showIf="{{AdForm.shouldExpire.checked[0]}}">
+    <input type="date" value="{{AdForm.expiryDate}}"/>
+  </column>
+</row>
+
+<row>
+
+  <label>Preferred Contact Method(s): </label>
+  
+  <column colnum="3">
+    <input type="checkbox" size="20" value="{{AdForm.contactMethods}}"/>
+  </column>
+
+</row>
+
+<!-- CONTACT -->
+<row showIf="{{AdForm.contactMethods.checked[0]}}" >
+
+  <label>Phone #: </label>
+  
+  <column colnum="3">
+    <input type="text"  size="12" value="{{AdForm.phoneNumber}}"/>
+  </column>
+  
+  <column colnum="6">
+    <input type="checkbox" value="{{AdForm.shouldSavePhoneNumber}}"/>
+  </column>
+</row>

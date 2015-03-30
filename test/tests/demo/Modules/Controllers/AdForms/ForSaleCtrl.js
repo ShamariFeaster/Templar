@@ -10,9 +10,18 @@ var _ = require('Util'),
     AdFormMdl = _Templar.getModel('AdForm'),
     Config = require('Config'),
     _$ = $;
+
+    
+function bindHandlers(){
+
+}
+
+function init(bannerMsg){
+  bindHandlers();
+}
     
 _Templar.success(Config.formsDir + 'for-sale.html', function(){
-
+  init();
 });
     
     

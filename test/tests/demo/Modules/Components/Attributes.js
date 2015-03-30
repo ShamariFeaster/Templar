@@ -10,7 +10,7 @@ Templar.attribute('isDisabled',{
 
 Templar.attribute('showIf',{
   onChange : function(self, val){
-    if(val == false){
+    if(val == false || val == 'false'){
       self.style.visibility = 'hidden';
     }else{
       self.style.visibility = '';
@@ -20,7 +20,7 @@ Templar.attribute('showIf',{
 
 Templar.attribute('hideIf',{
   onChange : function(self, val){
-    if(val == true){
+    if(val == true || val == 'true'){
       self.style.visibility = 'hidden';
     }else{
       self.style.visibility = '';
