@@ -10,7 +10,7 @@ Templar.component('column',{
     colnum : function(self, val){
       val = (_.isNullOrEmpty(val)) ? 0 : val;
       var endLeft = ((this.colWidth * val)) + (this.parentLeft - self.offsetLeft);
-      self.setAttribute('style', 'left : ' + endLeft + 'px;');
+      self.style.left = endLeft + 'px';
     }
   },
   onCreate : function(DOM_component){

@@ -61,7 +61,7 @@ Templar.Route([
     fallback : '#/new-ad'
 },
 {
-    route : '#/new-ad/3',
+    route : '#/new-ad/typeform',
     partial : 'partials/Profile/new-ad-part-3.html',
     target : '#profile-right-col',
     fallback : '#/new-ad'

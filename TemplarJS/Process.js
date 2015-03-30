@@ -43,7 +43,8 @@ return {
         tmp_node = null,
         preProcessedTMPNodes = [],
         customAttribute,
-        origValue;
+        origValue,
+        Interpolate = Circular('Interpolate');
     
     /*Options don't need to be in the node tree due to having NTs in 'value' attribute*/
     if(node.hasAttributes() && node.tagName != 'OPTION'){
@@ -53,16 +54,22 @@ return {
         origValue = attributes[i].value;
         if((customAttribute = Attribute.getAttribute(attributes[i].name)) != null){
           
-          node._setAttribute = node.setAttribute;
-          node.__customAttribute__ = customAttribute;
-          node.setAttribute = function(name, val){
-            /*If we don't check, we end up with onChange being called on every call to the
-            overriden setAttribute(). The side effects are that the user's cust attrib handler
-            will have unexpected behavior.*/
-            if(this.__customAttribute__.name == name)
-              this.__customAttribute__.onChange.call(this.__customAttribute__, this, val);
-            this._setAttribute.call(this, name, val);
-          };
+          if(!_.isDef(node.__customAttributes__)){
+            node._setAttribute = node.setAttribute;
+            node.__customAttributes__ = {};
+            node.setAttribute = function(name, val){
+              /*If we don't check, we end up with onChange being called on every call to the
+              overriden setAttribute(). The side effects are that the user's cust attrib handler
+              will have unexpected behavior.*/
+              for(var caName in this.__customAttributes__){
+                if(this.__customAttributes__[caName].name == name)
+                  this.__customAttributes__[caName].onChange.call(this.__customAttributes__[caName], this, val);
+              }
+              this._setAttribute.call(this, name, val);
+            };
+          }
+          node.__customAttributes__[customAttribute.name] = customAttribute;
+          
           /*This is called after the _setAttribute assignment b/c onCreate calls onChange
             implicitly which may make use of it.*/
           customAttribute.onCreate.call(customAttribute, node);
@@ -246,6 +253,7 @@ return {
         inputType = DOM_Node.getAttribute('type') || '',
         tokens = Circular('Compile').getTokens(DOM_Node.getAttribute('value')),
         token,
+        Interpolate = Circular('Interpolate'),
         __COMPILER_FLG__ = _.COMPILE_ME;
         
     if( tokens.length < 1 )
@@ -281,8 +289,11 @@ return {
           TMP_checkbox.inheritToken(token);
           DOM.annotateDOMNode(TMP_checkbox.node, token.modelName, token.attribName, token);
           TMP_checkbox.node.setAttribute('name', token.attribName);
-          if(checked == true)
+          attrib._value_ = '';
+          if(checked == true){
+            attrib._value_ = value;
             TMP_checkbox.node.setAttribute('checked', checked);
+          }
           DOM.cloneAttributes(DOM_Node, TMP_checkbox.node);
           TMP_checkbox.node.setAttribute('value', value);
           
@@ -326,8 +337,11 @@ return {
                     , value : e.target.value
                   },
                 annotations = DOM.getDOMAnnotations(this);
-          
-            attrib._value_ = e.target.value;
+            /*for checkboxes we should not set current_selection to value if it was unchecked*/
+            attrib._value_ = (selectObj.checked == true) ? e.target.value : false;
+            State.dispatchListeners = false;
+            Interpolate.interpolate(annotations.modelName, annotations.attribName);
+            State.dispatchListeners = true;
             Interpolate.dispatchListeners(
               Map.getListeners(annotations.modelName, annotations.attribName)
               , selectObj

@@ -247,7 +247,8 @@ return {
   
   open : function(routeId){
 
-    if((resolvedRouteObj = this.handleRoute(routeId)) != null && resolvedRouteObj !== _.RESTRICTED){
+    if((resolvedRouteObj = this.handleRoute(routeId)) != null 
+        && resolvedRouteObj !== _.RESTRICTED){
       //State.onloadFileQueue.push(resolvedRouteObj.partial);
 
       DOM.asynFetchRoutes(resolvedRouteObj, function(){
@@ -261,6 +262,14 @@ return {
         window.location.href = href + resolvedRouteObj.route;
       });
      
+    }
+
+  },
+  
+  openPartial : function(routeId, targetId){
+    if(!_.isNullOrEmpty(routeId) && !_.isNullOrEmpty(targetId)){
+      State.onloadFileQueue.push(routeId);
+      DOM.asynGetPartial(routeId, Bootstrap.loadPartialIntoTemplate, targetId);
     }
   },
   

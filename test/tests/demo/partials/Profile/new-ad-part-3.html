@@ -1,27 +1,4 @@
-<row>
-
-  <column colnum="0">
-    <input type="checkbox" value="{{AdForm.isItemFree}}"/>
-  </column>
-  
-  <column colnum="1">
-    <row>
-      <column colnum="0">
-        <label>Price</label>
-      </column>
-    </row>
-    
-    <row class="no-margin">
-      <column colnum="0">
-        <input isDisabled="{{AdForm.disablePriceField}}" 
-               type="text" size="10" value="{{AdForm.itemPrice}}"/>
-      </column>
-    </row>
-    
-  </column>
-
-</row>
-
+<div id="{{AdForm.categoryFormId}}"></div>
 
 <row>
   <a class="flatbtn" href="#/new-ad/2">Back</a>

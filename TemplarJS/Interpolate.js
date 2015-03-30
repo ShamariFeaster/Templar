@@ -54,7 +54,7 @@ return {
           currAttribVal = '',
           elemAttributes = node.attributes,
           component,
-          key,
+          keys,
           tokens;
       
       for(var i = 0; i < elemAttributes.length; i++){
@@ -86,11 +86,12 @@ return {
         will have a single key. This key can be used to tell us which update function to
         run. This sinlge key situation is not the case w/ non-component tmp's as they can
         have multiple keys (aka multiple attributes-per-node that need interpolation)*/
-      if( 
-          (key = Object.keys(tmp_node.symbolMap)).length > 0 
-          && !_.isNullOrEmpty(attribVal = Map.getAttribute(modelName, attributeName))
-        ){
-        node.setAttribute(key[0], attribVal);
+      if( (keys = Object.keys(tmp_node.symbolMap)).length > 0 ){
+        tokens = Circular('Compile').getTokens( tmp_node.symbolMap[keys[0]] );
+        for(var x = 0; x < tokens.length; x++ ){
+          node.setAttribute(keys[0], Map.dereferenceAttribute(tokens[x]));
+        }
+        
       }
 
     }

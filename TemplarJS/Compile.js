@@ -232,7 +232,7 @@ return {
               if(_.isFunc(updateFunc = component.attributes[name])){
                 updateFunc.call(component, this, val);
               }
-              this._setAttribute = origSetAttrib;
+              this._setAttribute = (_.isDef(this._setAttribute)) ? this._setAttribute : origSetAttrib;
               origSetAttrib.call(this,name, val);
             };
             

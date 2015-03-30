@@ -1,7 +1,8 @@
 structureJS.module('Model', function(require){
 
 var AdTypes = require('Type-Category-Map').AdTypes,
-    Categories = require('Type-Category-Map').Categories;
+    Categories = require('Type-Category-Map').Categories,
+    Config = require('Config');
 
 Templar.dataModel('Environment',
 {
@@ -48,9 +49,10 @@ Templar.dataModel('AdForm',
   adType : AdTypes,
   category : Categories[AdTypes[0]],
   uploadedImages : [],
-  isItemFree : [{description : 'Free?', value : -1, checked : false}],
+  isItemFree : [{description : 'Free?', value : false, checked : false}],
   disablePriceField : false,
   itemPrice : '',
+  categoryFormId : Config.categoryFormId,
   ln : '',
   states : structureJS.require('GeoInfo-US').states,
   cities : [],

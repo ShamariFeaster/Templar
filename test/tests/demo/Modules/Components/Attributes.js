@@ -7,3 +7,13 @@ Templar.attribute('isDisabled',{
     }
   }
 });
+
+Templar.attribute('isVisible',{
+  onChange : function(self, val){
+    if(val == 'false'){
+      self.style.display = 'none';
+    }else{
+      self.style.display = '';
+    }
+  }
+});
