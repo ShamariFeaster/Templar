@@ -1,17 +1,18 @@
 structureJS.module('Compile', function(require){
 
-var _ = this;
-var TMP_Node = require('TMP_Node');
-var ControlNode = require('ControlNodeHeader');
-var Map = require('Map');
-var DOM = require('DOM');
-var Interpolate = require('Interpolate');
-var Process = require('Process');
-var State = require('State');
-var Token = require('Token');
-var Circular = structureJS.circular();
+var _ = this,
+    TMP_Node = require('TMP_Node'),
+    ControlNode = require('ControlNodeHeader'),
+    Map = require('Map'),
+    DOM = require('DOM'),
+    Interpolate = require('Interpolate'),
+    Process = require('Process'),
+    State = require('State'),
+    Token = require('Token'),
+    Circular = structureJS.circular();
 
 return {
+
   getTokens : function(input, isNT){
     var modelNameParts, 
         token = new Token(), 
@@ -90,7 +91,6 @@ return {
       State.onloadFileQueue.push(defaultPartialHref);
       DOM.asynGetPartial(defaultPartialHref, Circular('Bootstrap').loadPartialIntoTemplate, null, root );
       _.log('Spawning Thread <' + defaultPartialHref + '> w/ target <' + root.id + '> w/ scope <' + scope + '>');
-      //return scope;
     }
     
     var nodes = root.childNodes,
@@ -108,8 +108,6 @@ return {
         propName = '',
         
         __COMPILER_FLG__ = _.NO_COMPILE_ME;
-        //2 = a.b, 3 = [0], 4 = 0, 5 = propertyName  
-        
 
     for(var i = 0; i < nodes.length; i++){
         DOM_Node = nodes[i];
@@ -141,21 +139,19 @@ return {
               Interpolate.interpolateSpan(tmp_node);
               parentNode.replaceChild(tmp_node.node, splitNode);
               Map.pushNodes(tmp_node);             
-              //log('1Parent Tag Name: ' + parentTagName + ' ' + tokens[x]['fullToken']);
             }
             if(DOM_Node.nodeValue.trim() == tokens[x]['fullToken']){
               tmp_node.node.innerText = DOM_Node.nodeValue;
               Interpolate.interpolateSpan(tmp_node);
               parentNode.replaceChild(tmp_node.node, DOM_Node);
               Map.pushNodes(tmp_node); 
-              //log('2Parent Tag Name: ' + parentTagName + ' ' + tokens[x]['fullToken']);
             }
             DOM_Node = nodes[++i];
             
             if(DOM_Node.nodeType != _.TEXT_NODE)
                 break;
+                
             splitNode = DOM.splitText(DOM_Node, tokens[x]['end']  - prevLength);
-            //splitNode = DOM_Node.splitText(tokens[x]['end']  - prevLength);
             prevLength += DOM_Node.nodeValue.length;
             
             if(splitNode.nodeValue.trim() == tokens[x]['fullToken']){
@@ -163,15 +159,14 @@ return {
               Interpolate.interpolateSpan(tmp_node);
               parentNode.replaceChild(tmp_node.node, splitNode);
               Map.pushNodes( tmp_node); 
-              //log('3Parent Tag Name: ' + parentTagName + ' ' + tokens[x]['fullToken']);
             }
             if(DOM_Node.nodeValue.trim() == tokens[x]['fullToken']){
               tmp_node.node.innerText = DOM_Node.nodeValue;
               Interpolate.interpolateSpan(tmp_node);
               parentNode.replaceChild(tmp_node.node, DOM_Node);
               Map.pushNodes( tmp_node ); 
-              //log('4Parent Tag Name: ' + parentTagName + ' ' + tokens[x]['fullToken']);
             }
+            
             DOM_Node = nodes[++i];
 
             if(DOM_Node.nodeType != _.TEXT_NODE)
@@ -215,14 +210,15 @@ return {
             DOM_component.tmp_component = component;
             /*probably unecessary*/
             DOM.cloneAttributes(DOM_Node, DOM_component, true);
-            
-            
-            /*Iniatialization of component attrib values happen in preProcessNodeAttributes(),
-              which calls Interpolate.updateNodeAttributes() where the magic actually happens.
-              Note: this only preprocesses attributes with NTs as values*/
-            TMP_processed_components = Process.preProcessNodeAttributes(DOM_component, scope);
 
-            var origSetAttrib = DOM_component.setAttribute;
+            TMP_processed_components = Process.preProcessNodeAttributes(DOM_component, scope);
+            
+            if(_.isDef(DOM_component._setAttribute)){
+              DOM_component._setAttributeWrapper = DOM_component.setAttribute;
+            }else{
+              DOM_component._setAttribute = DOM_component.setAttribute;
+            }
+            
             DOM_component.setAttribute = function(name, val){
               var component = this.tmp_component,
                   updateFunc;
@@ -230,10 +226,13 @@ return {
               if(_.isFunc(updateFunc = component.attributes[name])){
                 updateFunc.call(component, this, val);
               }
-              /*origSetAttrib may already be overriden by custom attrib init. We check for this
-                here*/
-              this._setAttribute = (_.isDef(this._setAttribute)) ? this._setAttribute : origSetAttrib;
-              origSetAttrib.call(this,name, val);
+              
+              if(_.isDef(this._setAttributeWrapper)){
+                this._setAttributeWrapper.call(this,name, val);
+              }else{
+                this._setAttribute.call(this,name, val);
+              }
+              
             };
             
             /*Strange lesson here. The iter variable was named 'i'. This 'i' was clobbering
@@ -245,17 +244,7 @@ return {
             
             /*fire onCreate*/
             component.onCreate.call(component, DOM_component);
-            
-            /*I am commenting this our b/c assuming the user wants initialization to happen
-              here is problematic. I could make it configurable but that requires a component
-              option which increases intellectual overhead.
-              
-            for(attrib in component.attributes){
-              if(!_.isNullOrEmpty(attribVal = DOM_Node.getAttribute(attrib))){
-                component.attributes[attrib].call(component, DOM_component, attribVal);
-              }
-            }
-            */
+
             DOM_Node.parentNode.removeChild(DOM_Node);
             DOM_Node = null;
           }

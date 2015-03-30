@@ -51,8 +51,8 @@ return {
           toNode.setAttribute(attributes[i].name, attributes[i].value);
         }else{
           toNodeAttrib = (_.isNullOrEmpty(toNodeAttrib = toNode.getAttribute(attributes[i].name))) 
-                            ? '' : toNodeAttrib;
-          toNode.setAttribute(attributes[i].name, toNodeAttrib + ' ' + attributes[i].value);
+                            ? '' : toNodeAttrib + ' ';
+          toNode.setAttribute(attributes[i].name, toNodeAttrib + attributes[i].value);
         }
         
       }

@@ -1,11 +1,12 @@
 structureJS.module('Process', function(require){
 
-var _ = this;
-var TMP_Node = require('TMP_Node');
-var Map = require('Map');
-var DOM = require('DOM');
-var Attribute = require('Attribute')();
-var Circular = structureJS.circular();
+var _ = this,
+    TMP_Node = require('TMP_Node'),
+    Map = require('Map'),
+    DOM = require('DOM'),
+    Attribute = require('Attribute')(),
+    Circular = structureJS.circular();
+    
 return {
 
   parseModelAttribName : function(qualifiedAttribName){
@@ -281,7 +282,6 @@ return {
   
     (function(select){
       
-          
       Object.defineProperty(attrib, 'current_selection', {
         configurable : true,
         set : function(value){
@@ -397,8 +397,6 @@ return {
             
             DOM.cloneAttributes(DOM_Node, TMP_checkbox.node);
             TMP_checkbox.node.setAttribute('value', value);
-            
-            /*check to see if it's embedded and annotate*/
 
             this.addCurrentSelectionToCheckbox(DOM_Node, attrib);
             
@@ -504,6 +502,5 @@ return {
   }
   
 };
-
 
 });
