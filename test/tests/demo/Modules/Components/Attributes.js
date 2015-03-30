@@ -8,12 +8,22 @@ Templar.attribute('isDisabled',{
   }
 });
 
-Templar.attribute('isVisible',{
+Templar.attribute('showIf',{
   onChange : function(self, val){
-    if(val == 'false'){
-      self.style.display = 'none';
+    if(val == false){
+      self.style.visibility = 'hidden';
     }else{
-      self.style.display = '';
+      self.style.visibility = '';
+    }
+  }
+});
+
+Templar.attribute('hideIf',{
+  onChange : function(self, val){
+    if(val == true){
+      self.style.visibility = 'hidden';
+    }else{
+      self.style.visibility = '';
     }
   }
 });

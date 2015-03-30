@@ -232,7 +232,7 @@ return {
     if(!Map.exists(modelName))
       return;
       
-    _.log('Attemping Interpolation ' + modelName + '.' + attributeName + ' for scopes ' + compiledScopes);
+    //_.log('Attemping Interpolation ' + modelName + '.' + attributeName + ' for scopes ' + compiledScopes);
     var option = null;
         listeners = Map.getListeners(modelName, attributeName),
         Interpolate = this,
@@ -252,7 +252,7 @@ return {
              
       /*On Link() only interp nodes belonging to the linked scope*/
       if(_.isDef(compiledScopes) && !Map.isInScopeList(tmp_node.scope, compiledScopes)){
-        _.log('Not Interpolating '  + modelName + '.' + attributeName + ' for scope <' + tmp_node.scope + '> not in <' + compiledScopes +'>');
+        //_.log('Not Interpolating '  + modelName + '.' + attributeName + ' for scope <' + tmp_node.scope + '> not in <' + compiledScopes +'>');
         return;
       }
         

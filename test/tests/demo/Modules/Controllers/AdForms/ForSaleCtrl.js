@@ -12,14 +12,7 @@ var _ = require('Util'),
     _$ = $;
     
 _Templar.success(Config.formsDir + 'for-sale.html', function(){
-  AdFormMdl.listen('isItemFree', function(e){
-    if(e.checked == true){
-      AdFormMdl.disablePriceField = true;
-      AdFormMdl.itemPrice = '';
-    }else{
-      AdFormMdl.disablePriceField = false;
-    }
-  });
+
 });
     
     

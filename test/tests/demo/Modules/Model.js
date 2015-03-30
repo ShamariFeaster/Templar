@@ -2,7 +2,9 @@ structureJS.module('Model', function(require){
 
 var AdTypes = require('Type-Category-Map').AdTypes,
     Categories = require('Type-Category-Map').Categories,
-    Config = require('Config');
+    Config = require('Config'),
+    States = structureJS.require('GeoInfo-US').states,
+    Cities = structureJS.require('GeoInfo-US').city_map;
 
 Templar.dataModel('Environment',
 {
@@ -28,8 +30,8 @@ Templar.dataModel('ProfileForm',
   uploadStatus : '',
   fn : '',
   ln : '',
-  states : structureJS.require('GeoInfo-US').states,
-  cities : [],
+  states : States,
+  cities : Cities[States[0]],
   age : (function(){
           var range = [];
           for(var i = 18; i < 51; i++){ range.push(i); }
@@ -49,16 +51,14 @@ Templar.dataModel('AdForm',
   adType : AdTypes,
   category : Categories[AdTypes[0]],
   uploadedImages : [],
-  isItemFree : [{description : 'Free (check for yes)?', value : false, checked : false}],
-  useMyLocation : [{description : 'Use My Saved Location? (check for yes)?', value : false, checked : true}],
-  useCustomCity : [{description : 'Other City? (check for yes)?', value : true, checked : false}],
+  isItemFree : [{description : 'Free (check for yes)?' , checked : true}],
+  useMyLocation : [{description : 'Use My Saved Location? (check for yes)?', checked : true}],
+  useCustomCity : [{description : 'Other City? (check for yes)?', checked : false}],
   customCity : '',
   disablePriceField : false,
   itemPrice : '',
   categoryFormId : Config.categoryFormId,
   ln : '',
-  states : structureJS.require('GeoInfo-US').states,
-  cities : [],
   age : (function(){
           var range = [];
           for(var i = 18; i < 51; i++){ range.push(i); }

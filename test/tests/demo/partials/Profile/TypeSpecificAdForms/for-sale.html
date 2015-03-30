@@ -1,3 +1,4 @@
+
 <row>
   
   <column colnum="0">
@@ -6,7 +7,7 @@
   
 </row>
 
-<row isVisible="{{AdForm.useMyLocation.current_selection}}">
+<row hideIf="{{AdForm.useMyLocation.checked[0]}}">
   
   <column colnum="0">
     <select name="state">{{ProfileForm.states}}</select>
@@ -20,7 +21,7 @@
     <input type="checkbox" value="{{AdForm.useCustomCity}}"/>
   </column>
 
-  <row isVisible="{{AdForm.useCustomCity.current_selection}}">
+  <row showIf="{{AdForm.useCustomCity.checked[0]}}">
     <label>City : </label>
     <column colnum="0">
       <input type="text" size="30" value="{{AdForm.customCity}}"/>
@@ -38,7 +39,7 @@
     <input type="checkbox" value="{{AdForm.isItemFree}}"/>
   </column>
   
-  <column colnum="3" isVisible="{{AdForm.isItemFree.current_selection}}">
+  <column colnum="3" hideIf="{{AdForm.isItemFree.checked[0]}}">
     <row>
       <column colnum="0">
         <label>Price</label>
@@ -47,11 +48,14 @@
     
     <row class="no-margin">
       <column colnum="0">
-        <input isDisabled="{{AdForm.disablePriceField}}" 
-               type="text" size="10" value="{{AdForm.itemPrice}}"/>
+        <input type="text" size="10" value="{{AdForm.itemPrice}}"/>
       </column>
     </row>
     
   </column>
 
 </row>
+<!--
+<input type="checkbox" value="{{AdForm.isItemFree}}"/>
+<div isVisible="{{AdForm.isItemFree.checked[0]}}">Toggle ME</div>
+-->

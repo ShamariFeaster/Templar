@@ -323,7 +323,7 @@ return {
   
     node.addEventListener('click',function(e){
       var attrib = Map.dereferenceAttribute(this.token),
-          selectObj = 
+          cbObj = 
             {
               type : _.MODEL_EVENT_TYPES.checkbox_change
               , checked : (e.target.checked === true)
@@ -331,7 +331,8 @@ return {
             },
           annotations = DOM.getDOMAnnotations(this);
       /*for checkboxes we should not set current_selection to value if it was unchecked*/
-      attrib._value_ = (selectObj.checked == true) ? e.target.value : false;
+      attrib._value_ = (cbObj.checked == true) ? e.target.value : false;
+      attrib.checked[this.getAttribute('id')] = cbObj.checked;
       
       State.dispatchListeners = false;
       Interpolate.interpolate(annotations.modelName, annotations.attribName);
@@ -339,7 +340,7 @@ return {
       
       Interpolate.dispatchListeners(
         Map.getListeners(annotations.modelName, annotations.attribName)
-        , selectObj
+        , cbObj
       ); 
     });
   },
@@ -367,11 +368,13 @@ return {
           TMP_checkbox = null,
           value = '',
           description = '',
-          checked = false;
+          checked = false,
+          checkedStateId = '';
 
         attrib = Map.dereferenceAttribute(token);
         if(_.isArray(attrib)){
           attrib._value_ = '';
+          attrib.checked = {};
           
           for(var i = 0; i < attrib.length; i++, checked = false){
           
@@ -381,15 +384,17 @@ return {
               value = (_.isDef(attrib[i].value)) ? attrib[i].value : value;
               description = (_.isDef(attrib[i].description)) ? attrib[i].description : description;
               checked = (_.isDef(attrib[i].checked)) ? attrib[i].checked : checked;
+              checkedStateId = (_.isDef(attrib[i].id)) ? attrib[i].id : i;
             }
             
             TMP_checkbox = new TMP_Node(document.createElement('input'),token.model, token.attrib, i) ;
             TMP_checkbox.scope = scope;
             TMP_checkbox.inheritToken(token);
-            DOM.annotateDOMNode(TMP_checkbox.node, token.modelName, token.attribName, token);
             TMP_checkbox.node.setAttribute('name', token.attribName);
-            
+            TMP_checkbox.node.setAttribute('id', checkedStateId);
+            DOM.annotateDOMNode(TMP_checkbox.node, token.modelName, token.attribName, token);
             /*sets current_selection w/o firing setter.*/
+            attrib.checked[checkedStateId] = checked; 
             if(checked == true){
               attrib._value_ = value;
               TMP_checkbox.node.setAttribute('checked', checked);

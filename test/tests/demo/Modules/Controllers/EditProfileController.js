@@ -47,11 +47,6 @@ function updateProfileHandler(e){
 function bindHandlers(){
   $('#btn-update-profile').click(updateProfileHandler);
   
-  /*Cascade value of state select*/
-  ProfileFormMdl.listen('states', function(e){
-    ProfileFormMdl.cities = GeoInfo['city_map'][e.text];
-  });
-  
 }
 
 function init(bannerMsg){
@@ -59,7 +54,7 @@ function init(bannerMsg){
   EnvModel.error = (ProfileFormMdl.uploadStatus === '0') ? 
                       'Your Profile Picture Upload Failed' : '';
   bindHandlers();
-  ProfileFormMdl.cities = GeoInfo['city_map'][ProfileFormMdl.states.current_selection];
+  //ProfileFormMdl.cities = GeoInfo['city_map'][ProfileFormMdl.states.current_selection];
 }
 
 _Templar.success("#/editProfile", function(){

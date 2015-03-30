@@ -122,6 +122,7 @@ return {
     ctx.modelAttribLength = 0;
     ctx.removeItem = function(i){
       ctx.target.splice(i, 1);
+      /*
       var indexCnt = Object.create(null);
       
       for(var i = 0; i < ctx.target.length; i++ ){
@@ -129,6 +130,7 @@ return {
           indexCnt[ctx.target[i].index] = true;
       }
       ctx.modelAttribLength = Object.keys(indexCnt).length;
+      */
       ctx.index--;
 
     };
@@ -159,19 +161,21 @@ return {
     /*model attribute node tables (index table and interpolatation array)*/
     }else if(!_.isFunc(modelName) && !_.isFunc(attribName) && _.isFunc(mapFunction)){
       var tmp_node = null,
-          indexCnt = Object.create(null);
+          indexCnt = {};
       if( _.isDef(_map[modelName]['nodeTable'][attribName]) ){
         ctx.target = _map[modelName]['nodeTable'][attribName]['nodes'];
-        
-        for(var i = 0; i < ctx.target.length; i++ ){
-          if(ctx.target[i].index > _.UNINDEXED)
-            indexCnt[ctx.target[i].index] = true;
-        }
-        
-        ctx.modelAttribLength = Object.keys(indexCnt).length;
-        
-        for(; ctx.index < ctx.target.length && ctx.stop == false; ctx.index++){
+
+        for(; ctx.index < ctx.target.length && ctx.stop == false; ctx.index++, indexCnt = {}){
           tmp_node = ctx.target[ctx.index];
+          /*Single attrib could be used multiple times. For example, a select may be used twice in 
+            an app. The cache would contain 2 nodes per index and modelAttribLength would be
+            # of options * 2. We should only count nodes that share my scope, meaning */
+          for(var i = 0; i < ctx.target.length; i++ ){
+            if(ctx.target[i].index > _.UNINDEXED && tmp_node.scope == ctx.target[i].scope)
+              indexCnt[ctx.target[i].index] = true;
+          }
+          
+          ctx.modelAttribLength = Object.keys(indexCnt).length;
           ctx.modelName = modelName;
           ctx.modelAtrribName = attribName;
           ctx.modelAttribIndex = tmp_node.index;
@@ -180,8 +184,7 @@ return {
           mapFunction.call(null, ctx, tmp_node);
           
         }
-        
-        
+
       }
     }
 
