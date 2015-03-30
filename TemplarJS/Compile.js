@@ -221,9 +221,7 @@ return {
               which calls Interpolate.updateNodeAttributes() where the magic actually happens.
               Note: this only preprocesses attributes with NTs as values*/
             TMP_processed_components = Process.preProcessNodeAttributes(DOM_component, scope);
-            
-            /*Override setAttribute() so controlling node through Control will
-              work as expected*/
+
             var origSetAttrib = DOM_component.setAttribute;
             DOM_component.setAttribute = function(name, val){
               var component = this.tmp_component,
@@ -232,6 +230,8 @@ return {
               if(_.isFunc(updateFunc = component.attributes[name])){
                 updateFunc.call(component, this, val);
               }
+              /*origSetAttrib may already be overriden by custom attrib init. We check for this
+                here*/
               this._setAttribute = (_.isDef(this._setAttribute)) ? this._setAttribute : origSetAttrib;
               origSetAttrib.call(this,name, val);
             };

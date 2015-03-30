@@ -17,12 +17,7 @@ return {
     return modelNameParts;
   },
 
-  buildNonTerminal : function(modelName, modelAtrribName, propertyName, index){
-    var propertyName = (_.isNullOrEmpty(propertyName)) ? '' : '.' + propertyName;
-    return '{{' + modelName + '.' + modelAtrribName + '[' + index + ']' + propertyName + '}}';
-  },
-
-  _buildNonTerminal : function(Token){
+  buildNonTerminal : function(Token){
     var NT = Token.modelName + '.' + Token.attribName,
       prop,
       queue = (_.isArray(Token.indexQueue)) ? Token.indexQueue.slice(0) : [],
@@ -33,10 +28,7 @@ return {
     }
     return '{{' + NT + unfoldedIndexes + '}}';
   },
-  buildRepeatNonTerminal : function(modelName, modelAtrribName, parentModel, parentAttrib, index){
-    var propertyName = (_.isNullOrEmpty(propertyName)) ? '' : propertyName;
-    return '{{' + modelName + '.' + modelAtrribName + '[' + index + '].zTMPzDOT' + parentModel +'DOT' + parentAttrib + '}}';
-  },
+
   preProcessNodeAttributes : function(node, scope){
     var attributes = null,
         match = null,
@@ -124,7 +116,7 @@ return {
           if(idvRepeatedProperty[0] == '{{}}'){
             TMP_node.indexQueue.push(index);
             TMP_node.node.nodeValue = intraCompilation = 
-                    intraCompilation.replace(idvRepeatedProperty[0], this._buildNonTerminal(TMP_node) );
+                    intraCompilation.replace(idvRepeatedProperty[0], this.buildNonTerminal(TMP_node) );
             TMP_node.indexQueue.pop();
            } 
           
@@ -136,14 +128,14 @@ return {
           if(idvRepeatedProperty[0] == '{{$item}}'){
             TMP_node.node.nodeValue = intraCompilation =
                     intraCompilation.replace(idvRepeatedProperty[0], 
-                    this._buildNonTerminal(TMP_node, index));
+                    this.buildNonTerminal(TMP_node, index));
           }
           /*simple property access*/
           if(idvRepeatedProperty[0] != '{{}}' && idvRepeatedProperty[0] != '{{$index}}'){
             TMP_node.indexQueue.push(index);
             TMP_node.indexQueue.push(idvRepeatedProperty[1]);
             TMP_node.node.nodeValue = intraCompilation =
-                    intraCompilation.replace(idvRepeatedProperty[0], this._buildNonTerminal(TMP_node) );
+                    intraCompilation.replace(idvRepeatedProperty[0], this.buildNonTerminal(TMP_node) );
             TMP_node.indexQueue.pop();
             TMP_node.indexQueue.pop();
           }
@@ -242,10 +234,114 @@ return {
     return hasNonTerminals;
   },
   
-  newPreProcessRepeatNode : function(TMP_baseNode, index){
+  preProcessRepeatNode : function(TMP_baseNode, index){
     var PreProcessedNode = this._cloneBaseNode(TMP_baseNode, index);
     PreProcessedNode.hasNonTerminals = this._traverseRepeatNode(PreProcessedNode.node, index, TMP_baseNode);
     return PreProcessedNode;
+  },
+  
+  preProcessTextInput : function(DOM_Node){
+    /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
+      DOM_Node.addEventListener('keyup', function(e){
+        var annotations = DOM.getDOMAnnotations(this);
+        Map.setAttribute(annotations.modelName, annotations.attribName, e.target.value);
+        /*a change to an input that is interpolated will redraw the input value pushing the cursor 
+          to the end. This prevents that.*/
+        State.ignoreKeyUp = true; 
+        Interpolate.interpolate(annotations.modelName, annotations.attribName, e.target.value );
+        State.ignoreKeyUp = false;
+      });
+  },
+  
+  addCurrentSelectionToCheckbox : function(DOM_Node, attrib){
+    /*Make current_selection assignment update the DOM*/
+    if(!_.isDef(attrib.current_selection)){
+      (function(name){
+        
+        Object.defineProperty(attrib, 'current_selection', {
+          configurable : true,
+          set : function(value){
+            this._value_ = value;
+            var checkboxes = document.querySelectorAll('input[name='+name+']');
+            for(var w = 0; w < checkboxes.length; w++){
+              if(checkboxes[w].value == value){
+                checkboxes[w].checked = true;
+              }
+            }
+          },
+          get : function(){
+            return this._value_;
+          }
+        });
+      })(DOM_Node.attrib);
+    }
+  },
+  
+  addCurrentSelectionToSelect : function(DOM_Node, attrib){
+  
+    (function(select){
+      
+          
+      Object.defineProperty(attrib, 'current_selection', {
+        configurable : true,
+        set : function(value){
+          if(value == '')
+            return;
+          var annotations = DOM.getDOMAnnotations(select);
+          this._value_ = value;
+
+          for(var s = 0; s < select.children.length; s++){
+            if(select.children[s].value == value){
+              select.selectedIndex = s;
+              /*We want to reinterpolate the select on change of current_selection. we don't
+                want to fire listeners on this interp due to the fact user is likely setting
+                current_selection from a listener and we want to prevent infinite looping.*/
+              State.dispatchListeners = false;
+              Interpolate.interpolate(annotations.modelName, annotations.attribName);
+              State.dispatchListeners = true;
+              Interpolate.dispatchListeners(
+                Map.getListeners(annotations.modelName, annotations.attribName)
+                , {
+                    type : _.MODEL_EVENT_TYPES.select_change
+                    , value : select.children[s].value
+                    , text : select.children[s].text
+                    , index : select.selectedIndex
+                  }
+              );
+              
+            }
+          }
+        },
+        get : function(){
+          return this._value_;
+        }
+      });
+    })(DOM_Node);
+  },
+  
+  bindCheckboxListener : function(node){
+  
+    node.addEventListener('click',function(e){
+      var attrib = Map.dereferenceAttribute(this.token),
+          selectObj = 
+            {
+              type : _.MODEL_EVENT_TYPES.checkbox_change
+              , checked : (e.target.checked === true)
+              , value : e.target.value
+            },
+          annotations = DOM.getDOMAnnotations(this);
+      /*for checkboxes we should not set current_selection to value if it was unchecked*/
+      attrib._value_ = (selectObj.checked == true) ? e.target.value : false;
+      
+      State.dispatchListeners = false;
+      Interpolate.interpolate(annotations.modelName, annotations.attribName);
+      State.dispatchListeners = true;
+      
+      Interpolate.dispatchListeners(
+        Map.getListeners(annotations.modelName, annotations.attribName)
+        , selectObj
+      ); 
+    });
   },
   
   preProcessInputNode : function(DOM_Node, scope){
@@ -264,110 +360,73 @@ return {
     DOM.annotateDOMNode(DOM_Node, token.modelName, token.attribName, token);
     
     inputType = inputType.toLowerCase();
-
-    if(inputType == 'checkbox' || inputType == 'radio'){
-      var attrib,
+    switch(inputType){
+      case 'checkbox':
+      case 'radio':
+        var attrib,
           TMP_checkbox = null,
           value = '',
           description = '',
           checked = false;
 
-      attrib = Map.dereferenceAttribute(token);
-      if(_.isArray(attrib)){
-        for(var i = 0; i < attrib.length; i++, checked = false){
-        
-          if(!_.isDef(attrib[i].description) && !_.isDef(attrib[i].value)){
-            value = description = attrib[i];
-          } else {
-            value = (_.isDef(attrib[i].value)) ? attrib[i].value : value;
-            description = (_.isDef(attrib[i].description)) ? attrib[i].description : description;
-            checked = (_.isDef(attrib[i].checked)) ? attrib[i].checked : checked;
-          }
-          
-          TMP_checkbox = new TMP_Node(document.createElement('input'),token.model, token.attrib, i) ;
-          TMP_checkbox.scope = scope;
-          TMP_checkbox.inheritToken(token);
-          DOM.annotateDOMNode(TMP_checkbox.node, token.modelName, token.attribName, token);
-          TMP_checkbox.node.setAttribute('name', token.attribName);
+        attrib = Map.dereferenceAttribute(token);
+        if(_.isArray(attrib)){
           attrib._value_ = '';
-          if(checked == true){
-            attrib._value_ = value;
-            TMP_checkbox.node.setAttribute('checked', checked);
-          }
-          DOM.cloneAttributes(DOM_Node, TMP_checkbox.node);
-          TMP_checkbox.node.setAttribute('value', value);
           
-          /*check to see if it's embedded and annotate*/
+          for(var i = 0; i < attrib.length; i++, checked = false){
+          
+            if(!_.isDef(attrib[i].description) && !_.isDef(attrib[i].value)){
+              value = description = attrib[i];
+            } else {
+              value = (_.isDef(attrib[i].value)) ? attrib[i].value : value;
+              description = (_.isDef(attrib[i].description)) ? attrib[i].description : description;
+              checked = (_.isDef(attrib[i].checked)) ? attrib[i].checked : checked;
+            }
+            
+            TMP_checkbox = new TMP_Node(document.createElement('input'),token.model, token.attrib, i) ;
+            TMP_checkbox.scope = scope;
+            TMP_checkbox.inheritToken(token);
+            DOM.annotateDOMNode(TMP_checkbox.node, token.modelName, token.attribName, token);
+            TMP_checkbox.node.setAttribute('name', token.attribName);
+            
+            /*sets current_selection w/o firing setter.*/
+            if(checked == true){
+              attrib._value_ = value;
+              TMP_checkbox.node.setAttribute('checked', checked);
+            }
+            
+            DOM.cloneAttributes(DOM_Node, TMP_checkbox.node);
+            TMP_checkbox.node.setAttribute('value', value);
+            
+            /*check to see if it's embedded and annotate*/
 
-          /*Make current_selection assignment update the DOM*/
-          if(!_.isDef(attrib.current_selection)){
-            (function(name){
-              
-              Object.defineProperty(attrib, 'current_selection', {
-                configurable : true,
-                set : function(value){
-                  this._value_ = value;
-                  var checkboxes = document.querySelectorAll('input[name='+name+']');
-                  for(var w = 0; w < checkboxes.length; w++){
-                    if(checkboxes[w].value == value){
-                      checkboxes[w].checked = true;
-                    }
-                  }
-                },
-                get : function(){
-                  return this._value_;
-                }
-              });
-            })(DOM_Node.attrib);
+            this.addCurrentSelectionToCheckbox(DOM_Node, attrib);
+            
+            /*Build Description*/
+            DOM_Node.parentNode.insertBefore(TMP_checkbox.node, DOM_Node);
+            DOM_Node.parentNode.insertBefore(document.createTextNode(description), DOM_Node);
+            
+            this.bindCheckboxListener(TMP_checkbox.node);
+            
+            Map.pushNodes(TMP_checkbox);
+            
           }
-          
-          DOM_Node.parentNode.insertBefore(TMP_checkbox.node, DOM_Node);
-          DOM_Node.parentNode.insertBefore(document.createTextNode(description), DOM_Node);
-          /*sets current_selection w/o firing setter.*/
-          if(checked == true){
-            attrib._value_ = value;
-          }
-          
-          TMP_checkbox.node.addEventListener('click',function(e){
-            var attrib = Map.dereferenceAttribute(this.token),
-                selectObj = 
-                  {
-                    type : _.MODEL_EVENT_TYPES.checkbox_change
-                    , checked : (e.target.checked === true)
-                    , value : e.target.value
-                  },
-                annotations = DOM.getDOMAnnotations(this);
-            /*for checkboxes we should not set current_selection to value if it was unchecked*/
-            attrib._value_ = (selectObj.checked == true) ? e.target.value : false;
-            State.dispatchListeners = false;
-            Interpolate.interpolate(annotations.modelName, annotations.attribName);
-            State.dispatchListeners = true;
-            Interpolate.dispatchListeners(
-              Map.getListeners(annotations.modelName, annotations.attribName)
-              , selectObj
-            ); 
-          });
-          Map.pushNodes(TMP_checkbox);
-          
         }
-      }
-      
-      DOM_Node.parentNode.removeChild(DOM_Node);
-      __COMPILER_FLG__ = _.RECOMPILE_ME;
-    }else{
-      /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
-      DOM_Node.addEventListener('keyup', function(e){
-        var annotations = DOM.getDOMAnnotations(this);
-        Map.setAttribute(annotations.modelName, annotations.attribName, e.target.value);
-        /*a change to an input that is interpolated will redraw the input value pushing the cursor 
-          to the end. This prevents that.*/
-        State.ignoreKeyUp = true; 
-        Interpolate.interpolate(annotations.modelName, annotations.attribName, e.target.value );
-        State.ignoreKeyUp = false;
-      });
+        
+        DOM_Node.parentNode.removeChild(DOM_Node);
+        __COMPILER_FLG__ = _.RECOMPILE_ME;
+        break;
+      case 'text':
+        this.preProcessTextInput(DOM_Node);
+        break;
+      default:
+        this.preProcessTextInput(DOM_Node);
+        break;
     }
+
     return __COMPILER_FLG__;
   },
+  
   preProcessNode : function(DOM_Node, scope){
     if(!_.isDef(DOM_Node) || DOM_Node === null )
       return;

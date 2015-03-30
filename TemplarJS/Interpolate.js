@@ -176,7 +176,7 @@ return {
 
             /*rebuild new one*/
             for(var i = 0; i < attributeVal.length; i++){
-              TMP_repeatedNode = Process.newPreProcessRepeatNode(TMP_repeatBaseNode, i);
+              TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
               TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
               Map.pushNodes(TMP_repeatedNode);
               if(TMP_repeatedNode.hasNonTerminals == false)
@@ -192,7 +192,6 @@ return {
       
     }
   
-    
   },
   
   intializeSelect : function(tmp_node, ifEmbedded, modelAttribLength){
@@ -204,48 +203,10 @@ return {
         modelName = tmp_node.modelName,
         attributeName = tmp_node.attribName;
         
-    (function(TMP_select){
-      var attrib = Map.dereferenceAttribute(TMP_select),
-          select = TMP_select.node;
-          
-      Object.defineProperty(attrib, 'current_selection', {
-        configurable : true,
-        set : function(value){
-          if(value == '')
-            return;
-          var annotations = DOM.getDOMAnnotations(select);
-          this._value_ = value;
-
-          for(var s = 0; s < select.children.length; s++){
-            if(select.children[s].value == value){
-              select.selectedIndex = s;
-              /*We want to reinterpolate the select on change of current_selection. we don't
-                want to fire listeners on this interp due to the fact user is likely setting
-                current_selection from a listener and we want to prevent infinite looping.*/
-              State.dispatchListeners = false;
-              Interpolate.interpolate(annotations.modelName, annotations.attribName);
-              State.dispatchListeners = true;
-              Interpolate.dispatchListeners(
-                Map.getListeners(annotations.modelName, annotations.attribName)
-                , {
-                    type : _.MODEL_EVENT_TYPES.select_change
-                    , value : select.children[s].value
-                    , text : select.children[s].text
-                    , index : select.selectedIndex
-                  }
-              );
-              
-            }
-          }
-        },
-        get : function(){
-          return this._value_;
-        }
-      });
-    })(tmp_node);
+    Process.addCurrentSelectionToSelect(tmp_node.node, attributeVal);
     
     if(run && _.isArray(attributeVal)){
-          
+      
       /*New model data, longer than existing data, add extra nodes*/
       if(attributeVal.length > modelAttribLength){
         /*amount of nodes needed*/
@@ -334,10 +295,7 @@ return {
               ctx.removeItem(ctx.index); /*from indexes[key] = []*/
               node.parentNode.removeChild(node);
             }
-            
-            
-          
-            
+
           }
           break;
         
@@ -396,7 +354,7 @@ return {
 
               /*rebuild new one*/
               for(var i = 0; i < attributeVal.length; i++){
-                TMP_repeatedNode = Process.newPreProcessRepeatNode(TMP_repeatBaseNode, i);
+                TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
                 TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
                 Map.pushNodes(TMP_repeatedNode);
                 if(TMP_repeatedNode.hasNonTerminals == false)
