@@ -32,4 +32,84 @@ Model.prototype.unlisten = function(attributeName){
   Map.removeListener(this.modelName, attributeName);
 };
 
+Model.prototype.freeze = function(){
+  var output = '';
+  if(!_.isDef(this.attributes['__meta__']))
+    this.attributes['__meta__'] = {};
+  
+  for(var attribName in this.attributes){
+    var attrib = this.attributes[attribName];
+    if(_.isArray(attrib)){
+      for(var arrProp in attrib){
+      
+        if(attrib.hasOwnProperty(arrProp) && !/^-?[0-9]+$/.test(arrProp)){
+           
+           if(!_.isDef(this.attributes['__meta__'][attribName])){
+            this.attributes['__meta__'][attribName] = {};
+           }
+           
+           this.attributes['__meta__'][attribName][arrProp] = 
+            (_.isString(attrib[arrProp])) ? 
+              attrib[arrProp] :
+              JSON.stringify(attrib[arrProp]);
+        }
+      }
+      
+    }
+  }
+  output = JSON.stringify(this.attributes);
+  delete this.attributes['__meta__'];
+  if(_.isDef(window.sessionStorage)){
+    window.sessionStorage[this.name] = output;
+  }
+  return output;
+};
+
+Model.prototype.thaw = function(jsonString){
+var thawed, thawFailed = false;
+  
+  if(_.isDef(window.sessionStorage) && !_.isDef(jsonString)){
+    jsonString = window.sessionStorage[this.name];
+    window.sessionStorage.removeItem(this.name);
+  }
+  try{
+    thawed = JSON.parse(jsonString);
+  }catch(e){
+    thawFailed = true
+  }
+  
+  if(thawFailed == true){
+    _.log('ERROR: Frozen item was not proper JSON. Thaw failed.');
+    return;
+  }
+  
+  var meta,
+    metaProp,
+    thawedItem;
+  
+  for(var prop in thawed){
+    if(prop != '__meta__')
+      this.attributes[prop] = thawed[prop];
+  }
+  
+  if(_.isDef(meta = thawed['__meta__'])){
+    /*Reinstate meta*/
+    for(var prop in meta){
+      metaProp = meta[prop];
+      for(var item in metaProp){
+        if(_.isDef(this.attributes[prop])){
+          try{
+            thawedItem = JSON.parse(metaProp[item]);
+          }catch(e){
+            thawedItem = metaProp[item];
+          }
+          this.attributes[prop][item] = thawedItem;
+        }
+      }
+      
+    }
+  }
+  
+};
+
 });

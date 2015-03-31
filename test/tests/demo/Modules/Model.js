@@ -12,7 +12,8 @@ Templar.dataModel('Environment',
   banner : '',
   error : '',
   success_msg : '',
-  pic_submission_url : 'server/upload-picture.php'
+  pic_submission_url : 'server/upload-picture.php',
+  ad_pic_submission_url : ''
 });
 
 Templar.dataModel('LoginForm',
@@ -63,16 +64,9 @@ Templar.dataModel('AdForm',
   disablePriceField : false,
   itemPrice : '',
   categoryFormId : Config.categoryFormId,
-  ln : '',
-  age : (function(){
-          var range = [];
-          for(var i = 18; i < 51; i++){ range.push(i); }
-          return range;
-        })(),
-  sex : [
-        {description : 'Male', value : 'm', checked : true}, 
-        {description : 'Female', value : 'f'}, 
-        {description :'Yes Please', value : 'na'}]
+  image_uri : '',
+  image_id : '',
+  image_collections : []
   
 });
             

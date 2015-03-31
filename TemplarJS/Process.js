@@ -345,7 +345,7 @@ return {
       ); 
     });
   },
-  
+ 
   preProcessInputNode : function(DOM_Node, scope){
     var match = null,
         inputType = DOM_Node.getAttribute('type') || '',
@@ -375,7 +375,10 @@ return {
         attrib = Map.dereferenceAttribute(token);
         if(_.isArray(attrib)){
           attrib._value_ = '';
-          attrib.checked = {};
+          
+          if(!_.isDef(attrib.checked)){
+            attrib.checked = {};
+          }
           
           for(var i = 0; i < attrib.length; i++, checked = false){
           
@@ -394,7 +397,12 @@ return {
             TMP_checkbox.node.setAttribute('name', token.attribName);
             TMP_checkbox.node.setAttribute('id', checkedStateId);
             DOM.annotateDOMNode(TMP_checkbox.node, token.modelName, token.attribName, token);
-            /*sets current_selection w/o firing setter.*/
+            
+            /*reinstate CB state.if user (inexplicably) changes 'id' @ runtime, this breaks*/
+            if(_.isDef(attrib.checked[checkedStateId])){
+              checked = attrib.checked[checkedStateId];
+            }
+            
             attrib.checked[checkedStateId] = checked; 
             if(checked == true){
               attrib._value_ = value;

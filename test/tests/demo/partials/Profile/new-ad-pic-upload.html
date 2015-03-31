@@ -1,0 +1,21 @@
+ <form id="" name="" 
+        method="post" enctype="multipart/form-data" 
+        action="{{Environment.ad_pic_submission_url}}"
+        autocomplete="off">
+    <row>
+      <div data-apl-repeat="AdForm.ad_images">
+        <img id="pp_preview" src="{{src}}" >
+      </div> 
+    </row>
+    
+    <row>
+      <label for="profile_pic">Ad Image:</label>
+      <input type="file" name="ad_pic[]" id="ad_pic" tabindex="1">
+      <input type="hidden" name="uid" value="{{UserProfile.uid}}">
+    </row>
+    
+    <row>
+      <label></label>
+      <button type="submit">Upload Image</button>
+    </row>
+</form>

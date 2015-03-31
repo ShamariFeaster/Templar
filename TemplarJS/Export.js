@@ -61,6 +61,7 @@ structureJS.done(function(){
     }
     
   };
+  
   State.compiledScopes += scope + ',';
 
   if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){

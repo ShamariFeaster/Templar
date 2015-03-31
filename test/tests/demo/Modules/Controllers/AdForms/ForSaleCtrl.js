@@ -24,5 +24,8 @@ _Templar.success(Config.formsDir + 'for-sale.html', function(){
   init();
 });
     
+_Templar.success('#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri', function(){
+  _.log('Hello World');
+});
     
 });
