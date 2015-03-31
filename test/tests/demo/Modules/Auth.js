@@ -31,7 +31,7 @@ _Templar.setAuthenticator(function(inputObj){
           cookie['city'] = data.cookie.city;
           cookie['description'] =  data.cookie.description;
           cookie['pp_src'] = data.cookie.pp_src;
-          
+   
           if(_.isDef(inputObj.landingPage)){
             Route.open(inputObj.landingPage);
           }else{

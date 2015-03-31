@@ -3,6 +3,7 @@ structureJS.module('Helper', function(require){
   var _ = require('Util'),
       _Templar = Templar,
       EnvModel = _Templar.getModel('Environment'),
+      UserProfileModel = _Templar.getModel('UserProfile'),
       _$ = $;
       
   return {
@@ -42,6 +43,7 @@ structureJS.module('Helper', function(require){
       EnvModel.banner = banner || '';
       EnvModel.error = errorMsg || '';
       EnvModel.success_msg = successMsg || '';
+      this.loadProfile(UserProfileModel);
     },
     
     setProfileProperty : function(UserProfile, prop, fallBack){

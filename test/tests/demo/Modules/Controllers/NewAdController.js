@@ -7,50 +7,45 @@ var _ = require('Util'),
     _Templar = Templar,
     AdFormMdl = _Templar.getModel('AdForm'),
     Config = require('Config'),
+    Controller = require('Controller'),
+    P1Controller = new Controller(),
+    P2Controller = new Controller(),
     NewAd = {part1 : {}, part2 : {}};   
 
 /*--------- Part 1: Category Select  -------------------*/
-NewAd.part1.sortCategories = function(){
+P1Controller.sortCategories = function(){
   AdFormMdl.sort('category');
   AdFormMdl.update('category');
 };
 
-NewAd.part1.bindHandlers = function(){
-  var NewAd = this;
+P1Controller.bindHandlers = function(){
+  var P1Controller = this;
   
   AdFormMdl.listen('adType', function(e){
     AdFormMdl.category = AdTypeMap.Categories[e.value];
-    NewAd.sortCategories();
+    P1Controller.sortCategories();
   });
 };
 
-NewAd.part1.init = function(bannerMsg){
-  Helper.init(bannerMsg);
-  this.bindHandlers();
+P1Controller.init = function(bannerMsg){
   AdFormMdl.sort('adType');
   AdFormMdl.update('adType');
 };
 
 _Templar.success("#/new-ad", function(){
-  NewAd.part1.init('Ad Category');
+  P1Controller.init('Ad Category');
 });
 
 _Templar.success("#/new-ad/2", function(){
-  Helper.init('Title & Description');
+  P2Controller.init('Title & Description');
 });
 
 /*--------- PART 3: Details -------------------*/
-NewAd.part2.bindHandlers = function(){};
-
-NewAd.part2.init = function(bannerMsg){
-  Helper.init(bannerMsg);
-  this.bindHandlers();
-};
 
 /*Sub-routing - this avoids the old hide/show paradigm. Allows for much cleaner
   HTML as well as modularization of complex logic for each partial*/
 _Templar.success("#/new-ad/typeform", function(){
-  NewAd.part2.init(AdFormMdl.adType.current_selection);
+  P2Controller.init(AdFormMdl.adType.current_selection);
   
   switch(AdFormMdl.adType.current_selection){
     case 'For Sale': 

@@ -78,7 +78,6 @@ structureJS.done(function(){
     }
     
   };
-  
 
   /*The length of _components indicated the # of valid declared components.
     Validity being determined by whether the delcariont obj had a template url*/

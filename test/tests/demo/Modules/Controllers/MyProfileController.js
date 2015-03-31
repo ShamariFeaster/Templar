@@ -6,16 +6,11 @@ var _ = require('Util'),
     _Templar = Templar,
     EnvModel = _Templar.getModel('Environment'),
     UserProfileModel = _Templar.getModel('UserProfile'),
+    Controller = require('Controller')(),
     _$ = $;   /*stop unecessary scope lookup*/
-    
-function bindHandlers(){
-  
-}
 
 _Templar.success("#/profile", function(){
-  Helper.init('My Profile');
-  bindHandlers();
-  Helper.loadProfile(UserProfileModel);
+  Controller.init('My Profile');
 });
 
 });
