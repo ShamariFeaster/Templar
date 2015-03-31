@@ -9,6 +9,7 @@ return {
   compiledScopes : '',
   ignoreHashChange : false,
   ignoreKeyUp : false,
-  dispatchListeners : true
+  dispatchListeners : true,
+  blockBodyCompilation : false
 };
 });

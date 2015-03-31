@@ -16,22 +16,36 @@ var _ = this;
     /******Initialization*******/
 
 function beginBootstrap(scope){
-  var defaultNodeToHide;
-  Compile.compile( document.getElementsByTagName('body')[0], scope ); 
-  Link.bindModel( State.compiledScopes );
+  State.compiledScopes += scope + ',';
+
+  if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){
+    if(!_.isNullOrEmpty(resolvedRouteObj.partial)){
+
+      routeContentNode = document.getElementById(resolvedRouteObj.target);
+      defaultKey = DOM.getDataAttribute(routeContentNode, _.IE_DEFAULT_ATTRIB_KEY);
+      if(!_.isNull(routeContentNode) && !_.isNullOrEmpty(defaultKey)){
+        routeContentNode.setAttribute('data-' + _.IE_DEFAULT_ATTRIB_KEY, '')
+      }
+      
+      DOM.asynFetchRoutes(resolvedRouteObj, function(){
+        _.log('asynFetchRoutes complete for ' + resolvedRouteObj.route);
+      });
+      State.blockBodyCompilation = true;
+    }
+    
+  }
+
+  if(State.blockBodyCompilation == false){
+    Compile.compile( document.getElementsByTagName('body')[0], scope ); 
+    Link.bindModel( State.compiledScopes );
+  }else{
+    _.log('WARNING: Body compilation has been blocked');
+  }
+  
   Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.framework_loaded);
   System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.framework_loaded);
   Bootstrap.bindTargetSetter();
-  
-  var defaultHiddenNodeList = document.querySelectorAll('.apl-default-hidden');
-  if(!_.isNull(defaultHiddenNodeList)){
-    for(var i = 0; i < defaultHiddenNodeList.length; i++){
-      defaultNodeToHide = defaultHiddenNodeList[i];
-      DOM.modifyClasses(defaultNodeToHide,'','apl-default-hidden');
-    }
-  }
-  
-  _.log('Body COMPILATION DONE');
+
 }
     
 structureJS.done(function(){
@@ -43,7 +57,8 @@ structureJS.done(function(){
       resolvedRouteObj = null,
       routeContentNode = null,
       defaultKey = '';
-
+  
+  /*Bind onhashchange listener*/
   window.onhashchange  = function(event) {
     /*Short-circuit if using Route.open()*/
     if(State.ignoreHashChange === true){
@@ -53,7 +68,9 @@ structureJS.done(function(){
     
     var hashValue = '', resolvedRouteObj = null;
     if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){
-      DOM.asynFetchRoutes(resolvedRouteObj);
+      DOM.asynFetchRoutes(resolvedRouteObj, function(){
+        _.log('asynFetchRoutes complete for ' + resolvedRouteObj.route);
+      });
     }else{
       hashValue = DOM.getHashValue(window.location.href);
       State.onloadFileQueue.push(hashValue);
@@ -61,24 +78,6 @@ structureJS.done(function(){
     }
     
   };
-  
-  State.compiledScopes += scope + ',';
-
-  if((resolvedRouteObj = Route.handleRoute(window.location.href)) != null){
-    if(!_.isNullOrEmpty(resolvedRouteObj.partial)){
-
-      routeContentNode = document.getElementById(resolvedRouteObj.target);
-      defaultKey = DOM.getDataAttribute(routeContentNode, _.IE_DEFAULT_ATTRIB_KEY);
-      if(!_.isNull(routeContentNode) && !_.isNullOrEmpty(defaultKey)){
-        routeContentNode.setAttribute('data-' + _.IE_DEFAULT_ATTRIB_KEY, '')
-      }
-      DOM.asynFetchRoutes(resolvedRouteObj);
-      //State.onloadFileQueue.push(resolvedRouteObj.partial);
-      //DOM.asynGetPartial(resolvedRouteObj.partial, Bootstrap.loadPartialIntoTemplate, resolvedRouteObj.target);
-      
-    }
-    
-  }
   
 
   /*The length of _components indicated the # of valid declared components.

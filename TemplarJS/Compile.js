@@ -83,9 +83,11 @@ return {
     if(_.isNull(root) || _.isNull(root.childNodes))
       return scope;
 
-    var defaultPartialHref = root.getAttribute('data-apl-default');
-
-    if(!_.isNullOrEmpty(defaultPartialHref)){
+    var defaultPartialHref = root.getAttribute('data-apl-default'),
+       id = root.getAttribute('id'),
+       shortCircuit = (State.blockBodyCompilation == true && id == 'apl-content');
+    
+    if(!_.isNullOrEmpty(defaultPartialHref) && !shortCircuit){
       root.setAttribute('data-apl-default', '');
       State.compilationThreadCount++;
       State.onloadFileQueue.push(defaultPartialHref);
