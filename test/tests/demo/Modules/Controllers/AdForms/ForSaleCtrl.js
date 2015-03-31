@@ -9,24 +9,22 @@ var _ = require('Util'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     AdFormMdl = _Templar.getModel('AdForm'),
     Config = require('Config'),
+    Controller = require('Controller')(),
     _$ = $;
 
     
-function bindHandlers(){
-
-}
-
-function init(bannerMsg){
-  Helper.init(bannerMsg);
-  bindHandlers();
-}
     
 _Templar.success(Config.formsDir + 'for-sale.html', function(){
-  init('Details');
+  Controller.init('Details');
 });
     
 _Templar.success('#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri', function(){
-  _.log('Hello World');
+  Controller.init('Upload Images');
+  if(AdFormMdl.image_id == -1 && AdFormMdl.image_uri == -1){
+    AdFormMdl.freeze();
+  }else{
+    AdFormMdl.thaw();
+  }
 });
     
 });

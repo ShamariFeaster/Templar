@@ -292,6 +292,32 @@ return {
       }
     }
     return obj;
+  },
+  
+  deferenceNestedRoutes : function(inArr, outArr){
+    var routeName = null,//route1
+        routeObj = '',
+        /*by value b/c we need the partial array for subsequent calls to 
+          DOM.asynFetchRoutes(). We can't consume it so we use the value.*/
+        inArr = inArr.slice(0),
+        isRoute,
+        isString,
+        deferenceNestedRoutes = this.deferenceNestedRoutes;
+    while((routeName = inArr.shift()) != null){
+    
+      if((isString = _.isString(routeName)) && (isRoute = this.isRoute(routeName))){
+        routeObj = this.getRouteObj(routeName);
+        if(_.isArray(routeObj.partial)){
+          deferenceRoutes(routeObj.partial, outArr);
+        }else{
+          outArr.push(routeObj);
+        }
+      }else if(!isString){
+        outArr.push(routeName);
+      }
+      /*noop if routeName was a string but didn't match a route*/
+    }
+    
   }
   
 };

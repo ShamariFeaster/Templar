@@ -202,7 +202,8 @@ return {
     var attributeVal = Map.dereferenceAttribute(tmp_node),
         modelAttribLength, newNodeCnt, newNodeIndex, text, value,
         modelName = tmp_node.modelName,
-        attributeName = tmp_node.attribName;
+        attributeName = tmp_node.attribName,
+        selectedValue = attributeVal._value_;
         
     Process.addCurrentSelectionToSelect(tmp_node.node, attributeVal);
     
@@ -222,10 +223,13 @@ return {
           tmp_option.node.value = ( _.isDef(value = attributeVal[newNodeIndex].value) ) ? value : attributeVal[newNodeIndex];
           tmp_node.node.appendChild(tmp_option.node);
           tmp_option.scope = tmp_node.scope;
+          tmp_node.node.selectedIndex = 
+            (!_.isNullOrEmpty(selectedValue) && tmp_option.node.value == selectedValue) ?
+              q : tmp_node.node.selectedIndex;
           Map.pushNodes(tmp_option);
         }
       }
-        
+      
     }
   },
   

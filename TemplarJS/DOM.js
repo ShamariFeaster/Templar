@@ -87,90 +87,65 @@ return {
     
   },
   
+  fetchNestedRouteFiles : function(routes){
+    var xhr = new XMLHttpRequest(),
+        routeObj = null;
+    
+    if((routeObj = routes.shift()) != null){
+      xhr.onload = Circular('Bootstrap').loadPartialIntoTemplate;
+      xhr.fileName = routeObj.partial;
+      xhr.targetId = routeObj.target;
+      xhr.route = routeObj.route;
+      xhr.fallback = routeObj.fallback || '';
+      xhr.callbackOnComplete = routes.onComplete || function(){},
+      /*We copy the route array b/c the next xhr call will alter the reference
+        and will blow up the length check we use to determine when to call
+        onComplete*/
+      xhr.callbackParam1 = routes.slice(0);
+      /*the context is the previously loaded route. All properties of 'this' are
+      'looking back' at the last route that was loaded.*/
+      xhr.callback = function(){
+        State.onloadFileQueue.push(this.fileName);
+        Circular('DOM').fetchNestedRouteFiles.call(null, this.callbackParam1);
+        if(this.callbackParam1.length == 0){
+          Circular('Bootstrap').fireOnloads();
+          this.callbackOnComplete.call(null);
+        }
+      }
+      
+      xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4){   //if complete
+          if(xhr.status === 404){  //check if "OK" (200)
+            _.log('WARNING(404): FILE "'+xhr.fileName+'" NOT FOUND');
+            if(!_.isNullOrEmpty(xhr.fallback)){
+              _.log('WARNING (404): ATTEMPTING FALLBACK ROUTE "'+xhr.fallback+'".');
+              Circular('Route').open(xhr.fallback);
+            }
+          }
+        } 
+      }
+      if(!_.isNullOrEmpty(xhr.fileName)){
+        xhr.open('get',  xhr.fileName, true);
+        xhr.send();
+      }
+    }
+    
+  },
+  
   asynFetchRoutes : function(routeObj, onComplete){
     var currFile = '',
         routes = [],
         routeName = routeObj.route;
         routes.onComplete = onComplete || function(){};
-    
-    function deferenceRoutes(inArr, outArr){
-      var routeName = null,//route1
-          routeObj = '',
-          /*by value b/c we need the partial array for subsequent calls to 
-            DOM.asynFetchRoutes(). We can't consume it so we use the value.*/
-          inArr = inArr.slice(0),
-          isRoute,
-          isString;
-      while((routeName = inArr.shift()) != null){
-      
-        if((isString = _.isString(routeName)) && (isRoute = Circular('Route').isRoute(routeName))){
-          routeObj = Circular('Route').getRouteObj(routeName);
-          if(_.isArray(routeObj.partial)){
-            deferenceRoutes(routeObj.partial, outArr);
-          }else{
-            outArr.push(routeObj);
-          }
-        }else if(!isString){
-          outArr.push(routeName);
-        }
-        /*noop if routeName was a string but didn't match a route*/
-      }
-      
-    }
-    
-    function getFileContents(routes){
-      var xhr = new XMLHttpRequest(),
-          routeObj = null;
-      
-      if((routeObj = routes.shift()) != null){
-        xhr.onload = Circular('Bootstrap').loadPartialIntoTemplate;
-        xhr.fileName = routeObj.partial;
-        xhr.targetId = routeObj.target;
-        xhr.route = routeObj.route;
-        xhr.fallback = routeObj.fallback || '';
-        xhr.callbackOnComplete = routes.onComplete || function(){},
-        /*We copy the route array b/c the next xhr call will alter the reference
-          and will blow up the length check we use to determine when to call
-          onComplete*/
-        xhr.callbackParam1 = routes.slice(0);
-        /*the context is the previously loaded route. All properties of 'this' are
-        'looking back' at the last route that was loaded.*/
-        xhr.callback = function(){
-          State.onloadFileQueue.push(this.fileName);
-          getFileContents.call(null, this.callbackParam1);
-          if(this.callbackParam1.length == 0){
-            Circular('Bootstrap').fireOnloads();
-            this.callbackOnComplete.call(null);
-          }
-        }
-        
-        xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4){   //if complete
-            if(xhr.status === 404){  //check if "OK" (200)
-              _.log('WARNING(404): FILE "'+xhr.fileName+'" NOT FOUND');
-              if(!_.isNullOrEmpty(xhr.fallback)){
-                _.log('WARNING (404): ATTEMPTING FALLBACK ROUTE "'+xhr.fallback+'".');
-                Circular('Route').open(xhr.fallback);
-              }
-            }
-          } 
-        }
-        if(!_.isNullOrEmpty(xhr.fileName)){
-          xhr.open('get',  xhr.fileName, true);
-          xhr.send();
-        }
-      }
-      
-    }
-    
+
     if(_.isArray(routeObj.partial)){
-      deferenceRoutes(routeObj.partial, routes);
+      Circular('Route').deferenceNestedRoutes(routeObj.partial, routes);
     }else{
       routes.push(routeObj);
     }
     
     State.onloadFileQueue.push(routeName);
-    getFileContents(routes);
+    this.fetchNestedRouteFiles(routes);
   },
   
   /*Solution from: http://stackoverflow.com/questions/7378186/ie9-childnodes-not-updated-after-splittext*/

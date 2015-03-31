@@ -60,7 +60,7 @@ Model.prototype.freeze = function(){
   output = JSON.stringify(this.attributes);
   delete this.attributes['__meta__'];
   if(_.isDef(window.sessionStorage)){
-    window.sessionStorage[this.name] = output;
+    window.sessionStorage[this.modelName] = output;
   }
   return output;
 };
@@ -69,8 +69,8 @@ Model.prototype.thaw = function(jsonString){
 var thawed, thawFailed = false;
   
   if(_.isDef(window.sessionStorage) && !_.isDef(jsonString)){
-    jsonString = window.sessionStorage[this.name];
-    window.sessionStorage.removeItem(this.name);
+    jsonString = window.sessionStorage[this.modelName];
+    window.sessionStorage.removeItem(this.modelName);
   }
   try{
     thawed = JSON.parse(jsonString);
@@ -89,7 +89,7 @@ var thawed, thawFailed = false;
   
   for(var prop in thawed){
     if(prop != '__meta__')
-      this.attributes[prop] = thawed[prop];
+      this[prop] = thawed[prop];
   }
   
   if(_.isDef(meta = thawed['__meta__'])){
@@ -103,6 +103,8 @@ var thawed, thawFailed = false;
           }catch(e){
             thawedItem = metaProp[item];
           }
+          if(item == '_value_')
+            item = 'current_selection';
           this.attributes[prop][item] = thawedItem;
         }
       }

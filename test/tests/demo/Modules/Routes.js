@@ -68,7 +68,11 @@ Templar.Route([
 },
 {
     route : '#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri',
-    partial : 'partials/Profile/new-ad-part-3.html',
-    target : '#profile-right-col',
-    fallback : '#/new-ad'
+    partial : ['#/profile',
+    { 
+      partial : 'partials/Profile/new-ad-pic-upload.html', 
+      target : '#profile-right-col',
+      fallback : '#/new-ad'
+    }]
+    
 }]);
