@@ -24,6 +24,7 @@ structureJS.module('Constants', function(require){
   /*Repeat Regex*/
   _.RX_RPT_M_ATTR = /(\w+\.\w+)(.*)*/g;
   _.RX_RPT_ALL_INX = /((\w+\.\w+)([^}]*)*)/g;
+  _.RX_RPT_SPC_SYM = /\{\{(\$*\w+)*\}\}/g;
   _.TEXT_NODE = 3;
   _.ELEMENT_NODE = 1;
   _.UNINDEXED = -1;

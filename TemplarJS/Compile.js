@@ -13,16 +13,16 @@ var _ = this,
 
 return {
 
-  getTokens : function(input, isNT){
+  getTokens : function(input, isWithoutBraces){
     var modelNameParts, 
         token = new Token(), 
-        match,
-        match2,        
+        match = null,
+        match2 = null,        
         tokens = [],
         pattern1 = _.RX_TOKEN,
         pattern2 = _.RX_ALL_INX;
         
-    if(_.isDef(isNT) && isNT == true){
+    if(_.isDef(isWithoutBraces) && isWithoutBraces == true){
       pattern1 = _.RX_RPT_M_ATTR;
       pattern2 = _.RX_RPT_ALL_INX      
     }
@@ -70,14 +70,16 @@ return {
       tokens.push(token);
       token = new Token();
     }
-
+    
     return tokens;
   },
   
   getRepeatToken : function(input){
     return this.getTokens(input, true);
   },
-  
+  getAllTokens : function(input){
+    return this.getTokens(input).concat(this.getRepeatToken(input));
+  },
   compile : function(root, scope){
   
     if(_.isNull(root) || _.isNull(root.childNodes))

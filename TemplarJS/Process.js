@@ -18,7 +18,7 @@ return {
     return modelNameParts;
   },
 
-  buildNonTerminal : function(Token){
+  buildNT : function(Token){
     var NT = Token.modelName + '.' + Token.attribName,
       prop,
       queue = (_.isArray(Token.indexQueue)) ? Token.indexQueue.slice(0) : [],
@@ -29,15 +29,45 @@ return {
     }
     return '{{' + NT + unfoldedIndexes + '}}';
   },
-
+  
+  buildItemNT : function(tmp_node, index){
+    return tmp_node.modelName + '.' + tmp_node.attribName + '[' + index + ']';
+  },
+  
+  checkForCustomAttribute : function(node, attribName){
+    var customAttribute;
+    if((customAttribute = Attribute.getAttribute(attribName)) != null){
+          
+      if(!_.isDef(node.__customAttributes__)){
+        node._setAttribute = node.setAttribute;
+        node.__customAttributes__ = {};
+        node.setAttribute = function(name, val){
+          /*If we don't check, we end up with onChange being called on every call to the
+          overriden setAttribute(). The side effects are that the user's cust attrib handler
+          will have unexpected behavior.*/
+          for(var caName in this.__customAttributes__){
+            if(this.__customAttributes__[caName].name == name)
+              this.__customAttributes__[caName].onChange.call(this.__customAttributes__[caName], this, val);
+          }
+          this._setAttribute.call(this, name, val);
+        };
+      }
+      node.__customAttributes__[customAttribute.name] = customAttribute;
+      
+      /*This is called after the _setAttribute assignment b/c onCreate calls onChange
+        implicitly which may make use of it.*/
+      customAttribute.onCreate.call(customAttribute, node);
+    }
+  },
+  
   preProcessNodeAttributes : function(node, scope){
     var attributes = null,
         match = null,
         tmp_node = null,
         preProcessedTMPNodes = [],
-        customAttribute,
         origValue,
-        Interpolate = Circular('Interpolate');
+        Interpolate = Circular('Interpolate'),
+        tokens;
     
     /*Options don't need to be in the node tree due to having NTs in 'value' attribute*/
     if(node.hasAttributes() && node.tagName != 'OPTION'){
@@ -45,107 +75,123 @@ return {
       /*search node attributes for non-terminals*/
       for(var i = 0; i < attributes.length; i++){
         origValue = attributes[i].value;
-        if((customAttribute = Attribute.getAttribute(attributes[i].name)) != null){
-          
-          if(!_.isDef(node.__customAttributes__)){
-            node._setAttribute = node.setAttribute;
-            node.__customAttributes__ = {};
-            node.setAttribute = function(name, val){
-              /*If we don't check, we end up with onChange being called on every call to the
-              overriden setAttribute(). The side effects are that the user's cust attrib handler
-              will have unexpected behavior.*/
-              for(var caName in this.__customAttributes__){
-                if(this.__customAttributes__[caName].name == name)
-                  this.__customAttributes__[caName].onChange.call(this.__customAttributes__[caName], this, val);
-              }
-              this._setAttribute.call(this, name, val);
-            };
-          }
-          node.__customAttributes__[customAttribute.name] = customAttribute;
-          
-          /*This is called after the _setAttribute assignment b/c onCreate calls onChange
-            implicitly which may make use of it.*/
-          customAttribute.onCreate.call(customAttribute, node);
-        }
         
-        _.RX_M_ATTR.lastIndex = 0;
-        while( (match = _.RX_M_ATTR.exec(origValue)) != null ){
-          tmp_node = new TMP_Node(node, match[1], match[2]);         
+        this.checkForCustomAttribute(node, attributes[i].name);
+        
+        tokens = Circular('Compile').getAllTokens(origValue);
+        
+        for(var x = 0 ; x < tokens.length; x++){
+          tmp_node = new TMP_Node(node, tokens[x].modelName, tokens[x].attribName);         
+          //tmp_node.inheritToken(token[x]);
           tmp_node.symbolMap[attributes[i].name] = origValue;
           tmp_node.scope = scope;
-
           Map.pushNodes(tmp_node);
           /*This is necessary for repeats as their child nodes aren't added to Interpolation array
             Rather they are recompiled using repeated elements as the base. It makes sense since
             we do interpolation during preprocessing with repeats that we do the same with attributes
             in repeats*/
           Interpolate.updateNodeAttributes(tmp_node, tmp_node.modelName, tmp_node.attribName);
-          /*annotate node with symbolMap and push it onto modelMap */
           preProcessedTMPNodes.push(tmp_node);
         }
-        
+       
       }
 
     }
     
     return preProcessedTMPNodes;
   },
+  _preProcessRepeatAttributes : function(DOM_Node, TMP_baseNode, index){
+    var attributes, 
+        idvRepeatedProperty = null,
+        preProcessedOutput,
+        symbol,
+        hasNonTerminals = false;
+    
+    if(DOM_Node.hasAttributes() && node.tagName != 'OPTION'){
+      attributes = DOM_Node.attributes;
 
+      for(var i = 0; i < attributes.length; i++){
+        preProcessedOutput = attributes[i].value;
+          
+        _.RX_RPT_SPC_SYM.lastIndex = 0;
+        while((idvRepeatedProperty = _.RX_RPT_SPC_SYM.exec(preProcessedOutput)) != null){
+          hasNonTerminals = true;
+          symbol = idvRepeatedProperty[0];
+          if(symbol == '{{}}'){
+            TMP_baseNode.indexQueue.push(index);
+            preProcessedOutput = preProcessedOutput.replace(symbol, this.buildNT(TMP_baseNode) );
+            TMP_baseNode.indexQueue.pop();
+           } 
+          
+          if(symbol == '{{$index}}'){
+            preProcessedOutput = preProcessedOutput.replace(symbol, index);
+          }
+          
+          if(symbol == '{{$item}}'){
+            preProcessedOutput = preProcessedOutput.replace(symbol, this.buildItemNT(TMP_baseNode, index));
+          }
+
+          if(symbol != '{{}}' && symbol != '{{$index}}'){
+            TMP_baseNode.indexQueue.push(index);
+            TMP_baseNode.indexQueue.push(idvRepeatedProperty[1]);
+            preProcessedOutput = preProcessedOutput.replace(symbol, this.buildNT(TMP_baseNode) );
+            TMP_baseNode.indexQueue.pop();
+            TMP_baseNode.indexQueue.pop();
+          }
+
+        }
+        DOM_Node.setAttribute(attributes[i].name, preProcessedOutput);
+      }
+
+    }
+    return hasNonTerminals;
+  },
+  
   _preprocessInPlace : function(TMP_node, index){
     var repeatedProperties = null,
-        uncompiledTemplate = '',
+        nodeValue = '',
         intraCompilation = '',
         idvRepeatedProperty = null,
+        preProcessedOutput;
         nonTerminal = '',
         match = null,
         templateText = TMP_node.node.nodeValue,
         annotatedNT = '',
-        repeatedTags = null;
+        symbol = '';
     
-    if( (repeatedProperties = TMP_node.node.nodeValue.match(/\{\{(\$*\w+)*\}\}/g)) != null){
-      TMP_node.hasNonTerminals = true;
+    TMP_node.hasNonTerminals = true;
+    preProcessedOutput = TMP_node.node.nodeValue;
+    
+    _.RX_RPT_SPC_SYM.lastIndex = 0;
+    while( (idvRepeatedProperty = _.RX_RPT_SPC_SYM.exec(TMP_node.node.nodeValue) ) != null ){
+      /*w/ this symbol our token already has instructions to build our NT.
+        we use the index of the repeated node to index the attrib our NT
+        refers to*/
+      symbol = idvRepeatedProperty[0];
+      if(symbol == '{{}}'){
+        TMP_node.indexQueue.push(index);
+        preProcessedOutput = preProcessedOutput.replace(symbol, this.buildNT(TMP_node) );
+        TMP_node.indexQueue.pop();
+       } 
       
-      uncompiledTemplate = intraCompilation = TMP_node.node.nodeValue;
-      
-      /*Cycle through them*/
-      for(var z = 0; z < repeatedProperties.length; z++){
-        
-        if( (idvRepeatedProperty = /\{\{(\$*\w+)*\}\}/.exec(repeatedProperties[z]) ) ){
-          /*w/ this symbol our token already has instructions to build our NT.
-            we use the index of the repeated node to index the attrib our NT
-            refers to*/
-          if(idvRepeatedProperty[0] == '{{}}'){
-            TMP_node.indexQueue.push(index);
-            TMP_node.node.nodeValue = intraCompilation = 
-                    intraCompilation.replace(idvRepeatedProperty[0], this.buildNonTerminal(TMP_node) );
-            TMP_node.indexQueue.pop();
-           } 
-          
-          if(idvRepeatedProperty[0] == '{{$index}}'){
-            TMP_node.node.nodeValue = intraCompilation =
-                    intraCompilation.replace(idvRepeatedProperty[0], index);
-          }
-          
-          if(idvRepeatedProperty[0] == '{{$item}}'){
-            TMP_node.node.nodeValue = intraCompilation =
-                    intraCompilation.replace(idvRepeatedProperty[0], 
-                    this.buildNonTerminal(TMP_node, index));
-          }
-          /*simple property access*/
-          if(idvRepeatedProperty[0] != '{{}}' && idvRepeatedProperty[0] != '{{$index}}'){
-            TMP_node.indexQueue.push(index);
-            TMP_node.indexQueue.push(idvRepeatedProperty[1]);
-            TMP_node.node.nodeValue = intraCompilation =
-                    intraCompilation.replace(idvRepeatedProperty[0], this.buildNonTerminal(TMP_node) );
-            TMP_node.indexQueue.pop();
-            TMP_node.indexQueue.pop();
-          }
-          
-        }
-
+      if(symbol == '{{$index}}'){
+        preProcessedOutput = preProcessedOutput.replace(symbol, index);
       }
-      intraCompilation = uncompiledTemplate;
+      
+      if(symbol == '{{$item}}'){
+        preProcessedOutput = preProcessedOutput.replace(symbol, this.buildItemNT(TMP_baseNode, index));
+      }
+      /*simple property access*/
+      if(symbol != '{{}}' && symbol != '{{$index}}'){
+        TMP_node.indexQueue.push(index);
+        TMP_node.indexQueue.push(idvRepeatedProperty[1]);
+        preProcessedOutput = preProcessedOutput.replace(symbol, this.buildNT(TMP_node) );
+        TMP_node.indexQueue.pop();
+        TMP_node.indexQueue.pop();
+      }
+      
     }
+    TMP_node.node.nodeValue = preProcessedOutput;
     
     _.RX_M_ATTR_TOK.lastIndex = 0;
     /*test if already been annotated as embed, we don't wantv to double that*/
@@ -197,10 +243,12 @@ return {
     for(var i = 0; i < nodes.length; i++){
       
       if(nodes[i].nodeType == _.ELEMENT_NODE){
-        /*ignore nested repeat nodes*/
+
+        hasNonTerminals |= this._preProcessRepeatAttributes(nodes[i], TMP_baseNode, index);
+        /*traverse node attributes looking for repeat-specific symbols and replacing them w/ NTs.
+            This function would need to take the base node to build the NTs just like _preprocessInPlace()
+            preProcessNodeAttributes() needs to be modified to understand complex references*/
         repeatKey = DOM.getDataAttribute(nodes[i], _.IE_MODEL_REPEAT_KEY);
-        repeatKey = repeatKey.replace('{{$item}}', TMP_baseNode.modelName + '.' + TMP_baseNode.attribName + '[' + index + ']');
-        
         if((tokens = Circular('Compile').getRepeatToken(repeatKey)).length > 0){
           nodes[i].token = tokens[0];
         }
