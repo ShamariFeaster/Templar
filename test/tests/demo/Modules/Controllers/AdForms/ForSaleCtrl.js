@@ -20,14 +20,17 @@ _Templar.success(Config.formsDir + 'for-sale.html', function(){
     
 _Templar.success('#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri', function(){
   Controller.init('Upload Images');
-  if(AdFormMdl.image_id == -1 && AdFormMdl.image_uri == -1){
-    AdFormMdl.freeze();
-    AdFormMdl.update('ad_images');
-  }else{
-    AdFormMdl.thaw();
-    AdFormMdl.ad_images.push(Config.adPicDir + AdFormMdl.image_uri);
+  var newImageUri = AdFormMdl.image_uri,
+      newImageId = AdFormMdl.image_id;
+  
+  AdFormMdl.load();
+  
+  if(newImageId != '-1'){
+    AdFormMdl.ad_images.push(Config.adPicDir + newImageUri);
     AdFormMdl.update('ad_images');
   }
+  
+  AdFormMdl.save();
   
 });
     

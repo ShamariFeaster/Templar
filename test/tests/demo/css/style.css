@@ -301,7 +301,7 @@ p {
 .error {color : red;}
 .success {color : green;}
 
-#pp_preview {width : 80px; height : 80px;}
+.pp_preview {width : 80px; height : 80px;}
 
 form#form_pp_pic label { 
   min-width: 80px;

@@ -32,7 +32,7 @@ Model.prototype.unlisten = function(attributeName){
   Map.removeListener(this.modelName, attributeName);
 };
 
-Model.prototype.freeze = function(){
+Model.prototype.save = function(){
   var output = '';
   if(!_.isDef(this.attributes['__meta__']))
     this.attributes['__meta__'] = {};
@@ -65,7 +65,7 @@ Model.prototype.freeze = function(){
   return output;
 };
 
-Model.prototype.thaw = function(jsonString){
+Model.prototype.load = function(jsonString){
 var thawed, thawFailed = false;
   
   if(_.isDef(window.sessionStorage) && !_.isDef(jsonString)){
