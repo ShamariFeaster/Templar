@@ -73,7 +73,7 @@ return {
           
           for(var x = 0; x < tokens.length; x++ ){
             currAttribVal = Map.dereferenceAttribute(tokens[x]);
-            if(!_.isString(currAttribVal)){
+            if(_.isArray(currAttribVal)){
               currAttribVal = tokens[x].fullToken;
             }
             intermediateValue = uninterpolatedString.replace(tokens[x].fullToken, currAttribVal );

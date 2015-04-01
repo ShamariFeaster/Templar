@@ -3,8 +3,8 @@
         action="{{Environment.ad_pic_submission_url}}"
         autocomplete="off">
     <row>
-      <div data-apl-repeat="AdForm.ad_images">
-        <img id="pp_preview" src="{{src}}" >
+      <div>
+        <img data-apl-repeat="{{AdForm.ad_images}}" id="pp_preview" src="{{src}}" >
       </div> 
     </row>
     

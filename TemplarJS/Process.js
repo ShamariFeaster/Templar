@@ -233,9 +233,8 @@ return {
     return TMP_repeatedNode;
   },
   
-  _traverseRepeatNode : function(node, index, TMP_baseNode){
-    var nodes = node.childNodes,
-        TMP_textNode = null,
+  _traverseRepeatNode : function(nodes, index, TMP_baseNode){
+    var TMP_textNode = null,
         processedNode = null,
         repeatKey = '',
         tokens = null,
@@ -267,7 +266,7 @@ return {
         }
         
         if(nodes[i].hasChildNodes())
-          hasNonTerminals |= this._traverseRepeatNode(nodes[i], index, TMP_baseNode);
+          hasNonTerminals |= this._traverseRepeatNode(nodes[i].childNodes, index, TMP_baseNode);
         else
           continue;
       }
@@ -285,7 +284,13 @@ return {
   
   preProcessRepeatNode : function(TMP_baseNode, index){
     var PreProcessedNode = this._cloneBaseNode(TMP_baseNode, index);
-    PreProcessedNode.hasNonTerminals = this._traverseRepeatNode(PreProcessedNode.node, index, TMP_baseNode);
+    PreProcessedNode.hasNonTerminals = this._traverseRepeatNode([PreProcessedNode.node], index, TMP_baseNode);
+    /* For nodes with no children the compiler will not call preProcessNodeAttributes() so
+        we should check for that and call it ourselves*/
+    if(!PreProcessedNode.node.hasChildNodes()){
+      this.preProcessNode(PreProcessedNode.node, PreProcessedNode.scope);
+      this.preProcessNodeAttributes(PreProcessedNode.node, PreProcessedNode.scope);
+    }
     return PreProcessedNode;
   },
   

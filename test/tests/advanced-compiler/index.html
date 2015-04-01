@@ -7,10 +7,11 @@
 </script></head>
 <body>
 
-<div data-apl-repeat="Environment.complex_repeat" id="repeat">
-  <img src="{{{{$item}}.other_books[0]}}" id="{{{{$item}}.other_books[0]}} - {{$index}} "/>
+<div>
+  <img data-apl-repeat="{{Environment.complex_repeat}}"
+      src="{{{{$item}}.other_books[0]}}" 
+      id="{{{{$item}}.other_books[0]}} - {{$index}} "/>
 </div>
-
 
 <!-- 
 -->

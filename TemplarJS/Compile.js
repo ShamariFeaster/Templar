@@ -78,7 +78,7 @@ return {
     return this.getTokens(input, true);
   },
   getAllTokens : function(input){
-    return this.getTokens(input).concat(this.getRepeatToken(input));
+    return this.getTokens(input);//.concat(this.getRepeatToken(input));
   },
   compile : function(root, scope){
   
