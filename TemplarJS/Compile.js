@@ -188,7 +188,8 @@ return {
               TMP_processed_components = null,
               attribVal,
               templateContent,
-              matches = null;
+              matches = null,
+              repeatKey;
           if(_.isDef(component)
               && !_.isNullOrEmpty(component.templateContent)
               && !_.isNull(DOM_Node.parentNode)){
@@ -204,7 +205,11 @@ return {
               if(!_.isNullOrEmpty(contentNode = DOM_component.getElementsByTagName('CONTENT'))){
                 contentNode = contentNode[0];
                 for(var q = 0; q < DOM_Node.childNodes.length; q++){
-                  DOM_component.insertBefore(DOM_Node.childNodes[q], contentNode);
+                
+                  if(!_.isNull(contentNode.parentNode)){
+                    contentNode.parentNode.insertBefore(DOM_Node.childNodes[q], contentNode);
+                  }
+                  
                   q--;/*Live list, insertBefore() shortents childNodes by 1*/
                 }
                 
@@ -252,13 +257,14 @@ return {
             
             /*fire onCreate*/
             component.onCreate.call(component, DOM_component);
-
+            repeatKey = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY)
             DOM_Node.parentNode.removeChild(DOM_Node);
-            DOM_Node = null;
+            DOM_Node = DOM_component;
+            DOM_Node.setAttribute('data-' + _.IE_MODEL_REPEAT_KEY, repeatKey);
           }
           //log('Recursing on :' + DOM_Node.tagName);
-          var repeatKey = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY),
-              tokens, token;
+          repeatKey = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);
+          var tokens, token;
           if(!_.isNullOrEmpty(repeatKey) && (tokens = this.getRepeatToken(repeatKey)).length > 0){
             DOM.annotateDOMNode(DOM_Node, tokens[0].modelName, tokens[0].attribName, tokens[0] );
           }

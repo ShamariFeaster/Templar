@@ -283,13 +283,17 @@ return {
   },
   
   preProcessRepeatNode : function(TMP_baseNode, index){
-    var PreProcessedNode = this._cloneBaseNode(TMP_baseNode, index);
+    var PreProcessedNode = this._cloneBaseNode(TMP_baseNode, index),
+        Component = TMP_baseNode.node.tmp_component,
+        isComponent = _.isDef(Component);
     PreProcessedNode.hasNonTerminals = this._traverseRepeatNode([PreProcessedNode.node], index, TMP_baseNode);
     /* For nodes with no children the compiler will not call preProcessNodeAttributes() so
         we should check for that and call it ourselves*/
-    if(!PreProcessedNode.node.hasChildNodes()){
+    if(!PreProcessedNode.node.hasChildNodes() || isComponent){
       this.preProcessNode(PreProcessedNode.node, PreProcessedNode.scope);
       this.preProcessNodeAttributes(PreProcessedNode.node, PreProcessedNode.scope);
+      if(isComponent)
+        Component.onCreate.call(Component, PreProcessedNode.node);
     }
     return PreProcessedNode;
   },
