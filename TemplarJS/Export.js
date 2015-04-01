@@ -15,6 +15,13 @@ var _ = this;
 
     /******Initialization*******/
 
+function bootstrapComplete(msg){
+  Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.framework_loaded);
+  System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.framework_loaded);
+  Bootstrap.bindTargetSetter();
+  _.log('Running bootstrap Complete: ' + msg);
+}
+
 function beginBootstrap(scope){
   State.compiledScopes += scope + ',';
 
@@ -29,6 +36,7 @@ function beginBootstrap(scope){
       
       DOM.asynFetchRoutes(resolvedRouteObj, function(){
         _.log('asynFetchRoutes complete for ' + resolvedRouteObj.route);
+        bootstrapComplete('ASYN FETCH ROUTES');
       });
       State.blockBodyCompilation = true;
     }
@@ -38,13 +46,12 @@ function beginBootstrap(scope){
   if(State.blockBodyCompilation == false){
     Compile.compile( document.getElementsByTagName('body')[0], scope ); 
     Link.bindModel( State.compiledScopes );
+    bootstrapComplete('BODY COMPILATION');
   }else{
     _.log('WARNING: Body compilation has been blocked');
   }
   
-  Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.framework_loaded);
-  System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.framework_loaded);
-  Bootstrap.bindTargetSetter();
+  
 
 }
     

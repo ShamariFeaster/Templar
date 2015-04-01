@@ -102,15 +102,19 @@ return {
         and will blow up the length check we use to determine when to call
         onComplete*/
       xhr.callbackParam1 = routes.slice(0);
+      xhr.callbackParam1.onComplete = routes.onComplete;
       /*the context is the previously loaded route. All properties of 'this' are
       'looking back' at the last route that was loaded.*/
       xhr.callback = function(){
         State.onloadFileQueue.push(this.fileName);
-        Circular('DOM').fetchNestedRouteFiles.call(null, this.callbackParam1);
+        
         if(this.callbackParam1.length == 0){
           Circular('Bootstrap').fireOnloads();
           this.callbackOnComplete.call(null);
         }
+        
+        Circular('DOM').fetchNestedRouteFiles.call(null, this.callbackParam1);
+        
       }
       
       xhr.onreadystatechange = function() {

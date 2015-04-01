@@ -207,7 +207,11 @@ return {
                   DOM_component.insertBefore(DOM_Node.childNodes[q], contentNode);
                   q--;/*Live list, insertBefore() shortents childNodes by 1*/
                 }
-                DOM_component.removeChild(contentNode);
+                
+                if(!_.isNull(contentNode.parentNode)){
+                  contentNode.parentNode.removeChild(contentNode);
+                }
+                
               }
             }
             
