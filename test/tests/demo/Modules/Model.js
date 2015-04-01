@@ -13,7 +13,7 @@ Templar.dataModel('Environment',
   error : '',
   success_msg : '',
   pic_submission_url : 'server/upload-picture.php',
-  ad_pic_submission_url : ''
+  ad_pic_submission_url : 'server/upload-ad-picture.php'
 });
 
 Templar.dataModel('LoginForm',
@@ -66,7 +66,7 @@ Templar.dataModel('AdForm',
   categoryFormId : Config.categoryFormId,
   image_uri : '',
   image_id : '',
-  image_collections : []
+  ad_images : []
   
 });
             

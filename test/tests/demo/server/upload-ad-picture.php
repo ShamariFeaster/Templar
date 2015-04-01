@@ -23,7 +23,7 @@ $query = <<<EOD
           INSERT INTO ad_pics 
           (image_uri)
           VALUES
-          ('?');
+          (?);
 EOD;
 
 $stmt = $mysqli->prepare($query);
@@ -39,6 +39,7 @@ if(strlen($response['error']) == 0){
 }
 
 }
+//echo print_r($response);
 
 header('Location: /Templar/test/tests/demo/#/new-ad/4'
         .'/id/'

@@ -24,7 +24,10 @@ _Templar.success('#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri', function(
     AdFormMdl.freeze();
   }else{
     AdFormMdl.thaw();
+    AdFormMdl.ad_images.push(Config.adPicDir + AdFormMdl.image_uri);
+    AdFormMdl.update('ad_images');
   }
+  
 });
     
 });

@@ -7,3 +7,4 @@ media/
 images/
 build/node_modules/
 test/tests/demo/server/profile_pics/
+test/tests/demo/server/ad_pics/

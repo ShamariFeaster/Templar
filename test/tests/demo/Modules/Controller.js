@@ -21,7 +21,7 @@ function Controller(){
       if(_.isFunc(val)){
         this._userInit = function(){
           val.apply(null, arguments);
-          this._init.apply(this, arguments)
+          this._init.apply(this, arguments);
         };
       }
     },
