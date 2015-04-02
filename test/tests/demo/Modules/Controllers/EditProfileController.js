@@ -44,6 +44,7 @@ function updateProfileHandler(e){
       UserProfileModel.description = data.description;
   });
 }
+
 Controller.bindHandlers = function(){
   $('#btn-update-profile').click(updateProfileHandler);
 };

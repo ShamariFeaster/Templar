@@ -8,7 +8,7 @@ var _ = require('Util'),
     GeoInfo = require('GeoInfo-US'),
     _$ = $;   /*stop unecessary scope lookup*/
 
-_Templar.success(function(){
+_Templar.done(function(){
 
 $('#goto-logout').click(function(e){
   EnvModel.error = '';
