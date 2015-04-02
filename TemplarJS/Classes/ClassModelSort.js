@@ -25,7 +25,7 @@ Model.prototype.sort = function(attribName, pageNum){
     chain.target = Map.getPageSlice(Model, attribName, chain.target);
   }
   
-  chain.propName = '';
+  chain.propName = null;
   chain.prevProps = [];
   
   /*in a page sort chain.target is a slice of the full target*/
@@ -99,6 +99,8 @@ Model.prototype.sort = function(attribName, pageNum){
     return chain;
   }
   
+  chain.target.sort(chain.sorter);
+  chain.insertSortedSlice(chain.target, Model, attribName, pageNum);
   return chain;
   
 }

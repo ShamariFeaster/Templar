@@ -12,15 +12,14 @@ return {
 
   dispatchListeners : function(listeners, data){
 
-    if(_.isDef(listeners)){
+    if(_.isDef(listeners) && State.dispatchListeners == true){
       for(var id in listeners){
         if(_.isFunc(listeners[id])){
           listeners[id].call(null, data);
         }
       }
     }
-    
-    
+
   },
   
   dispatchSystemListeners : function(type){
@@ -46,19 +45,17 @@ return {
   },
   
   updateNodeAttributes : function(tmp_node, modelName, attributeName){
-    var updateObject = Object.create(null);
+    var updateObject = {};
     var node = tmp_node.node;
-    if(node.hasAttributes()){
-      var regex = /(\{\{(\w+\.\w+)\}\})/g, 
-      //result array -> [1] = {{a.b}}, [2] = a.b, 4 = index, 5 = prop
-          ntRegex = /(\{\{(\w+\.\w+)(\[(\d+)\])*(?:\.)*(\w+)*?\}\})/g,
-          match = null,
-          text = '',
-          intermediateValue = '',
+    if(node.hasAttributes() && tmp_node.isComponent == false){
+      var intermediateValue = '',
           uninterpolatedString = '',
           elemAttribName = '',
           currAttribVal = '',
-          elemAttributes = node.attributes;
+          elemAttributes = node.attributes,
+          component,
+          keys,
+          tokens;
       
       for(var i = 0; i < elemAttributes.length; i++){
         elemAttribName = elemAttributes[i].name;
@@ -68,14 +65,18 @@ return {
                                   '';
         /*short circuit: is this model attribute's non-terminal in the node attributes string?
           during compilation, any node with a non-terminal is annotated w/ a symbol map*/
-        if(_.isDef( uninterpolatedString ) && ntRegex.test(uninterpolatedString)){
+        if(!_.isNullOrEmpty( uninterpolatedString = tmp_node.symbolMap[elemAttribName]  ) ){
           /*get each non-terminal then, using text replacement, we update the node attribute
             value*/
-          ntRegex.lastIndex = 0;
-          while(  (match = ntRegex.exec(uninterpolatedString)) != null){
-            modelNameParts = Process.parseModelAttribName(match[2]);
-            currAttribVal = Map.getAttribute(modelNameParts[0], modelNameParts[1], match[4], match[5]);
-            intermediateValue = uninterpolatedString.replace(match[1], currAttribVal );
+            
+          tokens = Circular('Compile').getAllTokens( uninterpolatedString );
+          
+          for(var x = 0; x < tokens.length; x++ ){
+            currAttribVal = Map.dereferenceAttribute(tokens[x]);
+            if(_.isArray(currAttribVal)){
+              currAttribVal = tokens[x].fullToken;
+            }
+            intermediateValue = uninterpolatedString.replace(tokens[x].fullToken, currAttribVal );
             uninterpolatedString = intermediateValue;
           }
           
@@ -83,23 +84,30 @@ return {
           updateObject[elemAttribName] = intermediateValue;
         }
       }
+    }else if(tmp_node.isComponent == true){
+      component = Templar._components[tmp_node.componentName];
+      /*Due to the way Process.preProcessNodeAttribute() works a component's symbolMap
+        will have a single key. This key can be used to tell us which update function to
+        run. This sinlge key situation is not the case w/ non-component tmp's as they can
+        have multiple keys (aka multiple attributes-per-node that need interpolation)*/
+      if( (keys = Object.keys(tmp_node.symbolMap)).length > 0 ){
+        tokens = Circular('Compile').getTokens( tmp_node.symbolMap[keys[0]] );
+        for(var x = 0; x < tokens.length; x++ ){
+          node.setAttribute(keys[0], Map.dereferenceAttribute(tokens[x]));
+        }
+        
+      }
+
     }
 
     return updateObject;
   },
-  interpolateSpan : function(tmp_node, attributeVal){
-    var node = tmp_node.node;
-    /*Notice the sequence of the if/else ladder. the first test was last but firefox 33
-      was ignoring the test and running the blcok.*/
-    if(_.isNullOrEmpty(tmp_node.prop) && tmp_node.index >= 0 && _.isDef(attributeVal[tmp_node.index]) && tmp_node.index < attributeVal.length){
-        node.innerText = node.innerHTML = attributeVal[tmp_node.index];
-    }else if(_.isNullOrEmpty(tmp_node.prop) && tmp_node.index == _.UNINDEXED){
-      node.innerText = node.innerHTML = attributeVal;
-    }else if(!_.isNullOrEmpty(tmp_node.prop) && tmp_node.index >= 0 && _.isDef(attributeVal[tmp_node.index]) && tmp_node.index < attributeVal.length){
-      node.innerText = node.innerHTML = attributeVal[tmp_node.index][tmp_node.prop];     
-    } 
-    
-    
+  interpolateSpan : function(tmp_node){
+    var node = tmp_node.node,
+        retVal = Map.dereferenceAttribute(tmp_node);
+    node.innerText = node.innerHTML = 
+      (_.isString(retVal)) ? retVal : '';
+
   },
   /*Returns the whole attribute if no limit is defined for this attribute*/
   getPageSlice : function(Model, attributeName, target){
@@ -111,8 +119,8 @@ return {
     if(_.isDef(Model.limitTable[attributeName])){
       page = Model.limitTable[attributeName].page;
       limit = Model.limitTable[attributeName].limit;
-      length = (((limit * page))  <= target.length) ? 
-               ((limit * page)) : target.length;
+      length = ((limit * page) <= target.length) ? 
+               (limit * page) : target.length;
       start = ( ((page * limit) - limit) < length) ?
               (page * limit) - limit : 0;
       results = target.slice(start, length);
@@ -143,11 +151,97 @@ return {
     return results;
     
   },
+  /*TODO: COMMENT THIS*/
+  interpolateEmbeddedRepeats : function(TMP_node, index){
+    var baseNodes,
+        TMP_repeatBaseNode,
+        attributeVal,
+        modelName,
+        attributeName,
+        parts;
+        
+    for(var modelAttrib in TMP_node.embeddedRepeats){
+      if(TMP_node.embeddedRepeats.hasOwnProperty(modelAttrib)){
+        
+        parts = Process.parseModelAttribName(modelAttrib);
+        modelName = parts[0];
+        attributeName = parts[1];
+        baseNodes = Map.getRepeatBaseNodes(modelName, attributeName);
+        Map.pruneBaseNodes(baseNodes);
+        /*In interpolate() the call to compile() preceeding  the call to this adds a
+          baseNode to this attribs basenode array. The index of which corresponsd to
+          the index of the repeated node. The point of doing it this way is to keep the
+          baseNodes for embedded repeats intact so changes to those attribs can rebuild
+          the embedded repeat(s) in place in their containing repetitions.*/
+        if(!_.isNull(TMP_repeatBaseNode = baseNodes[index])){
+          
+          if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode) && 
+            _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode)))
+          {
+
+            /*rebuild new one*/
+            for(var i = 0; i < attributeVal.length; i++){
+              TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
+              TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
+              Map.pushNodes(TMP_repeatedNode);
+              if(TMP_repeatedNode.hasNonTerminals == false)
+                TMP_repeatedNode.node.innerHTML = attributeVal[i];
+              TMP_repeatBaseNode.node.parentNode.insertBefore(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
+              Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
+            }
+          }
+          TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 
+        }
+        
+      }
+      
+    }
+  
+  },
+  
+  intializeSelect : function(tmp_node, ifEmbedded, modelAttribLength){
+    var isEmbedded = (!_.isNullOrEmpty(tmp_node.repeatModelName) && !_.isNullOrEmpty(tmp_node.repeatAttribName));
+        run = (ifEmbedded) ? (ifEmbedded && isEmbedded) : (!ifEmbedded && !isEmbedded);
+    
+    var attributeVal = Map.dereferenceAttribute(tmp_node),
+        modelAttribLength, newNodeCnt, newNodeIndex, text, value,
+        modelName = tmp_node.modelName,
+        attributeName = tmp_node.attribName,
+        selectedValue = attributeVal._value_;
+        
+    Process.addCurrentSelectionToSelect(tmp_node.node, attributeVal);
+    
+    if(run && _.isArray(attributeVal)){
+      
+      /*New model data, longer than existing data, add extra nodes*/
+      if(attributeVal.length > modelAttribLength){
+        /*amount of nodes needed*/
+        newNodeCnt = attributeVal.length - modelAttribLength;
+        /*where to start the new indexes in the 'indexes' table*/
+        newNodeIndex = attributeVal.length - newNodeCnt;
+
+        for(var q = 0; q < newNodeCnt; q++, newNodeIndex++, modelAttribLength++){
+          var tmp_option = new TMP_Node(document.createElement("option"),modelName, attributeName, newNodeIndex);
+          tmp_option.inheritToken(tmp_node);
+          tmp_option.node.text = ( _.isDef(text = attributeVal[newNodeIndex].text) ) ? text : attributeVal[newNodeIndex];
+          tmp_option.node.value = ( _.isDef(value = attributeVal[newNodeIndex].value) ) ? value : attributeVal[newNodeIndex];
+          tmp_node.node.appendChild(tmp_option.node);
+          tmp_option.scope = tmp_node.scope;
+          tmp_node.node.selectedIndex = 
+            (!_.isNullOrEmpty(selectedValue) && tmp_option.node.value == selectedValue) ?
+              q : tmp_node.node.selectedIndex;
+          Map.pushNodes(tmp_option);
+        }
+      }
+      
+    }
+  },
+  
   interpolate : function(modelName, attributeName, attributeVal, compiledScopes){  
     if(!Map.exists(modelName))
       return;
       
-    _.log('Attemping Interpolation ' + modelName + '.' + attributeName + ' for scopes ' + compiledScopes);
+    //_.log('Attemping Interpolation ' + modelName + '.' + attributeName + ' for scopes ' + compiledScopes);
     var option = null;
         listeners = Map.getListeners(modelName, attributeName),
         Interpolate = this,
@@ -159,52 +253,40 @@ return {
         TMP_repeatBaseNode = null,
         updateObj = Object.create(null),
         nodeScopeParts = null,
+<<<<<<< HEAD
         node = null;
+=======
+        node = null,
+        tagName = '',
+        attributes = null;
+>>>>>>> component
     /*Note that listeners are only fired for attribs that are in the nodeTree (ie, visible in the UI)*/
     Map.forEach(modelName, attributeName, function(ctx, tmp_node){
              
       /*On Link() only interp nodes belonging to the linked scope*/
       if(_.isDef(compiledScopes) && !Map.isInScopeList(tmp_node.scope, compiledScopes)){
-        _.log('Not Interpolating '  + modelName + '.' + attributeName + ' for scope <' + tmp_node.scope + '> not in <' + compiledScopes +'>');
+        //_.log('Not Interpolating '  + modelName + '.' + attributeName + ' for scope <' + tmp_node.scope + '> not in <' + compiledScopes +'>');
         return;
       }
         
       node = tmp_node.node;
-      if(ctx.hasAttributes == true)
+      tagName = (tmp_node.isComponent == true) ? 'COMPONENT' : node.tagName;
+      tagName = (Map.isRepeatedAttribute(modelName, attributeName) == true) ? 'REPEAT' : node.tagName;
+      if(ctx.hasAttributes == true){
         updateObject = Interpolate.updateNodeAttributes(tmp_node, modelName, attributeName);
+      } 
         
         
-      switch(node.tagName){
+      switch(tagName){
         
         case 'SELECT':
-          /*Make sure it's an array*/
-          if(_.isArray(attributeVal)){
-          
-            /*New model data, longer than existing data, add extra nodes*/
-            if(attributeVal.length > ctx.modelAttribLength){
-              /*amount of nodes needed*/
-              var newNodeCnt = attributeVal.length - ctx.modelAttribLength,
-                  /*where to start the new indexes in the 'indexes' table*/
-                  newNodeIndex = attributeVal.length - newNodeCnt;
-              
-              for(var q = 0; q < newNodeCnt; q++, newNodeIndex++, ctx.modelAttribLength++){
-                var tmp_option = new TMP_Node(document.createElement("option"),modelName, attributeName, newNodeIndex);
-                tmp_option.node.text = attributeVal[newNodeIndex].text;
-                tmp_option.node.value = attributeVal[newNodeIndex].value;
-                node.appendChild(tmp_option.node);
-                tmp_option.scope = tmp_node.scope;
-                Map.pushNodes(tmp_option);
-              }
-            }
-            
-          }
-           
+          Interpolate.intializeSelect(tmp_node, false, ctx.modelAttribLength);
           break;
         case 'OPTION':
-          if(_.isArray(attributeVal)){
+          if(_.isArray(attributeVal = Map.dereferenceAttribute(tmp_node))){
             if(attributeVal.length <= ctx.modelAttribLength && ctx.modelAttribIndex < attributeVal.length){
-                node.text = attributeVal[ctx.modelAttribIndex].text;
-                node.value = attributeVal[ctx.modelAttribIndex].value;
+                node.text = ( _.isDef(text = attributeVal[ctx.modelAttribIndex].text) ) ? text : attributeVal[ctx.modelAttribIndex];
+                node.value = ( _.isDef(value = attributeVal[ctx.modelAttribIndex].value) ) ? value : attributeVal[ctx.modelAttribIndex];
                 node.parentNode.selectedIndex = 
                   (_.isDef(attributeVal[ctx.modelAttribIndex].selected) && attributeVal[ctx.modelAttribIndex].selected == true) ? 
                     ctx.modelAttribIndex : node.parentNode.selectedIndex;
@@ -214,79 +296,122 @@ return {
             updateObj.text = node.parentNode.options[node.parentNode.selectedIndex].text;
             updateObj.type = _.MODEL_EVENT_TYPES.interp_change;
             updateObj.index = node.parentNode.selectedIndex;
+            updateObj._attrib_ = attributeVal;
+            
+            /*This is here & not in preProcess... b/c when attrib is replaced as
+            is the case with a cascading select, the preProcessor isn't called again,
+            and therefore the setter isn't fired*/
+            
+            
             /*New model data, shorter than existing data, kill extra nodes*/
             if(ctx.modelAttribIndex >= attributeVal.length){
               ctx.removeItem(ctx.index); /*from indexes[key] = []*/
               node.parentNode.removeChild(node);
             }
-            
+
           }
           break;
         
         case 'SPAN':
 
-          Interpolate.interpolateSpan(tmp_node, attributeVal);
+          Interpolate.interpolateSpan(tmp_node);
           updateObj.text = node.innerText;
           updateObj.type = node.tagName.toLowerCase();
           break;
         case 'INPUT':
+          attributes = DOM.getDOMAnnotations(tmp_node.node);
+          /*A mismatch here means this tmp_node is in the cache for attribute processing
+            . Such a node shouldn't update the DOM_node value or fire listeners.*/
+          
+          if(attributes.modelName == tmp_node.modelName 
+             && attributes.attribName == tmp_node.attribName){
+             
+             /*array would mean bound to checkbox*/
+            if(!_.isArray(attributeVal = Map.dereferenceAttribute(tmp_node)) && State.ignoreKeyUp == false){
+              node.value = attributeVal;
+            }
+            
+            updateObj.text = node.value;
+            updateObj.type = node.tagName.toLowerCase();
+            updateObj.target = node;
+           }
+          
+          break;
+        case 'TEXTAREA':
+          tmp_node.node.value = attributeVal;
           updateObj.text = node.value;
           updateObj.type = node.tagName.toLowerCase();
+          updateObj.target = node;
           break;
-        default:
+        case 'REPEAT':
           var TMP_newRepeatNode = null,
               TMP_repeatedNode = null,
               outerCtx = ctx,
               baseNodes = null,
               repeatStart = 0,
               repeatEnd = 0;
-         
-         
-          /*Kill existing repeat tree*/
-          Map.forEach(modelName, attributeName, function(ctx, tmp_node){
-            /*un-track all nodes*/
-            Map.pruneControlNodesByIndex(tmp_node, modelName, attributeName, tmp_node.index);
-            ctx.removeItem(ctx.index);
-            /*only remove visible elements from DOM, don't remove base node from DOM*/
-            if(!_.isNull(tmp_node.node.parentNode) && tmp_node.index > _.UNINDEXED)
-              tmp_node.node.parentNode.removeChild(tmp_node.node);
-          });
-         
+          /*cache and DOM housekeeping*/
+          Map.destroyRepeatTree(modelName, attributeName);
+          
           baseNodes = Map.getRepeatBaseNodes(modelName, attributeName);
+          Map.pruneBaseNodes(baseNodes);
+
           for(var z = 0; z < baseNodes.length; z++){
             TMP_repeatBaseNode = baseNodes[z];
+<<<<<<< HEAD
             /*If base node has no parent then it is not in the current DOM.
             NOTE (11/24/14): if we use 'apl-default-hidden' class on BODY repeats will not interp.
             I've never liked the default hidden class anyways so for now I'm not going to
             change logic here to support the continued use of the default hidden class.*/
             if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode)){
+=======
+            if(baseNodes[z].node.parentNode)
+              ctx.target.unshift(TMP_repeatBaseNode);
+
+            if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode) && 
+              _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode)))
+            {
+
+>>>>>>> component
               /*rebuild new one*/
               for(var i = 0; i < attributeVal.length; i++){
-                Map.pruneEmbeddedNodes(TMP_repeatBaseNode, modelName, attributeName, i);
                 TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
                 TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
                 Map.pushNodes(TMP_repeatedNode);
                 if(TMP_repeatedNode.hasNonTerminals == false)
                   TMP_repeatedNode.node.innerHTML = attributeVal[i];
-                DOM.appendTo(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
+                TMP_repeatBaseNode.node.parentNode.insertBefore(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
                 Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
+                Interpolate.interpolateEmbeddedRepeats(TMP_repeatBaseNode, i);
               }
             }
             TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 
           }
+          Map.pruneDeadEmbeds();
           Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built); 
           System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built);
           /*Stop outter loop. We build the updated repeat nodes in one pass*/
           outerCtx.stop = true;
           updateObj.type = 'repeat';
           updateObj.value = attributeVal;
+<<<<<<< HEAD
+=======
+          break;
+        default:
+>>>>>>> component
           break;
         }
       
     });
     /*only dispatchListeners() for interps which change node values*/
-    if(_.isDef(updateObj.type))
+    if(_.isDef(updateObj.type)){
+    
+      if(updateObj.type == _.MODEL_EVENT_TYPES.interp_change){
+        updateObj._attrib_._value_ = updateObj.value;
+      }
+      
       Interpolate.dispatchListeners(listeners, updateObj);
+    }
     
   }
   

@@ -1,6 +1,7 @@
 structureJS.module('Map', function(require){
 
 var _ = this;
+var DOM = require('DOM');
 var _repeatTable = Object.create(null);/*modelName : { attribName : node}*/
 var _controlTable = Object.create(null);/*ctrlId : [ctrl1, ctrl2,......]*/
 var _map = Object.create(null);/*no prototype chain, better iteration performance >= IE9*/
@@ -23,6 +24,26 @@ return {
       baseNodes = _repeatTable[modelName][attribName];
     
     return baseNodes;
+<<<<<<< HEAD
+=======
+  },
+  /*This is designed for re-interps. We want to get dead base nodes out of the cache.
+    This is not only for performance reasons. Interpolate.interpolateEmbeddedRepeats()
+    uses the current index of the parent's repeat to pull the proper base node out
+    the cache. If dead nodes remain, this indexing is thrown out of alignment.*/
+  pruneBaseNodes : function(baseNodes){
+    for(var i = 0; i < baseNodes.length; i++){
+      /*visibility is a bad check*/
+      if(_.isNull(baseNodes[i].node.parentNode) || !document.body.contains(baseNodes[i].node)){
+        baseNodes.splice(i, 1);
+        i--;
+      }
+    }
+  },
+  
+  isRepeatedAttribute : function(modelName, attribName){
+    return (this.getRepeatBaseNodes(modelName, attribName).length > 0);
+>>>>>>> component
   },
   
   addRepeatBaseNode : function(tmp_node){
@@ -35,13 +56,7 @@ return {
     }
       _repeatTable[tmp_node.modelName][tmp_node.attribName].push(tmp_node);
   },
-  
-  addControlNode : function(ControlNode){
-    if(!_.isDef(_controlTable[ControlNode.id]))
-      _controlTable[ControlNode.id] = [];
-    
-    _controlTable[ControlNode.id].push(ControlNode);
-  },
+
   
   exists : function(modelName){
     return (_.isDef(_map[modelName]));
@@ -92,37 +107,6 @@ return {
     return inScope;
   },
 
-  Control : {
-    forEach : function(mapFunction){
-      var ControlNode = null;
-      if(!_.isFunc(mapFunction))
-        return;
-        
-      var ctrlIdArray = null,
-          ctx = Object.create(null);
-          ctx.index = 0; 
-          ctx.id = ''; 
-          ctx.length = 0; 
-          ctx.stop = false; 
-          ctx.target = [];
-          ctx.removeItem = function(i){
-            this.target.splice(i, 1);
-            this.length = this.target.length;
-          };
-                
-      for(var id in _controlTable){
-        ctrlIdArray = ctx.target = _controlTable[id];
-        ctx.length = ctrlIdArray.length;
-        ctx.id = id;
-        for(var i = 0; i < ctrlIdArray.length; i++){
-          ctx.index = i;
-          ControlNode = ctrlIdArray[i];
-          mapFunction.call(null, ctx, ControlNode);
-          if(ctx.stop == true ) break;
-        }
-      }
-    }
-  },
   forEach : function(modelName, attribName, mapFunction){
     //__modelMap[modelName] = {modelObj : modelObj, nodes : Object.create(null), api : api, listeners : Object.create(null)};
     var target = null;
@@ -141,6 +125,7 @@ return {
     ctx.modelAttribLength = 0;
     ctx.removeItem = function(i){
       ctx.target.splice(i, 1);
+      /*
       var indexCnt = Object.create(null);
       
       for(var i = 0; i < ctx.target.length; i++ ){
@@ -148,6 +133,7 @@ return {
           indexCnt[ctx.target[i].index] = true;
       }
       ctx.modelAttribLength = Object.keys(indexCnt).length;
+      */
       ctx.index--;
 
     };
@@ -178,19 +164,21 @@ return {
     /*model attribute node tables (index table and interpolatation array)*/
     }else if(!_.isFunc(modelName) && !_.isFunc(attribName) && _.isFunc(mapFunction)){
       var tmp_node = null,
-          indexCnt = Object.create(null);
+          indexCnt = {};
       if( _.isDef(_map[modelName]['nodeTable'][attribName]) ){
         ctx.target = _map[modelName]['nodeTable'][attribName]['nodes'];
-        
-        for(var i = 0; i < ctx.target.length; i++ ){
-          if(ctx.target[i].index > _.UNINDEXED)
-            indexCnt[ctx.target[i].index] = true;
-        }
-        
-        ctx.modelAttribLength = Object.keys(indexCnt).length;
-        
-        for(; ctx.index < ctx.target.length && ctx.stop == false; ctx.index++){
+
+        for(; ctx.index < ctx.target.length && ctx.stop == false; ctx.index++, indexCnt = {}){
           tmp_node = ctx.target[ctx.index];
+          /*Single attrib could be used multiple times. For example, a select may be used twice in 
+            an app. The cache would contain 2 nodes per index and modelAttribLength would be
+            # of options * 2. We should only count nodes that share my scope, meaning */
+          for(var i = 0; i < ctx.target.length; i++ ){
+            if(ctx.target[i].index > _.UNINDEXED && tmp_node.scope == ctx.target[i].scope)
+              indexCnt[ctx.target[i].index] = true;
+          }
+          
+          ctx.modelAttribLength = Object.keys(indexCnt).length;
           ctx.modelName = modelName;
           ctx.modelAtrribName = attribName;
           ctx.modelAttribIndex = tmp_node.index;
@@ -199,8 +187,7 @@ return {
           mapFunction.call(null, ctx, tmp_node);
           
         }
-        
-        
+
       }
     }
 
@@ -209,6 +196,12 @@ return {
     var tmp_node = DOMorTMPNode;
     if(!(tmp_node instanceof TMP_Node))
       tmp_node = new TMP_Node(DOMorTMPNode, modelName, attribName, index);
+    
+    /*If user references unknown model in template we get this error*/
+    if(!_.isDef(_map[tmp_node.modelName])){
+      throw 'FATAL ERROR: Model "' + tmp_node.modelName + ' Is Undeclared.';
+    }
+       
     if( !_.isDef(_map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]) ){
       _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName] = { nodes : []};
 
@@ -239,8 +232,12 @@ return {
   },
   
   getAttribute : function(modelName, attribName, index, property){
+    if(!_.isDef(_map[modelName])) 
+      return null;
+      
     var returnVal = null,
         Model = _map[modelName]['api'];
+    
     
     if(_.isDef(_map[modelName]) && _.isDef(_map[modelName]['modelObj'][attribName])){
       returnVal = _map[modelName]['modelObj'][attribName];
@@ -278,6 +275,33 @@ return {
       
     }
     
+    return returnVal;
+  },
+  
+  dereferenceAttribute : function(TMP_node){
+    if(!_.isDef(_map[TMP_node.modelName])) 
+      return null;
+      
+    var returnVal = null,
+        attribute = null,
+        prop = null,
+        queue = TMP_node.indexQueue.slice(0),
+        modelName = TMP_node.modelName,
+        attribName = TMP_node.attribName;
+    
+    if(_.isDef(_map[modelName]['modelObj'][attribName])){
+      attribute = returnVal = _map[modelName]['modelObj'][attribName];
+      if(_.isArray(attribute)){
+        while((prop = queue.shift()) != null && _.isDef(attribute[prop])){
+          returnVal = attribute = attribute[prop];
+        }
+
+      }else{
+        returnVal = attribute;
+      }
+      
+    }
+
     return returnVal;
   },
   
@@ -347,6 +371,8 @@ return {
     var model = null;
     if(this.exists(modelName)){
       model = _map[modelName]['api'];
+    }else{
+      _.log('WARNING: Attempt To Get Model "' + modelName + '" Failed.');
     }
     return model;
   },
@@ -357,79 +383,40 @@ return {
                       limitTable : model_obj.limitTable, filterResults : model_obj.filterResults};
                       
   },
-  pruneControlNodesByIndex : function(tmp_node, modelName, attribName, index){
-    var Map = this,
-        scopeParts = tmp_node.scope.split(' '),
-        nodeScopeParts = null,
-        deleteNodes = true;
-    /*Remove embedded controls*/  
-    
-    Map.Control.forEach(function(ctrlCtx, ctrlNode){
+  /*----REPEAT INTERPOLATION CLEANUP-----------------*/
+  destroyRepeatTree : function(modelName, attribName){
+    this.forEach(modelName, attribName, function(ctx, tmp_node){
 
-      nodeScopeParts = ctrlNode.scope.split(' ');
+      ctx.removeItem(ctx.index);
 
-      if( (nodeScopeParts[0] == scopeParts[0] && nodeScopeParts[1] == scopeParts[1])
-          && ctrlNode.index == index 
-          && ctrlNode.modelName == modelName 
-          && ctrlNode.attribName == attribName
-      ){
-        _.log('Pruning Controll Node ' + ctrlNode.node.tagName + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
-        ctrlCtx.removeItem(ctrlCtx.index);
+      /*only remove visible elements from DOM, don't remove base node from DOM*/
+      if(!_.isNull(tmp_node.node.parentNode) && tmp_node.index > _.UNINDEXED){
+        tmp_node.node.parentNode.removeChild(tmp_node.node);
+        
       }
-      
-      
-    });
-    
-  },
-  
-  pruneControlNodesByScope : function(modelName, attribName, index, compiledScopes){
-    var Map = this,
-        nodeScopeParts = null,
-        deleteNodes = true;
-    /*Remove embedded controls*/  
-    
-    Map.Control.forEach(function(ctrlCtx, ctrlNode){
-
-      nodeScopeParts = ctrlNode.scope.split(' ');
-
-      if( (Map.isInScopeList(ctrlNode.scope, compiledScopes) && !Map.isInScopeList(ctrlNode.scope, compiledScopes, true))
-          && ctrlNode.index == index 
-          /*non-repeat controls have '' for model/atrrib names*/
-          && (ctrlNode.modelName == modelName || _.isNullOrEmpty(ctrlNode.modelName))
-          && (ctrlNode.attribName == attribName || _.isNullOrEmpty(ctrlNode.attribName))
-      ){
-        _.log('Pruning Controll Node ' + ctrlNode.node.tagName + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
-        ctrlCtx.removeItem(ctrlCtx.index);
-      }
-      
-      
     });
   },
   
-  pruneEmbeddedNodes : function(tmp_baseNode, repeatModelName, repeatAttribName, index){
-    var Map = this,
-        embeddedAttribs = Object.keys(tmp_baseNode.embeddedModelAttribs),
-        splitAttrib = null;
-
-    for(var i = 0; i < embeddedAttribs.length; i++){
-      if(!_.isNullOrEmpty(embeddedAttribs[i])){
-        splitAttrib = embeddedAttribs[i].split('.');/*0 = modelName, 1 = attribName*/
+  pruneDeadEmbeds : function(){
+    var Map = this;
         
-        Map.forEach(splitAttrib[0], splitAttrib[1], function(ctx, tmp_node){
-        
-          if(tmp_node.repeatModelName == repeatModelName 
-             && tmp_node.repeatAttribName == repeatAttribName 
-             && tmp_node.repeatIndex == index){
-              ctx.removeItem(ctx.index);
-              _.log('Pruning Embedded :' + tmp_node.node.tagName);
-
+    Map.forEach(function(ctx, modelName){
+      Map.forEach(ctx.modelName, function(ctx, attribName){
+        Map.forEach(ctx.modelName, ctx.modelAtrribName, function(ctx, tmp_node){
+          var node = tmp_node.node;
+          if((!_.isNullOrEmpty(tmp_node.repeatModelName) && !_.isNullOrEmpty(tmp_node.repeatAttribName)) 
+            && !document.body.contains(node)){
+            ctx.removeItem(ctx.index);
           }
-          
         });
-      }
-    }
+              
+      });
+    
+    });
     
   },
+  
+  /*----SCOPE CHANGE CLEANUP-----------------*/
   pruneNodeTreeByScope : function( compiledScopes ){
     if(_.isNullOrEmpty(compiledScopes) )
       return;
@@ -445,12 +432,11 @@ return {
         /*remove listeners*/
           
         Map.forEach(ctx.modelName, ctx.modelAtrribName, function(ctx, tmp_node){
-          var node = tmp_node.node,
-              repeatIndex = tmp_node.index;
+          var node = tmp_node.node;
+          
           if(( nodeScopeParts = tmp_node.scope.split(' ')) !== null){
             if(Map.isInScopeList(tmp_node.scope, compiledScopes) && !Map.isInScopeList(tmp_node.scope, compiledScopes, true)){
               ctx.removeItem(ctx.index);
-              Map.pruneControlNodesByScope(ctx.modelName, ctx.modelAtrribName, repeatIndex, compiledScopes );
               //Map.removeListener(ctx.modelName, ctx.modelAtrribName);
               _.log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName 
                   + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
@@ -463,6 +449,7 @@ return {
     });
     
   },
+  /*----DEBUGGING-----------------*/
   getInternalModel : function(modelName){
     results = null;
     if(this.exists(modelName))
@@ -473,17 +460,11 @@ return {
     return _map;
   },
   
-  getControls : function(){
-    return _controlTable;
-  },
-  
   getRepeat : function(){
     return _repeatTable;
-  },
-  /*returns an array of ControlNode(s). These have valid elements as their 'node' property*/
-  getBaseControls : function(controlName){
-    return (_.isDef(_controlTable[controlName])) ? _controlTable[controlName] : null;;
   }
+  
+  
 };
 
 

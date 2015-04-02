@@ -17,9 +17,10 @@ return {
       });
     });
     State.compiledScopes = '';
-    /*Control listeners should not fire until this system event is finished*/
-    Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done);
-    System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.interpolation_done);
+    /*Control listeners should not fire until this system event is finished. 
+      TODO: interpolation_done name should be changed to 'pageLoaded' */
+    Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.link_done);
+    System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.link_done);
   }
 };
 

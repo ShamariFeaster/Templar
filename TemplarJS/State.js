@@ -6,6 +6,10 @@ return {
   compilationThreadCount : 0,
   onloadFileQueue : [],
   hasDeclaredRoutes : false,
-  compiledScopes : ''
+  compiledScopes : '',
+  ignoreHashChange : false,
+  ignoreKeyUp : false,
+  dispatchListeners : true,
+  blockBodyCompilation : false
 };
 });

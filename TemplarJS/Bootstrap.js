@@ -7,6 +7,7 @@ var Link = require('Link');
 var State = require('State');
 var Compile = require('Compile');
 var DOM = require('DOM');
+var Route = require('Route'); 
 
 var Bootstrap = {
 
@@ -41,62 +42,57 @@ var Bootstrap = {
   },
   /*Preloading audio players will hang the framework.*/
   loadPartialIntoTemplate : function(){
+    /*Graceful fail on file not found. Error is logged from aync function*/
+    if(this.status != 200) return;
+    
     var partialContents = this.responseText,
         fileName = this.fileName,
         targetId = (!_.isNullOrEmpty(this.targetId)) ? 
                       this.targetId.replace('#','') : 'apl-content',
         targetNode = (!_.isNull(this.targetNode)) ? this.targetNode : null,
         /*a partial can define parent template dom elements to be hidden*/
-        aplHideNode = null,
         nodeToShow = null,
-        defaultHiddenNodeList = null,
-        defaultNodeToHide = null,
         href = document.location.href,
         timestamp = new Date().getTime(),
-        scope = fileName +  ' ' + timestamp;
+        scope = fileName +  ' ' + timestamp,
+        /*These are for calls from DOM.asynFetchRoutes(). The context is set
+          as the xhr object*/
+        DOMGetFileContents = this.callback || function(){};
   
     if(!_.isNull(targetNode)){
       targetNode.innerHTML = partialContents;
     }else
     if((targetNode = document.getElementById(targetId)) != null){
       targetNode.innerHTML = partialContents;
+    }else{
+      /*Target node was not found, fallback*/
+      _.log('WARNING: TARGET NODE NOT FOUND FOR ROUTE "'+this.route+'".');
+      if(!_.isNullOrEmpty(this.fallback)){
+        _.log('WARNING: ATTEMPTING FALLBACK ROUTE "'+this.fallback+'".');
+        Route.open(this.fallback);
+      }
+      return;
     }
 
-    aplHideNode = document.getElementById('apl-hide');
-    
-    /*Show nodes hidden from last partial load*/
-      nodesPreviouslyHidden = State.aplHideList.split(_.CLASS_SEPARATOR);
-      for(var i = 0; i < nodesPreviouslyHidden.length; i++){
-          nodeToShow = document.getElementById(nodesPreviouslyHidden[i]);
-          DOM.modifyClasses(nodeToShow,'apl-show','apl-show,apl-hide');
-        }
-
-    if(!_.isNull(aplHideNode)){
-      State.aplHideList = aplHideNode.getAttribute('data-apl-hide');
-      DOM.hideByIdList(State.aplHideList);
-    }
-    
     _.log('Compiling <' + fileName + '> w/ scope <' + scope + '>');
     /*remove this pending comp*/
-    State.compilationThreadCount--;
+    
     State.compiledScopes += scope + ',';
     Compile.compile( targetNode, scope );
-    
-    /*unhide target node after compilation*/
-    DOM.modifyClasses(targetNode,'apl-show','apl-hide,apl-show');
+    State.compilationThreadCount--;
     /*if a default-template tag found, recursive compilations will be spun off async during compile()
       .without a way to determine if there are still unfinished 'threads' we will interpolate multiple
       times and prematurely causing unecessary overhead and misfiring of our onload handlers. Dangers of
       multiple interps is tearing down/rebuilding repeats which destroys control nodes causing control failure*/
     if(State.compilationThreadCount <= 0){
-      
       Map.pruneNodeTreeByScope( State.compiledScopes ); 
-      Bootstrap.fireOnloads();
       Link.bindModel( State.compiledScopes );
+      Bootstrap.fireOnloads();
       Bootstrap.bindTargetSetter();
       State.compilationThreadCount = 0;
     }
-
+    DOMGetFileContents.call(this);
+    
   }
 };
 
