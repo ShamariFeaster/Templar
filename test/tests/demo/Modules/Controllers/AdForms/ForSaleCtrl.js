@@ -18,15 +18,35 @@ _Templar.success(Config.formsDir + 'for-sale.html', function(){
   Helper.init('Details');
 });
 
-Controller.bindHandlers = function(){
-  _$('.ad-pic').click(function(e){
-    var confirmResponse = window.confirm('Do you want to delete this image?');
+function deleteAdImage(e){
+  var confirmResponse = window.confirm('Do you want to delete this image?');
     if(confirmResponse == true){
-      var id = _$(this).data('id');
-      _.log(id);
+      var $this = _$(this),
+          imageId = $this.data('id'),
+          imageUri = $this.attr('src');
+      
+      Helper.ajax('server/delete-ad-picture.php',{
+        uid : UserProfileModel.uid,
+        imageId : imageId,
+        imageUri : imageUri
+      }, function(data, status){
+        EnvModel.success_msg = 'Image deletion successful.';
+        AdFormMdl.ad_images = AdFormMdl.ad_images
+                            .filter(function(obj){
+                              return (obj.id != imageId);
+                            });
+        if(AdFormMdl.ad_images.length < 3){
+          AdFormMdl.disablePicSubmission = false;
+          EnvModel.error = "";
+        }
+        Controller.bindHandlers();
+        AdFormMdl.save();
+      });
     }
-    
-  });
+}
+
+Controller.bindHandlers = function(){
+  _$('.ad-pic').click(deleteAdImage);
 };
 
 _Templar.success('#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri', function(){
@@ -36,17 +56,20 @@ _Templar.success('#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri', function(
   
   AdFormMdl.load();
   
-  if(newImageId != '-1' && AdFormMdl.ad_images.length < 2){
+  if(newImageId != '-1' && AdFormMdl.ad_images.length <= 2){
     AdFormMdl.ad_images.push({src : Config.adPicDir + newImageUri, id : newImageId});
   }
   
-  if(AdFormMdl.ad_images.length >= 2){
+  if(AdFormMdl.ad_images.length > 2){
     AdFormMdl.disablePicSubmission = true;
-    EnvModel.error = "You've Reached The Max of 2 Picture Per Ad";
+    EnvModel.error = "You've Reached The Max of 3 Picture Per Ad";
+  }else{
+    AdFormMdl.disablePicSubmission = false;
+    EnvModel.error = "";
   }
   
   AdFormMdl.update('ad_images');
-  Controller.init('Upload Images');
+  Controller.init('Upload Images', EnvModel.error);
   
   AdFormMdl.save();
   
