@@ -317,7 +317,7 @@ form#form_pp_pic textarea{
 #btn-update-profile {
   min-width : 283px;
 }
-
+.btn-form {min-width: 200px;}
 .menu-btn {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;

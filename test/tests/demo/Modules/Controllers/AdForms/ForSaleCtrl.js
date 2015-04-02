@@ -25,11 +25,16 @@ _Templar.success('#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri', function(
   
   AdFormMdl.load();
   
-  if(newImageId != '-1'){
+  if(newImageId != '-1' && AdFormMdl.ad_images.length < 2){
     AdFormMdl.ad_images.push(Config.adPicDir + newImageUri);
-    AdFormMdl.update('ad_images');
   }
   
+  if(AdFormMdl.ad_images.length >= 2){
+    AdFormMdl.disablePicSubmission = true;
+    EnvModel.error = "You've Reached The Max of 2 Picture Per Ad";
+  }
+  
+  AdFormMdl.update('ad_images');
   AdFormMdl.save();
   
 });

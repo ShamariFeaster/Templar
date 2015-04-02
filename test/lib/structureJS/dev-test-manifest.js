@@ -21,4 +21,6 @@ structureJS.declare('templar/Export');
 
 /*App*/
 structureJS.declare('modules/Model');
+structureJS.declare('modules/Attribute');
+structureJS.declare('modules/Component');
 structureJS.declare('modules/Controller');

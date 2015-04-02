@@ -32,7 +32,7 @@ structureJS.declare('modules/Controller');
 structureJS.declare('components/Attributes');
 structureJS.declare('components/Row');
 structureJS.declare('components/Column');
-
+structureJS.declare('components/OverlayButton');
 /*Home*/
 structureJS.declare('controllers/NavigationController');
 structureJS.declare('controllers/LoginController');

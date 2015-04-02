@@ -3,18 +3,29 @@
         action="{{Environment.ad_pic_submission_url}}"
         autocomplete="off">
     <row>
-      <img data-apl-repeat="{{AdForm.ad_images}}" class="pp_preview" src="{{src}}" >
+    
+      <OverlayButton 
+        data-apl-repeat="{{AdForm.ad_images}}" 
+        overlay="image/icon/red-x.png"
+        src="{{src}}">
+      </OverlayButton>
+      
      </row>
     
     <row>
       <label for="profile_pic">Ad Image:</label>
-      <input type="file" name="ad_pic[]" id="ad_pic" tabindex="1">
+      <column colnum="1"> 
+        <input type="file" name="ad_pic[]" id="ad_pic" tabindex="1">
+      </column>
       <input type="hidden" name="uid" value="{{UserProfile.uid}}">
     </row>
     
     <row>
-      <label></label>
-      <button type="submit">Upload Image</button>
+      <column colnum="1"> 
+        <button type="submit" isDisabled="{{AdForm.disablePicSubmission}}">
+          Upload Image
+        </button>
+      </column>
     </row>
 </form>
 
