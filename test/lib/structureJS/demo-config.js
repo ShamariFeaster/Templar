@@ -1,6 +1,6 @@
 structureJS.configure(
 {
-  styles : ['css/style'],
+  styles : ['css/style','css/hover-min'],
   globals : [
              'lib/jquery', 
              'lib/GeoInfo',
@@ -13,6 +13,7 @@ structureJS.configure(
             'classes/Attribute.class',
             'classes/Component.class',
             'classes/Token.class',
+            'templar/State',
             'templar/DOM'],
   directory_aliases : {modules : 'Modules/',
                        controllers : 'Modules/Controllers/',

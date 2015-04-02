@@ -50,19 +50,19 @@ Templar.Route([
     route : '#/new-ad',
     partial : ['#/profile',
     { 
-      partial : 'partials/Profile/new-ad-part-1.html', 
+      partial : 'partials/New-Ad/pick-category.html', 
       target : '#profile-right-col'
     }]
 },
 {
     route : '#/new-ad/2',
-    partial : 'partials/Profile/new-ad-part-2.html',
+    partial : 'partials/New-Ad/title-description.html',
     target : '#profile-right-col',
     fallback : '#/new-ad'
 },
 {
     route : '#/new-ad/typeform',
-    partial : 'partials/Profile/new-ad-part-3.html',
+    partial : 'partials/New-Ad/type-specific-form.html',
     target : '#profile-right-col',
     fallback : '#/new-ad'
 },
@@ -70,7 +70,7 @@ Templar.Route([
     route : '#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri',
     partial : ['#/profile',
     { 
-      partial : 'partials/Profile/new-ad-pic-upload.html', 
+      partial : 'partials/New-Ad/pic-upload.html', 
       target : '#profile-right-col',
       fallback : '#/new-ad'
     }]

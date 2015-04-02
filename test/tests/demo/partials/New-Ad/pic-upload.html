@@ -1,0 +1,36 @@
+ <form id="" name="" 
+        method="post" enctype="multipart/form-data" 
+        action="{{Environment.ad_pic_submission_url}}"
+        autocomplete="off">
+    <row>
+    
+      <OverlayButton 
+        class="hvr-grow ad-pic"
+        data-apl-repeat="{{AdForm.ad_images}}" 
+        overlay="image/icon/red-x.png"
+        src="{{src}}"
+        data-id={{id}}>
+      </OverlayButton>
+      
+     </row>
+    
+    <row>
+      <label for="profile_pic">Ad Image:</label>
+      <column colnum="1"> 
+        <input type="file" name="ad_pic[]" id="ad_pic" tabindex="1">
+      </column>
+      <input type="hidden" name="uid" value="{{UserProfile.uid}}">
+    </row>
+    
+    <row>
+      <column colnum="1"> 
+        <button type="submit" isDisabled="{{AdForm.disablePicSubmission}}">
+          Upload Image
+        </button>
+      </column>
+    </row>
+</form>
+
+<row>
+  <a class="flatbtn" href="#/new-ad/typeform">Back</a>
+</row>

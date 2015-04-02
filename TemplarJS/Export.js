@@ -103,7 +103,7 @@ structureJS.done(function(){
           style = null,
           head = document.getElementsByTagName('head')[0];;
       
-      
+      State.compilationThreadCount--;
       container.innerHTML = this.responseText;
       /*This serves as flag that Compile.compile() uses to perform transclusion*/
       component.transclude = (container.getElementsByTagName('content').length > 0);

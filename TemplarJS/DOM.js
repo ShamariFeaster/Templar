@@ -1,6 +1,7 @@
 structureJS.module('DOM', function(require){
 
-var Circular = structureJS.circular()
+var Circular = structureJS.circular(),
+    State = require('State'),
     _  = this;
 
 return {
@@ -75,14 +76,17 @@ return {
     xhr.targetNode = node;
     xhr.onreadystatechange = function() {
     if (xhr.readyState === 4){   //if complete
-        if(xhr.status !== 200){  //check if "OK" (200)
+        if(xhr.status === 404){  //check if "OK" (200)
+          State.compilationThreadCount--;
           _.log('WARNING(404): FILE "'+xhr.fileName+'" NOT FOUND');
         }
       } 
     }
     if(!_.isNullOrEmpty(xhr.fileName)){
+      State.compilationThreadCount++;
       xhr.open('get',  fileName, true);
       xhr.send();
+      
     }
     
   },
@@ -120,17 +124,21 @@ return {
       xhr.onreadystatechange = function() {
       if (xhr.readyState === 4){   //if complete
           if(xhr.status === 404){  //check if "OK" (200)
+            State.compilationThreadCount--;
             _.log('WARNING(404): FILE "'+xhr.fileName+'" NOT FOUND');
             if(!_.isNullOrEmpty(xhr.fallback)){
               _.log('WARNING (404): ATTEMPTING FALLBACK ROUTE "'+xhr.fallback+'".');
               Circular('Route').open(xhr.fallback);
             }
+            
           }
         } 
       }
       if(!_.isNullOrEmpty(xhr.fileName)){
+        State.compilationThreadCount++;
         xhr.open('get',  xhr.fileName, true);
         xhr.send();
+        
       }
     }
     

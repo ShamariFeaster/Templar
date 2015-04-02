@@ -15,18 +15,29 @@ var _ = require('Util'),
     
     
 _Templar.success(Config.formsDir + 'for-sale.html', function(){
-  Controller.init('Details');
+  Helper.init('Details');
 });
+
+Controller.bindHandlers = function(){
+  _$('.ad-pic').click(function(e){
+    var confirmResponse = window.confirm('Do you want to delete this image?');
+    if(confirmResponse == true){
+      var id = _$(this).data('id');
+      _.log(id);
+    }
     
+  });
+};
+
 _Templar.success('#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri', function(){
-  Controller.init('Upload Images');
+  
   var newImageUri = AdFormMdl.image_uri,
       newImageId = AdFormMdl.image_id;
   
   AdFormMdl.load();
   
   if(newImageId != '-1' && AdFormMdl.ad_images.length < 2){
-    AdFormMdl.ad_images.push(Config.adPicDir + newImageUri);
+    AdFormMdl.ad_images.push({src : Config.adPicDir + newImageUri, id : newImageId});
   }
   
   if(AdFormMdl.ad_images.length >= 2){
@@ -35,6 +46,8 @@ _Templar.success('#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri', function(
   }
   
   AdFormMdl.update('ad_images');
+  Controller.init('Upload Images');
+  
   AdFormMdl.save();
   
 });

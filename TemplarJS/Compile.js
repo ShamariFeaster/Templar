@@ -91,7 +91,6 @@ return {
     
     if(!_.isNullOrEmpty(defaultPartialHref) && !shortCircuit){
       root.setAttribute('data-apl-default', '');
-      State.compilationThreadCount++;
       State.onloadFileQueue.push(defaultPartialHref);
       DOM.asynGetPartial(defaultPartialHref, Circular('Bootstrap').loadPartialIntoTemplate, null, root );
       _.log('Spawning Thread <' + defaultPartialHref + '> w/ target <' + root.id + '> w/ scope <' + scope + '>');

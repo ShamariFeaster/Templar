@@ -76,10 +76,10 @@ var Bootstrap = {
 
     _.log('Compiling <' + fileName + '> w/ scope <' + scope + '>');
     /*remove this pending comp*/
-    State.compilationThreadCount--;
+    
     State.compiledScopes += scope + ',';
     Compile.compile( targetNode, scope );
-
+    State.compilationThreadCount--;
     /*if a default-template tag found, recursive compilations will be spun off async during compile()
       .without a way to determine if there are still unfinished 'threads' we will interpolate multiple
       times and prematurely causing unecessary overhead and misfiring of our onload handlers. Dangers of
@@ -90,9 +90,9 @@ var Bootstrap = {
       Bootstrap.fireOnloads();
       Bootstrap.bindTargetSetter();
       State.compilationThreadCount = 0;
-      DOMGetFileContents.call(this);
     }
-
+    DOMGetFileContents.call(this);
+    
   }
 };
 

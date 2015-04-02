@@ -1,0 +1,91 @@
+<!-- LOCATION -->
+<row>
+  
+  <column colnum="0">
+    <input type="checkbox" value="{{AdForm.useMyLocation}}"/>
+  </column>
+  
+</row>
+
+<row hideIf="{{AdForm.useMyLocation.checked[0]}}">
+  
+  <column colnum="0">
+    <select>{{ProfileForm.states}}</select>
+  </column>
+  
+  <column colnum="3">
+    <select isDisabled="{{AdForm.useCustomCity.checked[0]}}">{{ProfileForm.cities}}</select>
+  </column>
+  
+  <column colnum="6">
+    <input type="checkbox" value="{{AdForm.useCustomCity}}"/>
+  </column>
+
+  <row showIf="{{AdForm.useCustomCity.checked[0]}}">
+
+      <label>Write Your City Name Here: </label>
+
+    <column colnum="3">
+      <input type="text" size="20" value="{{AdForm.customCity}}"/>
+    </column>
+    
+  </row>
+  
+</row>
+
+<!-- PRICE -->
+<row>
+
+  <column colnum="0">
+    <input type="checkbox" value="{{AdForm.isItemFree}}"/>
+  </column>
+  
+  <column colnum="3" hideIf="{{AdForm.isItemFree.checked[0]}}">
+    <row>
+      <column colnum="0">
+        <label>Price (dollars)</label>
+      </column>
+    </row>
+    
+    <row class="no-margin">
+      <column colnum="0">
+        <input type="text" size="10" value="{{AdForm.itemPrice}}"/>
+      </column>
+    </row>
+    
+  </column>
+
+</row>
+
+<!-- LOCATION -->
+<row>
+  <input type="checkbox" value="{{AdForm.shouldExpire}}"/>
+  
+  <column colnum="3" showIf="{{AdForm.shouldExpire.checked[0]}}">
+    <input type="date" value="{{AdForm.expiryDate}}"/>
+  </column>
+</row>
+
+<row>
+
+  <label>Preferred Contact Method(s): </label>
+  
+  <column colnum="3">
+    <input type="checkbox" size="20" value="{{AdForm.contactMethods}}"/>
+  </column>
+
+</row>
+
+<!-- CONTACT -->
+<row showIf="{{AdForm.contactMethods.checked[0]}}" >
+
+  <label>Phone #: </label>
+  
+  <column colnum="3">
+    <input type="text"  size="12" value="{{AdForm.phoneNumber}}"/>
+  </column>
+  
+  <column colnum="6">
+    <input type="checkbox" value="{{AdForm.shouldSavePhoneNumber}}"/>
+  </column>
+</row>
