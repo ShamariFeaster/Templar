@@ -20,8 +20,8 @@ function Controller(){
     set : function(val){
       if(_.isFunc(val)){
         this._userInit = function(){
-          val.apply(null, arguments);
           this._init.apply(this, arguments);
+          val.apply(null, arguments);
         };
       }
     },

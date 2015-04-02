@@ -20,7 +20,7 @@ P1Controller.sortCategories = function(){
 
 P1Controller.bindHandlers = function(){
   var P1Controller = this;
-  
+
   AdFormMdl.listen('adType', function(e){
     AdFormMdl.category = AdTypeMap.Categories[e.value];
     P1Controller.sortCategories();
@@ -28,6 +28,8 @@ P1Controller.bindHandlers = function(){
 };
 
 P1Controller.init = function(bannerMsg){
+
+  //AdFormMdl.category = AdTypeMap.Categories[AdFormMdl.adType.current_selection];
   AdFormMdl.sort('adType');
   AdFormMdl.update('adType');
 };

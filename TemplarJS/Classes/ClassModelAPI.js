@@ -103,8 +103,9 @@ var thawed, thawFailed = false;
           }catch(e){
             thawedItem = metaProp[item];
           }
-          if(item == '_value_')
-            item = 'current_selection';
+          if(item == '_value_'){
+            this.attributes[prop]['current_selection'] = thawedItem;
+          }
           this.attributes[prop][item] = thawedItem;
         }
       }

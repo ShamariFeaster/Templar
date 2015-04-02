@@ -45,8 +45,14 @@ function deleteAdImage(e){
     }
 }
 
+function onBeforeSubmit(){
+  _.log('running onbeforesubmit');
+  AdFormMdl.save();
+};
+
 Controller.bindHandlers = function(){
   _$('.ad-pic').click(deleteAdImage);
+  _$('#pic-submit').click(onBeforeSubmit);
 };
 
 _Templar.success('#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri', function(){
@@ -71,7 +77,7 @@ _Templar.success('#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri', function(
   AdFormMdl.update('ad_images');
   Controller.init('Upload Images', EnvModel.error);
   
-  AdFormMdl.save();
+  
   
 });
     
