@@ -3,6 +3,7 @@ structureJS.module('Config', function(require){
     categoryFormId : 'type-specific-form-partial',
     formsDir : 'partials/New-Ad/TypeSpecificAdForms/',
     formsCtrlDir : 'Modules/Controllers/AdForms/',
-    adPicDir : 'server/ad_pics/'
+    adPicDir : 'server/ad_pics/',
+    serverRoot : 'server/'
   };
 });

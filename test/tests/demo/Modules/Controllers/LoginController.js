@@ -7,6 +7,7 @@ var _ = require('Util'),
     EnvModel = _Templar.getModel('Environment'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     LoginFormMdl = _Templar.getModel('LoginForm'),
+    Config = require('Config'),
     _$ = $;   /*stop unecessary scope lookup*/
 
 function loginHandler(e){
@@ -22,8 +23,7 @@ function loginHandler(e){
 }
 
 function signupHandler(e){
-  Helper.ajax(
-    'server/sign-up.php',
+  Helper.ajax('sign-up.php',
     {
       username: LoginFormMdl.un,
       password : LoginFormMdl.pw,
@@ -62,13 +62,14 @@ _Templar.success("partials/login-screen.html", function(){
   
   LoginFormMdl.listen('un', function(e){
 
-    _$.ajax('server/check-unique.php',{
-      method : 'POST',
-      data : {username: LoginFormMdl.un},
-      
-      success : function(data, status, jqXHR){
-        if(data < 1){
-          LoginFormMdl.validation_msgs[4] = LoginFormMdl.un + ' Is Already In Use';
+    Helper.ajax('check-unique.php',
+      {username: LoginFormMdl.un},
+      function(data, status){
+        if(data.isAvailable == false){
+        
+          LoginFormMdl.validation_msgs[4] = 
+            LoginFormMdl.un + ' Is Already In Use';
+            
           LoginFormMdl.submissionDisabled = true;
         }else{
           LoginFormMdl.validation_msgs[4] = '';
@@ -76,10 +77,6 @@ _Templar.success("partials/login-screen.html", function(){
         }
         
         LoginFormMdl.update('validation_msgs');
-      },
-      error : function(data, status, jqXHR){
-        EnvModel.error = 'FATAL: ' + data.error;
-      }
     });
   
     if(e.text.length < 8){

@@ -78,44 +78,63 @@ _Templar.success("#/new-ad/typeform", function(){
     
   }
 });
+function saveAdImages(adID){
+  if(AdFormMdl.ad_images.length > 0){
+    Helper.ajax('associateAdPic.php', {
+      adID : adID,
+      imagesJson : AdFormMdl.ad_images
+    });
+  }
+  
+}
 
 function saveAd(e){
-  var updateObj = {
-    uid : UserProfileModel.uid
-  };
-
-  updateObj['price'] = (Helper.isChecked(AdFormMdl, 'isItemFree')) ? 0 : AdFormMdl.itemPrice;
+  var details = {},
+      updateObj = {uid : UserProfileModel.uid, details : details};
+  details['save_phone_num'] = false;
+  details['title'] = AdFormMdl.description;
+  details['description'] = AdFormMdl.title;
+  details['ad_state'] = 'active';
+  details['ad_type'] = AdFormMdl.adType.current_selection;
+  details['ad_category'] = AdFormMdl.category.current_selection;
+  details['price'] = (Helper.isChecked(AdFormMdl, 'isItemFree')) ? 0 : AdFormMdl.itemPrice;
   
   if(Helper.isChecked(AdFormMdl, 'useMyLocation')){
-    updateObj['city'] = UserProfileModel.city;
-    updateObj['state'] = UserProfileModel.state;
+    details['city'] = UserProfileModel.city;
+    details['state'] = UserProfileModel.state;
   }else{
-    updateObj['city'] = ProfileFormMdl.cities;
-    updateObj['state'] = ProfileFormMdl.states;
+    details['city'] = ProfileFormMdl.cities;
+    details['state'] = ProfileFormMdl.states;
   }
   
   if(Helper.isChecked(AdFormMdl, 'useCustomCity')){
-    updateObj['city'] = AdFormMdl.customCity;
+    details['city'] = AdFormMdl.customCity;
   }
   
   if(Helper.isChecked(AdFormMdl, 'shouldExpire')){
-    updateObj['end'] = Helper.parseDate(AdFormMdl.expiryDate) || Helper.todayPlusXDays(90);
+    details['end'] = Helper.parseDate(AdFormMdl.expiryDate) || Helper.todayPlusXDays(90);
   }else{
-    updateObj['end'] = Helper.todayPlusXDays(90);
+    details['end'] = Helper.todayPlusXDays(90);
   }
   
   if(Helper.areAnyChecked(AdFormMdl, 'contactMethods')){
-    updateObj['contact_methods'] = 
-      Helper.getCheckedVals(AdFormMdl, 'contactMethods').map(function(v){return "'" + v + "'";}).join();
+    details['contact_methods'] = 
+      Helper.getCheckedVals(AdFormMdl, 'contactMethods')
+        .map(function(v){return "'" + v + "'";}).join();
   }
   
   if(Helper.isChecked(AdFormMdl, 'contactMethods', 0)){
-    updateObj['phone_num'] = AdFormMdl.phoneNumber;
+    details['phone_num'] = AdFormMdl.phoneNumber.replace(/[\-\s]/g, '');
   }
   
   if(Helper.isChecked(AdFormMdl, 'shouldSavePhoneNumber')){
-    updateObj['save_phone_num'] = true;
+    details['save_phone_num'] = true;
   }
+  
+  Helper.ajax('saveAd.php',updateObj,
+    function(data){
+      saveAdImages(data.insertId);
+    });
 }
 
 P2Controller.bindHandlers = function(){

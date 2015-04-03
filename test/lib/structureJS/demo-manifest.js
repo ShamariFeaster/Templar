@@ -19,12 +19,16 @@ structureJS.declare('templar/Templar');
 structureJS.declare('templar/Bootstrap');
 structureJS.declare('templar/Export');
 
-/*App*/
+/*Data*/
 structureJS.declare('modules/Data/Config');
-structureJS.declare('modules/Auth');
+structureJS.declare('lib/GeoInfo');
+structureJS.declare('modules/Data/Type-Category-Map');
+
+/*App*/
+structureJS.declare('modules/Auth', ['modules/Helper']);
 structureJS.declare('modules/Routes');
 structureJS.declare('modules/Model');
-structureJS.declare('modules/Helper');
+structureJS.declare('modules/Helper', ['modules/Model']);
 structureJS.declare('modules/Controller');
 
 /*Components*/
@@ -32,6 +36,7 @@ structureJS.declare('components/Attributes');
 structureJS.declare('components/Row');
 structureJS.declare('components/Column');
 structureJS.declare('components/OverlayButton');
+
 /*Home*/
 structureJS.declare('controllers/NavigationController');
 structureJS.declare('controllers/LoginController');

@@ -25,22 +25,25 @@ function deleteAdImage(e){
           imageId = $this.data('id'),
           imageUri = $this.attr('src');
       
-      Helper.ajax('server/delete-ad-picture.php',{
-        uid : UserProfileModel.uid,
-        imageId : imageId,
-        imageUri : imageUri
-      }, function(data, status){
-        EnvModel.success_msg = 'Image deletion successful.';
-        AdFormMdl.ad_images = AdFormMdl.ad_images
-                            .filter(function(obj){
-                              return (obj.id != imageId);
-                            });
-        if(AdFormMdl.ad_images.length < 3){
-          AdFormMdl.disablePicSubmission = false;
-          EnvModel.error = "";
-        }
-        Controller.bindHandlers();
-        AdFormMdl.save();
+      Helper.ajax('delete-ad-picture.php',
+        {
+          uid : UserProfileModel.uid,
+          imageId : imageId,
+          imageUri : imageUri
+        }, 
+        
+        function(data, status){
+          EnvModel.success_msg = 'Image deletion successful.';
+          AdFormMdl.ad_images = AdFormMdl.ad_images
+                              .filter(function(obj){
+                                return (obj.id != imageId);
+                              });
+          if(AdFormMdl.ad_images.length < 3){
+            AdFormMdl.disablePicSubmission = false;
+            EnvModel.error = "";
+          }
+          Controller.bindHandlers();
+          AdFormMdl.save();
       });
     }
 }

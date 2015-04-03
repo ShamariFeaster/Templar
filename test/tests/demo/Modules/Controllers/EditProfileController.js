@@ -8,6 +8,7 @@ var _ = require('Util'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     ProfileFormMdl = _Templar.getModel('ProfileForm'),
     GeoInfo = require('GeoInfo-US'),
+    Config = require('Config'),
     Controller = require('Controller')(),
     _$ = $;   /*stop unecessary scope lookup*/
 
@@ -22,7 +23,7 @@ function repopulateEditForm(){
 }
 
 function updateProfileHandler(e){
-  Helper.ajax('server/update-profile.php', 
+  Helper.ajax('update-profile.php', 
     {
       uid: UserProfileModel.uid,
       fn : ProfileFormMdl.fn,

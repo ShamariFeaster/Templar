@@ -12,8 +12,8 @@ Templar.dataModel('Environment',
   banner : '',
   error : '',
   success_msg : '',
-  pic_submission_url : 'server/upload-picture.php',
-  ad_pic_submission_url : 'server/upload-ad-picture.php'
+  pic_submission_url : Config.serverRoot + 'upload-picture.php',
+  ad_pic_submission_url : Config.serverRoot + 'upload-ad-picture.php'
 });
 
 Templar.dataModel('LoginForm',

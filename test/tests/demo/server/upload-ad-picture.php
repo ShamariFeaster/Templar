@@ -19,24 +19,24 @@ $targetFile = $uploadDir . $hashedName;//should throw in timestamp
 
 if(move_uploaded_file($img_path, $targetFile)){
 
-$query = <<<EOD
-          INSERT INTO ad_pics 
-          (image_uri)
-          VALUES
-          (?);
+  $query = <<<EOD
+            INSERT INTO ad_pics 
+            (image_uri)
+            VALUES
+            (?);
 EOD;
 
-$stmt = $mysqli->prepare($query);
-$stmt->bind_param("s", $hashedName);
-$stmt->execute();
+  $stmt = $mysqli->prepare($query);
+  $stmt->bind_param("s", $hashedName);
+  $stmt->execute();
 
-$response['error'] = $mysqli->error;
+  $response['error'] = $mysqli->error;
 
-if(strlen($response['error']) == 0){
-  $response['image_id'] = $insertId = $mysqli->insert_id;
-  $response['image_uri'] = $hashedName;
-  $response['uploadStatus'] = 1;
-}
+  if(strlen($response['error']) == 0){
+    $response['image_id'] = $insertId = $mysqli->insert_id;
+    $response['image_uri'] = $hashedName;
+    $response['uploadStatus'] = 1;
+  }
 
 }
 //echo print_r($response);

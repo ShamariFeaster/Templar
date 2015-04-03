@@ -4,6 +4,7 @@ structureJS.module('Helper', function(require){
       _Templar = Templar,
       EnvModel = _Templar.getModel('Environment'),
       UserProfileModel = _Templar.getModel('UserProfile'),
+      Config = require('Config'),
       _$ = $;
       
   return {
@@ -12,7 +13,9 @@ structureJS.module('Helper', function(require){
         return;
         
       var payload = payload || {},
-          cbOK = cbOK || function(){},
+          cbOK = cbOK || function(data){
+            EnvModel.success_msg = data;
+          },
           cbErr = cbErr || function(data, status, jqXHR){
             EnvModel.error = data.error;
           },
@@ -20,7 +23,7 @@ structureJS.module('Helper', function(require){
             EnvModel.error = 'FATAL ERROR: ' + data.responseText;
           };
       
-      _$.ajax(url,{
+      _$.ajax(Config.serverRoot + url,{
         method : 'POST',
         data : payload,
         dataType : 'json',
@@ -73,7 +76,7 @@ structureJS.module('Helper', function(require){
       this.setProfileProperty(UserProfile, 'role');
       this.setProfileProperty(UserProfile, 'pp_src', function(UserProfile, prop){
         if(_.isNullOrEmpty(UserProfile[prop] || sessionStorage[prop])){
-          this.ajax('server/profile-pic-src.php', 
+          this.ajax('profile-pic-src.php', 
             {uid: UserProfile.uid},
             function(data, status, jqXHR){
               UserProfile[prop] = data.src;
