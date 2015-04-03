@@ -312,6 +312,7 @@ return {
 
           Interpolate.interpolateSpan(tmp_node);
           updateObj.text = node.innerText;
+          updateObj.value = node.innerText;
           updateObj.type = node.tagName.toLowerCase();
           break;
         case 'INPUT':
@@ -328,6 +329,7 @@ return {
             }
             
             updateObj.text = node.value;
+            updateObj.value = node.value;
             updateObj.type = node.tagName.toLowerCase();
             updateObj.target = node;
            }
@@ -336,6 +338,7 @@ return {
         case 'TEXTAREA':
           tmp_node.node.value = attributeVal;
           updateObj.text = node.value;
+          updateObj.value = node.value;
           updateObj.type = node.tagName.toLowerCase();
           updateObj.target = node;
           break;

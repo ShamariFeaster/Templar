@@ -42,7 +42,7 @@ Model.prototype.save = function(){
     if(_.isArray(attrib)){
       for(var arrProp in attrib){
       
-        if(attrib.hasOwnProperty(arrProp) && !/^-?[0-9]+$/.test(arrProp)){
+        if(attrib.hasOwnProperty(arrProp) && !_.isInt(arrProp)){
            
            if(!_.isDef(this.attributes['__meta__'][attribName])){
             this.attributes['__meta__'][attribName] = {};
