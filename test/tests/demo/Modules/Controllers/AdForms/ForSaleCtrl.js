@@ -51,7 +51,7 @@ function onBeforeSubmit(){
 };
 
 Controller.bindHandlers = function(){
-  _$('.ad-pic').click(deleteAdImage);
+  _$('.upload-ad-pic').click(deleteAdImage);
   _$('#pic-submit').click(onBeforeSubmit);
 };
 

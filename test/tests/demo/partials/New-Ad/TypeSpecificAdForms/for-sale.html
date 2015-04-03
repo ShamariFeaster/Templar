@@ -13,7 +13,7 @@
     <select>{{ProfileForm.states}}</select>
   </column>
   
-  <column colnum="3">
+  <column colnum="3.75">
     <select isDisabled="{{AdForm.useCustomCity.checked[0]}}">{{ProfileForm.cities}}</select>
   </column>
   
@@ -25,7 +25,7 @@
 
       <label>Write Your City Name Here: </label>
 
-    <column colnum="3">
+    <column colnum="3.75">
       <input type="text" size="20" value="{{AdForm.customCity}}"/>
     </column>
     
@@ -40,7 +40,7 @@
     <input type="checkbox" value="{{AdForm.isItemFree}}"/>
   </column>
   
-  <column colnum="3" hideIf="{{AdForm.isItemFree.checked[0]}}">
+  <column colnum="3.75" hideIf="{{AdForm.isItemFree.checked[0]}}">
     <row>
       <column colnum="0">
         <label>Price (dollars)</label>
@@ -61,7 +61,7 @@
 <row>
   <input type="checkbox" value="{{AdForm.shouldExpire}}"/>
   
-  <column colnum="3" showIf="{{AdForm.shouldExpire.checked[0]}}">
+  <column colnum="3.75" showIf="{{AdForm.shouldExpire.checked[0]}}">
     <input type="date" value="{{AdForm.expiryDate}}"/>
   </column>
 </row>
@@ -70,7 +70,7 @@
 
   <label>Preferred Contact Method(s): </label>
   
-  <column colnum="3">
+  <column colnum="3.75">
     <input type="checkbox" size="20" value="{{AdForm.contactMethods}}"/>
   </column>
 
@@ -81,7 +81,7 @@
 
   <label>Phone #: </label>
   
-  <column colnum="3">
+  <column colnum="3.75">
     <input type="text"  size="12" value="{{AdForm.phoneNumber}}"/>
   </column>
   

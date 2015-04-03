@@ -1,0 +1,33 @@
+
+<row class="center">
+{{AdForm.adType.current_selection}} - {{AdForm.category.current_selection}}
+</row>
+
+<row class="center">
+<h1>{{AdForm.title}}</h1>
+</row>
+
+<row class="center">
+<h2 class="price-under-title">${{AdForm.itemPrice}}</h2>
+</row>
+
+<div id="ad-display-pics">
+  <row data-apl-repeat="{{AdForm.ad_images}}" >
+    <img 
+      class="hvr-grow show-ad-pic"
+      
+      src="{{src}}"
+      data-id={{id}}>
+    </img>
+    
+  </row>
+</div>
+
+<div id="ad-display-description" class="{{AdForm.descriptionClass}}">
+{{AdForm.description}}
+</div>
+
+<div class="sticky-bottom">
+  <a class="flatbtn" href="#/new-ad/4/id/-1/uri/-1">Back</a>
+  <a class="flatbtn" id="save-ad">Save</a>
+</div>

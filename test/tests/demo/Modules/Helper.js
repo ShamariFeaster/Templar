@@ -83,6 +83,75 @@ structureJS.module('Helper', function(require){
         }
       });
       
+    },
+    
+    isChecked : function(model, attribName, index){
+      if(!model[attribName] || !model[attribName].checked)
+        return false;
+      var index = (_.isDef(index)) ? index : 0;
+      return (model[attribName].checked[index] == true);
+    },
+    
+    areAnyChecked : function(model, attribName){
+      var anyChecked = false;
+      for(var i in model[attribName].checked){
+        anyChecked |= model[attribName].checked[i];
+      }
+      return anyChecked;
+    },
+    
+    getCheckedVals : function(model, attribName){
+      var checkedVals = [];
+      for(var i in model[attribName].checked){
+        if(model[attribName].checked[i]){
+          if(_.isInt(i)){
+            checkedVals.push(
+            (_.isDef(model[attribName][i].value)) ?
+              model[attribName][i].value :
+              model[attribName][i]
+            )
+          }
+        };
+      }
+      
+      return checkedVals;
+    },
+    
+    parseDate : function(dateStr){
+      var retVal = null;
+      if(!_.isNullOrEmpty(dateStr) && /\d{1,4}[\/\-]+\d{1,2}[\/\-]+\d{1,4}/.test(dateStr)){
+        var time = new Date(),
+            dateSplit = dateStr.split(/[\/\-]/).sort(
+              /*pushes 4 digit year to the end of array*/
+              function(a,b){ 
+                if(a.length == 4)
+                  return 1;
+                if(b.length == 4)
+                  return -1
+                
+                return 0;
+              }),
+            date = dateSplit[2] + '-' + dateSplit[0] + '-' + dateSplit[1];
+        retVal = date + ' ' + time.getHours() + ':' + 
+                time.getMinutes() + ':' + time.getSeconds();
+      }
+      
+      return retVal;
+    },
+    
+    todayPlusXDays : function(xDays){
+      var date = new Date(),
+          months, days, output = ['','',''];
+      if(_.isInt(xDays)){
+        months = xDays/30;
+        days = xDays%30;
+        date.setMonth( date.getMonth() + months + 1 );
+        date.setDate( date.getDate() + days );
+      }
+      output[0] = date.getMonth();
+      output[1] = date.getDate();
+      output[2] = date.getFullYear();
+      return this.parseDate(output.join('/'));
     }
   };
 });

@@ -5,25 +5,25 @@
     <row>
     
       <OverlayButton 
-        class="hvr-grow ad-pic"
+        class="hvr-grow upload-ad-pic"
         data-apl-repeat="{{AdForm.ad_images}}" 
         overlay="image/icon/red-x.png"
         src="{{src}}"
         data-id={{id}}>
       </OverlayButton>
       
-     </row>
+    </row>
     
     <row>
       <label for="profile_pic">Ad Image:</label>
-      <column colnum="1"> 
+      <column colnum="2"> 
         <input type="file" name="ad_pic[]" id="ad_pic" tabindex="1">
       </column>
       <input type="hidden" name="uid" value="{{UserProfile.uid}}">
     </row>
     
     <row>
-      <column colnum="1"> 
+      <column colnum="2"> 
         <button id="pic-submit" type="submit" isDisabled="{{AdForm.disablePicSubmission}}">
           Upload Image
         </button>
@@ -31,6 +31,7 @@
     </row>
 </form>
 
-<row>
+<div class="sticky-bottom">
   <a class="flatbtn" href="#/new-ad/typeform">Back</a>
-</row>
+  <a class="flatbtn" href="#/new-ad/preview">Preview</a>
+</div>

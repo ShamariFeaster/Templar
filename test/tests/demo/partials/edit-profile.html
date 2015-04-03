@@ -19,13 +19,16 @@
     
     <row>
       <label for="profile_pic">Profile Image:</label>
-      <input type="file" name="profile_pic[]" id="profile_pic" tabindex="1">
-      <input type="hidden" name="uid" value="{{UserProfile.uid}}">
+      <column colnum="1.5">
+        <input type="file" name="profile_pic[]" id="profile_pic" tabindex="1">
+        <input type="hidden" name="uid" value="{{UserProfile.uid}}">
+      </column>
     </row>
     
     <row>
-      <label></label>
-      <button type="submit">Upload Image</button>
+      <column colnum="1.5">
+        <button type="submit">Upload Image</button>
+      </column>
     </row>
     
     <row>

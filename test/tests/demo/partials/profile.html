@@ -5,11 +5,11 @@
   <h2>{{Environment.success_msg}}</h2>
 </div>
 
-<row>
-  <a class="menu-btn" id="goto-new-ad" href="#/new-ad">New Ad</a>
-  <a class="menu-btn" id="goto-my-ads" href="#/my-ads">My Ads</a>
-  <a class="menu-btn" id="goto-messages" href="#/messages">Messages</a>
-  <a class="menu-btn" id="goto-wall" href="#/wall">Wall</a>
+<row class="center">
+  <a class="menu-btn hvr-buzz-out" id="goto-new-ad" href="#/new-ad">New Ad</a>
+  <a class="menu-btn hvr-buzz-out" id="goto-my-ads" href="#/my-ads">My Ads</a>
+  <a class="menu-btn hvr-buzz-out" id="goto-messages" href="#/messages">Messages</a>
+  <a class="menu-btn hvr-buzz-out" id="goto-wall" href="#/wall">Wall</a>
 </row>
 
 <div style="clear: both;">
@@ -19,13 +19,20 @@
   <img class="pp_preview" src="{{UserProfile.pp_src}}" >
 </row>
 
-
 <row>
-  <label for="first-name">First Name:</label> {{UserProfile.fn}}
+  <label for="first-name">First Name:</label> 
 </row>
 
 <row>
-  <label for="last-name">Last Name:</label> {{UserProfile.ln}}
+  {{UserProfile.fn}}
+</row>
+
+<row>
+  <label for="last-name">Last Name:</label> 
+</row>
+
+<row>
+  {{UserProfile.ln}}
 </row>
 
 <row>
@@ -36,17 +43,31 @@
   <label for="sex">Sex:</label> {{UserProfile.sex}}
 </row>
 
+
 <row>
-  <label for="state">State:</label> {{UserProfile.state}}
+  <label for="state">State:</label> 
 </row>
 
 <row>
-  <label for="city">City:</label> {{UserProfile.city}}
+  {{UserProfile.state}}
 </row>
 
 <row>
-  <label for="city">Description:</label> {{UserProfile.description}}
+  <label for="city">City:</label> 
 </row>
+
+<row>
+  {{UserProfile.city}}
+</row>
+
+<row>
+  <label for="city">Description:</label> 
+</row>
+
+<row>
+  {{UserProfile.description}}
+</row>
+
 
 </div>
 

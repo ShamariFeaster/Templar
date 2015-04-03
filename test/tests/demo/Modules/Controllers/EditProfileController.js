@@ -35,13 +35,13 @@ function updateProfileHandler(e){
     }, 
     function(data, status, jqXHR){
       EnvModel.success_msg = data.success_msg;
-      UserProfileModel.fn = data.fn;
-      UserProfileModel.ln = data.ln;
-      UserProfileModel.age = data.age;
-      UserProfileModel.sex = data.sex;
-      UserProfileModel.state = data.state;
-      UserProfileModel.city = data.city;
-      UserProfileModel.description = data.description;
+      UserProfileModel.fn = sessionStorage['fn'] = data.fn;
+      UserProfileModel.ln = sessionStorage['ln'] = data.ln;
+      UserProfileModel.age = sessionStorage['age'] = data.age;
+      UserProfileModel.sex = sessionStorage['sex'] = data.sex;
+      UserProfileModel.state = sessionStorage['state'] = data.state;
+      UserProfileModel.city = sessionStorage['city'] = data.city;
+      UserProfileModel.description = sessionStorage['description'] = data.description;
   });
 }
 

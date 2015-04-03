@@ -75,4 +75,10 @@ Templar.Route([
       fallback : '#/new-ad'
     }]
     
+},
+{
+    route : '#/new-ad/preview',
+    partial : 'partials/New-Ad/preview.html',
+    target : '#profile-right-col',
+    fallback : '#/new-ad'
 }]);

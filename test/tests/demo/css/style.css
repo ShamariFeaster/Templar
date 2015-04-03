@@ -19,7 +19,7 @@ body {
   background: #f0f0f0 ; 
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: #313131;
-  font-size: 62.5%; 
+  font-size: 0.85em; 
   line-height: 1; 
 }
 
@@ -131,7 +131,6 @@ p {
 }
 
 .center { display: block; text-align: center; }
-
 
 /** page structure **/
 #w {
@@ -259,6 +258,7 @@ p {
 
 #loginform label { display: block; font-size: 1.1em; font-weight: bold; color: #7c8291; margin-bottom: 3px; }
 
+label {font-weight: bold;}
 
 .txtfield { 
   display: block;
@@ -354,8 +354,43 @@ form#form_pp_pic textarea{
   float : left;
   margin-left : 10px;
   width : 80%;
+  min-height : 300px;
+  position : relative;
+}
+#ad-form-description {
+  min-height: 170px;
 }
 
+#ad-display-description {
+  /*to push nav button down*/
+  margin-bottom: 50px;
+}
+
+#ad-display-pics {
+  float : left;
+  margin-bottom: 50px;
+}
 .no-margin {
   margin : 0px 0px !important;
+}
+.show-ad-pic{
+  width: 150px;
+  margin: 0px 5px;
+  padding: 3px;
+}
+
+.price-under-title{
+  font-weight: bolder;
+  font-size: 2em;
+  margin-top: -29px;
+}
+
+.sticky-bottom {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+}
+
+.new-ad-section{
+  min-height : 300px;
 }
