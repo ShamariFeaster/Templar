@@ -111,7 +111,7 @@ return {
       'looking back' at the last route that was loaded.*/
       xhr.callback = function(){
         State.onloadFileQueue.push(this.fileName);
-        
+        State.onloadFileQueue.push(this.route);
         if(this.callbackParam1.length == 0){
           Circular('Bootstrap').fireOnloads();
           this.callbackOnComplete.call(null);
