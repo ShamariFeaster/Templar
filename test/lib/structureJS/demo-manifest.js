@@ -46,7 +46,12 @@ structureJS.declare('controllers/EditProfileController');
 structureJS.declare('controllers/MyProfileController');
 
 /*New Ad*/
-structureJS.declare('controllers/NewAdController');
+structureJS.declare('controllers/NewAd/previewController');
+structureJS.declare('controllers/NewAd/categorySelectController');
+structureJS.declare('controllers/NewAd/titleDescriptionController');
+structureJS.declare('controllers/NewAd/typeFormController');
+
+/*Type Specific Forms*/
 structureJS.declare('controllers/AdForms/AnnouncementCtrl');
 structureJS.declare('controllers/AdForms/ForSaleCtrl');
 structureJS.declare('controllers/AdForms/HousingCtrl');

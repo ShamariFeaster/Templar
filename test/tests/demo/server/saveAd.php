@@ -11,6 +11,7 @@ $details = $_REQUEST['details'];
 $response['debug'] = print_r($details, true);
 $insertPassed = false;
 $savePhoneNum = (strtolower($details['save_phone_num']) === 'true') ? true : false;
+
 $insertQuery = <<<EOD
           INSERT INTO ads 
           (uid, state, city, price, title, description, 
@@ -51,7 +52,6 @@ $response['error'] = $mysqli->error;
 if(strlen($response['error']) == 0){
   $response['insertId'] = $mysqli->insert_id;
   $insertPassed = true;
-  /*check if update phone num*/
 }
 
 if($insertPassed == true && $savePhoneNum == true){

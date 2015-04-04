@@ -19,8 +19,6 @@ $query = <<<EOD
           ad_pic_id = ?;
 EOD;
 
-
-
 for($i = 0; $i < count($images); $i++){
   $stmt = $mysqli->prepare($query);
   $stmt->bind_param("ss", $adID, $images[$i]['id']);
