@@ -25,8 +25,10 @@ class Statement {
   }
 
   private function addConditions($query, $conditions){
-    $type = 'AND';
-    $tempCond = array();
+    $intraPrep = ' AND ';
+    $interPrepOp = ' AND ';
+    $condLen = 0;
+    $tempPrep = array();
     $returnObj = new stdClass();
     $returnObj->query = $query;
     $returnObj->conditions = array();
@@ -36,24 +38,48 @@ class Statement {
       $returnObj->query .= ' WHERE ';
       
       foreach($conditions as $condition){
+
         /*grab the type AND or OR*/
-        if(isset($condition['type'])){
-          $type = trim(strtoupper($condition['type']));
-          unset($condition['type']);
+        if(isset($condition['_prep_'])){
+          $intraPrep = ' '.trim(strtoupper($condition['_prep_'])).' ';
+          unset($condition['_prep_']);
         }
-        
+
         foreach($condition as $col => $val){
-          $tempCond[] = "$col = ?";
+          if(strcmp($col,'_interPrep_') == 0){
+            continue;
+          }
+          $tempPrep[] = "$col = ?";
           $returnObj->values[] = $val;
         }
+        /*push preposition onto queue*/
+        $returnObj->conditions[] = '('.implode($intraPrep , $tempPrep).')';
+        
+        if(($condLen = count($returnObj->conditions)) == 1){
+          $returnObj->query .= $returnObj->conditions[$condLen-1];
+        }else{
+          $returnObj->query .= $interPrepOp . $returnObj->conditions[$condLen-1];
+        }
+        
+        $interPrepOp = ' AND ';
+        
+        if(isset($condition['_interPrep_'])){
+          $interPrepOp = ' '.trim(strtoupper($condition['_interPrep_'])).' ';
+        }
+        
         /*wrap proposition in parenthesis */
-        $returnObj->conditions[] = '('.implode(' '.$type.' ' , $tempCond).')';
-        $tempCond = array();
+        $tempPrep = array();
       }
       
     }
+    /*add conditions to typedef string*/
+    $this->addToTypedefString(count($returnObj->values));
     $this->bindArray = array_merge($this->bindArray, $returnObj->values);
-    return $returnObj->query.implode(' AND ' , $returnObj->conditions) ;
+    return $returnObj->query;
+  }
+  
+  private function addToTypedefString($count){
+    $this->bindArray[0] .= str_repeat('s', $count);
   }
   
   private function parseData($keyValArr){
@@ -81,7 +107,7 @@ class Statement {
       $parts[] = implode(' = ',array($dataParts->columns[$i] , '?'));
     }
     /*add columns to typedef string*/
-    $this->bindArray[0] = $this->bindArray[0].str_repeat('s', count($dataParts->columns));
+    //$this->addToTypedefString(count($dataParts->columns));
     return trim(str_replace('__pair__', implode(' , ',$parts) , $stmt));
   }
 
