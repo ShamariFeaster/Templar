@@ -1,13 +1,14 @@
 <?php
 include '../EndPoint.php';
 
-$endPoint = new EndPoint('Insert');
-$endPoint->setData($_REQUEST['data']);
+$endPoint = new EndPoint('Update');
+$endPoint->SetTableName('ads');
+$endPoint->SetData($_REQUEST['data']);
 
 if(isset($_REQUEST['conditions']))
-  $endPoint->setConditions($_REQUEST['conditions']);
+  $endPoint->SetConditions($_REQUEST['conditions']);
   
-$endPoint->performAction();
+$endPoint->PerformAction();
   
 echo $endPoint->response;
 ?>

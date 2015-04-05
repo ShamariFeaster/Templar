@@ -15,6 +15,7 @@ class EndPoint{
   private $action;
   private $data;
   private $conditions;
+  private $tableName;
   public static $actions = array('insert', 'update', 'delete', 'select');
   
   public function __construct($action = 'insert'){
@@ -55,27 +56,35 @@ class EndPoint{
     $member = $decoded;
   }
   /*Data is set as a array of associative arrays*/
-  public function setData($data = array()){
+  public function SetData($data = array()){
     $this->transformAndStore($this->data, $data);
   }
   
-  public function setConditions($data = array()){
+  public function SetConditions($data = array()){
     $this->transformAndStore($this->conditions, $data);
   }
   
-  public function performAction(){
+  public function SetTableName($name = ''){
+    $this->tableName = $name;
+  } 
+  
+  public function PerformAction(){
     $query = '';
     $Statement = new Statement($this->connection, $this->action);
     
     switch ($this->action) {
       case 'insert':
         foreach($this->data as $data){
-          $Statement->exec($data, $this->conditions);
+          $Statement->Exec($data, $this->conditions, $this->tableName);
           $this->response->set('error', $this->connection->error);
         }
         
         break;
       case 'update':
+        foreach($this->data as $data){
+          $Statement->Exec($data, $this->conditions, $this->tableName);
+          $this->response->set('error', $this->connection->error);
+        }
         break;
       case 'delete':
         break;
