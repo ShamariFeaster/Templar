@@ -1,7 +1,7 @@
 <?php
 include '../EndPoint.php';
 
-$endPoint = new EndPoint('Update');
+$endPoint = new EndPoint('Delete');
 $endPoint->SetTableName('ads');
 $endPoint->SetData($_REQUEST['data']);
 

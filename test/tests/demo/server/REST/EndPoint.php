@@ -77,6 +77,7 @@ class EndPoint{
         foreach($this->data as $data){
           $Statement->Exec($data, $this->conditions, $this->tableName);
           $this->response->set('error', $this->connection->error);
+          $this->response->set('insertId', $this->connection->insert_id);
         }
         
         break;
@@ -87,6 +88,9 @@ class EndPoint{
         }
         break;
       case 'delete':
+        $stmt = $Statement->Exec(array(), $this->conditions, $this->tableName);
+        $this->response->set('error', $this->connection->error);
+        $this->response->set('affectedRows', $stmt->affected_rows);
         break;
       case 'select':
         break;
