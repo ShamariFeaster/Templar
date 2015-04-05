@@ -1,26 +1,12 @@
 <?php
-class BindParam{ 
-    private $values = array(), $types = ''; 
-    
-    public function add( $type, &$value ){ 
-        $this->values[] = $value; 
-        $this->types .= $type; 
-    } 
-    
-    public function get(){ 
-        return array_merge(array($this->types), $this->values); 
-    } 
-} 
-
 
 class Statement {
-  public static $insertQuery ='INSERT INTO ads (__names__) VALUES (__values__);';
+  public static $insertQuery ='INSERT INTO ads (__names__) VALUES (__values__)';
+  public static $updateQuery ='UPDATE ads SET (__names__) = (__values__)';
 
-  private $columns;
-  private $values;
   private $connection;
-  private $actionMap;
-  private $bindParam;
+  private $actionMap;//could be static
+  private $bindParam;//could be static
   private $bindArray;
   
   public function __construct(&$conn ,$action = ''){
@@ -36,8 +22,42 @@ class Statement {
       $this->bindArray[$i] = &$this->bindArray[$i];
     }
   }
+
+  private function addConditions($query, $conditions){
+    $type = 'AND';
+    $tempCond = array();
+    $returnObj = new stdClass();
+    $returnObj->query = $query;
+    $returnObj->conditions = array();
+    $returnObj->values = array();
+    
+    if(count($conditions) > 0){
+      $returnObj->query .= ' WHERE ';
+      
+      
+      foreach($conditions as $condition){
+        /*grab the type AND or OR*/
+        if(isset($condition['type'])){
+          $type = trim(strtoupper($condition['type']));
+          unset($condition['type']);
+        }
+        
+        foreach($condition as $col => $val){
+          $tempCond[] = "'$col' = ?";
+          $returnObj->values[] = $val;
+        }
+        /*wrap proposition in parenthesis */
+        $returnObj->conditions[] = '('.implode(' '.$type.' ' , $tempCond).')';
+        $tempCond = array();
+      }
+      
+    }
+    $this->bindArray = array_merge($this->bindArray, $returnObj->values);
+    return $returnObj->query.implode(' AND ' , $returnObj->conditions) ;
+  }
   
-  public function prep($keyValArr = array()){
+  /*---Statement Preparation---*/
+  private function prepInsert($keyValArr){
     $columns =  array_keys($keyValArr);
     $cQs = implode(',',array_fill(0, count($columns) , '?'));
     
@@ -48,17 +68,36 @@ class Statement {
     
     $this->bindArray = array(str_repeat('s', count($colVals)));
     $this->bindArray = array_merge($this->bindArray, $colVals);
-    $this->prepBindArray();
+    
     /*putting '?'s in query string*/
     $output = str_replace('__names__', implode(',', $columns) , $stmt);
     return trim(str_replace('__values__', $cvQs , $output));
   }
   
-  public function exec($data){
+  private function prepUpdate($keyValArr){
+  
+  }
+
+  private function prep($keyValArr = array()){
+    $query = '';
+    switch($this->action){
+      case 'insert':
+        $query = $this->prepInsert($keyValArr);
+        break;
+      case 'update':
+        $query = $this->prepUpdate($keyValArr);
+        break;
+    }
+    return $query;
+  }
+  
+  public function exec($data, $conditions){
     $query = $this->prep($data);
+    $query = $this->addConditions($query, $conditions);
     $stmt = $this->connection->prepare($query);
+    $this->prepBindArray();
     $this->bindParam->invokeArgs($stmt, $this->bindArray);
-    $stmt->execute();
+    //$stmt->execute();
   }
   
 }

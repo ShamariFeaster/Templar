@@ -14,6 +14,7 @@ class EndPoint{
   public $connection;
   private $action;
   private $data;
+  private $conditions;
   public static $actions = array('insert', 'update', 'delete', 'select');
   
   public function __construct($action = 'insert'){
@@ -27,25 +28,39 @@ class EndPoint{
     
     $this->action = strtolower($action);
     $this->data = array();
-    
+    $this->conditions = array();
     if(!in_array($this->action, $this::$actions)){
       throw new Exception('Unrecognized Action "'.$action.'"');
     }
     
   }
-  /*Data is set as a array of associative arrays*/
-  public function setData($data = array()){
+  
+  private function transformAndStore(&$member, $data){
     $decoded = json_decode($data);
+    $decoded = (isset($decoded)) ? $decoded : new stdClass();
     if(is_array($decoded)){
       for($i = 0; $i < count($decoded); $i++){
         $decoded[$i] = get_object_vars($decoded[$i]);
       }
       
     }else{
-      $decoded = array(get_object_vars($decoded));
+      $converted = get_object_vars($decoded);
+      $decoded = array();
+      if(count($converted) > 0){
+        $decoded[] = $converted;
+      }
+
     }
     
-    $this->data = $decoded;
+    $member = $decoded;
+  }
+  /*Data is set as a array of associative arrays*/
+  public function setData($data = array()){
+    $this->transformAndStore($this->data, $data);
+  }
+  
+  public function setConditions($data = array()){
+    $this->transformAndStore($this->conditions, $data);
   }
   
   public function performAction(){
@@ -55,7 +70,7 @@ class EndPoint{
     switch ($this->action) {
       case 'insert':
         foreach($this->data as $data){
-          $Statement->exec($data);
+          $Statement->exec($data, $this->conditions);
           $this->response->set('error', $this->connection->error);
         }
         
