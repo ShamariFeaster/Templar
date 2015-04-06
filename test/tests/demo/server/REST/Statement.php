@@ -4,6 +4,7 @@ class Statement {
   public static $insertQuery ='INSERT INTO __table__ (__names__) VALUES (__values__)';
   public static $updateQuery ='UPDATE __table__ SET __pair__';
   public static $deleteQuery = 'DELETE FROM __table__';
+  public static $selectQuery = 'SELECT __columns__ FROM __table__';
   
   private $connection;
   private $actionMap;//could be static
@@ -15,7 +16,8 @@ class Statement {
     $this->action = $action;
     $this->actionMap = array('insert' => self::$insertQuery,
                              'update' => self::$updateQuery,
-                             'delete' => self::$deleteQuery);
+                             'delete' => self::$deleteQuery,
+                             'select' => self::$selectQuery);
     $this->bindParam = (new ReflectionClass('mysqli_stmt'))->getMethod('bind_param'); 
     
   }
@@ -47,6 +49,21 @@ class Statement {
     
     return $returnObj;
   }
+  private function getCompOp($code){
+    $op = (isset($code)) ? $code : '';
+    
+    switch($op){
+      case 'EQ': $op = '='; break;
+      case 'GTE': $op = '>='; break;
+      case 'GT': $op = '>'; break;
+      case 'LTE': $op = '<'; break;
+      case 'LT': $op = '<='; break;
+      case 'NE': $op = '!='; break;
+      case 'LIKE': $op = 'LIKE'; break;
+      default: $op = '='; break;
+    }
+    return $op;
+  }
   
   /*$conditions is transformed by EndPoint. Each json object is represented as an assoc array.
     Those objects are wrapped in a indexed array. Each object represents a preposition (aka a
@@ -74,12 +91,16 @@ class Statement {
           $intraPrep = ' '.trim(strtoupper($condition['_prep_'])).' ';
           unset($condition['_prep_']);
         }
-
+        
+        /*get custom operator and remove it from $condition*/
+        $compOp = $this->getCompOp($condition['_op_']);
+        unset($condition['_op_']);
+        
         foreach($condition as $col => $val){
           if(strcmp($col,'_interPrep_') == 0){
             continue;
           }
-          $tempPrep[] = "$col = ?";
+          $tempPrep[] = "$col $compOp ?";
           $returnObj->values[] = $val;
         }
         /*push preposition onto queue*/
@@ -124,6 +145,14 @@ class Statement {
     return trim(str_replace('__pair__', implode(' , ',$parts) , $stmt));
   }
 
+  private function prepSelect($stmt, $dataParts){
+    if(count($dataParts->columns) > 0){
+      $output = str_replace('__columns__', implode(',', $dataParts->columns) , $stmt);
+    }else{
+      $output = str_replace('__columns__', '*' , $stmt);
+    }
+    return $output;
+  }
   
   private function prep($keyValArr = array(), $tableName){
     $query = '';
@@ -144,6 +173,9 @@ class Statement {
         /*delete statement only using conditions. So we use the raw statement. Of course
           the table name has been interpolated first though.*/
         $query = $stmt;
+        break;
+      case 'select':
+        $query = $this->prepSelect($stmt, $dataParts);
         break;
     }
     return $query;
