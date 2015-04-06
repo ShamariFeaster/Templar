@@ -93,6 +93,18 @@ class EndPoint{
         $this->response->set('affectedRows', $stmt->affected_rows);
         break;
       case 'select':
+        $result; 
+        $output = array(); 
+        $jsonOutput;
+        foreach($this->data as $data){
+          $stmt = $Statement->Exec($data, $this->conditions, $this->tableName);
+          $result = $stmt->get_result();
+          while ($row = $result->fetch_array(MYSQLI_ASSOC)){
+            $output[] = $row;
+          }
+          $jsonOutput = json_encode($output);
+          $this->response->set('results', $jsonOutput);
+        }
         break;
 
     }
