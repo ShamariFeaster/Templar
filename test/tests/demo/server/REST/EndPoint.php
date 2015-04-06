@@ -28,20 +28,34 @@ class EndPoint{
     if(!$this->connection)
       die('DB Connect Failed');
     $this->SetTableName($tableName);
-    $this->SetData($_REQUEST['data']);
+    
+    if(isset($_REQUEST['data']))
+      $this->SetData($_REQUEST['data']);
     
     if(isset($_REQUEST['conditions']))
       $this->SetConditions($_REQUEST['conditions']);
       
-    $this->action = strtolower($_REQUEST['action']);
-    
-    if(!in_array($this->action, $this::$actions)){
-      $this->response->set('error', 'SERVER ERROR: Unrecognized action "'.$this->action.'"');
-    }else{
+    $this->action = (isset($_REQUEST['action'])) ? 
+                      strtolower($_REQUEST['action']) : '';
+
+    if($this->getReadyState() == true){
       $this->PerformAction();
     }
   }
-  
+  private function getReadyState(){
+    $ready = true;
+    if(!in_array($this->action, $this::$actions)){
+      $ready = false;
+      $this->response->pushError('PROTOCOL ERROR: Unrecognized action "'.$this->action.'"');
+    }
+    
+    if(count($this->data) < 1){
+      $ready = false;
+      $this->response->pushError('PROTOCOL ERROR: No data property passed in request');
+    }
+    
+    return $ready;
+  }
   private function transformAndStore(&$member, $data){
     $decoded = json_decode($data);
     $decoded = (isset($decoded)) ? $decoded : new stdClass();
@@ -82,7 +96,7 @@ class EndPoint{
       case 'insert':
         foreach($this->data as $data){
           $Statement->Exec($data, $this->conditions, $this->tableName);
-          $this->response->set('error', $this->connection->error);
+          $this->response->pushError($this->connection->error);
           $this->response->set('insertId', $this->connection->insert_id);
         }
         
@@ -90,13 +104,13 @@ class EndPoint{
       case 'update':
         foreach($this->data as $data){
           $stmt = $Statement->Exec($data, $this->conditions, $this->tableName);
-          $this->response->set('error', $this->connection->error);
+          $this->response->pushError($this->connection->error);
           $this->response->set('affectedRows', $stmt->affected_rows);
         }
         break;
       case 'delete':
         $stmt = $Statement->Exec(array(), $this->conditions, $this->tableName);
-        $this->response->set('error', $this->connection->error);
+        $this->response->pushError($this->connection->error);
         $this->response->set('affectedRows', $stmt->affected_rows);
         break;
       case 'select':
