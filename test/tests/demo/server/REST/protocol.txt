@@ -1,0 +1,41 @@
+* - required
+
+Productions
+ATTR := column_name
+VAL := string
+AVPair := "_ATTR" : "_VAL"
+AVColection := AVPair[, _AVColection]
+Obj := {_AVColection}
+ObjCollection := [_Obj[,_ObjCollection]]
+Action := insert | update | delete | select
+
+Request Properties (name - data type):
+data* - (Obj|ObjCollection) 
+action* - (string) 
+conditions - (Obj|ObjCollection) 
+
+conditions property description
+
+Each _Obj is represents a dicrete logical preposition. _prep_ sets
+the logical operator used within an _Obj's preposition. _interPrep_
+sets the logical operator used to link prepositions.
+
+_op_ := EQ | GTE | GT | LTE | LT | NE | LIKE
+_prep_ := AND | OR /*sets the logical operator used */
+_distinct_ := any
+_interPrep_ := _prep_ /* set logical operator between this and next _Obj*/
+_limit_ := INT
+_limitOffset_ := INT
+
+action property description
+
+If Action Is insert
+conditions are ignored
+
+If Action Is update
+_distinct_ is ignored
+
+If Action Is delete
+_distinct_ is ignored
+
+If Action Is select

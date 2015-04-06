@@ -36,9 +36,10 @@ class EndPoint{
     $this->action = strtolower($_REQUEST['action']);
     
     if(!in_array($this->action, $this::$actions)){
-      throw new Exception('Unrecognized Action "'.$action.'"');
+      $this->response->set('error', 'SERVER ERROR: Unrecognized action "'.$this->action.'"');
+    }else{
+      $this->PerformAction();
     }
-    $this->PerformAction();
   }
   
   private function transformAndStore(&$member, $data){
@@ -88,8 +89,9 @@ class EndPoint{
         break;
       case 'update':
         foreach($this->data as $data){
-          $Statement->Exec($data, $this->conditions, $this->tableName);
+          $stmt = $Statement->Exec($data, $this->conditions, $this->tableName);
           $this->response->set('error', $this->connection->error);
+          $this->response->set('affectedRows', $stmt->affected_rows);
         }
         break;
       case 'delete':

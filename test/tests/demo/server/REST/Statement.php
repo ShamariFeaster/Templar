@@ -61,8 +61,8 @@ class Statement {
       case 'EQ': $op = '='; break;
       case 'GTE': $op = '>='; break;
       case 'GT': $op = '>'; break;
-      case 'LTE': $op = '<'; break;
-      case 'LT': $op = '<='; break;
+      case 'LTE': $op = '<='; break;
+      case 'LT': $op = '='; break;
       case 'NE': $op = '!='; break;
       case 'LIKE': $op = 'LIKE'; break;
       default: $op = '='; break;
