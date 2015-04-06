@@ -18,22 +18,27 @@ class EndPoint{
   private $tableName;
   public static $actions = array('insert', 'update', 'delete', 'select');
   
-  public function __construct($action = 'insert'){
+  public function __construct($tableName){
     $this->response = new Response();
-    $data = array();
+    $this->data = array();
+    $this->conditions = array();
     $dbc = new DatabaseConfig();
     $this->connection = mysqli_connect($dbc::$host, $dbc::$user_name, $dbc::$password, $dbc::$db_name);
     
     if(!$this->connection)
       die('DB Connect Failed');
+    $this->SetTableName($tableName);
+    $this->SetData($_REQUEST['data']);
     
-    $this->action = strtolower($action);
-    $this->data = array();
-    $this->conditions = array();
+    if(isset($_REQUEST['conditions']))
+      $this->SetConditions($_REQUEST['conditions']);
+      
+    $this->action = strtolower($_REQUEST['action']);
+    
     if(!in_array($this->action, $this::$actions)){
       throw new Exception('Unrecognized Action "'.$action.'"');
     }
-    
+    $this->PerformAction();
   }
   
   private function transformAndStore(&$member, $data){
