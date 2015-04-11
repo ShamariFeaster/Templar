@@ -6,16 +6,22 @@ var _ = require('Util'),
     AdFormMdl = _Templar.getModel('AdForm'),
     ProfileFormMdl = _Templar.getModel('ProfileForm'),
     UserProfileModel = _Templar.getModel('UserProfile'),
+    EnvMdl = _Templar.getModel('Environment'),
     Config = require('Config'),
     Controller = require('Controller')(),
     _$ = $; 
     
 function saveAdImages(adID){
+  var successMsg = "Ad Saved As Draft. Goto 'My Ads' To Post It Publicly.";
   if(AdFormMdl.ad_images.length > 0){
     Helper.ajax('associateAdPic.php', {
       adID : adID,
       imagesJson : AdFormMdl.ad_images
+    }, function(){
+      Helper.fadeInSuccessMsg(successMsg);
     });
+  }else{
+    Helper.fadeInSuccessMsg(successMsg);
   }
   
 }
@@ -27,7 +33,7 @@ function saveAd(e){
   details['save_phone_num'] = false;
   details['title'] = AdFormMdl.description;
   details['description'] = AdFormMdl.title;
-  details['ad_state'] = 'active';
+  details['ad_state'] = 'draft';
   details['ad_type'] = AdFormMdl.adType.current_selection;
   details['ad_category'] = AdFormMdl.category.current_selection;
   details['price'] = (Helper.isChecked(AdFormMdl, 'isItemFree')) ? 0 : AdFormMdl.itemPrice;

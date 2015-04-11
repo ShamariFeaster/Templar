@@ -4,6 +4,7 @@ structureJS.module('Config', function(require){
     formsDir : 'partials/New-Ad/TypeSpecificAdForms/',
     formsCtrlDir : 'Modules/Controllers/AdForms/',
     adPicDir : 'server/ad_pics/',
-    serverRoot : 'server/'
+    serverRoot : 'server/',
+    SERVER_DEBUG : true
   };
 });

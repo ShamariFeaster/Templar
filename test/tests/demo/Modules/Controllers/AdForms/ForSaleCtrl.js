@@ -33,7 +33,7 @@ function deleteAdImage(e){
         }, 
         
         function(data, status){
-          EnvModel.success_msg = 'Image deletion successful.';
+          Helper.fadeInSuccessMsg('Image deletion successful.');
           AdFormMdl.ad_images = AdFormMdl.ad_images
                               .filter(function(obj){
                                 return (obj.id != imageId);
@@ -71,7 +71,7 @@ _Templar.success('#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri', function(
   
   if(AdFormMdl.ad_images.length > 2){
     AdFormMdl.disablePicSubmission = true;
-    EnvModel.error = "You've Reached The Max of 3 Picture Per Ad";
+    Helper.fadeInErrorMsg("You've Reached The Max of 3 Picture Per Ad");
   }else{
     AdFormMdl.disablePicSubmission = false;
     EnvModel.error = "";

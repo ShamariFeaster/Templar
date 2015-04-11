@@ -113,7 +113,7 @@ return {
         State.onloadFileQueue.push(this.fileName);
         State.onloadFileQueue.push(this.route);
         if(this.callbackParam1.length == 0){
-          Circular('Bootstrap').fireOnloads();
+          //Circular('Bootstrap').fireOnloads();
           this.callbackOnComplete.call(null);
         }
         

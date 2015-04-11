@@ -370,6 +370,10 @@ form#form_pp_pic textarea{
   float : left;
   margin-bottom: 50px;
 }
+/*prevents messages from pushing down content when appearing*/
+#feedback-center {
+  min-height: 1.1em;
+}
 .no-margin {
   margin : 0px 0px !important;
 }

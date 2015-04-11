@@ -1,6 +1,6 @@
 structureJS.configure(
 {
-  globals : [
+  globals : [ 'lib/jquery',
             'templar/Constants', 
             'templar/Util', 
             'classes/ClassTMP_Node',

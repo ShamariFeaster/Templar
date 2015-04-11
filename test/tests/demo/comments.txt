@@ -57,3 +57,9 @@ and route definition objects. UNTESTED.
 Reduce memory footprint by storing references to cahced nodes instead of the nodes 
 themselves. Not a change I'm considering now, but when it's out in the wild this 
 optimization would be great for mobile and low power devices.
+
+4/3/2015
+
+Image uploading is uploading images to the server in order to provide previews for the user
+This is going to necessitate some chronjob to cleanup orphaned images both on the file
+system and in the DB.

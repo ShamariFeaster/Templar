@@ -11,7 +11,7 @@ structureJS.module('Helper', function(require){
     ajax : function(url, payload, cbOK, cbErr, cbFatalErr){
       if(!_.isString(url))
         return;
-        
+      url = (Config.SERVER_DEBUG == true) ? url + '?XDEBUG_SESSION_START=name' : url;
       var payload = payload || {},
           cbOK = cbOK || function(data){
             EnvModel.success_msg = data;
@@ -155,6 +155,20 @@ structureJS.module('Helper', function(require){
       output[1] = date.getDate();
       output[2] = date.getFullYear();
       return this.parseDate(output.join('/'));
-    }
+    },
+    
+    fadeInSuccessMsg : function(msg){
+      $('#success-msg').hide();
+      EnvModel.success_msg = msg;
+      $('#success-msg').fadeIn(1750).fadeOut(1750, function(){
+        EnvModel.success_msg = '';
+      });
+    },
+    
+    fadeInErrorMsg : function(msg){
+      $('#error-msg').hide();
+      EnvModel.error = msg;
+      $('#error-msg').fadeIn(1750);
+    },
   };
 });
