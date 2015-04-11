@@ -55,55 +55,63 @@ Update.prototype = Object.create(Query.prototype);
 function Condition(column, value, compOp){
   if(!(this instanceof Condition))
     return new Condition(column, value, compOp);
-  this.column = column;
-  this.value = value;
-  this.compOp = compOp;
-  this.prep = 'AND';
-  this.preposition = { _op_ : compOp, _prep_ : 'AND'};
+  this.preposition = { _op_ : compOp, _prep_ : 'AND', length : 1};
   this.preposition[column] = value;
   this.prepositions = [this.preposition];
+
 }
 
 Condition.prototype = {
-  addPrep : function(Condition, prep){
-    var lastPrep = this.prepositions.pop();
+  extend : function(from, to){
+    var added = 0;
+    for(var k in from){
+      if(from.hasOwnProperty(k) && typeof to[k] == 'undefined'){
+        to[k] = from[k];
+        added++;
+      }
+    }
+    return added;
+  },
+  addPrep : function(preposition, prep){
+    var lastPrep, keys;
+    lastPrep = this.prepositions.pop();
     if(lastPrep == null) return;
-    /*one prep on chain, override intra-prep*/
-    if(this.prepositions.length == 0 && lastPrep.compOp == Condition.compOp){
-      lastPrep[Condition.column] = Condition.value;
+
+    /*detects a binary preposition and allows for setting and/or*/
+    if(lastPrep.length == 1 && preposition.length == 1 
+      && lastPrep._op_ == preposition._op_){    
+      lastPrep.length += this.extend(preposition, lastPrep);
       lastPrep._prep_ = prep;
       this.prepositions.push(lastPrep);
-    }else
-    if(this.prepositions.length > 0 && lastPrep._prep_ == prep && lastPrep.compOp == Condition.compOp){
-      lastPrep[Condition.column] = Condition.value;
+    }else /*extends current proposition*/
+    if(lastPrep._prep_ == prep && lastPrep._op_ == preposition._op_){
+      lastPrep.length += this.extend(preposition, lastPrep);
       this.prepositions.push(lastPrep);
-    }else 
-    if(this.prepositions.length > 0 && (lastPrep._prep_ != prep || lastPrep.compOp != Condition.compOp)){
+    }else /*pushes new proposition, set interprop logic*/
+    if(lastPrep._prep_ != prep || lastPrep._op_ != preposition._op_){
       lastPrep._interPrep_ = prep;
       this.prepositions.push(lastPrep);
-      this.prepositions.push(Condition.preposition);
+      this.prepositions.push(preposition);
     }
+
   },
   
   build : function(Condition, prep){
     /*check if compound condition*/
-    if(Condition.prepositions.length == 1){
-      this.addPrep(Condition, prep);
-    }else{
-      var lastPrep = this.prepositions.pop();
-      lastPrep._prep_ = prep;
-      this.prepositions.push(lastPrep);
-      this.prepositions.concat(Condition.prepositions);
+    for(var i = 0; i < Condition.prepositions.length; i++){
+      this.addPrep(Condition.prepositions[i], prep);
     }
     
   },
   
   and : function(Condition){
     this.build(Condition, 'AND');
+    return this;
   },
   
   or : function(Condition){
     this.build(Condition, 'OR');
+    return this;
   }
 }
 
@@ -126,8 +134,12 @@ function LTE(column, value){return Condition.call(this, column, value, 'LTE' );}
 function NE(column, value){return Condition.call(this, column, value, 'NE' );}
 function LIKE(column, value){return Condition.call(this, column, value, 'LIKE' );}
 
-var sq = new Select();
-LT('ad_id',20);//.and( EQ('uid',18) );
+//var sq = new Select();
+var c = LT('sup',45).and( EQ('a', 0))
+  /*,
+   c2 = EQ('blah',7),
+   c3 = LT('sup', 45);*/
+LT('ad_id',20).or(c);//.and( EQ('uid',18) );
 /*sq.condition( LT('ad_id',20).and( EQ('uid',18) ) );
 sq.and( GTE('ad_id',20) );
 sq.execute(function(res){
