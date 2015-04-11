@@ -236,8 +236,4 @@ class Statement {
   }
   
 }
-
-
-
 ?>
-

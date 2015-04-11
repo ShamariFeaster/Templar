@@ -18,7 +18,8 @@ class EndPoint{
   private $tableName;
   public static $actions = array('insert', 'update', 'delete', 'select');
   
-  public function __construct($tableName){
+  public function __construct($tableName){  
+    header('Content-Type: application/json');
     $this->response = new Response();
     $this->data = array();
     $this->conditions = array();
@@ -57,20 +58,24 @@ class EndPoint{
     return $ready;
   }
   private function transformAndStore(&$member, $data){
-    $decoded = json_decode($data);
-    $decoded = (isset($decoded)) ? $decoded : new stdClass();
-    if(is_array($decoded)){
-      for($i = 0; $i < count($decoded); $i++){
-        $decoded[$i] = get_object_vars($decoded[$i]);
-      }
-      
-    }else{
-      $converted = get_object_vars($decoded);
-      $decoded = array();
-      if(count($converted) > 0){
-        $decoded[] = $converted;
-      }
+    $decoded = $data;
+    
+    if(gettype($data) == 'string'){
+      $decoded = json_decode($data);
+      $decoded = (isset($decoded)) ? $decoded : new stdClass();
+      if(is_array($decoded)){
+        for($i = 0; $i < count($decoded); $i++){
+          $decoded[$i] = get_object_vars($decoded[$i]);
+        }
+        
+      }else{
+        $converted = get_object_vars($decoded);
+        $decoded = array();
+        if(count($converted) > 0){
+          $decoded[] = $converted;
+        }
 
+      }
     }
     
     $member = $decoded;
@@ -123,13 +128,12 @@ class EndPoint{
           while ($row = $result->fetch_array(MYSQLI_ASSOC)){
             $output[] = $row;
           }
-          $jsonOutput = json_encode($output);
-          $this->response->set('results', $jsonOutput);
+
+          $this->response->set('results', $output);
         }
         break;
 
     }
   }
 }
-
 ?>
