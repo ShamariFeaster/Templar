@@ -44,13 +44,12 @@ var Bootstrap = {
   loadPartialIntoTemplate : function(){
     State.compilationThreadCount--;
     /*Graceful fail on file not found. Error is logged from aync function*/
-    if(this.status != 200) return;
-    
-    var partialContents = this.responseText,
+    if(this.status == 200){
+      var partialContents = this.responseText,
         fileName = this.fileName,
         targetId = (!_.isNullOrEmpty(this.targetId)) ? 
                       this.targetId.replace('#','') : 'apl-content',
-        targetNode = (!_.isNull(this.targetNode)) ? this.targetNode : null,
+        targetNode = (!_.isNull(this.targetNode)) ? this.targetNode : document.getElementById(targetId),
         /*a partial can define parent template dom elements to be hidden*/
         nodeToShow = null,
         href = document.location.href,
@@ -60,41 +59,38 @@ var Bootstrap = {
           as the xhr object*/
         DOMGetFileContents = this.callback || function(){};
   
-    if(!_.isNull(targetNode)){
-      targetNode.innerHTML = partialContents;
-    }else
-    if((targetNode = document.getElementById(targetId)) != null){
-      targetNode.innerHTML = partialContents;
-    }else{
-      /*Target node was not found, fallback*/
-      _.log('WARNING: TARGET NODE NOT FOUND FOR ROUTE "'+this.route+'".');
-      if(!_.isNullOrEmpty(this.fallback)){
-        _.log('WARNING: ATTEMPTING FALLBACK ROUTE "'+this.fallback+'".');
-        Route.open(this.fallback);
-      }
-      return;
-    }
 
-    _.log('Compiling <' + fileName + '> w/ scope <' + scope + '>');
-    /*remove this pending comp*/
-    
-    State.compiledScopes += scope + ',';
-    Compile.compile( targetNode, scope );
-    DOMGetFileContents.call(this);
-    
-    /*if a default-template tag found, recursive compilations will be spun off async during compile()
-      .without a way to determine if there are still unfinished 'threads' we will interpolate multiple
-      times and prematurely causing unecessary overhead and misfiring of our onload handlers. Dangers of
-      multiple interps is tearing down/rebuilding repeats which destroys control nodes causing control failure*/
-    if(State.compilationThreadCount <= 0){
-      Map.pruneNodeTreeByScope( State.compiledScopes ); 
-      Link.bindModel( State.compiledScopes );
-      Bootstrap.fireOnloads();
-      Bootstrap.bindTargetSetter();
-      State.compilationThreadCount = 0;
-    }
-    
-    
+      if(_.isNull(targetNode)){
+        /*Target node was not found, fallback*/
+        _.log('WARNING: TARGET NODE NOT FOUND FOR ROUTE "'+this.route+'".');
+        if(!_.isNullOrEmpty(this.fallback)){
+          _.log('WARNING: ATTEMPTING FALLBACK ROUTE "'+this.fallback+'".');
+          Route.open(this.fallback);
+        }
+      }else{
+        targetNode.innerHTML = partialContents;
+        _.log('Compiling <' + fileName + '> w/ scope <' + scope + '>');
+        /*remove this pending comp*/
+        
+        State.compiledScopes += scope + ',';
+        Compile.compile( targetNode, scope );
+        DOMGetFileContents.call(this);
+        
+        /*if a default-template tag found, recursive compilations will be spun off async during compile()
+          .without a way to determine if there are still unfinished 'threads' we will interpolate multiple
+          times and prematurely causing unecessary overhead and misfiring of our onload handlers. Dangers of
+          multiple interps is tearing down/rebuilding repeats which destroys control nodes causing control failure*/
+        if(State.compilationThreadCount <= 0){
+          Map.pruneNodeTreeByScope( State.compiledScopes ); 
+          Link.bindModel( State.compiledScopes );
+          Bootstrap.fireOnloads();
+          Bootstrap.bindTargetSetter();
+          State.compilationThreadCount = 0;
+        }
+      }
+
+    } 
+
   }
 };
 

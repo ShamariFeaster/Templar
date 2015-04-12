@@ -5,6 +5,8 @@ structureJS.module('Helper', function(require){
       EnvModel = _Templar.getModel('Environment'),
       UserProfileModel = _Templar.getModel('UserProfile'),
       Config = require('Config'),
+      SelectQuery = new (require('JRDBI').QueryCollection.Select)(),
+      EQ = require('JRDBI').Condition.EQ,
       _$ = $;
       
   return {
@@ -52,12 +54,13 @@ structureJS.module('Helper', function(require){
     setProfileProperty : function(UserProfile, prop, fallBack){
       if(!_.isDef(UserProfile) || !_.isDef(UserProfile[prop])){
         _.log('WARNING: setProfileProperty() : "' + prop + '" not found');
-        return;
+      }else{
+        UserProfile[prop] = (_.isNullOrEmpty(UserProfile[prop])) ? sessionStorage[prop] : UserProfile[prop];
+        if(_.isFunc(fallBack) && _.isNullOrEmpty(UserProfile[prop])){
+          fallBack.call(this, UserProfile, prop);
+        }
       }
-      UserProfile[prop] = (_.isNullOrEmpty(UserProfile[prop])) ? sessionStorage[prop] : UserProfile[prop];
-      if(_.isFunc(fallBack) && _.isNullOrEmpty(UserProfile[prop])){
-        fallBack.call(this, UserProfile, prop);
-      }
+      
     },
     
     loadProfile : function(UserProfile){
@@ -76,11 +79,13 @@ structureJS.module('Helper', function(require){
       this.setProfileProperty(UserProfile, 'role');
       this.setProfileProperty(UserProfile, 'pp_src', function(UserProfile, prop){
         if(_.isNullOrEmpty(UserProfile[prop] || sessionStorage[prop])){
-          this.ajax('profile-pic-src.php', 
-            {uid: UserProfile.uid},
-            function(data, status, jqXHR){
-              UserProfile[prop] = data.src;
-          });
+          SelectQuery
+            .fields({profile_pic_uri: true})
+            .condition(EQ('uid',UserProfile.uid))
+            .execute('people', function(data){
+              UserProfile[prop] = Config.ppPicDir + data.results[0].profile_pic_uri;
+            });
+
         }else{
           UserProfile[prop] = sessionStorage[prop];
         }
@@ -175,30 +180,4 @@ structureJS.module('Helper', function(require){
 
 
 /* ------------------------------------------------------------------------- */
-structureJS.module('JRDBI', function(require){
-  var Collection = require('JRDBIQuery'),
-      Config = require('Config'),
-      _$ = window.$;
-  /* implement execute using jquery ajax */
-  Collection.Query.prototype.execute = function(endPoint, success, fail){
-    
-    if(typeof endPoint !== 'string') return;
-    
-    var query = this,
-        url = Config.endpointRoot + endPoint + '.php';
-    url = (Config.SERVER_DEBUG == true) ? url + '?XDEBUG_SESSION_START=name' : url;
-    _$.ajax({
-      url : url,
-      method : 'POST',
-      datatype : 'json',
-      data : query.statement,
-      success : success || function(data){console.log(data);},
-      error : fail || function(data){console.log(data);}
-    });
-    
-    if(!(this instanceof Collection.SelectAll))
-      query.statement.data.length = 0;
-    query.statement.conditions.length = 0;
-  };
-  return { QueryCollection : Collection, Condition : require('JRDBICondition') };
-});
+
