@@ -160,8 +160,7 @@ return {
     }else{
       routes.push(routeObj);
     }
-    
-    State.onloadFileQueue.push(routeName);
+
     this.fetchNestedRouteFiles(routes);
   },
   
