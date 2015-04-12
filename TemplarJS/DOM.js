@@ -110,7 +110,7 @@ return {
       /*the context is the previously loaded route. All properties of 'this' are
       'looking back' at the last route that was loaded.*/
       xhr.callback = function(){
-        State.compilationThreadCount--;
+        //State.compilationThreadCount--;
         State.onloadFileQueue.push(this.fileName);
         /*parts of route chains aren't required to be named*/
         if(_.isDef(this.route))
@@ -119,9 +119,11 @@ return {
         if(this.callbackParam1.length == 0){
           //Circular('Bootstrap').fireOnloads();
           this.callbackOnComplete.call(null);
+        }else{
+          Circular('DOM').fetchNestedRouteFiles.call(null, this.callbackParam1);
         }
         
-        Circular('DOM').fetchNestedRouteFiles.call(null, this.callbackParam1);
+        
         
       }
       
@@ -140,6 +142,7 @@ return {
       }
       if(!_.isNullOrEmpty(xhr.fileName)){
         State.compilationThreadCount++;
+        _.log('GETTIG: ' + xhr.fileName);
         xhr.open('get',  xhr.fileName, true);
         xhr.send();
         

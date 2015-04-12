@@ -57,6 +57,7 @@ Controller.init = function(bannerMsg){
 };
 
 _Templar.success("partials/edit-profile.html", function(){
+  UserProfileModel.pp_src = sessionStorage['pp_src'] = '';
   Controller.init('Edit My Profile');
 });
     

@@ -42,6 +42,7 @@ var Bootstrap = {
   },
   /*Preloading audio players will hang the framework.*/
   loadPartialIntoTemplate : function(){
+    State.compilationThreadCount--;
     /*Graceful fail on file not found. Error is logged from aync function*/
     if(this.status != 200) return;
     
@@ -80,7 +81,7 @@ var Bootstrap = {
     State.compiledScopes += scope + ',';
     Compile.compile( targetNode, scope );
     DOMGetFileContents.call(this);
-    State.compilationThreadCount--;
+    
     /*if a default-template tag found, recursive compilations will be spun off async during compile()
       .without a way to determine if there are still unfinished 'threads' we will interpolate multiple
       times and prematurely causing unecessary overhead and misfiring of our onload handlers. Dangers of
