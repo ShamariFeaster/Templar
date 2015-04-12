@@ -11,7 +11,10 @@ class Response {
   }
   
   public function pushError($msg){
-    $this->response['error'][] = $msg;
+    if(!empty($msg)){
+      $this->response['error'][] = $msg;
+    }
+    
   }
   
   public function set($key, $val = ''){

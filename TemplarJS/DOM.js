@@ -110,21 +110,19 @@ return {
       /*the context is the previously loaded route. All properties of 'this' are
       'looking back' at the last route that was loaded.*/
       xhr.callback = function(){
-        //State.compilationThreadCount--;
+
         State.onloadFileQueue.push(this.fileName);
         /*parts of route chains aren't required to be named*/
         if(_.isDef(this.route))
           State.onloadFileQueue.push(this.route);
         
         if(this.callbackParam1.length == 0){
-          //Circular('Bootstrap').fireOnloads();
+
           this.callbackOnComplete.call(null);
         }else{
           Circular('DOM').fetchNestedRouteFiles.call(null, this.callbackParam1);
         }
-        
-        
-        
+
       }
       
       xhr.onreadystatechange = function() {
@@ -221,7 +219,7 @@ return {
             modelName : DOM_Node[_.DOM_MDL_NAME],
             attribName : DOM_Node[_.DOM_ATTR_NAME],
             token : DOM_Node[_.DOM_TOKEN]
-            };
+          };
   }
   
 }; 

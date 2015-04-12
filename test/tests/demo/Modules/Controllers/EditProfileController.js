@@ -3,14 +3,16 @@ structureJS.module('EditProfileController', function(require){
 var _ = require('Util'),
     Route = require('Route'),
     Helper = require('Helper'),
-    _Templar = Templar,
+    _Templar = window.Templar,
     EnvModel = _Templar.getModel('Environment'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     ProfileFormMdl = _Templar.getModel('ProfileForm'),
     GeoInfo = require('GeoInfo-US'),
     Config = require('Config'),
     Controller = require('Controller')(),
-    _$ = $;   /*stop unecessary scope lookup*/
+    UpdateQuery = new (require('JRDBI').QueryCollection.Update)(),
+    EQ = require('JRDBI').Condition.EQ,
+    _$ = window.$;   /*stop unecessary scope lookup*/
 
 function repopulateEditForm(){
   ProfileFormMdl.fn = UserProfileModel.fn;
@@ -23,9 +25,7 @@ function repopulateEditForm(){
 }
 
 function updateProfileHandler(e){
-  Helper.ajax('update-profile.php', 
-    {
-      uid: UserProfileModel.uid,
+  var updateFields = {
       fn : ProfileFormMdl.fn,
       ln : ProfileFormMdl.ln,
       age : ProfileFormMdl.age.current_selection,
@@ -33,17 +33,22 @@ function updateProfileHandler(e){
       state : ProfileFormMdl.states.current_selection,
       city : ProfileFormMdl.cities.current_selection,
       description : ProfileFormMdl.description
-    }, 
-    function(data, status, jqXHR){
-      EnvModel.success_msg = data.success_msg;
-      UserProfileModel.fn = sessionStorage['fn'] = data.fn;
-      UserProfileModel.ln = sessionStorage['ln'] = data.ln;
-      UserProfileModel.age = sessionStorage['age'] = data.age;
-      UserProfileModel.sex = sessionStorage['sex'] = data.sex;
-      UserProfileModel.state = sessionStorage['state'] = data.state;
-      UserProfileModel.city = sessionStorage['city'] = data.city;
-      UserProfileModel.description = sessionStorage['description'] = data.description;
-  });
+    };
+    
+  UpdateQuery
+    .fields(updateFields)
+    .condition( EQ('uid', UserProfileModel.uid) )
+    .execute('people', function(data){
+      Helper.fadeInSuccessMsg('Profile Updated');
+      UserProfileModel.fn = sessionStorage['fn'] = ProfileFormMdl.fn;
+      UserProfileModel.ln = sessionStorage['ln'] = ProfileFormMdl.ln;
+      UserProfileModel.age = sessionStorage['age'] = ProfileFormMdl.age.current_selection;
+      UserProfileModel.sex = sessionStorage['sex'] = ProfileFormMdl.sex.current_selection;
+      UserProfileModel.state = sessionStorage['state'] = ProfileFormMdl.states.current_selection;
+      UserProfileModel.city = sessionStorage['city'] = ProfileFormMdl.cities.current_selection;
+      UserProfileModel.description = sessionStorage['description'] = ProfileFormMdl.description;
+    });
+
 }
 
 Controller.bindHandlers = function(){

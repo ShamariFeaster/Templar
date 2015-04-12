@@ -110,25 +110,13 @@ class EndPoint{
         foreach($this->data as $data){
           $stmt = $Statement->Exec($data);
           $this->response->pushError($this->connection->error);
-          $affectedRows = 0;
-          
-          if($stmt){
-            $affectedRows = $stmt->affected_rows;
-          }
-          
-          $this->response->set('affectedRows', $affectedRows);
+          $this->response->set('affectedRows', $this->connection->affected_rows);
         }
         break;
       case 'delete':
         $stmt = $Statement->Exec(array());
         $this->response->pushError($this->connection->error);
-        $affectedRows = 0;
-        
-        if($stmt){
-          $affectedRows = $stmt->affected_rows;
-        }
-        
-        $this->response->set('affectedRows', $affectedRows);
+        $this->response->set('affectedRows', $this->connection->affected_rows);
         break;
       case 'select':
         $result; 
