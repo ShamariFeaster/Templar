@@ -7,13 +7,15 @@ class Statement {
   public static $selectQuery = 'SELECT __pre__ __columns__ FROM __table__';
   
   private $connection;
+  private $Endpoint;
   private $actionMap;//could be static
   private $bindParam;//could be static
   private $bindArray;
   
-  public function __construct(&$conn ,$action = ''){
-    $this->connection = $conn;
-    $this->action = $action;
+  public function __construct(&$EndPoint){
+    $this->connection = $EndPoint->connection;
+    $this->action = $EndPoint->action;
+    $this->EndPoint = $EndPoint;
     $this->actionMap = array('insert' => self::$insertQuery,
                              'update' => self::$updateQuery,
                              'delete' => self::$deleteQuery,
@@ -202,12 +204,12 @@ class Statement {
   
   private function prep($keyValArr = array(), $tableName){
     $query = '';
-    $stmt = $this->actionMap[$this->action];
+    $stmt = $this->actionMap[$this->EndPoint->action];
     $stmt = str_replace('__table__', $tableName , $stmt);
     $dataParts = $this->parseData($keyValArr);
     
     
-    switch($this->action){
+    switch($this->EndPoint->action){
       case 'insert':
         $query = $this->prepInsert($stmt, $dataParts);
         break;
@@ -227,15 +229,25 @@ class Statement {
     return $query;
   }
   
-  public function Exec($data, $conditions, $tableName){
-    $query = $this->prep($data, $tableName);
-    $query = $this->addConditions($query, $conditions);
-    $stmt = $this->connection->prepare($query);
-    $this->prepBindArray();
-    if(count($this->bindArray) > 0){
-      $this->bindParam->invokeArgs($stmt, $this->bindArray);
+  public function Exec($data){
+    $query = $this->prep($data, $this->EndPoint->tableName);
+    $query = $this->addConditions($query, $this->EndPoint->conditions);
+    $stmt = $this->EndPoint->connection->prepare($query);
+    if(!$stmt){
+      $this->EndPoint->response->pushError("Statment Prep Failure: $query" );
+    }else{
+      $this->prepBindArray();
+      if(count($this->bindArray) > 0){
+        $this->bindParam->invokeArgs($stmt, $this->bindArray);
+      }
+      try{
+        $stmt->execute();
+      }catch(Exception $e){
+        $this->EndPoint->response->pushError('Execution failure: ' . $e->getMessage());
+      }
     }
-    $stmt->execute();
+    
+    
     /*affected rows exists on the statement object so we pass it to the caller*/
     return $stmt;
   }

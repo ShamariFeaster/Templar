@@ -12,10 +12,10 @@ class DatabaseConfig {
 class EndPoint{
   public $response;
   public $connection;
-  private $action;
-  private $data;
-  private $conditions;
-  private $tableName;
+  public $action;
+  public $data;
+  public $conditions;
+  public $tableName;
   public static $actions = array('insert', 'update', 'delete', 'select');
   
   public function __construct($tableName){  
@@ -95,12 +95,12 @@ class EndPoint{
   
   public function PerformAction(){
     $query = '';
-    $Statement = new Statement($this->connection, $this->action);
+    $Statement = new Statement($this);
     
     switch ($this->action) {
       case 'insert':
         foreach($this->data as $data){
-          $Statement->Exec($data, $this->conditions, $this->tableName);
+          $Statement->Exec($data);
           $this->response->pushError($this->connection->error);
           $this->response->set('insertId', $this->connection->insert_id);
         }
@@ -108,26 +108,42 @@ class EndPoint{
         break;
       case 'update':
         foreach($this->data as $data){
-          $stmt = $Statement->Exec($data, $this->conditions, $this->tableName);
+          $stmt = $Statement->Exec($data);
           $this->response->pushError($this->connection->error);
-          $this->response->set('affectedRows', $stmt->affected_rows);
+          $affectedRows = 0;
+          
+          if($stmt){
+            $affectedRows = $stmt->affected_rows;
+          }
+          
+          $this->response->set('affectedRows', $affectedRows);
         }
         break;
       case 'delete':
-        $stmt = $Statement->Exec(array(), $this->conditions, $this->tableName);
+        $stmt = $Statement->Exec(array());
         $this->response->pushError($this->connection->error);
-        $this->response->set('affectedRows', $stmt->affected_rows);
+        $affectedRows = 0;
+        
+        if($stmt){
+          $affectedRows = $stmt->affected_rows;
+        }
+        
+        $this->response->set('affectedRows', $affectedRows);
         break;
       case 'select':
         $result; 
         $output = array(); 
         $jsonOutput;
         foreach($this->data as $data){
-          $stmt = $Statement->Exec($data, $this->conditions, $this->tableName);
-          $result = $stmt->get_result();
-          while ($row = $result->fetch_array(MYSQLI_ASSOC)){
-            $output[] = $row;
+          $stmt = $Statement->Exec($data);
+          
+          if($stmt){
+            $result = $stmt->get_result();
+            while ($row = $result->fetch_array(MYSQLI_ASSOC)){
+              $output[] = $row;
+            }
           }
+          
 
           $this->response->set('results', $output);
         }
