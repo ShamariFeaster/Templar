@@ -9,7 +9,6 @@ var _ = require('Util'),
     LoginFormMdl = _Templar.getModel('LoginForm'),
     Config = require('Config'),
     SelectQuery = new (require('JRDBI').QueryCollection.Select)(),
-    SelectAllQuery = new (require('JRDBI').QueryCollection.SelectAll)(),
     EQ = require('JRDBI').Condition.EQ,
     _$ = window.$;   /*stop unecessary scope lookup*/
 

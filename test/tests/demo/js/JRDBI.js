@@ -39,14 +39,21 @@ structureJS.module('JRDBIQuery', function(){
 
 
   function Select(){Query.call(this, 'SELECT');}
-  function SelectAll(){Query.call(this, 'SELECT');
-                    var obj = {}; obj['*'] = true;
-                    this.statement.data.push(obj);}
-  function DistinctSelect(){Query.call(this, 'SELECT');
-                       this.statement.conditions.push({_distinct_ : true});}
   function Delete(){Query.call(this, 'DELETE');}
   function Insert(){Query.call(this, 'INSERT');}
   function Update(){Query.call(this, 'UPDATE');}
+  
+  function SelectAll(){
+    Query.call(this, 'SELECT');
+    var obj = {}; obj['*'] = true;
+    this.statement.data.push(obj);
+  }
+  
+  function DistinctSelect(){
+    Query.call(this, 'SELECT');
+    this.statement.conditions.push({_distinct_ : true});
+  }
+  
 
   Select.prototype = Object.create(Query.prototype);
   SelectAll.prototype = Object.create(Query.prototype);
@@ -152,10 +159,10 @@ structureJS.module('JRDBICondition', function(){
   function NE(sColumn, sValue){return Condition.call(this, sColumn, sValue, 'NE' );}
   function LIKE(sColumn, sValue){return Condition.call(this, sColumn, sValue, 'LIKE' );}  
 
-  return {
-    EQ : EQ, GTE : GTE, GT : GT,
-    LT : LT, LTE : LTE, NE : NE, LIKE : LIKE
-  };
+  return { 
+    EQ : EQ, GTE : GTE, GT : GT, LT : LT, 
+    LTE : LTE, NE : NE, LIKE : LIKE
+    };
 
 }); 
 

@@ -5,6 +5,7 @@ structureJS.module('Config', function(require){
     formsCtrlDir : 'Modules/Controllers/AdForms/',
     adPicDir : 'server/ad_pics/',
     serverRoot : 'server/',
+    endpointRoot : 'http://localhost/Templar/test/tests/demo/server/REST/endpoints/',
     SERVER_DEBUG : true
   };
 });

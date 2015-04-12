@@ -56,7 +56,7 @@ Controller.init = function(bannerMsg){
   repopulateEditForm();
 };
 
-_Templar.success("#/editProfile", function(){
+_Templar.success("partials/edit-profile.html", function(){
   Controller.init('Edit My Profile');
 });
     
