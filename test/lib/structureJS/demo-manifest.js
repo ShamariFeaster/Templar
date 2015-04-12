@@ -28,8 +28,9 @@ structureJS.declare('modules/Data/Type-Category-Map');
 structureJS.declare('modules/Auth', ['modules/Helper']);
 structureJS.declare('modules/Routes');
 structureJS.declare('modules/Model');
-structureJS.declare('modules/Helper', ['modules/Model']);
+structureJS.declare('modules/Helper', ['modules/Model','js/JRDBI']);
 structureJS.declare('modules/Controller');
+structureJS.declare('js/JRDBI', ['modules/Data/Config']);
 
 /*Components*/
 structureJS.declare('components/Attributes');
