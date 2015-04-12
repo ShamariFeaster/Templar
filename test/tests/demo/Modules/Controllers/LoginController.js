@@ -8,6 +8,8 @@ var _ = require('Util'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     LoginFormMdl = _Templar.getModel('LoginForm'),
     Config = require('Config'),
+    Q = require('JRDBI').QueryCollection,
+    C = require('JRDBI').Condition,
     _$ = $;   /*stop unecessary scope lookup*/
 
 function loginHandler(e){
@@ -61,24 +63,21 @@ _Templar.success("partials/login-screen.html", function(){
   
   
   LoginFormMdl.listen('un', function(e){
-
-    Helper.ajax('check-unique.php',
-      {username: LoginFormMdl.un},
-      function(data, status){
-        if(data.isAvailable == false){
-        
-          LoginFormMdl.validation_msgs[4] = 
-            LoginFormMdl.un + ' Is Already In Use';
-            
+  
+    new Q.Select()
+      .addColumns({un : true})
+      .condition(C.EQ('un',LoginFormMdl.un))
+      .execute('acct', function(data){
+        if(data.results.length > 0){
+          LoginFormMdl.validation_msgs[4] = LoginFormMdl.un + ' Is Already In Use';
           LoginFormMdl.submissionDisabled = true;
         }else{
           LoginFormMdl.validation_msgs[4] = '';
           enableSubmission();
         }
-        
         LoginFormMdl.update('validation_msgs');
-    });
-  
+      });
+
     if(e.text.length < 8){
       LoginFormMdl.validation_msgs[0] = 'Username Must At Least 8 Characters';
       LoginFormMdl.submissionDisabled = true;

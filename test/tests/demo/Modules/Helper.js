@@ -1,3 +1,28 @@
+structureJS.module('JRDBI', function(require){
+  var Collection = require('JRDBIQuery'),
+      Config = require('Config'),
+      _$ = window.$;
+  /* implement execute using jquery ajax */
+  Collection.Query.prototype.execute = function(endPoint, success, fail){
+    
+    if(typeof endPoint !== 'string') return;
+    
+    var query = this,
+        epBase = 'http://localhost/Templar/test/tests/demo/server/REST/endpoints/',
+        url = epBase + endPoint + '.php';
+    url = (Config.SERVER_DEBUG == true) ? url + '?XDEBUG_SESSION_START=name' : url;
+    _$.ajax({
+      url : url,
+      method : 'POST',
+      datatype : 'json',
+      data : query.statement,
+      success : success || function(data){console.log(data);},
+      error : fail || function(data){console.log(data);}
+    });
+  };
+  return { QueryCollection : Collection, Condition : require('JRDBICondition') };
+});
+
 structureJS.module('Helper', function(require){
 
   var _ = require('Util'),

@@ -13,6 +13,7 @@ structureJS.configure(
   globals : [
       'lib/jquery', 
       'js/jquery.leanModal.min',
+      'js/JRDBI',
       'templar/Constants', 
       'templar/Util', 
       'classes/ClassTMP_Node',
