@@ -110,8 +110,12 @@ return {
       /*the context is the previously loaded route. All properties of 'this' are
       'looking back' at the last route that was loaded.*/
       xhr.callback = function(){
+        State.compilationThreadCount--;
         State.onloadFileQueue.push(this.fileName);
-        State.onloadFileQueue.push(this.route);
+        /*parts of route chains aren't required to be named*/
+        if(_.isDef(this.route))
+          State.onloadFileQueue.push(this.route);
+        
         if(this.callbackParam1.length == 0){
           //Circular('Bootstrap').fireOnloads();
           this.callbackOnComplete.call(null);
