@@ -19,6 +19,10 @@ structureJS.module('JRDBI', function(require){
       success : success || function(data){console.log(data);},
       error : fail || function(data){console.log(data);}
     });
+    
+    if(!(this instanceof Collection.SelectAll))
+      query.statement.data.length = 0;
+    query.statement.conditions.length = 0;
   };
   return { QueryCollection : Collection, Condition : require('JRDBICondition') };
 });

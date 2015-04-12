@@ -15,7 +15,7 @@ function Controller(){
     this.bindHandlers.call(this);
   }
   this._userInit = this._init;
-  
+  /*should be storing user init on Controller to prevent scope lookup*/
   Object.defineProperty(this, 'init', {
     set : function(val){
       if(_.isFunc(val)){

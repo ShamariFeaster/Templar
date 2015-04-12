@@ -19,7 +19,7 @@ class Statement {
                              'delete' => self::$deleteQuery,
                              'select' => self::$selectQuery);
     $this->bindParam = (new ReflectionClass('mysqli_stmt'))->getMethod('bind_param'); 
-    
+    $this->bindArray = array();
   }
   
   /*------ HELPERS --------*/
@@ -30,6 +30,7 @@ class Statement {
   }
   /* this is 1st args to bind_param. we use all strings cause that's how #'s are passed to us */
   private function addToTypedefString($count){
+    
     if(isset($this->bindArray[0])){
       $this->bindArray[0] .= str_repeat('s', $count);
     }else{
@@ -161,11 +162,13 @@ class Statement {
         $returnObj->query = str_replace('__pre__', $distinct , $returnObj->query);
       }
       
+      /*add conditions to typedef string*/
+      $this->addToTypedefString(count($returnObj->values));
+      $this->bindArray = array_merge($this->bindArray, $returnObj->values);
     }
+    
     $returnObj->query = str_replace('__pre__', '' , $returnObj->query);
-    /*add conditions to typedef string*/
-    $this->addToTypedefString(count($returnObj->values));
-    $this->bindArray = array_merge($this->bindArray, $returnObj->values);
+    
     return $returnObj->query;
   }
   
@@ -229,7 +232,9 @@ class Statement {
     $query = $this->addConditions($query, $conditions);
     $stmt = $this->connection->prepare($query);
     $this->prepBindArray();
-    $this->bindParam->invokeArgs($stmt, $this->bindArray);
+    if(count($this->bindArray) > 0){
+      $this->bindParam->invokeArgs($stmt, $this->bindArray);
+    }
     $stmt->execute();
     /*affected rows exists on the statement object so we pass it to the caller*/
     return $stmt;

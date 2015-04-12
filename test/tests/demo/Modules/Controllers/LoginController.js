@@ -3,14 +3,15 @@ structureJS.module('LoginPage', function(require){
 var _ = require('Util'),
     Route = require('Route'),
     Helper = require('Helper'),
-    _Templar = Templar,
+    _Templar = window.Templar,
     EnvModel = _Templar.getModel('Environment'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     LoginFormMdl = _Templar.getModel('LoginForm'),
     Config = require('Config'),
-    Q = require('JRDBI').QueryCollection,
-    C = require('JRDBI').Condition,
-    _$ = $;   /*stop unecessary scope lookup*/
+    SelectQuery = new (require('JRDBI').QueryCollection.Select)(),
+    SelectAllQuery = new (require('JRDBI').QueryCollection.SelectAll)(),
+    EQ = require('JRDBI').Condition.EQ,
+    _$ = window.$;   /*stop unecessary scope lookup*/
 
 function loginHandler(e){
   Route.authenticate({
@@ -61,23 +62,19 @@ _Templar.success("partials/login-screen.html", function(){
   _$('#modaltrigger1').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
   _$('#modaltrigger2').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
   
+  /*USername Validations*/
+  function checkUnique(data){
+    if(data.results.length > 0){
+      LoginFormMdl.validation_msgs[4] = LoginFormMdl.un + ' Is Already In Use';
+      LoginFormMdl.submissionDisabled = true;
+    }else{
+      LoginFormMdl.validation_msgs[4] = '';
+      enableSubmission();
+    }
+    LoginFormMdl.update('validation_msgs');
+  }
   
-  LoginFormMdl.listen('un', function(e){
-  
-    new Q.Select()
-      .addColumns({un : true})
-      .condition(C.EQ('un',LoginFormMdl.un))
-      .execute('acct', function(data){
-        if(data.results.length > 0){
-          LoginFormMdl.validation_msgs[4] = LoginFormMdl.un + ' Is Already In Use';
-          LoginFormMdl.submissionDisabled = true;
-        }else{
-          LoginFormMdl.validation_msgs[4] = '';
-          enableSubmission();
-        }
-        LoginFormMdl.update('validation_msgs');
-      });
-
+  function checkUnLength(e){
     if(e.text.length < 8){
       LoginFormMdl.validation_msgs[0] = 'Username Must At Least 8 Characters';
       LoginFormMdl.submissionDisabled = true;
@@ -88,10 +85,10 @@ _Templar.success("partials/login-screen.html", function(){
       LoginFormMdl.validation_msgs[0] = '';
       enableSubmission();
     }
-    LoginFormMdl.update('validation_msgs');
-  });
+  }
   
-  LoginFormMdl.listen('email', function(e){
+  /* Email validation */
+  function checkEmail(e){
     if(!/.+@.+\.\w+/.test(e.text)){
       LoginFormMdl.validation_msgs[3] = 'Invalid Email Address Format';
       LoginFormMdl.submissionDisabled = true;
@@ -102,10 +99,10 @@ _Templar.success("partials/login-screen.html", function(){
       LoginFormMdl.validation_msgs[3] = '';
       enableSubmission();
     }
-    LoginFormMdl.update('validation_msgs');
-  });
+  }
   
-  LoginFormMdl.listen('pw', function(e){
+  /* Password Validation */
+  function checkPw(e){
     if(e.text.length < 8){
       LoginFormMdl.validation_msgs[1] = 'Password Must Be At Least 8 Characters';
       LoginFormMdl.submissionDisabled = true;
@@ -116,10 +113,9 @@ _Templar.success("partials/login-screen.html", function(){
       LoginFormMdl.validation_msgs[1] = '';
       enableSubmission();
     }
-    LoginFormMdl.update('validation_msgs');
-  });
+  }
   
-  LoginFormMdl.listen('confirm_pw', function(e){
+  function checkConfirmPw(e){
     if((!e.text && !LoginFormMdl.pw) || e.text != LoginFormMdl.pw){
       LoginFormMdl.validation_msgs[2] = 'Password And Confirm Password Don\'t Match';
       LoginFormMdl.submissionDisabled = true;
@@ -127,6 +123,30 @@ _Templar.success("partials/login-screen.html", function(){
       LoginFormMdl.validation_msgs[2] = '';
       enableSubmission();
     }
+  }
+  LoginFormMdl.listen('un', function(e){
+  
+    SelectQuery
+      .fields({un : true})
+      .condition( EQ('un',LoginFormMdl.un) )
+      .execute('acct', checkUnique);
+
+    checkUnLength(e);
+    LoginFormMdl.update('validation_msgs');
+  });
+  
+  LoginFormMdl.listen('email', function(e){
+    checkEmail(e);
+    LoginFormMdl.update('validation_msgs');
+  });
+  
+  LoginFormMdl.listen('pw', function(e){
+    checkPw(e);
+    LoginFormMdl.update('validation_msgs');
+  });
+  
+  LoginFormMdl.listen('confirm_pw', function(e){
+    checkConfirmPw(e);
     LoginFormMdl.update('validation_msgs');
   });
   

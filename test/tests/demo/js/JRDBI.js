@@ -8,10 +8,11 @@ structureJS.module('JRDBIQuery', function(){
       data : [],
       conditions : []
     };
+
   }
 
   Query.prototype = {
-    addColumns : function(oData){
+    fields : function(oData){
       this.statement.data.push(oData);
       return this;
     },
@@ -38,6 +39,9 @@ structureJS.module('JRDBIQuery', function(){
 
 
   function Select(){Query.call(this, 'SELECT');}
+  function SelectAll(){Query.call(this, 'SELECT');
+                    var obj = {}; obj['*'] = true;
+                    this.statement.data.push(obj);}
   function DistinctSelect(){Query.call(this, 'SELECT');
                        this.statement.conditions.push({_distinct_ : true});}
   function Delete(){Query.call(this, 'DELETE');}
@@ -45,13 +49,14 @@ structureJS.module('JRDBIQuery', function(){
   function Update(){Query.call(this, 'UPDATE');}
 
   Select.prototype = Object.create(Query.prototype);
+  SelectAll.prototype = Object.create(Query.prototype);
   DistinctSelect.prototype = Object.create(Query.prototype);
   Delete.prototype = Object.create(Query.prototype);
   Insert.prototype = Object.create(Query.prototype);
   Update.prototype = Object.create(Query.prototype);
 
   return {
-    Select : Select, DistinctSelect : DistinctSelect,
+    Select : Select, SelectAll : SelectAll, DistinctSelect : DistinctSelect,
     Delete : Delete, Insert : Insert, Update : Update, Query : Query
   };
 });
@@ -106,7 +111,8 @@ structureJS.module('JRDBICondition', function(){
     },
     
     build : function(Condition, sPrep){
-      /*check if compound condition*/
+      /*check if compound condition. if so, we only mutate the link between 'this' prep and the 1st
+          in the chain. The rest chain has already been resolved so we just add it to 'this' chain*/
       for(var i = 0; i < Condition.prepositions.length; i++){
         if(i == 0)
           this.addPrep(Condition.prepositions[i], sPrep);
@@ -153,33 +159,4 @@ structureJS.module('JRDBICondition', function(){
 
 }); 
 
-
-
-
-/*
-var JRDBI = structureJS.require('JRDBI');
-var Q = JRDBI.Query;
-var C = JRDBI.Condition;
-var sq = new Q.Select();
-var c1 = C.GTE('uid',18);
-var c2 = C.EQ('sup',45).and( C.NE('a', 0).and(C.NE('b', 8)));
-sq.condition( c1 );
-var columns = {};
-columns['*'] = true;
-sq.setData(columns);
-sq.execute('people', function(data, status, jqXHR){
-  for(var i = 0; i < data.results.length; i++){
-    for(var res in  data.results[i]){
-      console.log(res + ' ' + data.results[i][res]);
-    }
-  }
-  
-});
-console.log(sq);
-sq.condition( LT('ad_id',20).and( EQ('uid',18) ) );
-sq.and( GTE('ad_id',20) );
-sq.execute(function(res){
-  //do stuff with rs
-});
-*/
 

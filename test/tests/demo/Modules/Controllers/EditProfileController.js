@@ -60,4 +60,4 @@ _Templar.success("#/editProfile", function(){
   Controller.init('Edit My Profile');
 });
     
-});
+}); 
