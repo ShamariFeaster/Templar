@@ -148,14 +148,19 @@ return {
     }
     
   },
-  
+  /*For routes w/ complex partials (ie, arrays) deferenceNestedRoutes builds an array that the 
+    fetcher can process. The problem was that the origin route name was not being added to the 
+    onloadQueue. We cannot, however, just add the origin route name to the queue for routes w/
+    simple partials (ie a string, single filename) b/c this causing the routename to be added 
+    twice: once here and the other in the fetcher's callback. */
   asynFetchRoutes : function(routeObj, onComplete){
     var currFile = '',
         routes = [],
         routeName = routeObj.route;
         routes.onComplete = onComplete || function(){};
-
+    
     if(_.isArray(routeObj.partial)){
+      State.onloadFileQueue.push(routeObj.route);
       Circular('Route').deferenceNestedRoutes(routeObj.partial, routes);
     }else{
       routes.push(routeObj);
