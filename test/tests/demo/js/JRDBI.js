@@ -10,7 +10,11 @@ structureJS.module('JRDBI', function(require){
     
     var query = this,
         url = Config.endpointRoot + endPoint + '.php',
-        success = (_.isFunc(success)) ? success : function(){},
+        success = (_.isFunc(success)) ? success : 
+                function(data){
+                  _.log('Query Success........');
+                  _.log(data);
+                },
         fail = (_.isFunc(fail)) ? fail : 
                 function(data){
                   _.log('ERROR: Query Failure.......');

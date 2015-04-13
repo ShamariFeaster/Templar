@@ -161,7 +161,13 @@ structureJS.module('Helper', function(require){
       output[2] = date.getFullYear();
       return this.parseDate(output.join('/'));
     },
-    
+    elipsis : function(str, maxLength){
+      var maxLength = (_.isDef(length)) ? maxLength : 15,
+          str = (_.isString(str)) ? str : '',
+          elipsis = '...';
+      return (str.length > maxLength) ? 
+              str.substr(0, maxLength) + elipsis : str;
+    },
     fadeInSuccessMsg : function(msg){
       $('#success-msg').hide();
       EnvModel.success_msg = msg;

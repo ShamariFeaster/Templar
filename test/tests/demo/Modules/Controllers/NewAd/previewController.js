@@ -8,31 +8,20 @@ var _ = require('Util'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     EnvMdl = _Templar.getModel('Environment'),
     Config = require('Config'),
+    InsertQuery = new (require('JRDBI').QueryCollection.Insert)(),
+    UpdateQuery = new (require('JRDBI').QueryCollection.Update)(),
+    EQ = require('JRDBI').Condition.EQ,
     Controller = require('Controller')(),
     _$ = $; 
     
-function saveAdImages(adID){
-  var successMsg = "Ad Saved As Draft. Goto 'My Ads' To Post It Publicly.";
-  if(AdFormMdl.ad_images.length > 0){
-    Helper.ajax('associateAdPic.php', {
-      adID : adID,
-      imagesJson : AdFormMdl.ad_images
-    }, function(){
-      Helper.fadeInSuccessMsg(successMsg);
-    });
-  }else{
-    Helper.fadeInSuccessMsg(successMsg);
-  }
-  
-}
 
 function saveAd(e){
   var details = {},
-      updateObj = {uid : UserProfileModel.uid, details : details};
-      
-  details['save_phone_num'] = false;
-  details['title'] = AdFormMdl.description;
-  details['description'] = AdFormMdl.title;
+      shouldSavePhoneNumber = Helper.isChecked(AdFormMdl, 'shouldSavePhoneNumber');
+
+  details['uid'] = UserProfileModel.uid;
+  details['title'] = AdFormMdl.title;
+  details['description'] = AdFormMdl.description;
   details['ad_state'] = 'draft';
   details['ad_type'] = AdFormMdl.adType.current_selection;
   details['ad_category'] = AdFormMdl.category.current_selection;
@@ -61,22 +50,38 @@ function saveAd(e){
         .map(function(v){return "'" + v + "'";}).join();
   }
   
-  if(Helper.isChecked(AdFormMdl, 'shouldSavePhoneNumber')){
-    details['save_phone_num'] = true;
-  }
   
   /*0 is 'call/text' option*/
   if(Helper.isChecked(AdFormMdl, 'contactMethods', 0)){
     details['phone_num'] = AdFormMdl.phoneNumber.replace(/[\-\s]/g, '');
   }else{
-    details['phone_num'] = '';
-    details['save_phone_num'] = false;
+    shouldSavePhoneNumber = false;
   }
   
-  Helper.ajax('saveAd.php',updateObj,
-    function(data){
-      saveAdImages(data.insertId);
+  InsertQuery
+    .fields(details)
+    .execute('ads', function(data){
+      
+      /*associate ad pics*/
+      for(var i = 0; i < AdFormMdl.ad_images.length; i++){
+        UpdateQuery
+          .fields({ad_id : data.insertId})
+          .condition( EQ('ad_pic_id', AdFormMdl.ad_images[i].id) )
+          .execute('pics');
+      }
+      
+      /*Save phone # to profile if requested*/
+      if(shouldSavePhoneNumber == true){
+        UpdateQuery
+          .fields({phone_num : details['phone_num'] })
+          .condition( EQ('uid' , details['uid'] ))
+          .execute('people');
+      }
+      
+      var successMsg = "Ad Saved As Draft. Goto 'My Ads' To Post It Publicly.";
+      Helper.fadeInSuccessMsg(successMsg)
     });
+
 }
 
 Controller.bindHandlers = function(){

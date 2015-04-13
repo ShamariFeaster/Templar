@@ -45,6 +45,10 @@ Templar.dataModel('ProfileForm',
   description : ''
 });
 
+Templar.dataModel('MyAds',{
+  ads : []
+});
+
 Templar.dataModel('AdForm',
 {
   title : '1997 BMW Z3',

@@ -46,6 +46,9 @@ structureJS.declare('controllers/LoginController');
 structureJS.declare('controllers/EditProfileController');
 structureJS.declare('controllers/MyProfileController');
 
+/* My Ads */
+structureJS.declare('controllers/MyAds/MyAdsController');
+
 /*New Ad*/
 structureJS.declare('controllers/NewAd/previewController');
 structureJS.declare('controllers/NewAd/categorySelectController');
