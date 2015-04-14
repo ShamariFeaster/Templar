@@ -1,10 +1,14 @@
 structureJS.module('TitleDescriptionController', function(require){
 
 var _Templar = Templar,
-    Controller = require('Controller')();
+    Helper = require('Helper'),
+    NewAdCtrl = require('Controller')( require('NewAd.extendo') );
   
 _Templar.success("#/new-ad/2", function(){
-  Controller.init('Title & Description');
+  NewAdCtrl.prevBtn(true,'#/new-ad');
+  NewAdCtrl.nextBtn(true,'#/new-ad/typeform');
+  NewAdCtrl.openPartial('title-description.html');
+  NewAdCtrl.init('Title & Description');
 });
 
 });

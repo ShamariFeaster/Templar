@@ -18,18 +18,20 @@ Controller.bindHandlers = function(){
 }
 
 Controller.init = function(){
+
+  function transformAdData(item){
+    /*format date*/
+    var date = new Date(item.start);
+    item.start = [(date.getMonth()+1),date.getDate(),date.getFullYear()].join('/');
+    /* truncate title */
+    item.title = Helper.elipsis(item.title, 25);
+    return item;
+  }
+  
   SelectAllQuery
     .condition( EQ('uid', UserProfileModel.uid) )
     .execute('ads', function(data){
-      
-      data.results.map(function(item){
-        /*format date*/
-        var date = new Date(item.start);
-        item.start = [(date.getMonth()+1),date.getDate(),date.getFullYear()].join('/');
-        /* truncate title */
-        item.title = Helper.elipsis(item.title, 10);
-        return item;
-      });
+      data.results.map(transformAdData);
       MyAdsMdl.ads = data.results;
     });
 }

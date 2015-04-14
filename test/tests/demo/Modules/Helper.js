@@ -161,6 +161,7 @@ structureJS.module('Helper', function(require){
       output[2] = date.getFullYear();
       return this.parseDate(output.join('/'));
     },
+    
     elipsis : function(str, maxLength){
       var maxLength = (_.isDef(length)) ? maxLength : 15,
           str = (_.isString(str)) ? str : '',
@@ -168,6 +169,7 @@ structureJS.module('Helper', function(require){
       return (str.length > maxLength) ? 
               str.substr(0, maxLength) + elipsis : str;
     },
+    
     fadeInSuccessMsg : function(msg){
       $('#success-msg').hide();
       EnvModel.success_msg = msg;
@@ -180,7 +182,7 @@ structureJS.module('Helper', function(require){
       $('#error-msg').hide();
       EnvModel.error = msg;
       $('#error-msg').fadeIn(1750);
-    },
+    }
   };
 });
 

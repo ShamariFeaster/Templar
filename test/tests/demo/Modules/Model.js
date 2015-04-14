@@ -74,7 +74,11 @@ Templar.dataModel('AdForm',
   image_uri : '',
   image_id : '',
   ad_images : [],
-  descriptionClass : ''
+  descriptionClass : '',
+  nav : {
+    next : { href : '', label : '', isVisible : true},
+    prev : { href : '', label : '', isVisible : true}
+  }
   
 });
             

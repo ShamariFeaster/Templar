@@ -5,42 +5,42 @@ var Route = require('Route'),
     AdFormMdl = _Templar.getModel('AdForm'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     Config = require('Config'),
-    Controller = require('Controller')();   
+    Helper = require('Helper'),
+    NewAdCtrl = require('Controller')( require('NewAd.extendo') );   
 
 /*--------- PART 3: Details -------------------*/
 
 /*Sub-routing - this avoids the old hide/show paradigm. Allows for much cleaner
   HTML as well as modularization of complex logic for each partial*/
 _Templar.success("#/new-ad/typeform", function(){
-  Controller.init(AdFormMdl.adType.current_selection);
-  
+  NewAdCtrl.init(AdFormMdl.adType.current_selection);
+  var formPartial = 'TypeSpecificAdForms/';
   switch(AdFormMdl.adType.current_selection){
     case 'For Sale': 
-      Route.openPartial(Config.formsDir + 'for-sale.html'
-                        ,Config.categoryFormId);
+      formPartial += 'for-sale.html';
       break;
     case 'Jobs': 
-      Route.openPartial(Config.formsDir + 'jobs.html'
-                        ,Config.categoryFormId);
+      formPartial += 'jobs.html';
       break;
     case 'Housing': 
-      Route.openPartial(Config.formsDir + 'housing.html'
-                        ,Config.categoryFormId);
+      formPartial += 'housing.html';
       break;
     case 'Services': 
-      Route.openPartial(Config.formsDir + 'services.html'
-                        ,Config.categoryFormId);
+      formPartial += 'services.html';
       break;
     case 'Personals': 
-      Route.openPartial(Config.formsDir + 'personals.html'
-                        ,Config.categoryFormId);
+      formPartial += 'personals.html';
       break;
     case 'Announcements': 
-      Route.openPartial( Config.formsDir + 'announcements.html'
-                        ,Config.categoryFormId);
+      formPartial += 'announcements.html';
       break;
     
   }
+  
+  NewAdCtrl.prevBtn(true,'#/new-ad/2');
+  NewAdCtrl.nextBtn(true,'#/new-ad/4/id/-1/uri/-1');
+  NewAdCtrl.openPartial(formPartial);
+
 });
 
 });

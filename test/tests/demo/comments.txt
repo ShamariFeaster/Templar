@@ -63,3 +63,37 @@ optimization would be great for mobile and low power devices.
 Image uploading is uploading images to the server in order to provide previews for the user
 This is going to necessitate some chronjob to cleanup orphaned images both on the file
 system and in the DB.
+
+4/13/2015
+
+DEFECT 
+
+When routes being fetched, if one of the partials has a "dat-apl-default" in  it
+, the compiler spawns a fetch thread which may come back after the completion of the original
+fetch chain. If the default shares the same target it will clobber the partial from 
+the fetch chain. 
+
+Reproduce: click "My Ads" and notice that "Wall" comes up from time to time.
+
+Notes for tomorrow: 
+
+The "sub-routing" method I'm using to implement the new ad form is introducing race 
+conditions in template loading. The proper thing to do is to use routes. This is the
+reason I made the router so efficient - to support a large amount of routes.
+
+The bigger issue at hand is I'm not sure I can prevent race conditions with the current
+"thread" system. By allowing calles of loadPartialIntoTemplate() to spawn thread (via
+Compile() and the fetcher's callback) I have a situation where the caller can enter the
+critical section (ie, the "finished" block) and then have a spawned thread come back
+in the middle. By this point the spawned thread's onloads have fired in error.
+
+It seems the premature onload firing is the worst of the side effects. This can be solved
+by making fire onloads targeted. IT can take a route or partial name and only fire and
+remove that onload funvtion from the queue. If this is the route I take then it pretty
+much eliminates the need for the thread count. I guess it's still useful for minimizing
+calls to bindModel() and the like but as explained above the thread count method is unreliable
+and therefore no good. It's not a show stopper but certainly something to think about.
+
+ERROR NOTE : upload images not working correctly b/c the click handler bound to the 
+upload image button does get attached and therefore the AdFormMdl's state is not being retained
+across the refresh. This has to do with the premature onload firing detailed above.

@@ -5,7 +5,7 @@ var _ = require('Util'),
     Helper = require('Helper'),
     _Templar = window.Templar,
     EnvModel = _Templar.getModel('Environment'),
-    UserProfileModel = _Templar.getModel('UserProfile'),
+    UserProfileMdl = _Templar.getModel('UserProfile'),
     ProfileFormMdl = _Templar.getModel('ProfileForm'),
     GeoInfo = require('GeoInfo-US'),
     Config = require('Config'),
@@ -15,13 +15,13 @@ var _ = require('Util'),
     _$ = window.$;   /*stop unecessary scope lookup*/
 
 function repopulateEditForm(){
-  ProfileFormMdl.fn = UserProfileModel.fn;
-  ProfileFormMdl.ln = UserProfileModel.ln;
-  ProfileFormMdl.description = UserProfileModel.description; 
-  ProfileFormMdl.sex.current_selection = UserProfileModel.sex;
-  ProfileFormMdl.states.current_selection = UserProfileModel.state;
-  ProfileFormMdl.age.current_selection = UserProfileModel.age;
-  ProfileFormMdl.cities.current_selection = UserProfileModel.city;
+  ProfileFormMdl.fn = UserProfileMdl.fn;
+  ProfileFormMdl.ln = UserProfileMdl.ln;
+  ProfileFormMdl.description = UserProfileMdl.description; 
+  ProfileFormMdl.sex.current_selection = UserProfileMdl.sex;
+  ProfileFormMdl.states.current_selection = UserProfileMdl.state;
+  ProfileFormMdl.age.current_selection = UserProfileMdl.age;
+  ProfileFormMdl.cities.current_selection = UserProfileMdl.city;
 }
 
 function updateProfileHandler(e){
@@ -37,16 +37,16 @@ function updateProfileHandler(e){
     
   UpdateQuery
     .fields(updateFields)
-    .condition( EQ('uid', UserProfileModel.uid) )
+    .condition( EQ('uid', UserProfileMdl.uid) )
     .execute('people', function(data){
       Helper.fadeInSuccessMsg('Profile Updated');
-      UserProfileModel.fn = sessionStorage['fn'] = ProfileFormMdl.fn;
-      UserProfileModel.ln = sessionStorage['ln'] = ProfileFormMdl.ln;
-      UserProfileModel.age = sessionStorage['age'] = ProfileFormMdl.age.current_selection;
-      UserProfileModel.sex = sessionStorage['sex'] = ProfileFormMdl.sex.current_selection;
-      UserProfileModel.state = sessionStorage['state'] = ProfileFormMdl.states.current_selection;
-      UserProfileModel.city = sessionStorage['city'] = ProfileFormMdl.cities.current_selection;
-      UserProfileModel.description = sessionStorage['description'] = ProfileFormMdl.description;
+      UserProfileMdl.fn = sessionStorage['fn'] = ProfileFormMdl.fn;
+      UserProfileMdl.ln = sessionStorage['ln'] = ProfileFormMdl.ln;
+      UserProfileMdl.age = sessionStorage['age'] = ProfileFormMdl.age.current_selection;
+      UserProfileMdl.sex = sessionStorage['sex'] = ProfileFormMdl.sex.current_selection;
+      UserProfileMdl.state = sessionStorage['state'] = ProfileFormMdl.states.current_selection;
+      UserProfileMdl.city = sessionStorage['city'] = ProfileFormMdl.cities.current_selection;
+      UserProfileMdl.description = sessionStorage['description'] = ProfileFormMdl.description;
     });
 
 }
@@ -62,7 +62,7 @@ Controller.init = function(bannerMsg){
 };
 
 _Templar.success("partials/edit-profile.html", function(){
-  UserProfileModel.pp_src = sessionStorage['pp_src'] = '';
+  UserProfileMdl.pp_src = sessionStorage['pp_src'] = '';
   Controller.init('Edit My Profile');
 });
     

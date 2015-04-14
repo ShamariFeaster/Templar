@@ -11,7 +11,7 @@ var _ = require('Util'),
     InsertQuery = new (require('JRDBI').QueryCollection.Insert)(),
     UpdateQuery = new (require('JRDBI').QueryCollection.Update)(),
     EQ = require('JRDBI').Condition.EQ,
-    Controller = require('Controller')(),
+    NewAdCtrl = require('Controller')( require('NewAd.extendo') ),
     _$ = $; 
     
 
@@ -84,23 +84,34 @@ function saveAd(e){
 
 }
 
-Controller.bindHandlers = function(){
-  _$('#save-ad').click(saveAd);
+NewAdCtrl.bindHandlers = function(){
+  _$('#' + AdFormMdl.nav.next.label).click(saveAd);
 };
 
 /*---------  PREVIEW -------------------*/
 _Templar.success("#/new-ad/preview", function(){
-  Controller.init('Ad Preview');
+  NewAdCtrl.prevBtn(true,'#/new-ad/4/id/-1/uri/-1');
+  NewAdCtrl.nextBtn(true,'#', 'Save');
   
-  if(Helper.isChecked(AdFormMdl, 'isItemFree')){
-    AdFormMdl.itemPrice = 'Free';
-  }
+  NewAdCtrl.init('Ad Preview');
   
-  if(AdFormMdl.ad_images.length > 0){
-    AdFormMdl.descriptionClass = '';
-  }else{
-    AdFormMdl.descriptionClass = 'center';
-  }
+  NewAdCtrl.openPartial('preview.html', function(){
+    
+    if(Helper.isChecked(AdFormMdl, 'isItemFree')){
+      AdFormMdl.itemPrice = 'Free';
+    }
+    
+    if(AdFormMdl.ad_images.length > 0){
+      AdFormMdl.descriptionClass = '';
+    }else{
+      AdFormMdl.descriptionClass = 'center';
+    }
+    
+  });
+  
+  
+  
+  
 });
 
 });

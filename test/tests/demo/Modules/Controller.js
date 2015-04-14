@@ -1,12 +1,20 @@
 structureJS.module('Controller', function(require){
 
 var _ = require('Util'),
-    _Templar = Templar,
+    _Templar = window.Templar,
     Helper = require('Helper');
     
-function Controller(){
-  if(!(this instanceof Controller))
-    return new Controller;
+function Controller( extendo ){
+  
+  if(!(this instanceof Controller)){
+    return new Controller( extendo );
+  }
+  
+  if(_.isObj(extendo)){
+    for(var prop in extendo){
+      this[prop] = extendo[prop];
+    }
+  }
   
   this.bindHandlers = function(){};
   
@@ -30,6 +38,7 @@ function Controller(){
     }
   });
 }
+
 
 return Controller;
 

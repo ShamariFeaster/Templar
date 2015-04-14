@@ -3,6 +3,8 @@ structureJS.module('Config', function(require){
     categoryFormId : 'type-specific-form-partial',
     formsDir : 'partials/New-Ad/TypeSpecificAdForms/',
     formsCtrlDir : 'Modules/Controllers/AdForms/',
+    newAdPartialsDir : 'partials/New-Ad/',
+    newAdTargetId : 'new-ad-content',
     adPicDir : 'server/ad_pics/',
     ppPicDir : 'server/profile_pics/',
     serverRoot : 'server/',

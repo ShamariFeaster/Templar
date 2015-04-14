@@ -38,6 +38,9 @@ structureJS.declare('components/Row');
 structureJS.declare('components/Column');
 structureJS.declare('components/OverlayButton');
 
+/*Controller Extendos*/
+structureJS.declare('controllers/Extendos/NewAd.extendo');
+
 /*Home*/
 structureJS.declare('controllers/NavigationController');
 structureJS.declare('controllers/LoginController');
@@ -50,6 +53,7 @@ structureJS.declare('controllers/MyProfileController');
 structureJS.declare('controllers/MyAds/MyAdsController');
 
 /*New Ad*/
+
 structureJS.declare('controllers/NewAd/previewController');
 structureJS.declare('controllers/NewAd/categorySelectController');
 structureJS.declare('controllers/NewAd/titleDescriptionController');

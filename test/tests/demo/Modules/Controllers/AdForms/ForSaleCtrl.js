@@ -4,13 +4,13 @@ var _ = require('Util'),
     Route = require('Route'),
     Helper = require('Helper'),
     AdTypeMap = require('Type-Category-Map'),
-    _Templar = Templar,
+    _Templar = window.Templar,
     EnvModel = _Templar.getModel('Environment'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     AdFormMdl = _Templar.getModel('AdForm'),
     Config = require('Config'),
-    Controller = require('Controller')(),
-    _$ = $;
+    NewAdCtrl = require('Controller')( require('NewAd.extendo') ),
+    _$ = window.$;
 
     
     
@@ -42,7 +42,7 @@ function deleteAdImage(e){
             AdFormMdl.disablePicSubmission = false;
             EnvModel.error = "";
           }
-          Controller.bindHandlers();
+          NewAdCtrl.bindHandlers();
           AdFormMdl.save();
       });
     }
@@ -53,34 +53,39 @@ function onBeforeSubmit(){
   AdFormMdl.save();
 };
 
-Controller.bindHandlers = function(){
+NewAdCtrl.bindHandlers = function(){
   _$('.upload-ad-pic').click(deleteAdImage);
   _$('#pic-submit').click(onBeforeSubmit);
 };
 
+/*--------------Image Upload Form----------------------*/
 _Templar.success('#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri', function(){
+  NewAdCtrl.prevBtn(true,'#/new-ad/typeform');
+  NewAdCtrl.nextBtn(true,'#/new-ad/preview');
   
-  var newImageUri = AdFormMdl.image_uri,
+  NewAdCtrl.openPartial('pic-upload.html', function(){
+  
+    var newImageUri = AdFormMdl.image_uri,
       newImageId = AdFormMdl.image_id;
   
-  AdFormMdl.load();
-  
-  if(newImageId != '-1' && AdFormMdl.ad_images.length <= 2){
-    AdFormMdl.ad_images.push({src : Config.adPicDir + newImageUri, id : newImageId});
-  }
-  
-  if(AdFormMdl.ad_images.length > 2){
-    AdFormMdl.disablePicSubmission = true;
-    Helper.fadeInErrorMsg("You've Reached The Max of 3 Picture Per Ad");
-  }else{
-    AdFormMdl.disablePicSubmission = false;
-    EnvModel.error = "";
-  }
-  
-  AdFormMdl.update('ad_images');
-  Controller.init('Upload Images', EnvModel.error);
-  
-  
+    AdFormMdl.load();
+    
+    if(newImageId != '-1' && AdFormMdl.ad_images.length <= 2){
+      AdFormMdl.ad_images.push({src : Config.adPicDir + newImageUri, id : newImageId});
+    }
+    
+    if(AdFormMdl.ad_images.length > 2){
+      AdFormMdl.disablePicSubmission = true;
+      Helper.fadeInErrorMsg("You've Reached The Max of 3 Picture Per Ad");
+    }else{
+      AdFormMdl.disablePicSubmission = false;
+      EnvModel.error = "";
+    }
+    
+    AdFormMdl.update('ad_images');
+    
+    NewAdCtrl.init('Upload Images', EnvModel.error);
+  });
   
 });
     
