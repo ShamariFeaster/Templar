@@ -25,4 +25,9 @@ Templar.dataModel('Environment',
                 }]
             });
 Templar.dataModel('A',
-            {a : 'A', b : 'B'});
+            { a : 'A', 
+              b : 'B',
+              c : { 
+                    d : { e : 'f'} 
+                  }
+            });
