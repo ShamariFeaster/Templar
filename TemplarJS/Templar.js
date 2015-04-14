@@ -20,12 +20,23 @@ Templar._attributes = Object.create(null);
 Templar._attributes.length = 0;
 
 Templar.success = function(partialFileName, onloadFunction){
+  var isUnique = true,
+      handler;
   if(!_.isDef(this._onloadHandlerMap[partialFileName])){
     this._onloadHandlerMap[partialFileName] = [];
   }
   
   if(_.isFunc(onloadFunction)){
-    this._onloadHandlerMap[partialFileName].push(onloadFunction);
+  
+    for(var i = 0; i < this._onloadHandlerMap[partialFileName].length; i++){
+      handler = this._onloadHandlerMap[partialFileName][i];
+      isUnique &= handler.toString() != onloadFunction.toString();
+    }
+    
+    if(isUnique == true){
+      this._onloadHandlerMap[partialFileName].push(onloadFunction);
+    }
+    
   }
   /*Success w/ no file name binds to framework_loaded system event. It should be
     noted that this will only be fired once after intial body compilation.*/

@@ -78,10 +78,6 @@ structureJS.done(function(){
       DOM.asynFetchRoutes(resolvedRouteObj, function(){
         _.log('asynFetchRoutes complete for ' + resolvedRouteObj.route);
       });
-    }else{
-      hashValue = DOM.getHashValue(window.location.href);
-      State.onloadFileQueue.push(hashValue);
-      DOM.asynGetPartial(hashValue, Bootstrap.loadPartialIntoTemplate, State.target);
     }
     
   };

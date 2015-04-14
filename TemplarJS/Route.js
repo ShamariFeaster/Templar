@@ -249,7 +249,6 @@ return {
 
     if((resolvedRouteObj = this.handleRoute(routeId)) != null 
         && resolvedRouteObj !== _.RESTRICTED){
-      //State.onloadFileQueue.push(resolvedRouteObj.partial);
 
       DOM.asynFetchRoutes(resolvedRouteObj, function(){
         State.ignoreHashChange = true;
@@ -266,10 +265,9 @@ return {
 
   },
   
-  openPartial : function(routeId, targetId){
-    if(!_.isNullOrEmpty(routeId) && !_.isNullOrEmpty(targetId)){
-      State.onloadFileQueue.push(routeId);
-      DOM.asynGetPartial(routeId, Bootstrap.loadPartialIntoTemplate, targetId);
+  openPartial : function(partialUri, targetId){
+    if(!_.isNullOrEmpty(partialUri) && !_.isNullOrEmpty(targetId)){
+      DOM.asynGetPartial(partialUri, Bootstrap.loadPartialIntoTemplate, targetId);
     }
   },
   

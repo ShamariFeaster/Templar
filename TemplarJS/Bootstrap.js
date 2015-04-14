@@ -22,7 +22,7 @@ var Bootstrap = {
   fireOnloads : function(){
     var file = '',
         handlers = null;
-    while( (file = State.onloadFileQueue.pop())){
+    while( (file = State.onloadFileQueue.pop()) ){
       handlers = Templar.getPartialOnlodHandler(file);
       for(var i = 0; i < handlers.length; i++){
         handlers[i].call(null);
@@ -42,6 +42,7 @@ var Bootstrap = {
   },
   /*Preloading audio players will hang the framework.*/
   loadPartialIntoTemplate : function(){
+
     State.compilationThreadCount--;
     /*Graceful fail on file not found. Error is logged from aync function*/
     if(this.status == 200){
@@ -59,7 +60,7 @@ var Bootstrap = {
           as the xhr object*/
         DOMGetFileContents = this.callback || function(){};
   
-
+      
       if(_.isNull(targetNode)){
         /*Target node was not found, fallback*/
         _.log('WARNING: TARGET NODE NOT FOUND FOR ROUTE "'+this.route+'".');
@@ -75,7 +76,7 @@ var Bootstrap = {
         State.compiledScopes += scope + ',';
         Compile.compile( targetNode, scope );
         DOMGetFileContents.call(this);
-        
+        State.onloadFileQueue.push(this.fileName);
         /*if a default-template tag found, recursive compilations will be spun off async during compile()
           .without a way to determine if there are still unfinished 'threads' we will interpolate multiple
           times and prematurely causing unecessary overhead and misfiring of our onload handlers. Dangers of

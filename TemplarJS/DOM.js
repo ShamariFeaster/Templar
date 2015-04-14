@@ -110,8 +110,6 @@ return {
       /*the context is the previously loaded route. All properties of 'this' are
       'looking back' at the last route that was loaded.*/
       xhr.callback = function(){
-
-        State.onloadFileQueue.push(this.fileName);
         /*parts of route chains aren't required to be named*/
         if(_.isDef(this.route))
           State.onloadFileQueue.push(this.route);
