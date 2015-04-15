@@ -106,7 +106,7 @@ return {
     var node = tmp_node.node,
         retVal = Map.dereferenceAttribute(tmp_node);
     node.innerText = node.innerHTML = 
-      (_.isString(retVal)) ? retVal : '';
+      (!_.isArray(retVal) && !_.isObj(retVal)) ? retVal : '';
 
   },
   /*Returns the whole attribute if no limit is defined for this attribute*/
@@ -360,7 +360,7 @@ return {
             if(baseNodes[z].node.parentNode)
               ctx.target.unshift(TMP_repeatBaseNode);
 
-            if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode) && 
+            if(document.body.contains(TMP_repeatBaseNode.node) && 
               _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode)))
             {
 
