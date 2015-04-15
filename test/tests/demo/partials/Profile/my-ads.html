@@ -1,5 +1,5 @@
 <!-- Individual Ad Listing Template (repeated by framework) -->
-<row data-apl-repeat="MyAds.ads">
+<row data-apl-repeat="{{Ads.myAds}}">
 
   <row class="my-ad-header">
     <column colnum="0">Posted</column>
@@ -10,10 +10,18 @@
     <column colnum="0">{{start}}</column>
     <column colnum="1.5">{{title}}</column>
     <column colnum="7">
-      <a href="#">View</a>
+      <a href="#/show-ad/{{ad_id}}">View</a>
+      
       <a href="#">Edit</a>
-      <a href="#">Post</a>
-      <a href="#">Delete</a>
+      
+      <a href="#" class="change-ad-state" 
+        index="{{$index}}" 
+        ad_id="{{ad_id}}">{{action}}</a>
+        
+      <a href="#" class="delete-ad" 
+        index="{{$index}}" 
+        ad_id="{{ad_id}}">Delete</a>
+        
     </column>
   </row>
   

@@ -45,6 +45,11 @@ Templar.Route([
       target : '#profile-right-col'
     }]
 },
+/*Show Ad*/
+{
+  route : '#/show-ad/Ads:currentAdId',
+  partial : 'partials/New-Ad/preview.html'
+},
 /*New Ad*/
 {
     route : '#/new-ad',

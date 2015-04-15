@@ -182,6 +182,13 @@ structureJS.module('Helper', function(require){
       $('#error-msg').hide();
       EnvModel.error = msg;
       $('#error-msg').fadeIn(1750);
+    },
+    
+    pushAdPic : function(uri, id){
+      var cfg = require('Config'),
+          mdl = window.Templar.getModel('AdForm');
+      mdl.ad_images.push({src : cfg.adPicDir + uri, id : id});
+      mdl.update('ad_images');
     }
   };
 });

@@ -87,7 +87,9 @@ _Templar.setAuthorizer(function(data){
   else if(url.indexOf('/wall') == 0){
     isAuthorized = isSignedIn();
   }
-
+  else if(url.indexOf('/show-ad') == 0){
+    isAuthorized = isSignedIn();
+  }
   return isAuthorized;
 
 });

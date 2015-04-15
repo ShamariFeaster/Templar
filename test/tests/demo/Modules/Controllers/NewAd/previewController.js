@@ -2,7 +2,7 @@ structureJS.module('AdPreviewController', function(require){
 
 var _ = require('Util'),
     Helper = require('Helper'),
-    _Templar = Templar,
+    _Templar = window.Templar,
     AdFormMdl = _Templar.getModel('AdForm'),
     ProfileFormMdl = _Templar.getModel('ProfileForm'),
     UserProfileModel = _Templar.getModel('UserProfile'),
@@ -12,7 +12,7 @@ var _ = require('Util'),
     UpdateQuery = new (require('JRDBI').QueryCollection.Update)(),
     EQ = require('JRDBI').Condition.EQ,
     NewAdCtrl = require('Controller')( require('NewAd.extendo') ),
-    _$ = $; 
+    _$ = window.$; 
     
 
 function saveAd(e){

@@ -45,8 +45,9 @@ Templar.dataModel('ProfileForm',
   description : ''
 });
 
-Templar.dataModel('MyAds',{
-  ads : []
+Templar.dataModel('Ads',{
+  myAds : [],
+  currentAdId : ''
 });
 
 Templar.dataModel('AdForm',

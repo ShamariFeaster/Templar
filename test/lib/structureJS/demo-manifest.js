@@ -52,6 +52,9 @@ structureJS.declare('controllers/MyProfileController');
 /* My Ads */
 structureJS.declare('controllers/MyAds/MyAdsController');
 
+/* Show Ad */
+structureJS.declare('controllers/ShowAdController');
+
 /*New Ad*/
 
 structureJS.declare('controllers/NewAd/previewController');
