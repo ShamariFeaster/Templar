@@ -1,5 +1,5 @@
 structureJS.module('Constants', function(require){
-  _ = Object.create(null);
+  _ = {};
   
   _.MODEL_ATTRIB_KEY = 'aplAttrib';
   _.MODEL_ATTRIB_REPEAT_KEY = 'aplRepeat';
@@ -12,6 +12,7 @@ structureJS.module('Constants', function(require){
   _.IE_TARGET_ATTRIB_KEY = 'apl-target';
   _.IE_CTRL_ATTRIB_KEY = 'apl-control';
   _.IE_DEFAULT_ATTRIB_KEY = 'apl-default';
+  _.MAIN_CONTENT_ID = 'apl-content';
   _.CLASS_SEPARATOR = /,|\s/;
   _.NT_REGEX = /\w\:\w/;
   _.RX_TOKEN = /\{\{(\w+\.\w+)(.*)*/;

@@ -244,7 +244,7 @@ return {
     
     return resolvedRouteObject;
   },
-  
+  /* Opens route */
   open : function(routeId){
 
     if((resolvedRouteObj = this.handleRoute(routeId)) != null 
@@ -266,7 +266,8 @@ return {
   },
   
   openPartial : function(partialUri, targetId){
-    if(!_.isNullOrEmpty(partialUri) && !_.isNullOrEmpty(targetId)){
+    var targetId = (_.isDef(targetId)) ? targetId : _.MAIN_CONTENT_ID;
+    if(!_.isNullOrEmpty(partialUri)){
       DOM.asynGetPartial(partialUri, Bootstrap.loadPartialIntoTemplate, targetId);
     }
   },

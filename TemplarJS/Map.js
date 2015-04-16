@@ -207,7 +207,32 @@ return {
     _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]['nodes'].push(tmp_node);
 
   },
-  
+  annotateWithLimitProps : function(model, attribName, value){
+    
+    if(_.isArray(value)){
+      Object.defineProperty(value, 'page', {
+        set : function(val){
+          model.gotoPage(val).of(attribName);
+        },
+        get : function(){ return model.currentPageOf(attribName);}
+      });
+      Object.defineProperty(value, 'totalPages', {
+        set : function(val){},
+        get : function(){return model.totalPagesOf(attribName);}
+      });
+      Object.defineProperty(value, 'limit', {
+        set : function(val){
+          model.limit(attribName).to(val);
+        },
+        get : function(){
+          var val = (!_.isDef(model.limitTable[attribName])) ? 
+                0 : model.limitTable[attribName].limit;
+          return val;
+          }
+      });
+    }
+    
+  },
   getPageSlice : function(Model, attributeName, target){
     var start = 0,
         length = target.length,
@@ -222,6 +247,7 @@ return {
       start = ( ((page * limit) - limit) < length) ?
               (page * limit) - limit : 0;
       results = target.slice(start, length);
+      this.annotateWithLimitProps(Model, attributeName, results);
     }    
     
             
@@ -286,8 +312,7 @@ return {
         modelName = TMP_node.modelName,
         attribName = TMP_node.attribName;
     
-    if(_.isDef(_map[modelName]['modelObj'][attribName])){
-      attribute = returnVal = _map[modelName]['modelObj'][attribName];
+    if(_.isDef(attribute = returnVal = this.getAttribute(modelName,attribName))){
       if(_.isArray(attribute) || _.isObj(attribute)){
         while((prop = queue.shift()) != null && _.isDef(attribute[prop])){
           returnVal = attribute = attribute[prop];

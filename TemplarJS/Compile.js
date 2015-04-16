@@ -87,7 +87,7 @@ return {
 
     var defaultPartialHref = root.getAttribute('data-apl-default'),
        id = root.getAttribute('id'),
-       shortCircuit = (State.blockBodyCompilation == true && id == 'apl-content');
+       shortCircuit = (State.blockBodyCompilation == true && id == _.MAIN_CONTENT_ID);
     
     if(!_.isNullOrEmpty(defaultPartialHref) && !shortCircuit){
       root.setAttribute('data-apl-default', '');
