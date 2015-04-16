@@ -37,9 +37,11 @@ structureJS.declare('components/Attributes');
 structureJS.declare('components/Row');
 structureJS.declare('components/Column');
 structureJS.declare('components/OverlayButton');
+structureJS.declare('components/PageButton');
 
-/*Controller Extendos*/
-structureJS.declare('controllers/Extendos/NewAd.extendo');
+/*Controller Mixins*/
+structureJS.declare('controllers/ControllerMixins/NewAd.mixin');
+structureJS.declare('controllers/ControllerMixins/MyAds.mixin');
 
 /*Home*/
 structureJS.declare('controllers/NavigationController');

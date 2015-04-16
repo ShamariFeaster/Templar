@@ -388,13 +388,27 @@ form#form_pp_pic textarea{
   font-size: 2em;
   margin-top: -29px;
 }
-
+/* -50px so it's top aligns with the bottom of it's container */
 .sticky-bottom {
   position: absolute;
-  bottom: 0px;
+  bottom: -50px;
   left: 0px;
 }
 
 .new-ad-section{
+  min-height : 250px;
+}
+
+#my-ads-content {
   min-height : 300px;
+}
+
+.clickable-word:hover {
+  cursor : pointer;
+  color : red;
+}
+
+.clickable-word{
+  text-decoration: underline;
+  color : rgb(22, 24, 22);
 }

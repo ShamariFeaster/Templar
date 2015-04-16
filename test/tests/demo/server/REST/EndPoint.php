@@ -50,7 +50,7 @@ class EndPoint{
       $this->response->pushError('PROTOCOL ERROR: Unrecognized action "'.$this->action.'"');
     }
     
-    if(count($this->data) < 1){
+    if(count($this->data) < 1 && strcmp($this->action,'delete') != 0){
       $ready = false;
       $this->response->pushError('PROTOCOL ERROR: No data property passed in request');
     }

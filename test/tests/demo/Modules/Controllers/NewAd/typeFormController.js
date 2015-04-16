@@ -6,7 +6,9 @@ var Route = require('Route'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     Config = require('Config'),
     Helper = require('Helper'),
-    NewAdCtrl = require('Controller')( require('NewAd.extendo') );   
+    mixin = require('Controller.NewAd.mixin'),
+    NewAdCtrl = require('Controller')( mixin );
+   
 
 /*--------- PART 3: Details -------------------*/
 
@@ -39,7 +41,7 @@ _Templar.success("#/new-ad/typeform", function(){
   
   NewAdCtrl.prevBtn(true,'#/new-ad/2');
   NewAdCtrl.nextBtn(true,'#/new-ad/4/id/-1/uri/-1');
-  NewAdCtrl.openPartial(formPartial);
+  NewAdCtrl.loadPartial(formPartial);
 
 });
 

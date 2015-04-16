@@ -6,7 +6,9 @@ var _Templar = Templar,
     Route = require('Route'),
     Config = require('Config'),
     Helper = require('Helper'),
-    NewAdCtrl = require('Controller')( require('NewAd.extendo') ) ; 
+    mixin = require('Controller.NewAd.mixin');
+ 
+ var  NewAdCtrl = require('Controller')( mixin ) ; 
     
 
 
@@ -33,7 +35,7 @@ NewAdCtrl.init = function(bannerMsg){
 _Templar.success("#/new-ad", function(){
   NewAdCtrl.prevBtn(false);
   NewAdCtrl.nextBtn(true,'#/new-ad/2');
-  NewAdCtrl.openPartial('pick-category.html');
+  NewAdCtrl.loadPartial('pick-category.html');
   NewAdCtrl.init('Ad Category');
 });
 

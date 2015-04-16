@@ -58,6 +58,12 @@ Reduce memory footprint by storing references to cahced nodes instead of the nod
 themselves. Not a change I'm considering now, but when it's out in the wild this 
 optimization would be great for mobile and low power devices.
 
+UPDATE: (4/16/15) I thought about this and I wonder if the higher compuational cost of
+using getElementById to get the "virtually cahced" node is worth the decrease in memory
+footprint. In order to optimize for battery life on mbile device I may want to
+use memory instead of cycles. I suppose I may be able to detect the user agent and load
+different cache module based on that. I dunno, maybe I'm over thinking this one?
+
 4/3/2015
 
 Image uploading is uploading images to the server in order to provide previews for the user
@@ -66,7 +72,7 @@ system and in the DB.
 
 4/13/2015
 
-DEFECT 
+**DEFECT**
 
 When routes being fetched, if one of the partials has a "dat-apl-default" in  it
 , the compiler spawns a fetch thread which may come back after the completion of the original
@@ -75,7 +81,7 @@ the fetch chain.
 
 Reproduce: click "My Ads" and notice that "Wall" comes up from time to time.
 
-Notes for tomorrow: 
+4/14/2015
 
 The "sub-routing" method I'm using to implement the new ad form is introducing race 
 conditions in template loading. The proper thing to do is to use routes. This is the
@@ -97,3 +103,25 @@ and therefore no good. It's not a show stopper but certainly something to think 
 ERROR NOTE : upload images not working correctly b/c the click handler bound to the 
 upload image button does get attached and therefore the AdFormMdl's state is not being retained
 across the refresh. This has to do with the premature onload firing detailed above.
+
+UPDATE: (4/16/15) this has been fixed. I didn't do any of the things I suggested above.
+I simple move loading of the onloadQueue to loadPartialIntoTemplate(). I also 
+mis-diagnosed the issue. the "sub-routing" pattern was causing problems b/c the
+thread was being spawned from within an onload. The thread's partial was put onto
+the queue immediately at the launch of the thread and this introduced a race condtion.
+If the calling fireOnloads got to the thread's partial index in the onloadqueue before 
+the thread returned with the partial content, then the onload fired prematurely. 
+
+The issue was solved by only adding a partial to the onloadqueue in the return callback (ie
+loadPartialIntoTemplate())
+
+4/16/15
+
+** DEFECT **
+
+If I have a large, unpaged repeat and I change the state of an index far down the page,
+the rebuilding of the entire repeat a.) causes the repeat to flash and b.) scrolls the user
+up to the top of the page.
+
+It seems the time has finally come for me to address my "scorched earth" repeat methodology 
+

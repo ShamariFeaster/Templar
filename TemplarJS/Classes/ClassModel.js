@@ -12,7 +12,7 @@ var Model = function(modelName ,modelObj){
   for(var attribName in modelObj){
     
     if(modelObj.hasOwnProperty(attribName)){
-
+      Circular('Map').annotateWithLimitProps(this, attribName, modelObj[attribName]);
       Object.defineProperty(this, attribName, {
         /*Closure is needed to bind 'attribName' value to each get/set. If we use attribName from Model scope
           it will always be the last value of the iteration*/

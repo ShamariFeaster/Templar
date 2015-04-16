@@ -11,7 +11,8 @@ var _ = require('Util'),
     InsertQuery = new (require('JRDBI').QueryCollection.Insert)(),
     UpdateQuery = new (require('JRDBI').QueryCollection.Update)(),
     EQ = require('JRDBI').Condition.EQ,
-    NewAdCtrl = require('Controller')( require('NewAd.extendo') ),
+    mixin = require('Controller.NewAd.mixin'),
+    NewAdCtrl = require('Controller')( mixin ), 
     _$ = window.$; 
     
 
@@ -95,7 +96,7 @@ _Templar.success("#/new-ad/preview", function(){
   
   NewAdCtrl.init('Ad Preview');
   
-  NewAdCtrl.openPartial('preview.html', function(){
+  NewAdCtrl.loadPartial('preview.html', function(){
     
     if(Helper.isChecked(AdFormMdl, 'isItemFree')){
       AdFormMdl.itemPrice = 'Free';

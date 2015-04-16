@@ -1,4 +1,4 @@
-structureJS.module('MyProfileController', function(require){
+structureJS.module('MyAdsController', function(require){
 
 var  _ = require('Util'),
     Helper = require('Helper'),
@@ -7,13 +7,21 @@ var  _ = require('Util'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     AdsMdl = _Templar.getModel('Ads'),
     Config = require('Config'),
-    SelectQuery = new (require('JRDBI').QueryCollection.Select)(),
-    UpdateQuery = new (require('JRDBI').QueryCollection.Update)(),
-    EQ = require('JRDBI').Condition.EQ,
-    Controller = require('Controller')(),
+    JRDBI = require('JRDBI'),
+    SelectQuery = new JRDBI.QueryCollection.Select(),
+    DeleteQuery = new JRDBI.QueryCollection.Delete(),
+    UpdateQuery = new JRDBI.QueryCollection.Update(),
+    EQ = JRDBI.Condition.EQ,
+    mixin = require('Controller.MyAds.mixin'),
+    MyAdsCtrl = require('Controller')(mixin),
     _$ = window.$;
 
-Controller.bindHandlers = function(){
+/* This covers repeat rebuilding due to limiting/paging */
+AdsMdl.listen('myAds', function(e){
+  MyAdsCtrl.bindHandlers();
+});
+    
+MyAdsCtrl.bindHandlers = function(){
   
   _$('.change-ad-state').click(function(e){
     var ad_id = e.currentTarget.getAttribute('ad_id'),
@@ -46,15 +54,34 @@ Controller.bindHandlers = function(){
         .execute('ads', function(){
           ad.ad_state = newAdState;
           AdsMdl.update('myAds');
-          Controller.bindHandlers();
+          
         });
         
       /* rebuild destroys orig nodes and so we re-bind */
 
   });
+  
+  _$('.delete-ad').click(function(e){
+    var ad_id = e.currentTarget.getAttribute('ad_id'),
+       index = e.currentTarget.getAttribute('index'),
+       ad = AdsMdl.myAds[index],
+       confirmResponse = window.confirm('Do you want to delete "'+ad.title+'"?');
+    if(confirmResponse == true){
+
+      DeleteQuery      
+        .condition( EQ('ad_id', ad_id) )
+        .execute('ads', function(){
+          AdsMdl.myAds.splice(index,1);
+          AdsMdl.update('myAds');
+          MyAdsCtrl.bindHandlers();
+        });
+    
+    }
+    
+  });
 }
 
-Controller.init = function(){
+MyAdsCtrl.init = function(){
 
   
 }
@@ -96,7 +123,7 @@ _Templar.success('#/my-ads', function(){
     .execute('ads', function(data){
       data.results.map(transformAdData);
       AdsMdl.myAds = data.results;
-      Controller.init('My Ads');
+      MyAdsCtrl.init('My Ads');
     });
     
   

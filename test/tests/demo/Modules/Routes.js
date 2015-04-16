@@ -41,8 +41,13 @@ Templar.Route([
     route : '#/my-ads',
     partial : ['#/profile',
     {
-      partial : 'partials/Profile/my-ads.html',
+      partial : 'partials/My-Ads/wrapper.html',
       target : '#profile-right-col'
+    },
+             
+    {
+      partial : 'partials/My-Ads/my-ads.html',
+      target : '#my-ads-content'
     }]
 },
 /*Show Ad*/
