@@ -235,18 +235,20 @@ return {
   },
   getPageSlice : function(Model, attributeName, target){
     var start = 0,
-        length = target.length,
+        end = target.length,
         limit = 0, 
         page = 0,
         results = target;
     if(_.isDef(Model.limitTable[attributeName]) && _.isArray(target)){
       page = Model.limitTable[attributeName].page;
       limit = Model.limitTable[attributeName].limit;
-      length = (((limit * page))  <= target.length) ? 
+      Model.limitTable[attributeName].totalPages = Math.floor(results.length/limit);
+      Model.limitTable[attributeName].totalPages += ((results.length%limit > 0) ? 1 : 0);
+      end = (((limit * page))  <= target.length) ? 
                ((limit * page)) : target.length;
-      start = ( ((page * limit) - limit) < length) ?
+      start = ( ((page * limit) - limit) < end) ?
               (page * limit) - limit : 0;
-      results = target.slice(start, length);
+      results = target.slice(start, end);
       this.annotateWithLimitProps(Model, attributeName, results);
     }    
     
