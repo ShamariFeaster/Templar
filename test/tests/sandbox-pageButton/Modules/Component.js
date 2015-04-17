@@ -37,37 +37,51 @@ Templar.component('PageButton',{
 Templar.component('LimitSelect',{
   templateURL : 'LimitSelect.html',
   attributes : {
-    max : function(){self,val},
+    limits : function(self,val){},
+    initLimit : function(self,val){},
     data : function(self, val){}
   },
   
   onCreate : function(self){
-    var max = parseInt(self.getAttribute('max')) || 10,
-        indexes = [2,5,10,25,50,75,100],
+    var _ = window.structureJS.require('Util'),
+        indexes = self.getAttribute('limits') || [5,10,25,50,75,100],
+        initLimit = self.getAttribute('initLimit') || 0,
         option;
-    
+    indexes = (_.isString(indexes)) ? indexes.split(',') : indexes;
+    /* build select */
     for(var i = 0; i < indexes.length ; i++){
-      if(indexes[i] > max)
-        break;
       option = document.createElement("option");
       option.text = option.value = indexes[i];
       self.appendChild(option);
     }
     
-    self.addEventListener('change', function(e){
+    self.getData = function(){
       var val = this.getAttribute('data'),
           _ = window.structureJS.require('Util');
-      val = (!_.isNull(val)) ? val.split('.') : [];
-      if(val.length > 1){
-        var select = e.target;
-        if(_.isDef(mdl = window.Templar.getModel(val[0])) 
-            && _.isArray(mdl[val[1]])){
-            mdl[val[1]].limit = select.options[select.selectedIndex].value;
+      return (!_.isNull(val)) ? val.split('.') : [];
+    }
+    
+    self.setLimit = function(limit){
+      var mdlParts = this.getData();
+      if(mdlParts.length > 1){
+        if(_.isDef(mdl = window.Templar.getModel(mdlParts[0])) 
+            && _.isArray(mdl[mdlParts[1]])){
+            mdl[mdlParts[1]].limit = limit || this.options[this.selectedIndex].value;
         }
       }
-  
-       
+    }
+    
+    
+    self.addEventListener('change', function(e){
+      this.setLimit();
+     });
+     /* if we don't wait until repeat is built we add nodes in the middle of compilation
+        which fucks up the nodelist, causing things like reunning back over the basenode
+        and other nastyness*/
+    window.Templar.done(function(){
+      self.setLimit(initLimit);
     });
+    
     
   }
 });
