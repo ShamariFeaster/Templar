@@ -19,12 +19,7 @@ var Model = function(modelName ,modelObj){
         set : (function(attribName, model){
                 return function(value){
                   _.log('SET FIRED for ' + model.modelName + '.' + attribName);
-                  /* Since clobber assignment request - clear attribute meta-data
-                         kill old limit and page num on reassingment*/
-                  if(_.isDef(model.limitTable[attribName])){
-                    delete model.limitTable[attribName];
-                  }
-                  
+
                   /*kill old static filter results as dataset has changed*/
                   if(_.isDef(model.filterResults[attribName])){
                     delete model.filterResults[attribName];

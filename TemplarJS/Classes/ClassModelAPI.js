@@ -28,8 +28,13 @@ Model.prototype.listen = function(attributeName, listener){
     Map.setListener(this.modelName, attributeName, listener);
 };
 
-Model.prototype.unlisten = function(attributeName){
-  Map.removeListener(this.modelName, attributeName);
+Model.prototype.unlisten = function(attributeName, func){
+  if(_.isFunc(func)){
+    Map.removeListener(this.modelName, attributeName, func);
+  }else if(_.isString(attributeName)){
+    Map.removeAllListeners(this.modelName, attributeName);
+  }
+  
 };
 
 Model.prototype.save = function(){

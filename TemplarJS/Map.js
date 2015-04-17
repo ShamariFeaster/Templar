@@ -209,7 +209,7 @@ return {
   },
   annotateWithLimitProps : function(model, attribName, value){
     
-    if(_.isArray(value)){
+    if(_.isArray(value) && !_.isDef(value.page)){
       Object.defineProperty(value, 'page', {
         set : function(val){
           model.gotoPage(val).of(attribName);
@@ -343,33 +343,46 @@ return {
     
     return listeners;
   },
-  
+  getFuncHash : function(func){
+    var string = func.toString(),
+        hash = string.length + string.charAt(string.length/2);
+    return hash;
+  },
   setListener : function(modelName, attributeName, listener, isFilterListener){        
     if(_.isFunc(listener)){
-      var string = listener.toString(),
-          id = string.length + string.charAt(string.length/2);
+      var hash = this.getFuncHash(listener);
       if(_.isDef(isFilterListener) && isFilterListener == true){
-        id = '_LIVE_FILTER_' + id + Math.random();
-        _.log('Adding duplicate with id ' + id + ' on ' + modelName + '.' + attributeName);
+        hash = '_LIVE_FILTER_' + hash + Math.random();
+        _.log('Adding duplicate with hash ' + hash + ' on ' + modelName + '.' + attributeName);
       }
 
       if(!_.isDef(_map[modelName]['listeners'][attributeName])){
         _map[modelName]['listeners'][attributeName] = Object.create(null);
       }
       
-      _map[modelName]['listeners'][attributeName][id] = listener;
+      _map[modelName]['listeners'][attributeName][hash] = listener;
     }        
   },
   
-  removeListener : function(modelName, attribName){
+  removeAllListeners : function(modelName, attribName){
     delete _map[modelName]['listeners'][attribName];
   },
   
+  removeListener : function(modelName, attribName, listener){
+    var listeners = _map[modelName]['listeners'][attribName],
+        needleHash = this.getFuncHash(listener),
+        deleteFunc = false;
+    for(var haystackHash in listeners){
+      if(needleHash == haystackHash){
+        delete listeners[haystackHash];
+      }
+    }
+  },
   isDuplicateListener : function(modelName, attribName, listener){
     var listeners = this.getListeners(modelName, attribName);
     
-    for(var id in listeners){
-      if(listener.toString() == listeners[id].toString())
+    for(var hash in listeners){
+      if(listener.toString() == listeners[hash].toString())
         return true;
     }
     
@@ -380,10 +393,10 @@ return {
   removeFilterListeners : function(modelName, attribName){
     if(_.isDef(_map[modelName]['listeners'][attribName])){
       var listeners = _map[modelName]['listeners'][attribName];
-      for(var id in listeners){
-        if(id.indexOf('_LIVE_FILTER_') == 0){
-          _.log('REMOVING Listener with id: ' + id);
-          delete listeners[id];
+      for(var hash in listeners){
+        if(hash.indexOf('_LIVE_FILTER_') == 0){
+          _.log('REMOVING Listener with hash: ' + hash);
+          delete listeners[hash];
         }
       }
     }

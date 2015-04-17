@@ -11,7 +11,7 @@ Model.prototype.limit = function(attribName){
       modelAttrib = 0,
       totalPages = 0;
   chain.to = function(limit){
-    /*if(limit > 0){*/
+
       delete Model.limitTable[attribName];
       modelAttrib = Map.getAttribute(Model.modelName, attribName);
       
@@ -21,10 +21,7 @@ Model.prototype.limit = function(attribName){
         Model.limitTable[attribName] = {limit : limit, page : 1, totalPages : totalPages, currentPage : 1};
         Model.update(attribName);
       }
-    /*  
-    }else{
-      delete Model.limitTable[attribName];
-    }*/
+
   };
   return chain;
 };
