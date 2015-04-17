@@ -258,7 +258,10 @@ return {
             repeatKey = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY)
             DOM_Node.parentNode.removeChild(DOM_Node);
             DOM_Node = DOM_component;
-            DOM_Node.setAttribute('data-' + _.IE_MODEL_REPEAT_KEY, repeatKey);
+            if(!_.isNullOrEmpty(repeatKey)){
+              DOM_Node.setAttribute('data-' + _.IE_MODEL_REPEAT_KEY, repeatKey);
+            }
+            
             i++;//make sure we don't recompile this node
           }
           //log('Recursing on :' + DOM_Node.tagName);
