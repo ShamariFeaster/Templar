@@ -361,7 +361,8 @@ return {
               ctx.target.unshift(TMP_repeatBaseNode);
 
             if(document.body.contains(TMP_repeatBaseNode.node) && 
-              _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode)))
+              _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode))
+              && attributeVal.length > 0)
             {
 
               /*rebuild new one*/
@@ -375,16 +376,19 @@ return {
                 Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
                 Interpolate.interpolateEmbeddedRepeats(TMP_repeatBaseNode, i);
               }
+              Map.pruneDeadEmbeds();
+              Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built); 
+              System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built);
+              updateObj.type = 'repeat';
+              updateObj.value = attributeVal;
             }
             TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 
+            
           }
-          Map.pruneDeadEmbeds();
-          Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built); 
-          System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built);
+          
           /*Stop outter loop. We build the updated repeat nodes in one pass*/
           outerCtx.stop = true;
-          updateObj.type = 'repeat';
-          updateObj.value = attributeVal;
+          
           break;
         default:
           break;
