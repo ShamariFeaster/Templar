@@ -9,18 +9,24 @@ Templar.component('column',{
   attributes : {
     colnum : function(self, val){
       val = (_.isNullOrEmpty(val)) ? 0 : val;
-      this.currOffsetLeft = 
-        ((this.colWidth * val)) + (this.parentLeft - self.offsetLeft + this.currOffsetLeft);
-      self.style.left = this.currOffsetLeft + 'px';
+      self._currOffsetLeft_ = 
+        ((self._colWidth_ * val)) + 
+        (self._parentLeft_ - self._currOffsetLeft_);
+      self.style.left = self._currOffsetLeft_ + 'px';
     }
   },
   onCreate : function(self){
-    var colnum = self.getAttribute('colnum');
-    this.parentWidth = self.parentNode.offsetWidth;
-    this.parentLeft = self.parentNode.offsetLeft;
-    this.colWidth = this.parentWidth / 10;
-    this.currOffsetLeft = 0;
-    this.attributes.colnum.call(this, self,colnum);
+    var component = this;
+    function init(){
+      var colnum = self.getAttribute('colnum');
+      self._parentWidth_ = self.parentNode.offsetWidth;
+      self._parentLeft_ = self.parentNode.offsetLeft;
+      self._colWidth_ = self._parentWidth_ / 10;
+      self._currOffsetLeft_ = self.offsetLeft;
+      component.attributes.colnum.call(component, self,colnum);
+    }
+    Templar.done(init);
+    System.setSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built, init);
 
   }
 });

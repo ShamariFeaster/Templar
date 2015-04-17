@@ -22,8 +22,8 @@ AdsMdl.listen('myAds', function(e){
 });
     
 MyAdsCtrl.bindHandlers = function(){
-  
-  _$('.change-ad-state').click(function(e){
+
+  function changeAdState(e){
     var ad_id = e.currentTarget.getAttribute('ad_id'),
        index = e.currentTarget.getAttribute('index'),
        newAdState = '';
@@ -59,9 +59,9 @@ MyAdsCtrl.bindHandlers = function(){
         
       /* rebuild destroys orig nodes and so we re-bind */
 
-  });
+  }
   
-  _$('.delete-ad').click(function(e){
+  function deleteAd(e){
     var ad_id = e.currentTarget.getAttribute('ad_id'),
        index = e.currentTarget.getAttribute('index'),
        ad = AdsMdl.myAds[index],
@@ -78,15 +78,14 @@ MyAdsCtrl.bindHandlers = function(){
     
     }
     
-  });
-}
-
-MyAdsCtrl.init = function(){
-
+  }
   
+  _$('.change-ad-state').click(changeAdState);
+  _$('.delete-ad').click(deleteAd);
 }
 
 _Templar.success('#/my-ads', function(){
+  AdsMdl.myAds = [];
   Helper.init('My Ads');
   function transformAdData(item){
     
@@ -123,7 +122,6 @@ _Templar.success('#/my-ads', function(){
     .execute('ads', function(data){
       data.results.map(transformAdData);
       AdsMdl.myAds = data.results;
-      MyAdsCtrl.init('My Ads');
     });
     
   
