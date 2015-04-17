@@ -87,7 +87,7 @@ MyAdsCtrl.init = function(){
 }
 
 _Templar.success('#/my-ads', function(){
-  
+  Helper.init('My Ads');
   function transformAdData(item){
     
     /*format date*/

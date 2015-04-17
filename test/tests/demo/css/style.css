@@ -356,6 +356,8 @@ form#form_pp_pic textarea{
   width : 80%;
   min-height : 300px;
   position : relative;
+  
+  padding-bottom: 50px;
 }
 #ad-form-description {
   min-height: 170px;
@@ -391,7 +393,7 @@ form#form_pp_pic textarea{
 /* -50px so it's top aligns with the bottom of it's container */
 .sticky-bottom {
   position: absolute;
-  bottom: -50px;
+  bottom: -30px;
   left: 0px;
 }
 

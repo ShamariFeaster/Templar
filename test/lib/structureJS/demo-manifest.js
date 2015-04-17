@@ -38,6 +38,7 @@ structureJS.declare('components/Row');
 structureJS.declare('components/Column');
 structureJS.declare('components/OverlayButton');
 structureJS.declare('components/PageButton');
+structureJS.declare('components/LimitSelect');
 
 /*Controller Mixins*/
 structureJS.declare('controllers/ControllerMixins/NewAd.mixin');

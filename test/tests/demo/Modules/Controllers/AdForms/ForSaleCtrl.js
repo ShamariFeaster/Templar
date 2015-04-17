@@ -9,7 +9,8 @@ var _ = require('Util'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     AdFormMdl = _Templar.getModel('AdForm'),
     Config = require('Config'),
-    NewAdCtrl = require('Controller')( require('NewAd.extendo') ),
+    mixin = require('Controller.NewAd.mixin'),
+    NewAdCtrl = require('Controller')( mixin ),
     _$ = window.$;
 
     
@@ -63,7 +64,7 @@ _Templar.success('#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri', function(
   NewAdCtrl.prevBtn(true,'#/new-ad/typeform');
   NewAdCtrl.nextBtn(true,'#/new-ad/preview');
   
-  NewAdCtrl.openPartial('pic-upload.html', function(){
+  NewAdCtrl.loadPartial('pic-upload.html', function(){
   
     var newImageUri = AdFormMdl.image_uri,
       newImageId = AdFormMdl.image_id;
