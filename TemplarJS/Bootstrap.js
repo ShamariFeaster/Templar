@@ -77,7 +77,7 @@ var Bootstrap = {
         Compile.compile( targetNode, scope );
         DOMGetFileContents.call(this);
         State.onloadFileQueue.push(this.fileName);
-        State.compilationThreadCount--;
+        //State.compilationThreadCount--;
         /*if a default-template tag found, recursive compilations will be spun off async during compile()
           .without a way to determine if there are still unfinished 'threads' we will interpolate multiple
           times and prematurely causing unecessary overhead and misfiring of our onload handlers. Dangers of

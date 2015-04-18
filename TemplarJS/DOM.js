@@ -75,13 +75,13 @@ return {
     xhr.targetId = targetId;
     xhr.targetNode = node;
     xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4){   //if complete
-        if(xhr.status === 404){  //check if "OK" (200)
-          State.compilationThreadCount--;
-          _.log('WARNING(404): FILE "'+xhr.fileName+'" NOT FOUND');
-        }
-      } 
-    }
+      if (xhr.readyState === 4){   //if complete
+        State.compilationThreadCount--;
+          if(xhr.status === 404){  //check if "OK" (200)
+            _.log('WARNING(404): FILE "'+xhr.fileName+'" NOT FOUND');
+          }
+        } 
+      }
     if(!_.isNullOrEmpty(xhr.fileName)){
       State.compilationThreadCount++;
       xhr.open('get',  fileName, true);
@@ -125,8 +125,9 @@ return {
       
       xhr.onreadystatechange = function() {
       if (xhr.readyState === 4){   //if complete
-          if(xhr.status === 404){  //check if "OK" (200)
-            State.compilationThreadCount--;
+        State.compilationThreadCount--;
+        if(xhr.status === 404){  //check if "OK" (200)
+            
             _.log('WARNING(404): FILE "'+xhr.fileName+'" NOT FOUND');
             if(!_.isNullOrEmpty(xhr.fallback)){
               _.log('WARNING (404): ATTEMPTING FALLBACK ROUTE "'+xhr.fallback+'".');
