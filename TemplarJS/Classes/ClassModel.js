@@ -37,7 +37,7 @@ var Model = function(modelName ,modelObj){
               })(attribName, this),
         get : (function(attribName, model){
                 return function(){
-                  return Map.getAttribute(model.modelName, attribName);
+                  return model.attributes[attribName];//Map.getAttribute(model.modelName, attribName);
                 }
               })(attribName, this)
         
