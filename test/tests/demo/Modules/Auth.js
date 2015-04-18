@@ -84,10 +84,13 @@ _Templar.setAuthorizer(function(data){
   else if(url.indexOf('/messages') == 0){
     isAuthorized = isSignedIn();
   }
-  else if(url.indexOf('/wall') == 0){
+  else if(url.indexOf('/people') == 0){
     isAuthorized = isSignedIn();
   }
   else if(url.indexOf('/show-ad') == 0){
+    isAuthorized = isSignedIn();
+  }
+  else if(url.indexOf('/edit-ad') == 0){
     isAuthorized = isSignedIn();
   }
   return isAuthorized;

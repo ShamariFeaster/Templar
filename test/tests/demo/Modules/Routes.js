@@ -27,12 +27,12 @@ Templar.Route([
       target : '#profile-right-col'
     }]
 },
-/*Wall*/
+/*people*/
 {
-    route : '#/wall',
+    route : '#/people',
     partial : ['#/profile',
     {
-      partial : 'partials/Profile/wall.html',
+      partial : 'partials/Profile/people.html',
       target : '#profile-right-col'
     }]
 },
@@ -52,8 +52,13 @@ Templar.Route([
 },
 /*Show Ad*/
 {
-  route : '#/show-ad/Ads:currentAdId',
+  route : '#/show-ad/AdForm:ad_id',
   partial : 'partials/New-Ad/preview.html'
+},
+/*Edit Ad*/
+{
+  route : '#/edit-ad/AdForm:ad_id/state/AdForm:ad_state',
+  partial : ['#/new-ad']
 },
 /*New Ad*/
 {

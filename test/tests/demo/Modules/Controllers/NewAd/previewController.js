@@ -8,18 +8,19 @@ var _ = require('Util'),
     UserProfileModel = _Templar.getModel('UserProfile'),
     EnvMdl = _Templar.getModel('Environment'),
     Config = require('Config'),
-    InsertQuery = new (require('JRDBI').QueryCollection.Insert)(),
+    Insert = require('JRDBI').QueryCollection.Insert,
+    InsertQuery = new Insert(),
     UpdateQuery = new (require('JRDBI').QueryCollection.Update)(),
     EQ = require('JRDBI').Condition.EQ,
     mixin = require('Controller.NewAd.mixin'),
     NewAdCtrl = require('Controller')( mixin ), 
     _$ = window.$; 
     
-
-function saveAd(e){
-  var details = {},
-      shouldSavePhoneNumber = Helper.isChecked(AdFormMdl, 'shouldSavePhoneNumber');
-
+function prepareAdPayload(){
+  var details = {};
+  
+  details['shouldSavePhoneNumber'] = Helper.isChecked(AdFormMdl, 'shouldSavePhoneNumber');
+  details['ad_id'] = AdFormMdl.ad_id;
   details['uid'] = UserProfileModel.uid;
   details['title'] = AdFormMdl.title;
   details['description'] = AdFormMdl.description;
@@ -56,32 +57,59 @@ function saveAd(e){
   if(Helper.isChecked(AdFormMdl, 'contactMethods', 0)){
     details['phone_num'] = AdFormMdl.phoneNumber.replace(/[\-\s]/g, '');
   }else{
-    shouldSavePhoneNumber = false;
+    details['shouldSavePhoneNumber'] = false;
   }
   
-  InsertQuery
-    .fields(details)
+  return details;
+}
+
+function writeToDB(QueryObject, successMsg){
+  var payload = prepareAdPayload(),
+     savePhoneNum = payload['shouldSavePhoneNumber'],
+     condition = null;
+  
+  delete payload['shouldSavePhoneNumber'];
+  
+  if(QueryObject instanceof Insert){
+    delete payload['ad_id'];
+  }else{
+    condition = EQ('ad_id', payload['ad_id']);
+    payload['ad_state'] = AdFormMdl.ad_state;
+  }
+  
+  QueryObject
+    .fields(payload)
+    .condition(condition)
     .execute('ads', function(data){
-      
+      var ad_id = (_.isDef(data.insertId)) ? data.insertId : AdFormMdl.ad_id;
       /*associate ad pics*/
       for(var i = 0; i < AdFormMdl.ad_images.length; i++){
         UpdateQuery
-          .fields({ad_id : data.insertId})
+          .fields({ad_id : ad_id})
           .condition( EQ('ad_pic_id', AdFormMdl.ad_images[i].id) )
           .execute('pics');
       }
       
       /*Save phone # to profile if requested*/
-      if(shouldSavePhoneNumber == true){
+      if(savePhoneNum == true){
         UpdateQuery
-          .fields({phone_num : details['phone_num'] })
-          .condition( EQ('uid' , details['uid'] ))
+          .fields({phone_num : payload['phone_num'] })
+          .condition( EQ('uid' , payload['uid'] ))
           .execute('people');
       }
-      
-      var successMsg = "Ad Saved As Draft. Goto 'My Ads' To Post It Publicly.";
+      AdFormMdl.ad_id = ad_id;
       Helper.fadeInSuccessMsg(successMsg)
     });
+}
+
+function saveAd(e){
+
+  if(AdFormMdl.ad_id == -1){
+    writeToDB(InsertQuery, "Ad Saved As Draft. Goto 'My Ads' To Post It Publicly.");
+  }else{
+    writeToDB(UpdateQuery, "Your Ad Has Been Updated.");
+  }
+  
 
 }
 

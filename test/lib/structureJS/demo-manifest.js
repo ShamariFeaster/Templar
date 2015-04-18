@@ -56,10 +56,10 @@ structureJS.declare('controllers/MyProfileController');
 structureJS.declare('controllers/MyAds/MyAdsController');
 
 /* Show Ad */
-structureJS.declare('controllers/ShowAdController');
+structureJS.declare('controllers/AdController');
+structureJS.declare('controllers/MyAds/EditAdController', ['controllers/AdController','controllers/NewAd/categorySelectController']);
 
 /*New Ad*/
-
 structureJS.declare('controllers/NewAd/previewController');
 structureJS.declare('controllers/NewAd/categorySelectController');
 structureJS.declare('controllers/NewAd/titleDescriptionController');

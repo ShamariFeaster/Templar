@@ -79,7 +79,9 @@ Templar.dataModel('AdForm',
   nav : {
     next : { href : '', label : '', isVisible : true},
     prev : { href : '', label : '', isVisible : true}
-  }
+  },
+  ad_id : -1,
+  ad_state : ''
   
 });
             

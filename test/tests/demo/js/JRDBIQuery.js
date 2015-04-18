@@ -17,13 +17,17 @@ structureJS.module('JRDBIQuery', function(){
       return this;
     },
     condition : function(Condition){
-      this.statement.conditions = 
+      var Condition = Condition || {};
+      if(typeof Condition.prepositions != 'undefined'){
+        this.statement.conditions = 
         this.statement.conditions
           .concat(Condition.prepositions)
           .map(function(cond){
             delete cond['__length__'];
             return cond;
           });
+      }
+      
       return this;
     },
     limit : function(iLimit){

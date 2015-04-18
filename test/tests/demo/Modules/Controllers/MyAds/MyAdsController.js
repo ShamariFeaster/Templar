@@ -29,7 +29,7 @@ MyAdsCtrl.bindHandlers = function(){
        newAdState = '';
 
       ad = AdsMdl.myAds[index];
-
+      
       switch(ad.action){
         case 'Post Ad':
           ad.action = 'De-List';
@@ -52,7 +52,7 @@ MyAdsCtrl.bindHandlers = function(){
         .condition( EQ('ad_id', ad_id) )
         
         .execute('ads', function(){
-          ad.ad_state = newAdState;
+          ad.ad_state = ad.state = newAdState;
           AdsMdl.update('myAds');
           
         });
@@ -99,12 +99,15 @@ _Templar.success('#/my-ads', function(){
     switch(item.ad_state){
       case 'draft':
         item.action = 'Post Ad';
+        item.state = 'draft';
         break;
       case 'active':
         item.action = 'De-List';
+        item.state = 'active';
         break;
       case 'deactivated':
         item.action = 'Re-List';
+        item.state = 'deactivated';
         break;
     }
 

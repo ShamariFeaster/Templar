@@ -6,11 +6,8 @@ var _Templar = Templar,
     Route = require('Route'),
     Config = require('Config'),
     Helper = require('Helper'),
-    mixin = require('Controller.NewAd.mixin');
- 
- var  NewAdCtrl = require('Controller')( mixin ) ; 
-    
-
+    mixin = require('Controller.NewAd.mixin'),
+    NewAdCtrl = require('Controller')( mixin ) ; 
 
 NewAdCtrl.sortCategories = function(){
   AdFormMdl.sort('category');
@@ -27,16 +24,19 @@ NewAdCtrl.bindHandlers = function(){
 };
 
 NewAdCtrl.init = function(bannerMsg){
-
+  AdFormMdl.ad_id = -1;
   AdFormMdl.sort('adType');
   AdFormMdl.update('adType');
 };
 
-_Templar.success("#/new-ad", function(){
+NewAdCtrl.onload = function(){
   NewAdCtrl.prevBtn(false);
   NewAdCtrl.nextBtn(true,'#/new-ad/2');
   NewAdCtrl.loadPartial('pick-category.html');
   NewAdCtrl.init('Ad Category');
-});
+};
 
+_Templar.success("#/new-ad", NewAdCtrl.onload);
+
+return NewAdCtrl;
 });
