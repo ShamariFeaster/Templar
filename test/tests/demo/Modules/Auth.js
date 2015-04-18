@@ -1,11 +1,11 @@
 structureJS.module('AuthModule', function(require){
 
 var _ = require('Util'),
-    _Templar = Templar,
+    _Templar = window.Templar,
     Route = require('Route'),
     Config = require('Config'),
     Helper = require('Helper'),
-    _$ = $;
+    _$ = window.$;
 
 _Templar.setAuthenticator(function(inputObj){
   var cookie = this,

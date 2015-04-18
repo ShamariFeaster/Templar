@@ -63,7 +63,7 @@ MyAdsCtrl.bindHandlers = function(){
   
   function deleteAd(e){
     var ad_id = e.currentTarget.getAttribute('ad_id'),
-       index = e.currentTarget.getAttribute('index'),
+       index = parseInt(e.currentTarget.getAttribute('index')),
        ad = AdsMdl.myAds[index],
        confirmResponse = window.confirm('Do you want to delete "'+ad.title+'"?');
     if(confirmResponse == true){
@@ -71,9 +71,8 @@ MyAdsCtrl.bindHandlers = function(){
       DeleteQuery      
         .condition( EQ('ad_id', ad_id) )
         .execute('ads', function(){
-          AdsMdl.myAds.splice(index,1);
+          AdsMdl.myAds.splice( (index + ((AdsMdl.myAds.page - 1) * AdsMdl.myAds.limit)),1);
           AdsMdl.update('myAds');
-          MyAdsCtrl.bindHandlers();
         });
     
     }

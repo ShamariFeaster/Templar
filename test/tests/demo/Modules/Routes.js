@@ -13,7 +13,10 @@ Templar.Route([
     route : '#/editProfile/ProfileForm:uploadStatus/',
     partial : 'partials/edit-profile.html'
 },
-/*---PROFILE---*/
+/*---PROFILE---
+  Best practice is not to use apl-default's. Uee UI states instead as they
+  are synchronized actions. apl-defaults introduce race conditions.
+*/
 {
     route : '#/profile',
     partial : 'partials/profile.html'

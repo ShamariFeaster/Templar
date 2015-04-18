@@ -8,11 +8,11 @@ var  _ = require('Util'),
     SelectAllQuery = new (require('JRDBI').QueryCollection.SelectAll)(),
     EQ = require('JRDBI').Condition.EQ,
     AdCtrl = require('AdController');
-    NewAdCtrl = require('CategorySelectController');
+    CtgSlCtrl = require('CategorySelectController');
     
 _Templar.success('#/edit-ad/AdForm:ad_id/state/AdForm:ad_state', function(){
   AdCtrl.onload();
-  NewAdCtrl.onload();
+  CtgSlCtrl.onload();
 });
 
 });

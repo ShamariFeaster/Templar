@@ -20,7 +20,7 @@ function populateAd(data){
       rows.results.map(function(item){
         Helper.pushAdPic(item.image_uri, item.ad_pic_id);
       });
-      
+
     });
     
   AdFormMdl.title = ad.title;
@@ -30,7 +30,7 @@ function populateAd(data){
   AdFormMdl.update('category');
   AdFormMdl.itemPrice = ad.price;
   AdFormMdl.description = ad.description;
-  AdFormMdl.ad_id = ad.ad_id;
+
 }
 
 function fetchAd(){

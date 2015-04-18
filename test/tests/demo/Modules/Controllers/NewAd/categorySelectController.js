@@ -24,7 +24,6 @@ NewAdCtrl.bindHandlers = function(){
 };
 
 NewAdCtrl.init = function(bannerMsg){
-  AdFormMdl.ad_id = -1;
   AdFormMdl.sort('adType');
   AdFormMdl.update('adType');
 };
