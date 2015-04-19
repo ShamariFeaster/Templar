@@ -93,6 +93,9 @@ _Templar.setAuthorizer(function(data){
   else if(url.indexOf('/edit-ad') == 0){
     isAuthorized = isSignedIn();
   }
+  else if(url.indexOf('/ad-search') == 0){
+    isAuthorized = isSignedIn();
+  }
   return isAuthorized;
 
 });

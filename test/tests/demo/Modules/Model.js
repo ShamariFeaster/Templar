@@ -84,7 +84,13 @@ Templar.dataModel('AdForm',
   ad_state : ''
   
 });
-            
+
+Templar.dataModel('AdSearch',{
+  adType : AdTypes,
+  category : Categories[AdTypes[0]],
+  keyword : ''
+});
+
 Templar.dataModel('UserProfile',
 {
   un :  '',
