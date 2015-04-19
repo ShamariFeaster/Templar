@@ -139,7 +139,7 @@ return {
       }
       if(!_.isNullOrEmpty(xhr.fileName)){
         State.compilationThreadCount++;
-        _.log('GETTIG: ' + xhr.fileName);
+        _.log('FETCHIGN: ' + xhr.fileName);
         xhr.open('get',  xhr.fileName, true);
         xhr.send();
         

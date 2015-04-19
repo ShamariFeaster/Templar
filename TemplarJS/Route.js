@@ -221,7 +221,7 @@ return {
         if(this.authorize.call(_clientCookie, {route : href}) === true){
           resolvedRouteObject = Route.resolveRoute(href);
           resolvedRouteObject.target = (!_.isNullOrEmpty(resolvedRouteObject.target)) ? 
-                            resolvedRouteObject.target : 'apl-content';
+                            resolvedRouteObject.target : _.MAIN_CONTENT_ID;
           NTDirectives = resolvedRouteObject.nonTerminalValues;
           /*TODO: support advanced derefencing to support a.b.current_selection and the like. Would 
             require an upgraded setAttribute.*/
@@ -311,10 +311,14 @@ return {
         }else{
           outArr.push(routeObj);
         }
+      /* in-line route obj */
       }else if(!isString){
         outArr.push(routeName);
+      /* partial w/ implicit target */
+      }else{
+        outArr.push({partial : routeName, target : _.MAIN_CONTENT_ID});
       }
-      /*noop if routeName was a string but didn't match a route*/
+      
     }
     
   }
