@@ -18,8 +18,13 @@ Templar.Route([
   are synchronized actions. apl-defaults introduce race conditions.
 */
 {
+  route : '#/profile-wrapper',
+  partial : 'partials/profile.html'
+},
+
+{
     route : '#/profile',
-    partial : ['partials/profile.html', 
+    partial : ['#/profile-wrapper', 
     {
       partial : 'partials/Profile/ad-search.html',
       target : '#profile-right-col'
@@ -28,7 +33,7 @@ Templar.Route([
 /*Messages*/
 {
     route : '#/messages',
-    partial : ['#/profile',
+    partial : ['#/profile-wrapper',
     {
       partial : 'partials/Profile/messages.html',
       target : '#profile-right-col'
@@ -37,12 +42,16 @@ Templar.Route([
 /*ad search */
 {
     route : '#/ad-search',
-    partial : ['#/profile']
+    partial : ['#/profile-wrapper', 
+    {
+      partial : 'partials/Profile/ad-search.html',
+      target : '#profile-right-col'
+    }]
 },
 /*My Ads*/
 {
     route : '#/my-ads',
-    partial : ['#/profile',
+    partial : ['#/profile-wrapper',
     {
       partial : 'partials/My-Ads/wrapper.html',
       target : '#profile-right-col'
@@ -70,7 +79,7 @@ Templar.Route([
 /*New Ad*/
 {
     route : '#/new-ad',
-    partial : ['#/profile',
+    partial : ['#/profile-wrapper',
     { 
       partial : 'partials/New-Ad/wrapper.html', 
       target : '#profile-right-col'
@@ -90,7 +99,7 @@ Templar.Route([
 },
 {
     route : '#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri',
-    partial : ['#/profile',
+    partial : ['#/profile-wrapper',
     { 
       partial : 'partials/New-Ad/wrapper.html', 
       target : '#profile-right-col',
