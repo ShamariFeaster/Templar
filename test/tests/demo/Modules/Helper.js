@@ -193,6 +193,13 @@ structureJS.module('Helper', function(require){
           mdl = window.Templar.getModel('AdForm');
       mdl.ad_images.push({src : cfg.adPicDir + uri, id : id});
       mdl.update('ad_images');
+    },
+    
+    getAd : function(ads, id){
+      var ads = ads.filter(
+            function(item){ return item.ad_id == id;}
+          );
+      return ads[0];
     }
   };
 });

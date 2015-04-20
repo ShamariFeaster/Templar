@@ -38,7 +38,7 @@ Templar.Route([
       target : '#ad-list-content'
     }]
 },
-/*Messages*/
+/*---- MESSAGES -----*/
 {
     route : '#/messages',
     partial : ['#/profile-wrapper',
@@ -47,12 +47,17 @@ Templar.Route([
       target : '#profile-right-col'
     }]
 },
-/*ad search */
+/*------AD SEARCH------ */
 {
     route : '#/ad-search',
     partial : ['#/profile']
 },
-/*My Ads*/
+/*ad search show ad*/
+{
+    route : '#/ad-search/show-ad/AdSearch:ad_id',
+    partial : ['#/my-ads/show-ad/MyAds:ad_id']
+},
+/*------ MY ADS ------*/
 {
     route : '#/my-ads',
     partial : ['#/profile-wrapper',
@@ -66,12 +71,23 @@ Templar.Route([
       target : '#my-ads-content'
     }]
 },
-/*Show Ad*/
+/*----- SHOW AD -----*/
 {
-  route : '#/show-ad/AdForm:ad_id',
-  partial : 'partials/New-Ad/preview.html'
+  route : '#/my-ads/show-ad/MyAds:ad_id',
+  partial : ['#/profile-wrapper',
+    {
+      partial : 'partials/Show-Ad/wrapper.html',
+      target : '#profile-right-col'
+    },
+    {
+      partial : 'partials/New-Ad/preview.html',
+      target : '#ad-container'
+    }
+  ]
+  
+  
 },
-/*Edit Ad
+/*---- EDIT AD -----
   Best practice : although you can set a Model's state from anywhere, best practice
   is to set an attribute using routing if the route makes use of that attribute. 
   Don't do inter-route communication directly on a model.
@@ -80,7 +96,7 @@ Templar.Route([
   route : '#/edit-ad/AdForm:ad_id/state/AdForm:ad_state',
   partial : ['#/new-ad']
 },
-/*New Ad*/
+/*---- NEW AD -----*/
 {
     route : '#/new-ad',
     partial : ['#/profile-wrapper',

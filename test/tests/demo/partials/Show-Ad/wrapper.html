@@ -1,0 +1,26 @@
+<div id="ad-container"></div>
+ 
+<div class="sticky-bottom">
+  
+  <a class="flatbtn" 
+    showIf="{{AdNav.prev.isVisible}}"
+    id="{{AdNav.prev.label}}"
+    href="{{AdNav.prev.href}}">
+    {{AdNav.prev.label}}
+    <span class="glyphicon glyphicon-triangle-left" aria-hidden="true"></span>
+  </a>
+  
+  <a class="flatbtn" 
+    showIf="{{AdNav.back.isVisible}}"
+    id="{{AdNav.back.label}}"
+    href="{{AdNav.back.href}}">{{AdNav.back.label}}
+  </a>
+  
+  <a class="flatbtn" 
+    showIf="{{AdNav.next.isVisible}}"
+    id="{{AdNav.next.label}}"
+    href="{{AdNav.next.href}}">
+    {{AdNav.next.label}}
+    <span class="glyphicon glyphicon-triangle-right" aria-hidden="true"></span>
+  </a>
+</div>

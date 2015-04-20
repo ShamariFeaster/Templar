@@ -45,9 +45,15 @@ Templar.dataModel('ProfileForm',
   description : ''
 });
 
-Templar.dataModel('Ads',{
-  myAds : [],
-  currentAdId : ''
+Templar.dataModel('MyAds',{
+  ads : [],
+  ad_id : ''
+});
+
+Templar.dataModel('AdNav',{
+  next : { href : '', label : '', isVisible : true},
+  back : { href : '', label : 'Back To List', isVisible : true},
+  prev : { href : '', label : '', isVisible : true}
 });
 
 Templar.dataModel('AdForm',
@@ -89,6 +95,7 @@ Templar.dataModel('AdSearch',{
   adType : AdTypes,
   category : Categories[AdTypes[0]],
   keyword : '',
+  ad_id : '',
   returnedAds : []
 });
 

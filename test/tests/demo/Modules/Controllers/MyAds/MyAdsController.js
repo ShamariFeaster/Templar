@@ -5,10 +5,10 @@ var  _ = require('Util'),
     _Templar = window.Templar,
     EnvModel = _Templar.getModel('Environment'),
     UserProfileModel = _Templar.getModel('UserProfile'),
-    AdsMdl = _Templar.getModel('Ads'),
+    AdsMdl = _Templar.getModel('MyAds'),
     Config = require('Config'),
     JRDBI = require('JRDBI'),
-    SelectQuery = new JRDBI.QueryCollection.Select(),
+    SelectAllQuery = new JRDBI.QueryCollection.SelectAll(),
     DeleteQuery = new JRDBI.QueryCollection.Delete(),
     UpdateQuery = new JRDBI.QueryCollection.Update(),
     EQ = JRDBI.Condition.EQ,
@@ -17,7 +17,7 @@ var  _ = require('Util'),
     _$ = window.$;
 
 /* This covers repeat rebuilding due to limiting/paging */
-AdsMdl.listen('myAds', function(e){
+AdsMdl.listen('ads', function(e){
   MyAdsCtrl.bindHandlers();
 });
     
@@ -28,7 +28,7 @@ MyAdsCtrl.bindHandlers = function(){
        index = e.currentTarget.getAttribute('index'),
        newAdState = '';
 
-      ad = AdsMdl.myAds[index];
+      ad = AdsMdl.ads[index];
       
       switch(ad.action){
         case 'Post Ad':
@@ -51,7 +51,7 @@ MyAdsCtrl.bindHandlers = function(){
         .condition( EQ('ad_id', ad_id) )
         .execute('ads', function(){
           ad.ad_state = ad.state = newAdState;
-          AdsMdl.update('myAds');
+          AdsMdl.update('ads');
           
         });
         
@@ -62,7 +62,7 @@ MyAdsCtrl.bindHandlers = function(){
   function deleteAd(e){
     var ad_id = e.currentTarget.getAttribute('ad_id'),
        index = parseInt(e.currentTarget.getAttribute('index')),
-       ad = AdsMdl.myAds[index],
+       ad = AdsMdl.ads[index],
        confirmResponse = window.confirm('Do you want to delete "'+ad.title+'"?');
     
     if(confirmResponse == true){
@@ -70,8 +70,8 @@ MyAdsCtrl.bindHandlers = function(){
       DeleteQuery      
         .condition( EQ('ad_id', ad_id) )
         .execute('ads', function(){
-          AdsMdl.myAds.splice( (index + ((AdsMdl.myAds.page - 1) * AdsMdl.myAds.limit)),1);
-          AdsMdl.update('myAds');
+          AdsMdl.ads.splice( (index + ((AdsMdl.ads.page - 1) * AdsMdl.ads.limit)),1);
+          AdsMdl.update('ads');
         });
     
     }
@@ -83,7 +83,7 @@ MyAdsCtrl.bindHandlers = function(){
 }
 
 _Templar.success('#/my-ads', function(){
-  AdsMdl.myAds = [];
+  AdsMdl.ads = [];
   Helper.init('My Ads');
   
   function transformAdData(item){
@@ -112,17 +112,11 @@ _Templar.success('#/my-ads', function(){
     return item;
   }
   
-  SelectQuery
-    .fields({ start:true,
-            title:true,
-            ad_id:true,
-            ad_state:true})
-            
+  SelectAllQuery
     .condition( EQ('uid', UserProfileModel.uid) )
-    
     .execute('ads', function(data){
       data.results.map(transformAdData);
-      AdsMdl.myAds = data.results;
+        AdsMdl.ads = data.results;
     });
     
   

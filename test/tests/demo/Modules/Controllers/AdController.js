@@ -3,18 +3,23 @@ structureJS.module('AdController', function(require){
 var  _ = require('Util'),
     Helper = require('Helper'),
     _Templar = window.Templar,
-    AdsMdl = _Templar.getModel('Ads'),
+    MyAdsMdl = _Templar.getModel('MyAds'),
     AdFormMdl = _Templar.getModel('AdForm'),
     SelectAllQuery = new (require('JRDBI').QueryCollection.SelectAll)(),
     EQ = require('JRDBI').Condition.EQ,
     mixin = require('Controller.NewAd.mixin'),
     AdCtrl = require('Controller')( mixin );
 
-function populateAd(data){
-  var ad = data.results[0];
-    
+function populateAd(ad){
+  if(_.isNull(ad)){
+    _.log('adController.populateAd() : ad was not found');
+    return;
+  } 
+  
+  AdFormMdl.ad_images = [];
+  
   SelectAllQuery
-    .condition( EQ('ad_id', AdFormMdl.ad_id) )
+    .condition( EQ('ad_id', ad.ad_id) )
     .execute('pics', function(rows){
       
       rows.results.map(function(item){
@@ -33,18 +38,24 @@ function populateAd(data){
 
 }
 
-function fetchAd(){
+function fetchAd(adId){
   /* clear ad images */
-  AdFormMdl.ad_images = [];
+  
 
   SelectAllQuery
-    .condition( EQ('ad_id', AdFormMdl.ad_id) )
-    .execute('ads', populateAd);
+    .condition( EQ('ad_id', adId || MyAdsMdl.ad_id) )
+    .execute('ads', function(data){
+      populateAd(data.results[0])
+    });
 }
 
 AdCtrl.populateAd = populateAd;
-AdCtrl.onload = fetchAd;
-_Templar.success('#/show-ad/AdForm:ad_id', AdCtrl.onload);
+AdCtrl.fetchAd = fetchAd;
+
+_Templar.success('#/my-ads/show-ad/MyAds:ad_id', function(){
+         
+  AdCtrl.populateAd( Helper.getAd(MyAdsMdl.ads, MyAdsMdl.ad_id) );
+});
 
 return AdCtrl;
 });
