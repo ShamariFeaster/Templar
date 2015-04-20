@@ -109,6 +109,7 @@ return {
     var target = null;
     var Map = this;
     var ctx = Object.create(null);
+    ctx.endingIndex = 0;
     ctx.modelName = '';
     ctx.modelAtrribName = '';
     ctx.hasAttributes = false;
@@ -161,11 +162,21 @@ return {
     /*model attribute node tables (index table and interpolatation array)*/
     }else if(!_.isFunc(modelName) && !_.isFunc(attribName) && _.isFunc(mapFunction)){
       var tmp_node = null,
-          indexCnt = {};
+          indexCnt = {},
+          startingLength;
       if( _.isDef(_map[modelName]['nodeTable'][attribName]) ){
         ctx.target = _map[modelName]['nodeTable'][attribName]['nodes'];
-
-        for(; ctx.index < ctx.target.length && ctx.stop == false; ctx.index++, indexCnt = {}){
+        /* I'm trying to elimante the use of ctx.stop. The goal is to allow the use of repeated
+            array length (and other props) in templates. This is currently being blocked by 2 things.
+            First, Map.destroyRepeatTree() was blowing up all cahced nodes indexed in the attribName.
+            Secondly, once I stoped that this interpolation loop was never getting to cached node
+            b/c if the repeat is first in the cahce array, ctx.stop is called and we don't interp 
+            the span bound to the repeat array property (most likely length). The thinking here is
+            in the case of interps that push nodes to the cache we don't want to stop the interp loop
+            , we just want to prevent the loop from hitting those newly added nodes. Storing the original
+            cahce array length should stop this behavior.*/
+        ctx.endingIndex = ctx.target.length;
+        for(; ctx.index < ctx.target.length && ctx.index < ctx.endingIndex; ctx.index++, indexCnt = {}){
           tmp_node = ctx.target[ctx.index];
           /*Single attrib could be used multiple times. For example, a select may be used twice in 
             an app. The cache would contain 2 nodes per index and modelAttribLength would be
@@ -420,11 +431,20 @@ return {
                       limitTable : model_obj.limitTable, filterResults : model_obj.filterResults};
                       
   },
+  /* BAsically for 'length' property but if the user defines other and wants them interped we need 
+      ,and associated changes (commit#...) to support that.*/
+  isRepeatArrayProperty : function(tmp_node){
+    return (tmp_node.indexQueue.length == 1 && !_.isInt(tmp_node.indexQueue[0]));
+  },
+  
   /*----REPEAT INTERPOLATION CLEANUP-----------------*/
   destroyRepeatTree : function(modelName, attribName){
+    var _this = this;
     this.forEach(modelName, attribName, function(ctx, tmp_node){
-
-      ctx.removeItem(ctx.index);
+    
+      if(!_this.isRepeatArrayProperty(tmp_node)){
+        ctx.removeItem(ctx.index);
+      }
 
       /*only remove visible elements from DOM, don't remove base node from DOM*/
       if(!_.isNull(tmp_node.node.parentNode) && tmp_node.index > _.UNINDEXED){

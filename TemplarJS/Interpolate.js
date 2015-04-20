@@ -267,7 +267,7 @@ return {
         
       node = tmp_node.node;
       tagName = (tmp_node.isComponent == true) ? 'COMPONENT' : node.tagName;
-      tagName = (Map.isRepeatedAttribute(modelName, attributeName) == true) ? 'REPEAT' : node.tagName;
+      tagName = (Map.isRepeatedAttribute(modelName, attributeName) == true && !Map.isRepeatArrayProperty(tmp_node)) ? 'REPEAT' : node.tagName;
       if(ctx.hasAttributes == true){
         updateObject = Interpolate.updateNodeAttributes(tmp_node, modelName, attributeName);
       } 
@@ -364,7 +364,7 @@ return {
               _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode))
               && attributeVal.length > 0)
             {
-
+              ctx.endingIndex = ctx.target.length;
               /*rebuild new one*/
               for(var i = 0; i < attributeVal.length; i++){
                 TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
@@ -387,7 +387,7 @@ return {
           }
           
           /*Stop outter loop. We build the updated repeat nodes in one pass*/
-          outerCtx.stop = true;
+          //outerCtx.stop = true;
           
           break;
         default:
