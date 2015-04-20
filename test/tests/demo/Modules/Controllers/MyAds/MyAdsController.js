@@ -48,9 +48,7 @@ MyAdsCtrl.bindHandlers = function(){
 
       UpdateQuery
         .fields({'ad_state' : newAdState})
-        
         .condition( EQ('ad_id', ad_id) )
-        
         .execute('ads', function(){
           ad.ad_state = ad.state = newAdState;
           AdsMdl.update('myAds');
@@ -66,6 +64,7 @@ MyAdsCtrl.bindHandlers = function(){
        index = parseInt(e.currentTarget.getAttribute('index')),
        ad = AdsMdl.myAds[index],
        confirmResponse = window.confirm('Do you want to delete "'+ad.title+'"?');
+    
     if(confirmResponse == true){
 
       DeleteQuery      
@@ -86,11 +85,11 @@ MyAdsCtrl.bindHandlers = function(){
 _Templar.success('#/my-ads', function(){
   AdsMdl.myAds = [];
   Helper.init('My Ads');
+  
   function transformAdData(item){
     
     /*format date*/
-    var date = new Date(item.start);
-    item.start = [(date.getMonth()+1),date.getDate(),date.getFullYear()].join('/');
+    item.start = Helper.formatDate(item.start);
     
     /* truncate title */
     item.title = Helper.elipsis(item.title, 25);

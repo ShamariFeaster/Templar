@@ -432,7 +432,7 @@ return {
                       
   },
   /* BAsically for 'length' property but if the user defines other and wants them interped we need 
-      ,and associated changes (commit#...) to support that.*/
+      ,and associated changes (commit#50c5f07) to support that.*/
   isRepeatArrayProperty : function(tmp_node){
     return (tmp_node.indexQueue.length == 1 && !_.isInt(tmp_node.indexQueue[0]));
   },

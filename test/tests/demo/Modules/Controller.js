@@ -14,14 +14,14 @@ function Controller( mixin ){
   }
   
   this._userInit = this._init;
-  
+
   /*should be storing user init on Controller to prevent scope lookup*/
   Object.defineProperty(this, 'init', {
     set : function(val){
       if(this._.isFunc(val)){
         this._userInit = function(){
           this._init.apply(this, arguments);
-          val.apply(null, arguments);
+          val.apply(this, arguments);
         };
       }
     },

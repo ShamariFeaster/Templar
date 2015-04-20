@@ -170,6 +170,10 @@ structureJS.module('Helper', function(require){
               str.substr(0, maxLength) + elipsis : str;
     },
     
+    formatDate : function(mySqlDatestamp){
+      var date = new Date(mySqlDatestamp);
+      return [(date.getMonth()+1),date.getDate(),date.getFullYear()].join('/');
+    },
     fadeInSuccessMsg : function(msg){
       $('#success-msg').hide();
       EnvModel.success_msg = msg;

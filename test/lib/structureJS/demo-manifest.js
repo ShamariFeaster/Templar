@@ -21,7 +21,7 @@ structureJS.declare('templar/Export');
 
 /*Data*/
 structureJS.declare('modules/Data/Config');
-structureJS.declare('lib/GeoInfo');
+structureJS.declare('js/GeoInfo');
 structureJS.declare('modules/Data/Type-Category-Map');
 
 /*App*/
@@ -72,3 +72,6 @@ structureJS.declare('controllers/AdForms/HousingCtrl');
 structureJS.declare('controllers/AdForms/JobsCtrl');
 structureJS.declare('controllers/AdForms/PersonalsCtrl');
 structureJS.declare('controllers/AdForms/ServicesCtrl');
+
+/* Search Ad */
+structureJS.declare('controllers/SearchAds/SearchAdController');

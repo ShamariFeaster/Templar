@@ -28,6 +28,14 @@ Templar.Route([
     {
       partial : 'partials/Profile/ad-search.html',
       target : '#profile-right-col'
+    },
+    {
+      partial : 'partials/Ad-Search/wrapper.html',
+      target : '#returned-ads'
+    },        
+    {
+      partial : 'partials/Ad-Search/ad-list.html',
+      target : '#ad-list-content'
     }]
 },
 /*Messages*/
@@ -42,11 +50,7 @@ Templar.Route([
 /*ad search */
 {
     route : '#/ad-search',
-    partial : ['#/profile-wrapper', 
-    {
-      partial : 'partials/Profile/ad-search.html',
-      target : '#profile-right-col'
-    }]
+    partial : ['#/profile']
 },
 /*My Ads*/
 {

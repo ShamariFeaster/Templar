@@ -6,12 +6,17 @@ structureJS.configure(
       components : 'Modules/Components/',
       templar : '../../../TemplarJS/', 
       classes : '../../../TemplarJS/Classes/',
-      lib : '../../lib/'
+      lib : '../../lib/',
+      bootstrap : 'js/bootstrap/'
     },
-  styles : ['css/style','css/hover-min'],
+  styles : ['css/hover-min',
+          'bootstrap/css/bootstrap.min',
+          'bootstrap/css/bootstrap-theme.min',
+          'css/style'],
   
   globals : [
-      'lib/jquery', 
+      'js/jquery', 
+      'bootstrap/js/bootstrap.min',
       'js/jquery.leanModal.min',
       'js/JRDBIQuery',
       'js/JRDBICondition',

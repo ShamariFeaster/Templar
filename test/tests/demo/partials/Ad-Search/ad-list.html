@@ -1,0 +1,17 @@
+<row data-apl-repeat="{{AdSearch.returnedAds}}">
+
+  <row class="my-ad-header">
+    <column colnum="0">Posted</column>
+    <column colnum="1.5">Title</column>
+  </row>
+  
+  <row class="my-ad-body">
+  
+    <column colnum="0">{{start}}</column>
+    <column colnum="1.5">
+      <a class="clickable-word" index="{{$index}}" id="{{ad_id}}">{{title}}</a>
+    </column>
+  
+  </row>
+  
+</row>

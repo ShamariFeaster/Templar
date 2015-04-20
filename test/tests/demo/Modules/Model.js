@@ -8,7 +8,7 @@ var AdTypes = require('Type-Category-Map').AdTypes,
 
 Templar.dataModel('Environment',
 {
-  siteName :  'GenericSocialNetwork.com',
+  siteName :  'Project Craig',
   banner : '',
   error : '',
   success_msg : '',
@@ -88,7 +88,8 @@ Templar.dataModel('AdForm',
 Templar.dataModel('AdSearch',{
   adType : AdTypes,
   category : Categories[AdTypes[0]],
-  keyword : ''
+  keyword : '',
+  returnedAds : []
 });
 
 Templar.dataModel('UserProfile',
