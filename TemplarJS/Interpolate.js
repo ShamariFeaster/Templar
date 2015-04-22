@@ -227,6 +227,7 @@ return {
           tmp_option.node.value = ( _.isDef(value = attributeVal[newNodeIndex].value) ) ? value : attributeVal[newNodeIndex];
           tmp_node.node.appendChild(tmp_option.node);
           tmp_option.scope = tmp_node.scope;
+          tmp_option.parentNode = tmp_node.node;
           tmp_node.node.selectedIndex = 
             (!_.isNullOrEmpty(selectedValue) && tmp_option.node.value == selectedValue) ?
               q : tmp_node.node.selectedIndex;
@@ -280,18 +281,22 @@ return {
           break;
         case 'OPTION':
           if(_.isArray(attributeVal = Map.dereferenceAttribute(tmp_node))){
-            if(attributeVal.length <= ctx.modelAttribLength && ctx.modelAttribIndex < attributeVal.length){
+            
+            var selectNode = tmp_node.parentNode;
+            
+            if(attributeVal.length <= ctx.modelAttribLength 
+              && ctx.modelAttribIndex < attributeVal.length){
                 node.text = ( _.isDef(text = attributeVal[ctx.modelAttribIndex].text) ) ? text : attributeVal[ctx.modelAttribIndex];
                 node.value = ( _.isDef(value = attributeVal[ctx.modelAttribIndex].value) ) ? value : attributeVal[ctx.modelAttribIndex];
-                node.parentNode.selectedIndex = 
+                selectNode.selectedIndex = 
                   (_.isDef(attributeVal[ctx.modelAttribIndex].selected) && attributeVal[ctx.modelAttribIndex].selected == true) ? 
-                    ctx.modelAttribIndex : node.parentNode.selectedIndex;
+                    ctx.modelAttribIndex : selectNode.selectedIndex;
               
             }
-            updateObj.value = node.parentNode.options[node.parentNode.selectedIndex].value;
-            updateObj.text = node.parentNode.options[node.parentNode.selectedIndex].text;
+            updateObj.value = selectNode.options[selectNode.selectedIndex].value;
+            updateObj.text = selectNode.options[selectNode.selectedIndex].text;
             updateObj.type = _.MODEL_EVENT_TYPES.interp_change;
-            updateObj.index = node.parentNode.selectedIndex;
+            updateObj.index = selectNode.selectedIndex;
             updateObj._attrib_ = attributeVal;
             
             /*This is here & not in preProcess... b/c when attrib is replaced as
@@ -302,7 +307,7 @@ return {
             /*New model data, shorter than existing data, kill extra nodes*/
             if(ctx.modelAttribIndex >= attributeVal.length){
               ctx.removeItem(ctx.index); /*from indexes[key] = []*/
-              node.parentNode.removeChild(node);
+              selectNode.removeChild(node);
             }
 
           }
