@@ -18,16 +18,30 @@ var Bootstrap = {
     State.target = (!_.isNullOrEmpty(State.target)) ? 
                         State.target : '';
   },
-  
-  fireOnloads : function(){
+  /* even if compilation epilogue fires early we will not fire onloads until whole
+      route path has been walked*/
+  fireOnloads : function(fileName){
     var file = '',
-        handlers = null;
-    while( (file = State.onloadFileQueue.pop()) ){
-      handlers = Templar.getPartialOnlodHandler(file);
-      for(var i = 0; i < handlers.length; i++){
-        handlers[i].call(null);
+        handlers = null,
+        onloadNames = fileName.split(','),
+        isInList = false;
+    for(var i = 0; i < State.onloadFileQueue.length; i++){
+      file = State.onloadFileQueue[i];
+      onloadNames.forEach(function(listIndex){
+        isInList |= listIndex == file;
+      });
+      
+      if(isInList == true){
+        file = State.onloadFileQueue.splice(i,1);
+        handlers = Templar.getPartialOnlodHandler(file);
+        _.log('Firing Handler(s) for: ' + file);
+        for(var i = 0; i < handlers.length; i++){
+          handlers[i].call(null);
+        }
+        
       }
     }
+
   },
   
   bindTargetSetter : function(){
@@ -75,8 +89,12 @@ var Bootstrap = {
         
         State.compiledScopes += scope + ',';
         Compile.compile( targetNode, scope );
-        DOMGetFileContents.call(this);
         State.onloadFileQueue.push(this.fileName);
+        /* on completion of route path walking the callback below resets this.fileName
+            to be a comma-separated list of the route components that have been walked.
+            this means we are ensured no onload is fired before it has been compiled and
+            loaded.*/
+        DOMGetFileContents.call(this);
         //State.compilationThreadCount--;
         /*if a default-template tag found, recursive compilations will be spun off async during compile()
           .without a way to determine if there are still unfinished 'threads' we will interpolate multiple
@@ -85,7 +103,7 @@ var Bootstrap = {
         if(State.compilationThreadCount <= 0){
           Map.pruneNodeTreeByScope( State.compiledScopes ); 
           Link.bindModel( State.compiledScopes );
-          Bootstrap.fireOnloads();
+          Bootstrap.fireOnloads(this.fileName);
           Bootstrap.bindTargetSetter();
           State.compilationThreadCount = 0;
         }

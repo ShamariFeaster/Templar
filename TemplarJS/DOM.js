@@ -91,7 +91,7 @@ return {
     
   },
   
-  fetchNestedRouteFiles : function(routes){
+  fetchNestedRouteFiles : function(routes, onloadList){
     var xhr = new XMLHttpRequest(),
         routeObj = null;
     
@@ -117,8 +117,9 @@ return {
         if(this.callbackParam1.length == 0){
 
           this.callbackOnComplete.call(null);
+          this.fileName = onloadList;
         }else{
-          Circular('DOM').fetchNestedRouteFiles.call(null, this.callbackParam1);
+          Circular('DOM').fetchNestedRouteFiles.call(null, this.callbackParam1, onloadList);
         }
 
       }
@@ -147,6 +148,21 @@ return {
     }
     
   },
+  /* comma-separated list of route names and partials that make up a route path */
+  buildOnloadList : function(routePath){
+    var list = [];
+    if(_.isArray(routePath)){
+      routePath.forEach(function(item){
+        if(_.isObj(item)){
+          list.push(item.partial);
+        }else{
+          list.push(item);
+        }
+      });
+    }
+    return list.join(',');
+  },
+  
   /*For routes w/ complex partials (ie, arrays) deferenceNestedRoutes builds an array that the 
     fetcher can process. The problem was that the origin route name was not being added to the 
     onloadQueue. We cannot, however, just add the origin route name to the queue for routes w/
@@ -155,17 +171,20 @@ return {
   asynFetchRoutes : function(routeObj, onComplete){
     var currFile = '',
         routes = [],
-        routeName = routeObj.route;
+        routeName = routeObj.route,
+        onloadList = '';
         routes.onComplete = onComplete || function(){};
     
     if(_.isArray(routeObj.partial)){
+      onloadList = this.buildOnloadList([routeObj.route].concat(routeObj.partial));
       State.onloadFileQueue.push(routeObj.route);
       Circular('Route').deferenceNestedRoutes(routeObj.partial, routes);
     }else{
+      onloadList = routeObj.route + ',' + routeObj.partial;
       routes.push(routeObj);
     }
 
-    this.fetchNestedRouteFiles(routes);
+    this.fetchNestedRouteFiles(routes, onloadList );
   },
   
   /*Solution from: http://stackoverflow.com/questions/7378186/ie9-childnodes-not-updated-after-splittext*/

@@ -212,9 +212,18 @@ return {
     Process.addCurrentSelectionToSelect(tmp_node.node, attributeVal);
     
     if(run && _.isArray(attributeVal)){
+      var isShittyIE = (modelAttribLength > 0 && tmp_node.node.children.length == 0);
+      /* with IE clearing children on node taken out of DOM, we must repopulate the select */
+      if(isShittyIE == true){
+        Map.forEach(tmp_node.modelName, tmp_node.attribName, function(ctx, tmp_option){
+          if(tmp_option.node.tagName == 'OPTION' && ctx.modelAttribIndex < modelAttribLength){
+            tmp_node.node.appendChild(tmp_option.node);
+          }
+        });
+      }
       
       /*New model data, longer than existing data, add extra nodes*/
-      if(attributeVal.length > modelAttribLength){
+      if(attributeVal.length > modelAttribLength ){
         /*amount of nodes needed*/
         newNodeCnt = attributeVal.length - modelAttribLength;
         /*where to start the new indexes in the 'indexes' table*/
@@ -227,7 +236,7 @@ return {
           tmp_option.node.value = ( _.isDef(value = attributeVal[newNodeIndex].value) ) ? value : attributeVal[newNodeIndex];
           tmp_node.node.appendChild(tmp_option.node);
           tmp_option.scope = tmp_node.scope;
-          tmp_option.parentNode = tmp_node.node;
+          tmp_node.node.selectedIndex = 0;
           tmp_node.node.selectedIndex = 
             (!_.isNullOrEmpty(selectedValue) && tmp_option.node.value == selectedValue) ?
               q : tmp_node.node.selectedIndex;
@@ -282,7 +291,7 @@ return {
         case 'OPTION':
           if(_.isArray(attributeVal = Map.dereferenceAttribute(tmp_node))){
             
-            var selectNode = tmp_node.parentNode;
+            var selectNode = node.parentNode;
             
             if(attributeVal.length <= ctx.modelAttribLength 
               && ctx.modelAttribIndex < attributeVal.length){

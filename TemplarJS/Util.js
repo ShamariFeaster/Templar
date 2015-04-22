@@ -15,6 +15,9 @@ structureJS.module('Util', function(require){
       if (a === null || typeof a === 'undefined') { return false;}
       return ( (typeof a === 'function') || (typeof a === 'object') );
     };
+  _.isTrue = function(a){ return (_.isDef(a) && a === true);};
+  _.isFalse = function(a){ return (_.isDef(a) && a === false);};
+  _.Default = function(a,b){ return (!_.isDef(a)) ? b : a;};
   _.mixin = function(from, to){
     for(var k in from){
       if(from.hasOwnProperty(k)){
