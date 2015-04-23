@@ -1,15 +1,15 @@
-<row data-apl-repeat="{{AdSearch.returnedAds}}">
-
-  <row class="my-ad-header">
-    <column colnum="0">Posted</column>
-    <column colnum="1.5">Title</column>
-  </row>
+<row hideIf="{{AdSearch.returnedAds.length}}" class="my-ad-header">
+  <column colnum="0"><a class="clickable-word">Posted</a></column>
+  <column colnum="1.5"><a class="clickable-word">Title</a></column>
+</row>
   
+<row data-apl-repeat="{{AdSearch.returnedAds}}">
   <row class="my-ad-body">
   
     <column colnum="0">{{start}}</column>
     <column colnum="1.5">
-      <a class="clickable-word view-ad" index="{{$index}}" href="#/ad-search/show-ad/{{ad_id}}">{{title}}</a>
+      <a class="clickable-word view-ad" index="{{$index}}" 
+        href="#/ad-search/show-ad/{{ad_id}}/creator/{{uid}}">{{title}}</a>
     </column>
   
   </row>

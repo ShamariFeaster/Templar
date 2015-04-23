@@ -1,7 +1,7 @@
 <h1>{{Environment.banner}}</h1>
 
 <div class="center">
-  <p>Welcome <strong>{{UserProfile.un}}</strong></p>
+  <p>Welcome <strong>{{MyProfile.un}}</strong></p>
   <p>Update Your Profile Here</p>
   <h2>{{Environment.error}}</h2>
   <h2>{{Environment.success_msg}}</h2>
@@ -14,14 +14,14 @@
         action="{{Environment.pic_submission_url}}"
         autocomplete="off">
     <row>
-      <img class="pp_preview" src="{{UserProfile.pp_src}}" >
+      <img class="pp_preview" src="{{MyProfile.pp_src}}" >
     </row>
     
     <row>
       <label for="profile_pic">Profile Image:</label>
       <column colnum="1.5">
         <input type="file" name="profile_pic[]" id="profile_pic" tabindex="1">
-        <input type="hidden" name="uid" value="{{UserProfile.uid}}">
+        <input type="hidden" name="uid" value="{{MyProfile.uid}}">
       </column>
     </row>
     
@@ -74,5 +74,5 @@
     <button class="flatbtn" id="btn-update-profile">Update</button>
   </row>
     
-  <div style="clear: both;">
+  <div style="clear: both;"></div>
 

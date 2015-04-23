@@ -99,7 +99,24 @@ Templar.dataModel('AdSearch',{
   returnedAds : []
 });
 
-Templar.dataModel('UserProfile',
+Templar.dataModel('AdMetadata',{
+  creatorUid : '',
+  comments : [],
+  creatorImageSrc : ''
+});
+
+Templar.dataModel('CommentForm',{
+  label : '',
+  text : '',
+  targetUid : -1,
+  posterUid : -1,
+  submitText : 'Post',
+  cancelText : 'Cancel',
+  cancelHref : '',
+  isWritingComment : false
+});
+
+Templar.dataModel('MyProfile',
 {
   un :  '',
   uid : '',
@@ -113,6 +130,23 @@ Templar.dataModel('UserProfile',
   role : '',
   description : '',
   pp_src : ''
+});
+
+Templar.dataModel('UserProfile',
+{
+  un :  '',
+  uid : '',
+  email : '',
+  fn : '',
+  ln : '',
+  state : '',
+  city : '',
+  age : '',
+  sex : '',
+  role : '',
+  description : '',
+  pp_src : '',
+  ads : []
 });
 
 });

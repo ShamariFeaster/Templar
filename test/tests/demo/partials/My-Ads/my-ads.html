@@ -1,15 +1,14 @@
 <!-- Individual Ad Listing Template (repeated by framework) -->
-<row data-apl-repeat="{{MyAds.ads}}">
+<row class="my-ad-header">
+  <column colnum="0"><a class="clickable-word">Posted</a></column>
+  <column colnum="1.5"><a class="clickable-word">Title</a></column>
+</row>
 
-  <row class="my-ad-header">
-    <column colnum="0">Posted</column>
-    <column colnum="1.5">Title</column>
-  </row>
-  
+<row data-apl-repeat="{{MyAds.ads}}">
   <row class="my-ad-body">
     <column colnum="0">{{start}}</column>
     <column colnum="1.5">{{title}}</column>
-    <column colnum="7">
+    <column colnum="5">
       <a class="clickable-word" href="#/my-ads/show-ad/{{ad_id}}">View</a>
       
       <a class="clickable-word" href="#/edit-ad/{{ad_id}}/state/{{state}}">Edit</a>

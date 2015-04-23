@@ -41,7 +41,7 @@ _Templar.setAuthenticator(function(inputObj){
         }else{
           /*No explicit landing page means choose profile page if profile exists*/
           if(_.isDef(data.cookie.profileExists)){
-            Route.open('/profile');
+            Route.open('/my-profile');
           }else{
             Route.open('/editProfile');
           }
@@ -72,7 +72,7 @@ _Templar.setAuthorizer(function(data){
   if(url.indexOf('/login') == 0){
     isAuthorized = true;
   }
-  else if(url.indexOf('/profile') == 0 || url.indexOf('/editProfile') == 0){
+  else if(url.indexOf('/my-profile') == 0 || url.indexOf('/editProfile') == 0){
     isAuthorized = isSignedIn();
   }
   else if(url.indexOf('/new-ad') == 0){

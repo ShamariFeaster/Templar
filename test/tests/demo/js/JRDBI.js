@@ -28,11 +28,16 @@ structureJS.module('JRDBI', function(require){
       datatype : 'json',
       data : query.statement,
       success : function(data){
-        if(data.error.length < 1){
-          success.call(null, data);
+        if(_.isObj(data)){
+          if(data.error.length < 1){
+            success.call(null, data);
+          }else{
+            fail.call(query, data);
+          }
         }else{
           fail.call(query, data);
         }
+        
 
       },
       error : function(data){_.log(data);}

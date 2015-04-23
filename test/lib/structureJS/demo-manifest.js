@@ -58,7 +58,7 @@ structureJS.declare('controllers/MyAds/MyAdsController');
 /* Show Ad */
 structureJS.declare('controllers/AdController');
 structureJS.declare('controllers/MyAds/EditAdController', ['controllers/AdController','controllers/NewAd/categorySelectController']);
-
+structureJS.declare('controllers/MetaSidebar/MetaSidebarController');
 /*New Ad*/
 structureJS.declare('controllers/NewAd/previewController');
 structureJS.declare('controllers/NewAd/categorySelectController');
@@ -74,4 +74,4 @@ structureJS.declare('controllers/AdForms/PersonalsCtrl');
 structureJS.declare('controllers/AdForms/ServicesCtrl');
 
 /* Search Ad */
-structureJS.declare('controllers/SearchAds/SearchAdController');
+structureJS.declare('controllers/SearchAds/SearchAdController', ['controllers/MetaSidebar/MetaSidebarController']);

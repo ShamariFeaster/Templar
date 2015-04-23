@@ -18,16 +18,34 @@ Templar.Route([
   are synchronized actions. apl-defaults introduce race conditions.
 */
 {
-  route : '#/profile-wrapper',
-  partial : 'partials/profile.html'
+  route : '#/main-layout',
+  partial : 'partials/layout.html'
 },
 
 {
-    route : '#/profile',
-    partial : ['#/profile-wrapper', 
+    route : '#/my-profile',
+    partial : ['#/main-layout', 
     {
-      partial : 'partials/Profile/ad-search.html',
-      target : '#profile-right-col'
+      partial : 'partials/Profile/profile.html',
+      target : '#layout-center-col'
+    }]
+},
+/*---- MESSAGES -----*/
+{
+    route : '#/messages',
+    partial : ['#/main-layout',
+    {
+      partial : 'partials/Profile/messages.html',
+      target : '#layout-center-col'
+    }]
+},
+/*------AD SEARCH------ */
+{
+    route : '#/ad-search',
+    partial : ['#/main-layout', 
+    {
+      partial : 'partials/Ad-Search/header.html',
+      target : '#layout-center-col'
     },
     {
       partial : 'partials/Ad-Search/wrapper.html',
@@ -38,32 +56,36 @@ Templar.Route([
       target : '#ad-list-content'
     }]
 },
-/*---- MESSAGES -----*/
-{
-    route : '#/messages',
-    partial : ['#/profile-wrapper',
-    {
-      partial : 'partials/Profile/messages.html',
-      target : '#profile-right-col'
-    }]
-},
-/*------AD SEARCH------ */
-{
-    route : '#/ad-search',
-    partial : ['#/profile']
-},
 /*ad search show ad*/
 {
-    route : '#/ad-search/show-ad/AdSearch:ad_id',
-    partial : ['#/my-ads/show-ad/MyAds:ad_id']
+    route : '#/ad-search/show-ad/AdSearch:ad_id/creator/AdMetadata:creatorUid',
+    partial : ['#/my-ads/show-ad/MyAds:ad_id',
+    {
+      partial : 'partials/MetaSidebar/wrapper.html',
+      target : '#layout-right-col'
+    }]
+},
+/*ad search make comment*/
+{
+    route : '#/ad-search/add-comment/AdSearch:ad_id',
+    partial : ['#/ad-search/show-ad/AdSearch:ad_id/creator/AdMetadata:creatorUid',
+    {
+      partial : 'partials/Comment-Forms/basic.html',
+      target : '#meta-sidebar-content'
+    }]
+},
+/*ad search make comment*/
+{
+    route : '#/ad-search/respond/AdSearch:ad_id',
+    partial : ['#/ad-search/add-comment/AdSearch:ad_id']
 },
 /*------ MY ADS ------*/
 {
     route : '#/my-ads',
-    partial : ['#/profile-wrapper',
+    partial : ['#/main-layout',
     {
       partial : 'partials/My-Ads/wrapper.html',
-      target : '#profile-right-col'
+      target : '#layout-center-col'
     },
              
     {
@@ -74,18 +96,17 @@ Templar.Route([
 /*----- SHOW AD -----*/
 {
   route : '#/my-ads/show-ad/MyAds:ad_id',
-  partial : ['#/profile-wrapper',
+  partial : ['#/main-layout',
     {
       partial : 'partials/Show-Ad/wrapper.html',
-      target : '#profile-right-col'
+      target : '#layout-center-col'
     },
     {
       partial : 'partials/New-Ad/preview.html',
       target : '#ad-container'
     }
   ]
-  
-  
+ 
 },
 /*---- EDIT AD -----
   Best practice : although you can set a Model's state from anywhere, best practice
@@ -99,30 +120,30 @@ Templar.Route([
 /*---- NEW AD -----*/
 {
     route : '#/new-ad',
-    partial : ['#/profile-wrapper',
+    partial : ['#/main-layout',
     { 
       partial : 'partials/New-Ad/wrapper.html', 
-      target : '#profile-right-col'
+      target : '#layout-center-col'
     }]
 },
 {
     route : '#/new-ad/2',
     partial : 'partials/New-Ad/wrapper.html',
-    target : '#profile-right-col',
+    target : '#layout-center-col',
     fallback : '#/new-ad'
 },
 {
     route : '#/new-ad/typeform',
     partial : 'partials/New-Ad/wrapper.html',
-    target : '#profile-right-col',
+    target : '#layout-center-col',
     fallback : '#/new-ad'
 },
 {
     route : '#/new-ad/4/id/AdForm:image_id/uri/AdForm:image_uri',
-    partial : ['#/profile-wrapper',
+    partial : ['#/main-layout',
     { 
       partial : 'partials/New-Ad/wrapper.html', 
-      target : '#profile-right-col',
+      target : '#layout-center-col',
       fallback : '#/new-ad'
     }]
     
@@ -130,6 +151,6 @@ Templar.Route([
 {
     route : '#/new-ad/preview',
     partial : 'partials/New-Ad/wrapper.html',
-    target : '#profile-right-col',
+    target : '#layout-center-col',
     fallback : '#/new-ad'
 }]);

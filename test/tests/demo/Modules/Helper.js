@@ -1,13 +1,14 @@
 structureJS.module('Helper', function(require){
 
   var _ = require('Util'),
-      _Templar = Templar,
+      _Templar = window.Templar,
       EnvModel = _Templar.getModel('Environment'),
-      UserProfileModel = _Templar.getModel('UserProfile'),
+      UserProfileModel = _Templar.getModel('MyProfile'),
       Config = require('Config'),
       SelectQuery = new (require('JRDBI').QueryCollection.Select)(),
+      SelectAllQuery = new (require('JRDBI').QueryCollection.SelectAll)(),
       EQ = require('JRDBI').Condition.EQ,
-      _$ = $;
+      _$ = window.$;
       
   return {
     ajax : function(url, payload, cbOK, cbErr, cbFatalErr){
@@ -63,10 +64,19 @@ structureJS.module('Helper', function(require){
       
     },
     
+    fetchProfilePic : function(UserProfile){
+      SelectQuery
+        .fields({profile_pic_uri: true})
+        .condition(EQ('uid',UserProfile.uid))
+        .execute('people', function(data){
+          UserProfile.pp_src = Config.ppPicDir + data.results[0].profile_pic_uri;
+        });
+    },
+    
     loadProfile : function(UserProfile){
       if(!_.isDef(UserProfile))
         return;
-        
+      var Helper = this;  
       this.setProfileProperty(UserProfile, 'un');
       this.setProfileProperty(UserProfile, 'uid');
       this.setProfileProperty(UserProfile, 'age');
@@ -79,13 +89,9 @@ structureJS.module('Helper', function(require){
       this.setProfileProperty(UserProfile, 'role');
       this.setProfileProperty(UserProfile, 'pp_src', function(UserProfile, prop){
         if(_.isNullOrEmpty(UserProfile[prop] || sessionStorage[prop])){
-          SelectQuery
-            .fields({profile_pic_uri: true})
-            .condition(EQ('uid',UserProfile.uid))
-            .execute('people', function(data){
-              UserProfile[prop] = Config.ppPicDir + data.results[0].profile_pic_uri;
-            });
 
+          Helper.fetchProfilePic(UserProfile);
+          
         }else{
           UserProfile[prop] = sessionStorage[prop];
         }
@@ -200,6 +206,90 @@ structureJS.module('Helper', function(require){
             function(item){ return item.ad_id == id;}
           );
       return ads[0];
+    },
+    
+    getAdjacentAds : function(ads, id){
+      var prev = null, next = null,
+         ads = ads.forEach(
+          function(item, i, arr){ 
+            if(item.ad_id == id){
+              prev = (i-1 >= 0 ) ? ads[i-1] : prev;
+              next = (i+1 < arr.length ) ? ads[i+1] : next;
+            }
+            
+          }
+        );
+      return {prev : prev, next: next};
+    },
+    
+    setAdNav : function(ads, id, routePrefix, addCretorUid){
+      var adjObj = this.getAdjacentAds(ads, id),
+          AdNavMdl = _Templar.getModel('AdNav'),
+          suffix = '';
+          
+      AdNavMdl.next.isVisible = false;
+      AdNavMdl.prev.isVisible = false;
+      
+      if(!_.isNull(adjObj.prev)){ 
+        suffix = (_.isTrue(addCretorUid)) ? 
+                      '/creator/' + adjObj.prev.uid : suffix;
+        AdNavMdl.prev.href = routePrefix + adjObj.prev.ad_id + suffix;
+        AdNavMdl.prev.label = adjObj.title;
+        AdNavMdl.prev.isVisible = true;
+      }
+      
+      if(!_.isNull(adjObj.next)){
+        suffix = (_.isTrue(addCretorUid)) ? 
+                      '/creator/' + adjObj.next.uid : suffix;
+        AdNavMdl.next.href = routePrefix + adjObj.next.ad_id + suffix ;
+        AdNavMdl.next.label = adjObj.title;
+        AdNavMdl.next.isVisible = true;
+      }
+      AdNavMdl.update('prev');
+      AdNavMdl.update('next');
+    },
+    
+    setAdBackBtn : function(href, label){
+      var AdNavMdl = _Templar.getModel('AdNav');
+      AdNavMdl.back.label = (_.isDef(label)) ? label : AdNavMdl.back.label;
+      AdNavMdl.back.href = href;
+      AdNavMdl.update('back');
+    },
+    fetchAds : function(uid, callback){
+      var Helper = this;
+      
+      function transformAdData(item){
+        
+        /*format date*/
+        item.start = Helper.formatDate(item.start);
+        
+        /* truncate title */
+        item.title = Helper.elipsis(item.title, 25);
+        
+        switch(item.ad_state){
+          case 'draft':
+            item.action = 'Post Ad';
+            item.state = 'draft';
+            break;
+          case 'active':
+            item.action = 'De-List';
+            item.state = 'active';
+            break;
+          case 'deactivated':
+            item.action = 'Re-List';
+            item.state = 'deactivated';
+            break;
+        }
+
+        return item;
+      }
+      
+      SelectAllQuery
+        .condition( EQ('uid', uid) )
+        .execute('ads', function(data){
+          data.results.map(transformAdData);
+          callback.call(null,data.results);
+        });
     }
   };
 });

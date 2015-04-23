@@ -17,9 +17,9 @@ $('#goto-logout').click(function(e){
   Route.open('/login');
 });
 
-$('#goto-profile').click(function(e){
+$('#goto-my-profile').click(function(e){
   EnvModel.error = '';
-  Route.open('/profile');
+  Route.open('/my-profile');
 });
 
 $('#goto-edit-profile').click(function(e){

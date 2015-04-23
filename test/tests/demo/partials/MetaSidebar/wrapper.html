@@ -1,0 +1,22 @@
+<div class="center" id="meta-sidebar-header">
+  <row>The Seller</row>
+  <img id="meta-sidebar-pic" class="pp_preview"
+       src="{{AdMetadata.creatorImageSrc}}"/>
+       
+  <row>
+    <a class="clickable-word">View Profile</a>
+  </row>
+  
+  <row>
+    <a hideIf="{{CommentForm.isWritingComment}}" 
+       class="clickable-word"
+       href="#/ad-search/respond/{{AdSearch.ad_id}}">Respond To Ad</a>
+  </row>
+
+  <row>
+    <a hideIf="{{CommentForm.isWritingComment}}" 
+       class="clickable-word" 
+       href="#/ad-search/add-comment/{{AdSearch.ad_id}}">Add Comment</a>
+  </row>
+</div>
+<div class="center" id="meta-sidebar-content"></div>

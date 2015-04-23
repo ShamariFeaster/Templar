@@ -10,6 +10,7 @@ var  _ = require('Util'),
     mixin = require('Controller.NewAd.mixin'),
     AdCtrl = require('Controller')( mixin );
 
+/* This is re-used in Ad Search when idv ad is selected for viewing*/
 function populateAd(ad){
   if(_.isNull(ad)){
     _.log('adController.populateAd() : ad was not found');
@@ -27,7 +28,8 @@ function populateAd(ad){
       });
 
     });
-    
+  /* the setting of adType and category should be optional as it's causing unecessary
+      firing of listeners where there*/
   AdFormMdl.title = ad.title;
   AdFormMdl.category.current_selection = ad.ad_category;
   AdFormMdl.adType.current_selection = ad.ad_type;
@@ -38,23 +40,12 @@ function populateAd(ad){
 
 }
 
-function fetchAd(adId){
-  /* clear ad images */
-  
-
-  SelectAllQuery
-    .condition( EQ('ad_id', adId || MyAdsMdl.ad_id) )
-    .execute('ads', function(data){
-      populateAd(data.results[0])
-    });
-}
-
 AdCtrl.populateAd = populateAd;
-AdCtrl.fetchAd = fetchAd;
 
-_Templar.success('#/my-ads/show-ad/MyAds:ad_id', function(){
-         
+_Templar.success('#/my-ads/show-ad/MyAds:ad_id', function(){    
   AdCtrl.populateAd( Helper.getAd(MyAdsMdl.ads, MyAdsMdl.ad_id) );
+  Helper.setAdNav(MyAdsMdl.ads, MyAdsMdl.ad_id, '#/my-ads/show-ad/');
+  Helper.setAdBackBtn('#/my-ads');
 });
 
 return AdCtrl;

@@ -4,7 +4,7 @@ var  _ = require('Util'),
     Helper = require('Helper'),
     _Templar = window.Templar,
     EnvModel = _Templar.getModel('Environment'),
-    UserProfileModel = _Templar.getModel('UserProfile'),
+    mdl_MyProfile = _Templar.getModel('MyProfile'),
     AdsMdl = _Templar.getModel('MyAds'),
     Config = require('Config'),
     JRDBI = require('JRDBI'),
@@ -86,38 +86,10 @@ _Templar.success('#/my-ads', function(){
   AdsMdl.ads = [];
   Helper.init('My Ads');
   
-  function transformAdData(item){
-    
-    /*format date*/
-    item.start = Helper.formatDate(item.start);
-    
-    /* truncate title */
-    item.title = Helper.elipsis(item.title, 25);
-    
-    switch(item.ad_state){
-      case 'draft':
-        item.action = 'Post Ad';
-        item.state = 'draft';
-        break;
-      case 'active':
-        item.action = 'De-List';
-        item.state = 'active';
-        break;
-      case 'deactivated':
-        item.action = 'Re-List';
-        item.state = 'deactivated';
-        break;
-    }
-
-    return item;
-  }
+  Helper.fetchAds(mdl_MyProfile.uid, function(ads){
+    AdsMdl.ads = ads;
+  });
   
-  SelectAllQuery
-    .condition( EQ('uid', UserProfileModel.uid) )
-    .execute('ads', function(data){
-      data.results.map(transformAdData);
-        AdsMdl.ads = data.results;
-    });
     
   
 });

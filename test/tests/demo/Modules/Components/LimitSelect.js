@@ -52,7 +52,7 @@ Templar.component('LimitSelect',{
     if(mdlParts.length > 1){
       if(_.isDef(mdl = window.Templar.getModel(mdlParts[0])) 
           && _.isArray(mdl[mdlParts[1]])){
-          mdl.limit(mdlParts[1]).to(initLimit);
+          mdl[mdlParts[1]].limit = initLimit;
       }
     }
 

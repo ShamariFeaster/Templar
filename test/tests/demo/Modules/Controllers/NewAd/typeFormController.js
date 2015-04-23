@@ -3,7 +3,7 @@ structureJS.module('TypeFormController', function(require){
 var Route = require('Route'),
     _Templar = Templar,
     AdFormMdl = _Templar.getModel('AdForm'),
-    UserProfileModel = _Templar.getModel('UserProfile'),
+    UserProfileModel = _Templar.getModel('MyProfile'),
     Config = require('Config'),
     Helper = require('Helper'),
     mixin = require('Controller.NewAd.mixin'),
@@ -16,32 +16,32 @@ var Route = require('Route'),
   HTML as well as modularization of complex logic for each partial*/
 _Templar.success("#/new-ad/typeform", function(){
   NewAdCtrl.init(AdFormMdl.adType.current_selection);
-  var formPartial = 'TypeSpecificAdForms/';
+  var typeFormURL = 'TypeSpecificAdForms/';
   switch(AdFormMdl.adType.current_selection){
     case 'For Sale': 
-      formPartial += 'for-sale.html';
+      typeFormURL += 'for-sale.html';
       break;
     case 'Jobs': 
-      formPartial += 'jobs.html';
+      typeFormURL += 'jobs.html';
       break;
     case 'Housing': 
-      formPartial += 'housing.html';
+      typeFormURL += 'housing.html';
       break;
     case 'Services': 
-      formPartial += 'services.html';
+      typeFormURL += 'services.html';
       break;
     case 'Personals': 
-      formPartial += 'personals.html';
+      typeFormURL += 'personals.html';
       break;
     case 'Announcements': 
-      formPartial += 'announcements.html';
+      typeFormURL += 'announcements.html';
       break;
     
   }
   
   NewAdCtrl.prevBtn(true,'#/new-ad/2');
   NewAdCtrl.nextBtn(true,'#/new-ad/4/id/-1/uri/-1');
-  NewAdCtrl.loadPartial(formPartial);
+  NewAdCtrl.loadPartial(typeFormURL);
 
 });
 
