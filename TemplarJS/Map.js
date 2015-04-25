@@ -442,7 +442,7 @@ return {
     var _this = this;
     this.forEach(modelName, attribName, function(ctx, tmp_node){
     
-      if(!_this.isRepeatArrayProperty(tmp_node)){
+      if(tmp_node.index > -1 || !document.body.contains(tmp_node.node)){
         ctx.removeItem(ctx.index);
       }
 
@@ -452,6 +452,7 @@ return {
         
       }
     });
+
   },
   
   pruneDeadEmbeds : function(){

@@ -25,6 +25,13 @@ structureJS.module('Util', function(require){
       }
     }
   };
+  _.length = function(o){
+    retVal = 0;
+    if(_.isObj(o)){
+      retVal = Object.keys(o).length;
+    }
+    return retVal;
+  }
   structureJS.extendContext(_); 
   return _;
 });

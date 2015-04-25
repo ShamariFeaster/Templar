@@ -187,7 +187,7 @@ return {
               if(TMP_repeatedNode.hasNonTerminals == false)
                 TMP_repeatedNode.node.innerHTML = attributeVal[i];
               TMP_repeatBaseNode.node.parentNode.insertBefore(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
-              Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
+              Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope, i);
             }
           }
           TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 
@@ -361,8 +361,9 @@ return {
               TMP_repeatedNode = null,
               outerCtx = ctx,
               baseNodes = null,
-              repeatStart = 0,
-              repeatEnd = 0;
+              removedCnt = 0;
+          ctx.endingIndex = 0;//ctx.target.length;
+          
           /*cache and DOM housekeeping*/
           Map.destroyRepeatTree(modelName, attributeName);
           
@@ -371,14 +372,12 @@ return {
 
           for(var z = 0; z < baseNodes.length; z++){
             TMP_repeatBaseNode = baseNodes[z];
-            if(baseNodes[z].node.parentNode)
-              ctx.target.unshift(TMP_repeatBaseNode);
 
             if(document.body.contains(TMP_repeatBaseNode.node) && 
               _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode))
               && attributeVal.length > 0)
             {
-              ctx.endingIndex = ctx.target.length;
+              
               /*rebuild new one*/
               for(var i = 0; i < attributeVal.length; i++){
                 TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
@@ -387,7 +386,7 @@ return {
                 if(TMP_repeatedNode.hasNonTerminals == false)
                   TMP_repeatedNode.node.innerHTML = attributeVal[i];
                 TMP_repeatBaseNode.node.parentNode.insertBefore(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
-                Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
+                Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope, i);
                 Interpolate.interpolateEmbeddedRepeats(TMP_repeatBaseNode, i);
               }
               Map.pruneDeadEmbeds();

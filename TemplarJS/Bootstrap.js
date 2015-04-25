@@ -34,7 +34,7 @@ var Bootstrap = {
       if(isInList == true){
         file = State.onloadFileQueue.splice(i,1);
         handlers = Templar.getPartialOnlodHandler(file);
-        _.log('Firing Handler(s) for: ' + file);
+        _.log('Firing '+handlers.length +' handlers(s) for: ' + file);
         for(var i = 0; i < handlers.length; i++){
           handlers[i].call(null);
         }

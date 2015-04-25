@@ -80,11 +80,14 @@ return {
   getAllTokens : function(input){
     return this.getTokens(input);//.concat(this.getRepeatToken(input));
   },
-  compile : function(root, scope){
+  compile : function(root, scope, repeatIndex){
   
     if(_.isNull(root) || _.isNull(root.childNodes))
       return scope;
-
+    
+    repeatIndex = (_.isInt(repeatIndex)) ? parseInt(repeatIndex) : -1;
+      
+    
     var defaultPartialHref = root.getAttribute('data-apl-default'),
        id = root.getAttribute('id'),
        shortCircuit = (State.blockBodyCompilation == true && id == _.MAIN_CONTENT_ID);
@@ -132,6 +135,8 @@ return {
             tmp_node = new TMP_Node(span, modelName, attribName);
             tmp_node.inheritToken(tokens[x]);
             tmp_node.scope = scope;
+            tmp_node.index = repeatIndex;
+            
             splitNode = DOM.splitText(DOM_Node, tokens[x]['start'] - prevLength)
             //splitNode = DOM_Node.splitText(tokens[x]['start'] - prevLength);
             prevLength += DOM_Node.nodeValue.length;
@@ -191,9 +196,8 @@ return {
           if(_.isDef(component)
               && !_.isNullOrEmpty(component.templateContent)
               && !_.isNull(DOM_Node.parentNode)){
-            _.log('Is Defined Component: ' + DOM_Node.tagName);
-            
-            
+            //_.log('Is Defined Component: ' + DOM_Node.tagName);
+
             DOM_Node.insertAdjacentHTML('afterend', component.templateContent);
             DOM_component = DOM_Node.nextElementSibling;
             
@@ -222,7 +226,7 @@ return {
             /*probably unecessary*/
             DOM.cloneAttributes(DOM_Node, DOM_component, true);
 
-            TMP_processed_components = Process.preProcessNodeAttributes(DOM_component, scope);
+            TMP_processed_components = Process.preProcessNodeAttributes(DOM_component, scope, repeatIndex);
             
             if(_.isDef(DOM_component._setAttribute)){
               DOM_component._setAttributeWrapper = DOM_component.setAttribute;
@@ -271,12 +275,12 @@ return {
             DOM.annotateDOMNode(DOM_Node, tokens[0].modelName, tokens[0].attribName, tokens[0] );
           }
           
-          __COMPILER_FLG__ = Process.preProcessNode(DOM_Node, scope);
+          __COMPILER_FLG__ = Process.preProcessNode(DOM_Node, scope, repeatIndex);
           
           /*Repeat base nodes serve as templates and should remain uncompiled*/
           switch(__COMPILER_FLG__){
             case _.COMPILE_ME:
-              this.compile(DOM_Node, scope);
+              this.compile(DOM_Node, scope, repeatIndex);
               break;
             case _.NO_COMPILE_ME:
               /*noop*/
