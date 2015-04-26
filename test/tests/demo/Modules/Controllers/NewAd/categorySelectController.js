@@ -31,7 +31,6 @@ NewAdCtrl.init = function(bannerMsg){
 NewAdCtrl.onload = function(){
   NewAdCtrl.prevBtn(false);
   NewAdCtrl.nextBtn(true,'#/new-ad/2');
-  NewAdCtrl.loadPartial('pick-category.html');
   NewAdCtrl.init('Ad Category');
 };
 

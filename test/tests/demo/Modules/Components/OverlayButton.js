@@ -3,13 +3,19 @@ Templar.component('OverlayButton', {
   attributes : {
   
     overlay : function(self, val){
-      var overlay = self.querySelector('[id=sf-overlay-image]');
-      overlay.setAttribute('src', val);
+      var overlay;
+      if((overlay = self.querySelector('[id=sf-overlay-image]')) != null){
+        overlay.setAttribute('src', val);
+      }
+      
     },
     
     src : function(self, val){
-      var main = self.querySelector('[id=sf-main-image]');
-      main.setAttribute('src', val);
+      var main;
+      if((main = self.querySelector('[id=sf-main-image]') )!= null){
+        main.setAttribute('src', val);
+      }
+      
     }
   },
   onCreate : function(self){

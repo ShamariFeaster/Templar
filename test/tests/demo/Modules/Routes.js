@@ -56,10 +56,21 @@ Templar.Route([
       target : '#ad-list-content'
     }]
 },
-/*ad search show ad*/
+/*ad search show ad, was composing this route with #/my-ads/show-ad/MyAds:ad_id, but I
+had redundant code causing problems. 
+
+New best practice: only compose routes with other if the child routes don't have handlers attached.*/
 {
     route : '#/ad-search/show-ad/AdSearch:ad_id/creator/AdMetadata:creatorUid',
-    partial : ['#/my-ads/show-ad/MyAds:ad_id',
+    partial : [
+    {
+      partial : 'partials/Show-Ad/wrapper.html',
+      target : '#layout-center-col'
+    },
+    {
+      partial : 'partials/New-Ad/preview.html',
+      target : '#ad-container'
+    },
     {
       partial : 'partials/MetaSidebar/wrapper.html',
       target : '#layout-right-col'
@@ -124,6 +135,10 @@ Templar.Route([
     { 
       partial : 'partials/New-Ad/wrapper.html', 
       target : '#layout-center-col'
+    },
+    { 
+      partial : 'partials/New-Ad/pick-category.html', 
+      target : '#new-ad-content'
     }]
 },
 {
@@ -150,7 +165,15 @@ Templar.Route([
 },
 {
     route : '#/new-ad/preview',
-    partial : 'partials/New-Ad/wrapper.html',
-    target : '#layout-center-col',
+    partial : [
+    {
+      partial : 'partials/New-Ad/wrapper.html',
+      target : '#layout-center-col'
+    },
+    {
+      partial : 'partials/New-Ad/preview.html',
+      target : '#new-ad-content'
+    }],
+    
     fallback : '#/new-ad'
 }]);

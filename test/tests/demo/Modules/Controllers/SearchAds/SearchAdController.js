@@ -54,27 +54,9 @@ SearchCtrl.bindHandlers = function(){
     SearchCtrl.getAds(AdSearchMdl.adType.current_selection, e.value);
   });
   
-  $('#ad-search-posted-sort').click(function(){
-    
-    AdSearchMdl.sortCurrentPageOf('returnedAds')
-      .orderBy('start', function(ad1,ad2){
-        var date1 = Helper.makeDateSortable(ad1.start),
-            date2 = Helper.makeDateSortable(ad2.start);
-        
-        if(date1 < date2)
-          return -1;
-        else if(date1 > date2)
-          return 1;
-        else
-          return 0;
-      })
-      .thenBy('title');
-   AdSearchMdl.update('returnedAds') ;
-  });
-  $('#ad-search-title-sort').click(function(){
-    AdSearchMdl.sortCurrentPageOf('returnedAds').orderBy('title');
-    AdSearchMdl.update('returnedAds') ;
-  });
+  Helper.bindDateSort('#ad-search-date-sort', AdSearchMdl, 'returnedAds');
+  Helper.bindTitleSort('#ad-search-title-sort', AdSearchMdl, 'returnedAds');
+
 };
 
 SearchCtrl.init = function(bannerMsg){

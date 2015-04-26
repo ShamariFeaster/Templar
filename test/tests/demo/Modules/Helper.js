@@ -300,6 +300,33 @@ structureJS.module('Helper', function(require){
               return a;
           });
       return parseInt(dateParts[2] + dateParts[0] + dateParts[1]);
+    },
+    
+    bindDateSort : function(btnId, mdl, attribName){
+      var Helper = this;
+      _$(btnId).click(function(){
+        mdl.sortCurrentPageOf(attribName)
+        .orderBy('start', function(ad1,ad2){
+          var date1 = Helper.makeDateSortable(ad1.start),
+              date2 = Helper.makeDateSortable(ad2.start);
+          
+          if(date1 < date2)
+            return -1;
+          else if(date1 > date2)
+            return 1;
+          else
+            return 0;
+        })
+        .thenBy('title');
+        mdl.update(attribName);
+      });
+    }, 
+    
+    bindTitleSort : function(btnId, mdl, attribName){
+      _$(btnId).click(function(){
+        mdl.sortCurrentPageOf(attribName).orderBy('title');
+        mdl.update(attribName);
+      });
     }
   };
 });

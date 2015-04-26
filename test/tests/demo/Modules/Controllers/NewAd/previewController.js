@@ -124,19 +124,17 @@ _Templar.success("#/new-ad/preview", function(){
   
   NewAdCtrl.init('Ad Preview');
   
-  NewAdCtrl.loadPartial('preview.html', function(){
+  if(Helper.isChecked(AdFormMdl, 'isItemFree')){
+    AdFormMdl.itemPrice = 'Free';
+  }
+  
+  if(AdFormMdl.ad_images.length > 0){
+    AdFormMdl.descriptionClass = '';
+  }else{
+    AdFormMdl.descriptionClass = 'center';
+  }
     
-    if(Helper.isChecked(AdFormMdl, 'isItemFree')){
-      AdFormMdl.itemPrice = 'Free';
-    }
-    
-    if(AdFormMdl.ad_images.length > 0){
-      AdFormMdl.descriptionClass = '';
-    }else{
-      AdFormMdl.descriptionClass = 'center';
-    }
-    
-  });
+ 
   
   
   

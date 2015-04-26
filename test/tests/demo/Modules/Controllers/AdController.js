@@ -31,8 +31,8 @@ function populateAd(ad){
   /* the setting of adType and category should be optional as it's causing unecessary
       firing of listeners where there*/
   AdFormMdl.title = ad.title;
-  AdFormMdl.category.current_selection = ad.ad_category;
   AdFormMdl.adType.current_selection = ad.ad_type;
+  AdFormMdl.category.current_selection = ad.ad_category;
   AdFormMdl.update('adType');
   AdFormMdl.update('category');
   AdFormMdl.itemPrice = ad.price;

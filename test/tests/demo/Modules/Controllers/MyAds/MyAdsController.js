@@ -80,6 +80,10 @@ MyAdsCtrl.bindHandlers = function(){
   
   _$('.change-ad-state').click(changeAdState);
   _$('.delete-ad').click(deleteAd);
+
+  Helper.bindDateSort('#my-ads-date-sort', AdsMdl, 'ads');
+  Helper.bindTitleSort('#my-ads-title-sort', AdsMdl, 'ads');
+  
 }
 
 _Templar.success('#/my-ads', function(){
