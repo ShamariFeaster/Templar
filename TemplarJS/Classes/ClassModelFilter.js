@@ -54,7 +54,7 @@ Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/propert
         an item val.*/
       filterResults = (storeFilterResults == true) ? 
                         filterFunc.call(null, itemValue ) :
-                        filterFunc.call(null, input, itemValue );
+                        !_.isNullOrEmpty(input) && filterFunc.call(null, input, itemValue );
       if(filterResults == true){
         results.push(item);
       }

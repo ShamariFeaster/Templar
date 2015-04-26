@@ -323,13 +323,25 @@ return {
         prop = null,
         queue = TMP_node.indexQueue.slice(0),
         modelName = TMP_node.modelName,
-        attribName = TMP_node.attribName;
+        attribName = TMP_node.attribName,
+        Model = _map[modelName]['api'];
     
     if(_.isDef(attribute = returnVal = this.getAttribute(modelName,attribName))){
       if(_.isArray(attribute) || _.isObj(attribute)){
-        while((prop = queue.shift()) != null && _.isDef(attribute[prop])){
-          returnVal = attribute = attribute[prop];
+        
+        /* get un-paged attrib length if used in template. */
+        if(queue.length == 1 && queue[0] === 'length'){
+          if(_.isDef(Model.cachedResults[attribName])){
+             returnVal = Model.cachedResults[attribName].length;
+          }else{
+            returnVal = Model.attributes[attribName].length;
+          } 
+        }else{
+          while((prop = queue.shift()) != null && _.isDef(attribute[prop])){
+            returnVal = attribute = attribute[prop];
+          }
         }
+        
 
       }else{
         returnVal = attribute;
@@ -343,6 +355,11 @@ return {
   setAttribute : function(modelName, attribName, value){
     var returnVal = null;
     if(_.isDef(_map[modelName]) && _.isDef(_map[modelName]['modelObj'][attribName])){
+      
+      if(_.isArray(value)){
+        this.annotateWithLimitProps(_map[modelName]['api'], attribName, value);
+      }
+      
       _map[modelName]['modelObj'][attribName] = value;
     }
     return returnVal;

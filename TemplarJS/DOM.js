@@ -154,9 +154,9 @@ return {
     if(_.isArray(routePath)){
       routePath.forEach(function(item){
         if(_.isObj(item)){
-          list.push(item.partial);
+          list.unshift(item.partial);
         }else{
-          list.push(item);
+          list.unshift(item);
         }
       });
     }
