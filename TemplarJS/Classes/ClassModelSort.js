@@ -6,7 +6,7 @@ var Map = require('Map');
 var Interpolate = require('Interpolate');
 
 
-Model.prototype.sort = function(attribName, pageNum){
+Model.prototype.sort = function(attribName, pageNum, sortFunc){
   var chain = Object.create(null),
       Model = this,
       oldPageNum = (_.isDef(Model.limitTable[attribName])) ? Model.limitTable[attribName].page : 0,
@@ -62,8 +62,7 @@ Model.prototype.sort = function(attribName, pageNum){
         orig_b = b,
         a = (!_.isNull(chain.propName)) ? a[chain.propName] : a,
         b = (!_.isNull(chain.propName)) ? b[chain.propName] : b,
-        intA = parseInt(a),
-        intB = parseInt(b),
+
         pastPropsAligned = true,
         sortAction = NO_CHANGE;
         
@@ -75,31 +74,31 @@ Model.prototype.sort = function(attribName, pageNum){
     for(var i = 0; i < chain.prevProps.length; i++){
       pastPropsAligned &= (orig_a[chain.prevProps[i]] == orig_b[chain.prevProps[i]]);
     }
-    
-    a = (isNaN(intA)) ? a : intA;
-    b = (isNaN(intB)) ? b : intB;
+
     sortAction = (b == a) ? NO_CHANGE : (b < a) ? B_FIRST : A_FIRST;
     sortAction = (pastPropsAligned == true) ? sortAction : NO_CHANGE;
     return sortAction
   };
     
-  chain.orderBy = function(propName){
+  chain.orderBy = function(propName, sortFunc){
+    var sorter = (_.isFunc(sortFunc)) ? sortFunc : chain.sorter;
     chain.propName = propName;
-    chain.target.sort(chain.sorter);
+    chain.target.sort(sorter);
     chain.insertSortedSlice(chain.target, Model, attribName, pageNum);
     chain.prevProps.push(propName);
     return chain;
   };
   
-  chain.thenBy = function(propName){
+  chain.thenBy = function(propName, sortFunc){
+    var sorter = (_.isFunc(sortFunc)) ? sortFunc : chain.sorter;
     chain.propName = propName;
-    chain.target.sort(chain.sorter);
+    chain.target.sort(sorter);
     chain.insertSortedSlice(chain.target, Model, attribName, pageNum);
     chain.prevProps.push(propName);
     return chain;
   }
-  
-  chain.target.sort(chain.sorter);
+  var sorter = (_.isFunc(sortFunc)) ? sortFunc : chain.sorter;
+  chain.target.sort(sorter);
   chain.insertSortedSlice(chain.target, Model, attribName, pageNum);
   return chain;
   
