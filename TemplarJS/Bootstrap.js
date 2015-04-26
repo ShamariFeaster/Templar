@@ -35,13 +35,13 @@ var Bootstrap = {
         file = State.onloadFileQueue.splice(i,1);
         handlers = Templar.getPartialOnlodHandler(file);
         _.log('Firing '+handlers.length +' handlers(s) for: ' + file);
-        for(var i = 0; i < handlers.length; i++){
-          handlers[i].call(null);
+        for(var x = 0; x < handlers.length; x++){
+          handlers[x].call(null);
         }
-        
+        i--;
       }
     }
-
+    _.log('Un-Fired on queue: ' + State.onloadFileQueue.toString());
   },
   
   bindTargetSetter : function(){
@@ -89,7 +89,7 @@ var Bootstrap = {
         
         State.compiledScopes += scope + ',';
         Compile.compile( targetNode, scope );
-        State.onloadFileQueue.push(this.fileName);
+        State.onloadFileQueue.unshift(this.fileName);
         /* on completion of route path walking the callback below resets this.fileName
             to be a comma-separated list of the route components that have been walked.
             this means we are ensured no onload is fired before it has been compiled and

@@ -110,10 +110,10 @@ return {
       /*the context is the previously loaded route. All properties of 'this' are
       'looking back' at the last route that was loaded.*/
       xhr.callback = function(){
-        /*parts of route chains aren't required to be named*/
+        /*parts of route chains aren't required to be named
         if(_.isDef(this.route))
           State.onloadFileQueue.push(this.route);
-        
+        */
         if(this.callbackParam1.length == 0){
 
           this.callbackOnComplete.call(null);
@@ -155,9 +155,11 @@ return {
       routePath.forEach(function(item){
         if(_.isObj(item)){
           list.unshift(item.partial);
-        }else{
+        }else{//is route name
           list.unshift(item);
+          State.onloadFileQueue.unshift(item);
         }
+        
       });
     }
     return list.join(',');
@@ -169,6 +171,8 @@ return {
     simple partials (ie a string, single filename) b/c this causing the routename to be added 
     twice: once here and the other in the fetcher's callback. */
   asynFetchRoutes : function(routeObj, onComplete){
+    State.onloadFileQueue.length = 0;
+    
     var currFile = '',
         routes = [],
         routeName = routeObj.route,
@@ -177,10 +181,12 @@ return {
     
     if(_.isArray(routeObj.partial)){
       onloadList = this.buildOnloadList([routeObj.route].concat(routeObj.partial));
-      State.onloadFileQueue.push(routeObj.route);
       Circular('Route').deferenceNestedRoutes(routeObj.partial, routes);
     }else{
       onloadList = routeObj.route + ',' + routeObj.partial;
+      /* partial names get put on queue during loadPartialIntoTemplate, so we only unshift 
+          rout names */
+      State.onloadFileQueue.unshift(routeObj.route);
       routes.push(routeObj);
     }
 
