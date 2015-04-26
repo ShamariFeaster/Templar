@@ -290,6 +290,16 @@ structureJS.module('Helper', function(require){
           data.results.map(transformAdData);
           callback.call(null,data.results);
         });
+    },
+    makeDateSortable : function(formattedDate, seperator){
+      var dateParts = formattedDate.split(seperator || '/')
+          .map(function(a){
+            if(a.length < 2)
+              return '0' + a;
+            else 
+              return a;
+          });
+      return parseInt(dateParts[2] + dateParts[0] + dateParts[1]);
     }
   };
 });

@@ -53,11 +53,41 @@ SearchCtrl.bindHandlers = function(){
   AdSearchMdl.listen('category', function(e){
     SearchCtrl.getAds(AdSearchMdl.adType.current_selection, e.value);
   });
+  
+  $('#ad-search-posted-sort').click(function(){
+    
+    AdSearchMdl.sortCurrentPageOf('returnedAds')
+      .orderBy('start', function(ad1,ad2){
+        var date1 = Helper.makeDateSortable(ad1.start),
+            date2 = Helper.makeDateSortable(ad2.start);
+        
+        if(date1 < date2)
+          return -1;
+        else if(date1 > date2)
+          return 1;
+        else
+          return 0;
+      })
+      .thenBy('title');
+   AdSearchMdl.update('returnedAds') ;
+  });
+  $('#ad-search-title-sort').click(function(){
+    AdSearchMdl.sortCurrentPageOf('returnedAds').orderBy('title');
+    AdSearchMdl.update('returnedAds') ;
+  });
 };
 
 SearchCtrl.init = function(bannerMsg){
   AdSearchMdl.sort('adType');
-  AdSearchMdl.update('adType');
+  if(_.isDef(AdSearchMdl.adType.current_selection)){
+      var prevCategory = AdSearchMdl.category.current_selection;
+    AdSearchMdl.adType.current_selection = AdSearchMdl.adType.current_selection;
+    AdSearchMdl.category.current_selection = prevCategory;
+  }else{
+    AdSearchMdl.update('adType');
+    AdSearchMdl.adType.current_selection = 'For Sale';
+    AdSearchMdl.category.current_selection = 'Jewelry';
+  }
 };
  
 SearchCtrl.onload = function(){
@@ -74,8 +104,21 @@ AdSearchMdl
         inputFound = regex.test((ad.title + ad.description));
     return (inputFound);
   });
+  
+_Templar.success('#/ad-search',SearchCtrl.onload);
 
-_Templar.success('partials/Ad-Search/header.html', SearchCtrl.onload);
+_Templar.success('partials/Ad-Search/header.html', function(bannerMsg){
+  AdSearchMdl.sort('adType');
+  if(_.isDef(AdSearchMdl.adType.current_selection)){
+      var prevCategory = AdSearchMdl.category.current_selection;
+    AdSearchMdl.adType.current_selection = AdSearchMdl.adType.current_selection;
+    AdSearchMdl.category.current_selection = prevCategory;
+  }else{
+    AdSearchMdl.update('adType');
+    AdSearchMdl.adType.current_selection = 'For Sale';
+    AdSearchMdl.category.current_selection = 'Jewelry';
+  }
+});
  
 _Templar.success('#/ad-search/show-ad/AdSearch:ad_id/creator/AdMetadata:creatorUid', function(){
   CommentFormMdl.isWritingComment = false;
