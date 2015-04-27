@@ -1,5 +1,5 @@
 /*Data structures*/
-structureJS.declare('templar/State');
+
 structureJS.declare('templar/Map');
 structureJS.declare('templar/System');
 /*Parse + Compile + Link _ Interpolate*/
