@@ -6,7 +6,7 @@ var Map = require('Map');
 var Interpolate = require('Interpolate');
 
 
-Model.prototype.sort = function(attribName, pageNum){
+Model.prototype.sort = function(attribName, pageNum, sortFunc){
   var chain = Object.create(null),
       Model = this,
       oldPageNum = (_.isDef(Model.limitTable[attribName])) ? Model.limitTable[attribName].page : 0,
@@ -39,7 +39,7 @@ Model.prototype.sort = function(attribName, pageNum){
     oldLimit = Model.limitTable[attribName].limit;
     Model.limitTable[attribName].limit = 0;
     /*we have to get full target on each call because last call has changed it*/
-    var fullTarget = Map.getAttribute(Model.modelName, attribName);
+    var fullTarget = Model.attributes[attribName];
     Model.limitTable[attribName].limit = oldLimit;
     var points = Interpolate.getPageSliceData(Model, attribName, fullTarget),
         fullTargetCopy = null;
@@ -57,49 +57,59 @@ Model.prototype.sort = function(attribName, pageNum){
     }
   };
   
+  /*if all of the prev sorted props of the operands are not aligned, no-op.
+      ie, previously sorted fields must have the same value to sort this field*/
+  chain.arePastPropsAligned = function(a,b){
+    var pastPropsAligned = true;
+    for(var i = 0; i < chain.prevProps.length; i++){
+      pastPropsAligned &= (a[chain.prevProps[i]] == b[chain.prevProps[i]]);
+    }
+    return pastPropsAligned;
+  };
+  
+  /* we wrap custom sorter so that we can make sure past orderBy orderings are respected */
+  chain.getSorter = function(func){
+    var wrapped = function(a,b){
+      var sortAction = func.call(null,a,b);
+      sortAction = (chain.arePastPropsAligned(a, b) == true) ? sortAction : NO_CHANGE;
+      return sortAction;
+    };
+    return (_.isFunc(func)) ? wrapped : chain.sorter;
+  };
+  
   chain.sorter = function(a,b){
     var orig_a = a,
         orig_b = b,
         a = (!_.isNull(chain.propName)) ? a[chain.propName] : a,
         b = (!_.isNull(chain.propName)) ? b[chain.propName] : b,
-        intA = parseInt(a),
-        intB = parseInt(b),
-        pastPropsAligned = true,
         sortAction = NO_CHANGE;
         
     if(!_.isDef(a) || !_.isDef(b)){
       return NO_CHANGE;
     }
-    /*if all of the prev sorted props of the operands are not aligned, no-op.
-      ie, previously sorted fields must have the same value to sort this field*/
-    for(var i = 0; i < chain.prevProps.length; i++){
-      pastPropsAligned &= (orig_a[chain.prevProps[i]] == orig_b[chain.prevProps[i]]);
-    }
-    
-    a = (isNaN(intA)) ? a : intA;
-    b = (isNaN(intB)) ? b : intB;
+
     sortAction = (b == a) ? NO_CHANGE : (b < a) ? B_FIRST : A_FIRST;
-    sortAction = (pastPropsAligned == true) ? sortAction : NO_CHANGE;
+    sortAction = (chain.arePastPropsAligned(orig_a, orig_b) == true) ? sortAction : NO_CHANGE;
     return sortAction
   };
     
-  chain.orderBy = function(propName){
+  chain.orderBy = function(propName, sortFunc){
     chain.propName = propName;
-    chain.target.sort(chain.sorter);
+    chain.target.sort(chain.getSorter(sortFunc));
     chain.insertSortedSlice(chain.target, Model, attribName, pageNum);
     chain.prevProps.push(propName);
     return chain;
   };
   
-  chain.thenBy = function(propName){
+  chain.thenBy = function(propName, sortFunc){
     chain.propName = propName;
-    chain.target.sort(chain.sorter);
+    chain.target.sort(chain.getSorter(sortFunc));
     chain.insertSortedSlice(chain.target, Model, attribName, pageNum);
     chain.prevProps.push(propName);
     return chain;
   }
-  
-  chain.target.sort(chain.sorter);
+
+  chain.target.sort(chain.getSorter(sortFunc));
   chain.insertSortedSlice(chain.target, Model, attribName, pageNum);
   return chain;
   

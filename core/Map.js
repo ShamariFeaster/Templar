@@ -24,8 +24,6 @@ return {
       baseNodes = _repeatTable[modelName][attribName];
     
     return baseNodes;
-<<<<<<< HEAD
-=======
   },
   /*This is designed for re-interps. We want to get dead base nodes out of the cache.
     This is not only for performance reasons. Interpolate.interpolateEmbeddedRepeats()
@@ -43,7 +41,6 @@ return {
   
   isRepeatedAttribute : function(modelName, attribName){
     return (this.getRepeatBaseNodes(modelName, attribName).length > 0);
->>>>>>> component
   },
   
   addRepeatBaseNode : function(tmp_node){
@@ -112,6 +109,7 @@ return {
     var target = null;
     var Map = this;
     var ctx = Object.create(null);
+    ctx.endingIndex = 0;
     ctx.modelName = '';
     ctx.modelAtrribName = '';
     ctx.hasAttributes = false;
@@ -164,11 +162,21 @@ return {
     /*model attribute node tables (index table and interpolatation array)*/
     }else if(!_.isFunc(modelName) && !_.isFunc(attribName) && _.isFunc(mapFunction)){
       var tmp_node = null,
-          indexCnt = {};
+          indexCnt = {},
+          startingLength;
       if( _.isDef(_map[modelName]['nodeTable'][attribName]) ){
         ctx.target = _map[modelName]['nodeTable'][attribName]['nodes'];
-
-        for(; ctx.index < ctx.target.length && ctx.stop == false; ctx.index++, indexCnt = {}){
+        /* I'm trying to elimante the use of ctx.stop. The goal is to allow the use of repeated
+            array length (and other props) in templates. This is currently being blocked by 2 things.
+            First, Map.destroyRepeatTree() was blowing up all cahced nodes indexed in the attribName.
+            Secondly, once I stoped that this interpolation loop was never getting to cached node
+            b/c if the repeat is first in the cahce array, ctx.stop is called and we don't interp 
+            the span bound to the repeat array property (most likely length). The thinking here is
+            in the case of interps that push nodes to the cache we don't want to stop the interp loop
+            , we just want to prevent the loop from hitting those newly added nodes. Storing the original
+            cahce array length should stop this behavior.*/
+        ctx.endingIndex = ctx.target.length;
+        for(; ctx.index < ctx.target.length && ctx.index < ctx.endingIndex; ctx.index++, indexCnt = {}){
           tmp_node = ctx.target[ctx.index];
           /*Single attrib could be used multiple times. For example, a select may be used twice in 
             an app. The cache would contain 2 nodes per index and modelAttribLength would be
@@ -210,21 +218,49 @@ return {
     _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]['nodes'].push(tmp_node);
 
   },
-  
+  annotateWithLimitProps : function(model, attribName, value){
+    
+    if(_.isArray(value) && !_.isDef(value.page)){
+      Object.defineProperty(value, 'page', {
+        set : function(val){
+          model.gotoPage(val).of(attribName);
+        },
+        get : function(){ return model.currentPageOf(attribName);}
+      });
+      Object.defineProperty(value, 'totalPages', {
+        set : function(val){},
+        get : function(){return model.totalPagesOf(attribName);}
+      });
+      Object.defineProperty(value, 'limit', {
+        set : function(val){
+          model.limit(attribName).to(val);
+        },
+        get : function(){
+          var val = (!_.isDef(model.limitTable[attribName])) ? 
+                0 : model.limitTable[attribName].limit;
+          return val;
+          }
+      });
+    }
+    
+  },
   getPageSlice : function(Model, attributeName, target){
     var start = 0,
-        length = target.length,
+        end = target.length,
         limit = 0, 
         page = 0,
         results = target;
     if(_.isDef(Model.limitTable[attributeName]) && _.isArray(target)){
       page = Model.limitTable[attributeName].page;
       limit = Model.limitTable[attributeName].limit;
-      length = (((limit * page))  <= target.length) ? 
+      Model.limitTable[attributeName].totalPages = Math.floor(results.length/limit);
+      Model.limitTable[attributeName].totalPages += ((results.length%limit > 0) ? 1 : 0);
+      end = (((limit * page))  <= target.length) ? 
                ((limit * page)) : target.length;
-      start = ( ((page * limit) - limit) < length) ?
+      start = ( ((page * limit) - limit) < end) ?
               (page * limit) - limit : 0;
-      results = target.slice(start, length);
+      results = target.slice(start, end);
+      this.annotateWithLimitProps(Model, attributeName, results);
     }    
     
             
@@ -287,14 +323,25 @@ return {
         prop = null,
         queue = TMP_node.indexQueue.slice(0),
         modelName = TMP_node.modelName,
-        attribName = TMP_node.attribName;
+        attribName = TMP_node.attribName,
+        Model = _map[modelName]['api'];
     
-    if(_.isDef(_map[modelName]['modelObj'][attribName])){
-      attribute = returnVal = _map[modelName]['modelObj'][attribName];
-      if(_.isArray(attribute)){
-        while((prop = queue.shift()) != null && _.isDef(attribute[prop])){
-          returnVal = attribute = attribute[prop];
+    if(_.isDef(attribute = returnVal = this.getAttribute(modelName,attribName))){
+      if(_.isArray(attribute) || _.isObj(attribute)){
+        
+        /* get un-paged attrib length if used in template. */
+        if(queue.length == 1 && queue[0] === 'length'){
+          if(_.isDef(Model.cachedResults[attribName])){
+             returnVal = Model.cachedResults[attribName].length;
+          }else{
+            returnVal = Model.attributes[attribName].length;
+          } 
+        }else{
+          while((prop = queue.shift()) != null && _.isDef(attribute[prop])){
+            returnVal = attribute = attribute[prop];
+          }
         }
+        
 
       }else{
         returnVal = attribute;
@@ -308,6 +355,11 @@ return {
   setAttribute : function(modelName, attribName, value){
     var returnVal = null;
     if(_.isDef(_map[modelName]) && _.isDef(_map[modelName]['modelObj'][attribName])){
+      
+      if(_.isArray(value)){
+        this.annotateWithLimitProps(_map[modelName]['api'], attribName, value);
+      }
+      
       _map[modelName]['modelObj'][attribName] = value;
     }
     return returnVal;
@@ -321,33 +373,46 @@ return {
     
     return listeners;
   },
-  
+  getFuncHash : function(func){
+    var string = func.toString(),
+        hash = string.length + string.charAt(string.length/2);
+    return hash;
+  },
   setListener : function(modelName, attributeName, listener, isFilterListener){        
     if(_.isFunc(listener)){
-      var string = listener.toString(),
-          id = string.length + string.charAt(string.length/2);
+      var hash = this.getFuncHash(listener);
       if(_.isDef(isFilterListener) && isFilterListener == true){
-        id = '_LIVE_FILTER_' + id + Math.random();
-        _.log('Adding duplicate with id ' + id + ' on ' + modelName + '.' + attributeName);
+        hash = '_LIVE_FILTER_' + hash + Math.random();
+        _.log('Adding duplicate with hash ' + hash + ' on ' + modelName + '.' + attributeName);
       }
 
       if(!_.isDef(_map[modelName]['listeners'][attributeName])){
         _map[modelName]['listeners'][attributeName] = Object.create(null);
       }
       
-      _map[modelName]['listeners'][attributeName][id] = listener;
+      _map[modelName]['listeners'][attributeName][hash] = listener;
     }        
   },
   
-  removeListener : function(modelName, attribName){
+  removeAllListeners : function(modelName, attribName){
     delete _map[modelName]['listeners'][attribName];
   },
   
+  removeListener : function(modelName, attribName, listener){
+    var listeners = _map[modelName]['listeners'][attribName],
+        needleHash = this.getFuncHash(listener),
+        deleteFunc = false;
+    for(var haystackHash in listeners){
+      if(needleHash == haystackHash){
+        delete listeners[haystackHash];
+      }
+    }
+  },
   isDuplicateListener : function(modelName, attribName, listener){
     var listeners = this.getListeners(modelName, attribName);
     
-    for(var id in listeners){
-      if(listener.toString() == listeners[id].toString())
+    for(var hash in listeners){
+      if(listener.toString() == listeners[hash].toString())
         return true;
     }
     
@@ -358,10 +423,10 @@ return {
   removeFilterListeners : function(modelName, attribName){
     if(_.isDef(_map[modelName]['listeners'][attribName])){
       var listeners = _map[modelName]['listeners'][attribName];
-      for(var id in listeners){
-        if(id.indexOf('_LIVE_FILTER_') == 0){
-          _.log('REMOVING Listener with id: ' + id);
-          delete listeners[id];
+      for(var hash in listeners){
+        if(hash.indexOf('_LIVE_FILTER_') == 0){
+          _.log('REMOVING Listener with hash: ' + hash);
+          delete listeners[hash];
         }
       }
     }
@@ -383,11 +448,20 @@ return {
                       limitTable : model_obj.limitTable, filterResults : model_obj.filterResults};
                       
   },
+  /* BAsically for 'length' property but if the user defines other and wants them interped we need 
+      ,and associated changes (commit#50c5f07) to support that.*/
+  isRepeatArrayProperty : function(tmp_node){
+    return (tmp_node.indexQueue.length == 1 && !_.isInt(tmp_node.indexQueue[0]));
+  },
+  
   /*----REPEAT INTERPOLATION CLEANUP-----------------*/
   destroyRepeatTree : function(modelName, attribName){
+    var _this = this;
     this.forEach(modelName, attribName, function(ctx, tmp_node){
-
-      ctx.removeItem(ctx.index);
+    
+      if(tmp_node.index > -1 || !document.body.contains(tmp_node.node)){
+        ctx.removeItem(ctx.index);
+      }
 
       /*only remove visible elements from DOM, don't remove base node from DOM*/
       if(!_.isNull(tmp_node.node.parentNode) && tmp_node.index > _.UNINDEXED){
@@ -395,6 +469,7 @@ return {
         
       }
     });
+
   },
   
   pruneDeadEmbeds : function(){

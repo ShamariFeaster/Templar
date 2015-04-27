@@ -14,8 +14,10 @@ Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/propert
     this is used to differentiate between filters that watch live attributes and those that filter data statically.
     Live filter shouldn't used cached results on every filter; rather they should check the whole set with each update.
   */
-  if(_.isDef(clearCachedResults) && clearCachedResults  == true)
+  if(_.isDef(clearCachedResults) && clearCachedResults  == true){
     delete this.cachedResults[attribName];
+  }
+  
   /*if we fail input filter we should restore he attribute to original state*/
   if(_.isDef(isInputFilter) && isInputFilter == true){
     if(filterFunc.call(null, input) == false){
@@ -52,7 +54,7 @@ Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/propert
         an item val.*/
       filterResults = (storeFilterResults == true) ? 
                         filterFunc.call(null, itemValue ) :
-                        filterFunc.call(null, input, itemValue );
+                        !_.isNullOrEmpty(input) && filterFunc.call(null, input, itemValue );
       if(filterResults == true){
         results.push(item);
       }
@@ -89,25 +91,32 @@ Model.prototype.filter = function(attribName){
       item = null,
       Model = this,
       clearCachedResults = true,
-      storeFilterResults = void(0);
+      storeFilterResults = void(0),
+      defaultFilter = function(input, item){
+        var notEmpty = (!_.isNullOrEmpty(item) && !_.isNullOrEmpty(input));
+        return ( notEmpty && (item.toString().toLowerCase().indexOf(input.toLowerCase()) == 0));
+      };
   
   chain.propName = '';
   chain.isStatic = false;
   chain.liveAndFuncs = [];
-    chain.using = function(atrribNameOrFunction){
+  
+  chain.using = function(atrribNameOrFunction){
       if(_.isFunc(atrribNameOrFunction)){
-        /*Static Filter
+        /*Static Filter (arity == 1)
           Function take a single arg which is list element, returns bool a < 5 for example*/
           clearCachedResults = false;
           storeFilterResults = true;
           chain.isStatic = true;
-        Model.filterWarapper(attribName, chain.propName, null, atrribNameOrFunction, clearCachedResults, storeFilterResults);
+
+        Model.filterWarapper(attribName, chain.propName, null, atrribNameOrFunction,
+                          clearCachedResults, storeFilterResults);
       }
       else{
         if(!_.isDef(Model.liveFilters[attribName])){
           Model.liveFilters[attribName] = [];
         } 
-        
+
         Model.liveFilters[attribName].push(atrribNameOrFunction);
         
         Map.setListener(Model.modelName, atrribNameOrFunction, function(data){
@@ -115,23 +124,24 @@ Model.prototype.filter = function(attribName){
           clearCachedResults = (chain.liveAndFuncs.length < 1);
 
           var passedInputFilter = true,
-              defaultFilterOverride = false;
+              overrideDefaultLiveFilter = false;
           /*Filter with live 'and' functions. Default 'startsWith' filter is overridden on
             functions /w arity == 2*/
           for(var i = 0; i < chain.liveAndFuncs.length && passedInputFilter == true; i++){
             var isInputFilter = (chain.liveAndFuncs[i].length == 1);
-            passedInputFilter = chain.liveAndFuncs[i].funct.call(null, data.text, chain.propName, isInputFilter);
-            defaultFilterOverride |= !isInputFilter; 
+            passedInputFilter = chain.liveAndFuncs[i].funct.call(null, data.text, chain.propName,
+                                                        isInputFilter);
+            overrideDefaultLiveFilter |= !isInputFilter; 
           }
-          _.log('defaultFilterOverride: ' + defaultFilterOverride);
+          _.log('overrideDefaultLiveFilter: ' + overrideDefaultLiveFilter);
           /*if we passed input filter, we shoould move on to default filter.
           IMPORTANT!!! If input filter fails, interp never happens and listeners on the filtered 
           attribs never fire*/
-          if(passedInputFilter == true && defaultFilterOverride == false){
+          if(passedInputFilter == true && overrideDefaultLiveFilter == false){
+            
             /*default filter for model attribute is a 'startsWith' string compare*/
-            Model.filterWarapper(attribName, chain.propName, data.text, function(input, item){
-              return (!_.isNullOrEmpty(item) && !_.isNullOrEmpty(input) && item.toString().toLowerCase().indexOf(input.toLowerCase()) == 0);
-            }, clearCachedResults, storeFilterResults);
+            Model.filterWarapper(attribName, chain.propName, data.text, defaultFilter , 
+                              clearCachedResults, storeFilterResults);
           }
 
         }, true);
@@ -146,14 +156,24 @@ Model.prototype.filter = function(attribName){
       
       return chain;
     }
+    
+    chain.andBy = function(propName){
+      chain.propName = propName;
+      
+      return chain;
+    }
+    
     /*'and' queries on live filters iterate the entire data set. */
     chain.and = function(comparitorFunc){
+    
       if(_.isFunc(comparitorFunc)){
+      
         /*Live comparitors should take input*/
         chain.liveAndFuncs.push({ funct : function(input, propName, isInputFilter){
           storeFilterResults = chain.isStatic;
-          clearCachedResults = isInputFilter;
-          return Model.filterWarapper(attribName, propName, input, comparitorFunc, clearCachedResults, storeFilterResults, isInputFilter);
+          clearCachedResults = !chain.isStatic;
+          return Model.filterWarapper(attribName, propName, input, comparitorFunc,
+                                  clearCachedResults, storeFilterResults, isInputFilter);
         }, length : comparitorFunc.length});
         
         /*push input filters to the front*/
@@ -162,10 +182,11 @@ Model.prototype.filter = function(attribName){
         });
         
         clearCachedResults = false;
-        storeFilterResults = chain.isStatic;
+        storeFilterResults = (comparitorFunc.length == 1);//is static
         
-        if( (storeFilterResults = chain.isStatic) == true){
-          Model.filterWarapper(attribName, chain.propName, null, comparitorFunc, clearCachedResults, storeFilterResults);
+        if( storeFilterResults == true){
+          Model.filterWarapper(attribName, chain.propName, null, comparitorFunc,
+                            clearCachedResults, storeFilterResults);
         }
         
       }

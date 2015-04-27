@@ -106,7 +106,7 @@ return {
     var node = tmp_node.node,
         retVal = Map.dereferenceAttribute(tmp_node);
     node.innerText = node.innerHTML = 
-      (_.isString(retVal)) ? retVal : '';
+      (!_.isArray(retVal) && !_.isObj(retVal)) ? retVal : '';
 
   },
   /*Returns the whole attribute if no limit is defined for this attribute*/
@@ -187,7 +187,7 @@ return {
               if(TMP_repeatedNode.hasNonTerminals == false)
                 TMP_repeatedNode.node.innerHTML = attributeVal[i];
               TMP_repeatBaseNode.node.parentNode.insertBefore(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
-              Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
+              Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope, i);
             }
           }
           TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 
@@ -212,9 +212,18 @@ return {
     Process.addCurrentSelectionToSelect(tmp_node.node, attributeVal);
     
     if(run && _.isArray(attributeVal)){
+      var isShittyIE = (modelAttribLength > 0 && tmp_node.node.children.length == 0);
+      /* with IE clearing children on node taken out of DOM, we must repopulate the select */
+      if(isShittyIE == true){
+        Map.forEach(tmp_node.modelName, tmp_node.attribName, function(ctx, tmp_option){
+          if(tmp_option.node.tagName == 'OPTION' && ctx.modelAttribIndex < modelAttribLength){
+            tmp_node.node.appendChild(tmp_option.node);
+          }
+        });
+      }
       
       /*New model data, longer than existing data, add extra nodes*/
-      if(attributeVal.length > modelAttribLength){
+      if(attributeVal.length > modelAttribLength ){
         /*amount of nodes needed*/
         newNodeCnt = attributeVal.length - modelAttribLength;
         /*where to start the new indexes in the 'indexes' table*/
@@ -227,6 +236,7 @@ return {
           tmp_option.node.value = ( _.isDef(value = attributeVal[newNodeIndex].value) ) ? value : attributeVal[newNodeIndex];
           tmp_node.node.appendChild(tmp_option.node);
           tmp_option.scope = tmp_node.scope;
+          tmp_node.node.selectedIndex = 0;
           tmp_node.node.selectedIndex = 
             (!_.isNullOrEmpty(selectedValue) && tmp_option.node.value == selectedValue) ?
               q : tmp_node.node.selectedIndex;
@@ -253,13 +263,9 @@ return {
         TMP_repeatBaseNode = null,
         updateObj = Object.create(null),
         nodeScopeParts = null,
-<<<<<<< HEAD
-        node = null;
-=======
         node = null,
         tagName = '',
         attributes = null;
->>>>>>> component
     /*Note that listeners are only fired for attribs that are in the nodeTree (ie, visible in the UI)*/
     Map.forEach(modelName, attributeName, function(ctx, tmp_node){
              
@@ -271,7 +277,7 @@ return {
         
       node = tmp_node.node;
       tagName = (tmp_node.isComponent == true) ? 'COMPONENT' : node.tagName;
-      tagName = (Map.isRepeatedAttribute(modelName, attributeName) == true) ? 'REPEAT' : node.tagName;
+      tagName = (Map.isRepeatedAttribute(modelName, attributeName) == true && !Map.isRepeatArrayProperty(tmp_node)) ? 'REPEAT' : node.tagName;
       if(ctx.hasAttributes == true){
         updateObject = Interpolate.updateNodeAttributes(tmp_node, modelName, attributeName);
       } 
@@ -284,18 +290,22 @@ return {
           break;
         case 'OPTION':
           if(_.isArray(attributeVal = Map.dereferenceAttribute(tmp_node))){
-            if(attributeVal.length <= ctx.modelAttribLength && ctx.modelAttribIndex < attributeVal.length){
+            
+            var selectNode = node.parentNode;
+            
+            if(attributeVal.length <= ctx.modelAttribLength 
+              && ctx.modelAttribIndex < attributeVal.length){
                 node.text = ( _.isDef(text = attributeVal[ctx.modelAttribIndex].text) ) ? text : attributeVal[ctx.modelAttribIndex];
                 node.value = ( _.isDef(value = attributeVal[ctx.modelAttribIndex].value) ) ? value : attributeVal[ctx.modelAttribIndex];
-                node.parentNode.selectedIndex = 
+                selectNode.selectedIndex = 
                   (_.isDef(attributeVal[ctx.modelAttribIndex].selected) && attributeVal[ctx.modelAttribIndex].selected == true) ? 
-                    ctx.modelAttribIndex : node.parentNode.selectedIndex;
+                    ctx.modelAttribIndex : selectNode.selectedIndex;
               
             }
-            updateObj.value = node.parentNode.options[node.parentNode.selectedIndex].value;
-            updateObj.text = node.parentNode.options[node.parentNode.selectedIndex].text;
+            updateObj.value = selectNode.options[selectNode.selectedIndex].value;
+            updateObj.text = selectNode.options[selectNode.selectedIndex].text;
             updateObj.type = _.MODEL_EVENT_TYPES.interp_change;
-            updateObj.index = node.parentNode.selectedIndex;
+            updateObj.index = selectNode.selectedIndex;
             updateObj._attrib_ = attributeVal;
             
             /*This is here & not in preProcess... b/c when attrib is replaced as
@@ -306,7 +316,7 @@ return {
             /*New model data, shorter than existing data, kill extra nodes*/
             if(ctx.modelAttribIndex >= attributeVal.length){
               ctx.removeItem(ctx.index); /*from indexes[key] = []*/
-              node.parentNode.removeChild(node);
+              selectNode.removeChild(node);
             }
 
           }
@@ -316,6 +326,7 @@ return {
 
           Interpolate.interpolateSpan(tmp_node);
           updateObj.text = node.innerText;
+          updateObj.value = node.innerText;
           updateObj.type = node.tagName.toLowerCase();
           break;
         case 'INPUT':
@@ -332,6 +343,7 @@ return {
             }
             
             updateObj.text = node.value;
+            updateObj.value = node.value;
             updateObj.type = node.tagName.toLowerCase();
             updateObj.target = node;
            }
@@ -340,6 +352,7 @@ return {
         case 'TEXTAREA':
           tmp_node.node.value = attributeVal;
           updateObj.text = node.value;
+          updateObj.value = node.value;
           updateObj.type = node.tagName.toLowerCase();
           updateObj.target = node;
           break;
@@ -348,8 +361,9 @@ return {
               TMP_repeatedNode = null,
               outerCtx = ctx,
               baseNodes = null,
-              repeatStart = 0,
-              repeatEnd = 0;
+              removedCnt = 0;
+          ctx.endingIndex = 0;//ctx.target.length;
+          
           /*cache and DOM housekeeping*/
           Map.destroyRepeatTree(modelName, attributeName);
           
@@ -358,21 +372,12 @@ return {
 
           for(var z = 0; z < baseNodes.length; z++){
             TMP_repeatBaseNode = baseNodes[z];
-<<<<<<< HEAD
-            /*If base node has no parent then it is not in the current DOM.
-            NOTE (11/24/14): if we use 'apl-default-hidden' class on BODY repeats will not interp.
-            I've never liked the default hidden class anyways so for now I'm not going to
-            change logic here to support the continued use of the default hidden class.*/
-            if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode)){
-=======
-            if(baseNodes[z].node.parentNode)
-              ctx.target.unshift(TMP_repeatBaseNode);
 
-            if(DOM.isVisible(TMP_repeatBaseNode.node.parentNode) && 
-              _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode)))
+            if(document.body.contains(TMP_repeatBaseNode.node) && 
+              _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode))
+              && attributeVal.length > 0)
             {
-
->>>>>>> component
+              
               /*rebuild new one*/
               for(var i = 0; i < attributeVal.length; i++){
                 TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
@@ -381,24 +386,24 @@ return {
                 if(TMP_repeatedNode.hasNonTerminals == false)
                   TMP_repeatedNode.node.innerHTML = attributeVal[i];
                 TMP_repeatBaseNode.node.parentNode.insertBefore(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
-                Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope);
+                Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope, i);
                 Interpolate.interpolateEmbeddedRepeats(TMP_repeatBaseNode, i);
               }
+              Map.pruneDeadEmbeds();
+              Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built); 
+              System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built);
+              updateObj.type = 'repeat';
+              updateObj.value = attributeVal;
             }
             TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 
+            
           }
-          Map.pruneDeadEmbeds();
-          Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built); 
-          System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built);
+          
           /*Stop outter loop. We build the updated repeat nodes in one pass*/
-          outerCtx.stop = true;
-          updateObj.type = 'repeat';
-          updateObj.value = attributeVal;
-<<<<<<< HEAD
-=======
+          //outerCtx.stop = true;
+          
           break;
         default:
->>>>>>> component
           break;
         }
       

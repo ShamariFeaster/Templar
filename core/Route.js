@@ -221,7 +221,7 @@ return {
         if(this.authorize.call(_clientCookie, {route : href}) === true){
           resolvedRouteObject = Route.resolveRoute(href);
           resolvedRouteObject.target = (!_.isNullOrEmpty(resolvedRouteObject.target)) ? 
-                            resolvedRouteObject.target : 'apl-content';
+                            resolvedRouteObject.target : _.MAIN_CONTENT_ID;
           NTDirectives = resolvedRouteObject.nonTerminalValues;
           /*TODO: support advanced derefencing to support a.b.current_selection and the like. Would 
             require an upgraded setAttribute.*/
@@ -244,12 +244,11 @@ return {
     
     return resolvedRouteObject;
   },
-  
+  /* Opens route */
   open : function(routeId){
 
     if((resolvedRouteObj = this.handleRoute(routeId)) != null 
         && resolvedRouteObj !== _.RESTRICTED){
-      //State.onloadFileQueue.push(resolvedRouteObj.partial);
 
       DOM.asynFetchRoutes(resolvedRouteObj, function(){
         State.ignoreHashChange = true;
@@ -266,10 +265,10 @@ return {
 
   },
   
-  openPartial : function(routeId, targetId){
-    if(!_.isNullOrEmpty(routeId) && !_.isNullOrEmpty(targetId)){
-      State.onloadFileQueue.push(routeId);
-      DOM.asynGetPartial(routeId, Bootstrap.loadPartialIntoTemplate, targetId);
+  openPartial : function(partialUri, targetId){
+    var targetId = (_.isDef(targetId)) ? targetId : _.MAIN_CONTENT_ID;
+    if(!_.isNullOrEmpty(partialUri)){
+      DOM.asynGetPartial(partialUri, Bootstrap.loadPartialIntoTemplate, targetId);
     }
   },
   
@@ -301,21 +300,25 @@ return {
           DOM.asynFetchRoutes(). We can't consume it so we use the value.*/
         inArr = inArr.slice(0),
         isRoute,
-        isString,
-        deferenceNestedRoutes = this.deferenceNestedRoutes;
+        isString;
+
     while((routeName = inArr.shift()) != null){
     
       if((isString = _.isString(routeName)) && (isRoute = this.isRoute(routeName))){
         routeObj = this.getRouteObj(routeName);
         if(_.isArray(routeObj.partial)){
-          deferenceRoutes(routeObj.partial, outArr);
+          this.deferenceNestedRoutes(routeObj.partial, outArr);
         }else{
           outArr.push(routeObj);
         }
+      /* in-line route obj */
       }else if(!isString){
         outArr.push(routeName);
+      /* partial w/ implicit target */
+      }else{
+        outArr.push({partial : routeName, target : _.MAIN_CONTENT_ID});
       }
-      /*noop if routeName was a string but didn't match a route*/
+      
     }
     
   }

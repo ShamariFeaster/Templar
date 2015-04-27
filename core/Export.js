@@ -78,10 +78,6 @@ structureJS.done(function(){
       DOM.asynFetchRoutes(resolvedRouteObj, function(){
         _.log('asynFetchRoutes complete for ' + resolvedRouteObj.route);
       });
-    }else{
-      hashValue = DOM.getHashValue(window.location.href);
-      State.onloadFileQueue.push(hashValue);
-      DOM.asynGetPartial(hashValue, Bootstrap.loadPartialIntoTemplate, State.target);
     }
     
   };
@@ -134,24 +130,9 @@ structureJS.done(function(){
       DOM.asynGetPartial(component.templateURL,callback, '', component);
     }
   }
-<<<<<<< HEAD
-    
-    
-  Compile.compile( document.getElementsByTagName('body')[0], scope ); 
-  Link.bindModel( State.compiledScopes );
-  Bootstrap.bindTargetSetter();
-  
-  var defaultHiddenNodeList = document.querySelectorAll('.apl-default-hidden');
-  if(!_.isNull(defaultHiddenNodeList)){
-    for(var i = 0; i < defaultHiddenNodeList.length; i++){
-      defaultNodeToHide = defaultHiddenNodeList[i];
-      DOM.modifyClasses(defaultNodeToHide,'','apl-default-hidden');
-    }
-=======
   /*IF there are no components to fetch, start bootsrap*/
   if(initComponentLength < 1){
     beginBootstrap(scope);
->>>>>>> component
   }
   
 });

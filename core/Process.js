@@ -60,7 +60,7 @@ return {
     }
   },
   
-  preProcessNodeAttributes : function(node, scope){
+  preProcessNodeAttributes : function(node, scope, repeatIndex){
     var attributes = null,
         match = null,
         tmp_node = null,
@@ -68,7 +68,7 @@ return {
         origValue,
         Interpolate = Circular('Interpolate'),
         tokens;
-    
+    repeatIndex = (_.isInt(repeatIndex)) ? parseInt(repeatIndex) : -1;
     /*Options don't need to be in the node tree due to having NTs in 'value' attribute*/
     if(node.hasAttributes() && node.tagName != 'OPTION'){
       attributes = node.attributes;
@@ -81,11 +81,16 @@ return {
         tokens = Circular('Compile').getAllTokens(origValue);
         
         for(var x = 0 ; x < tokens.length; x++){
-          tmp_node = new TMP_Node(node, tokens[x].modelName, tokens[x].attribName);         
-          //tmp_node.inheritToken(token[x]);
+          if(tmp_node == null ||
+            (tmp_node != null && (tokens[x].modelName != tmp_node.modelName || tokens[x].attribName != tmp_node.attribName))){
+            
+            tmp_node = new TMP_Node(node, tokens[x].modelName, tokens[x].attribName, repeatIndex);   
+            Map.pushNodes(tmp_node);
+          }
+
           tmp_node.symbolMap[attributes[i].name] = origValue;
           tmp_node.scope = scope;
-          Map.pushNodes(tmp_node);
+          
           /*This is necessary for repeats as their child nodes aren't added to Interpolation array
             Rather they are recompiled using repeated elements as the base. It makes sense since
             we do interpolation during preprocessing with repeats that we do the same with attributes
@@ -291,7 +296,7 @@ return {
         we should check for that and call it ourselves*/
     if(!PreProcessedNode.node.hasChildNodes() || isComponent){
       this.preProcessNode(PreProcessedNode.node, PreProcessedNode.scope);
-      this.preProcessNodeAttributes(PreProcessedNode.node, PreProcessedNode.scope);
+      this.preProcessNodeAttributes(PreProcessedNode.node, PreProcessedNode.scope, index);
       if(isComponent)
         Component.onCreate.call(Component, PreProcessedNode.node);
     }
@@ -500,10 +505,11 @@ return {
     return __COMPILER_FLG__;
   },
   
-  preProcessNode : function(DOM_Node, scope){
+  preProcessNode : function(DOM_Node, scope, repeatIndex){
     if(!_.isDef(DOM_Node) || DOM_Node === null )
       return;
-      
+    repeatIndex = (_.isInt(repeatIndex)) ? parseInt(repeatIndex) : -1;
+    
     var repeatValue = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);
     var type = (!_.isNullOrEmpty(repeatValue)) 
                   ? 'REPEAT' :
@@ -545,43 +551,16 @@ return {
           
           attrib.current_selection = selectObj.value;
           Interpolate.dispatchListeners(
-<<<<<<< HEAD
-            Map.getListeners(this.model, this.name)
-            , {type : _.MODEL_EVENT_TYPES.select_change
-            , value : e.target.options[e.target.selectedIndex].value
-            , text : e.target.options[e.target.selectedIndex].text
-            , index : e.target.selectedIndex
-              }
-=======
             Map.getListeners(annotations.modelName, annotations.attribName)
             , selectObj
->>>>>>> component
           );                  
         });
         break;
       case 'INPUT':
-<<<<<<< HEAD
-
-        if( (matches = regex.exec(DOM_Node.getAttribute('value'))) !== null){
-          modelNameParts = Process.parseModelAttribName(matches[2]);
-          DOM_Node.model = modelNameParts[0];
-          DOM_Node.name = modelNameParts[1];
-          /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
-          DOM_Node.addEventListener('keyup', function(e){
-            Map.setAttribute(this.model, this.name, e.target.value);
-            Interpolate.interpolate(this.model, this.name, e.target.value );
-          });
-        }
-        /*tmp_node is pushed during preProcessNodeAttributes()*/
-        
-        /*we don't push DOM_Node here because we can only bind to input using the value attribute
-          which is a guarantee that DOM_Node will be pushed during preProcessNodeAttributes() */
-=======
         __COMPILER_FLG__ = this.preProcessInputNode(DOM_Node, scope);
         break;
       case 'TEXTAREA':
         this.preProcessInputNode(DOM_Node, scope);
->>>>>>> component
         break;
       case 'REPEAT':
         /*push source repeat DOM_Node onto 'interpolate' array*/
@@ -590,7 +569,7 @@ return {
         TMP_RepeatBase.inheritToken(DOM_Node.token);
         TMP_RepeatBase.scope = scope;
         Map.addRepeatBaseNode(TMP_RepeatBase); 
-        Map.pushNodes(TMP_RepeatBase); 
+        //Map.pushNodes(TMP_RepeatBase); 
         __COMPILER_FLG__ = _.NO_COMPILE_ME;
         break;
 
@@ -599,7 +578,7 @@ return {
     }
     /*Don't process and cached removed nodes*/
     if(document.body.contains(DOM_Node))
-      this.preProcessNodeAttributes(DOM_Node, scope);
+      this.preProcessNodeAttributes(DOM_Node, scope, repeatIndex);
     return __COMPILER_FLG__;
   }
   

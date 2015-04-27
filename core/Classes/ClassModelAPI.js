@@ -28,11 +28,14 @@ Model.prototype.listen = function(attributeName, listener){
     Map.setListener(this.modelName, attributeName, listener);
 };
 
-Model.prototype.unlisten = function(attributeName){
-  Map.removeListener(this.modelName, attributeName);
+Model.prototype.unlisten = function(attributeName, func){
+  if(_.isFunc(func)){
+    Map.removeListener(this.modelName, attributeName, func);
+  }else if(_.isString(attributeName)){
+    Map.removeAllListeners(this.modelName, attributeName);
+  }
+  
 };
-<<<<<<< HEAD
-=======
 
 Model.prototype.save = function(){
   var output = '';
@@ -44,7 +47,7 @@ Model.prototype.save = function(){
     if(_.isArray(attrib)){
       for(var arrProp in attrib){
       
-        if(attrib.hasOwnProperty(arrProp) && !/^-?[0-9]+$/.test(arrProp)){
+        if(attrib.hasOwnProperty(arrProp) && !_.isInt(arrProp)){
            
            if(!_.isDef(this.attributes['__meta__'][attribName])){
             this.attributes['__meta__'][attribName] = {};
@@ -105,8 +108,9 @@ var thawed, thawFailed = false;
           }catch(e){
             thawedItem = metaProp[item];
           }
-          if(item == '_value_')
-            item = 'current_selection';
+          if(item == '_value_'){
+            this.attributes[prop]['current_selection'] = thawedItem;
+          }
           this.attributes[prop][item] = thawedItem;
         }
       }
@@ -115,6 +119,5 @@ var thawed, thawFailed = false;
   }
   
 };
->>>>>>> component
 
 });
