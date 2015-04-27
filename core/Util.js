@@ -33,5 +33,25 @@ structureJS.module('Util', function(require){
     return retVal;
   }
   structureJS.extendContext(_); 
+  
+  /* If structureJS depenedency resolver is missing we need to reassign */
+  if(!_.isDef(structureJS.done)){
+    Object.defineProperty(structureJS,'done',{
+      set : function(val){
+
+      },
+      get : function(){
+        return function(val){
+          this.state['doneQueue'].push(val);
+          var currOnload = window.onload || function(){};
+          window.onload = function(){
+            currOnload.call(null);
+            val.call(null);
+          }
+        };
+      }
+    });
+  }
+  
   return _;
 });
