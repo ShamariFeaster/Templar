@@ -209,7 +209,7 @@ return {
         attributeName = tmp_node.attribName,
         selectedValue = attributeVal._value_;
         
-    Process.addCurrentSelectionToSelect(tmp_node.node, attributeVal);
+    
     
     if(run && _.isArray(attributeVal)){
       var isShittyIE = (modelAttribLength > 0 && tmp_node.node.children.length == 0);
@@ -245,6 +245,7 @@ return {
       }
       
     }
+    Process.addCurrentSelectionToSelect(tmp_node.node, attributeVal);
   },
   
   interpolate : function(modelName, attributeName, attributeVal, compiledScopes){  
