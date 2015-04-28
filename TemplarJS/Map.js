@@ -365,6 +365,38 @@ return {
     return returnVal;
   },
   
+  setAttributeWithToken : function(token, value){
+    if(!_.isDef(_map[token.modelName])) 
+      return null;
+      
+    var lastRef = null,
+        lastProp = null;
+        attribute = null,
+        prop = null,
+        queue = token.indexQueue.slice(0),
+        modelName = token.modelName,
+        attribName = token.attribName,
+        Model = _map[modelName]['api'];
+    
+    if(_.isDef(attribute = this.getAttribute(modelName,attribName))){
+      if(_.isArray(attribute) || _.isObj(attribute)){
+
+        while((prop = queue.shift()) != null && _.isDef(attribute[prop])){
+          lastRef = attribute;
+          lastProp = prop;
+          attribute = attribute[prop];
+        }
+        
+        lastRef[lastProp] = value;
+        
+      }
+        
+    
+    }
+      
+    
+  },
+  
   getListeners : function(modelName, attributeName){
     var listeners = [];
     if(_.isDef(_map[modelName]['listeners'][attributeName])){

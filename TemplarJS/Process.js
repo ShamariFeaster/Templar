@@ -308,7 +308,8 @@ return {
     /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
     DOM_Node.addEventListener(eventType, function(e){
       var annotations = DOM.getDOMAnnotations(this);
-      Map.setAttribute(annotations.modelName, annotations.attribName, e.target.value);
+      Map.setAttributeWithToken(this.token, e.target.value);
+      //Map.setAttribute(annotations.modelName, annotations.attribName, e.target.value);
       /*a change to an input that is interpolated will redraw the input value pushing the cursor 
         to the end. This prevents that.*/
       State.ignoreKeyUp = true; 
@@ -342,7 +343,12 @@ return {
   },
   
   addCurrentSelectionToSelect : function(DOM_Node, attrib){
-  
+    
+    /* init to first value */
+    if(!_.isDef(attrib.current_selection)){
+      attrib._value_ = attrib[0].value || attrib[0];
+    }
+    
     (function(select){
       
       Object.defineProperty(attrib, 'current_selection', {
@@ -354,14 +360,17 @@ return {
           this._value_ = value;
 
           for(var s = 0; s < select.children.length; s++){
-            if(select.children[s].value == value){
+            if(select.children[s].value == value || select.children[s].text == value){
               select.selectedIndex = s;
               /*We want to reinterpolate the select on change of current_selection. we don't
                 want to fire listeners on this interp due to the fact user is likely setting
                 current_selection from a listener and we want to prevent infinite looping.*/
+
               State.dispatchListeners = false;
               Interpolate.interpolate(annotations.modelName, annotations.attribName);
               State.dispatchListeners = true;
+              
+              
               Interpolate.dispatchListeners(
                 Map.getListeners(annotations.modelName, annotations.attribName)
                 , {
@@ -379,7 +388,12 @@ return {
           return this._value_;
         }
       });
+      
+      
     })(DOM_Node);
+
+    
+
   },
   
   bindCheckboxListener : function(node){
