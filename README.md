@@ -88,8 +88,8 @@ Templar will repeat a list item template once for every element in a list . You 
 construct DOM on the fly. You DOM will never be represented in JavaScript strings
 again.
 
-To bind a data model attribute to a repeat template, simply add the following HTMLElement
-attribute:
+To bind a data model attribute to a repeat template (a div for example), simply add a `data-apl-repeat` 
+attribute like so:
 
 `<div data-apl-repeat="{{modelName.list}}"></div>`
 
@@ -108,8 +108,8 @@ data model attribute as the `innerHTML`:
 If `{{modelName.attributeName}}` is a list Templar will build the select using the elements of the list.
 
 The advantage to this is two-fold:
-1. It keeps your DOM clean of any Templar-specific markup
-2. It's less to learn and rememeber
+- 1. It keeps your DOM clean of any Templar-specific markup
+- 2. It's less to learn and rememeber
 
 The principle of model recognition is used throughout Templar on other HTMLElement's that
 typically serve as hosts for repeated data such as radio buttons and checkboxes.
@@ -444,21 +444,20 @@ Contributing
 This is my first major project; so I'm not all too sure how to build a community. Any help in that 
 area would be appreciated.
 
-I have a suite of regression tests written, but they are outdated as I re-wrote much of the compiler 
+I have a suite of regression tests written, but they are outdated as I have since re-wrote much of the compiler 
 and caching logic. Refectoring those tests are the first thing on my list.
 
 Next up on the testing front are performance and security testing. I could use help i those areas too.
+If Templar is slower, I want to know it and we'll make it faster. If it uses more memory, we'll make it smarter
+and more efficient.
 
 Where Templar is (hopefully) Going
 =========
-I'd be lying if I said my goal was anything other than to become the most widely used of the 
-SPA frameworks. No disrespect to the guys who built, contribute and maintain AngularJS, EmberJS, and Backbone. 
-I'm sure they are all great pieces of software, without which I would never have been inspired to 
-make Templar, but I think I've created a better, easier to learn machine and I'm going to do 
-everything I can to prove it's empirically better.
 
-So the performance tests are key to this goal. If Templar is slower, I want to know it and we'll
-make it faster. If it uses more memory, we'll make it smarter.
+I designed Templar to be useful as both a teaching tool and a serious, efficient application building
+toolset. I hope that it can lower the barrier to entry for learning about thick client architectures.
+
+My goal is to have a stable version by early 2016.
 
 Thanks 
 =========
