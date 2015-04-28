@@ -5,12 +5,15 @@
 <script src="Modules/Model.js"></script>
 </script></head>
 <body>
-{{Environment.siteName}}
+<h1>{{Example.banner}}</h1>
 
-<div data-apl-repeat="{{Environment.complex_repeat}}">
-{{author}}, {{title}}
-  <div data-apl-repeat="{{$item}}.other_books}}">
-    Other Books: {{}}
-  </div>
-</div>
+    <br/>
+
+    Which Number Do You Like?
+    <select>{{Example.items}}</select>
+    
+    <br/>
+    
+    You Picked
+    {{Example.items.current_selection}}
 </body></html>

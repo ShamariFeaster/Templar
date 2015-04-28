@@ -26,3 +26,9 @@ Templar.dataModel('Environment',
             });
 Templar.dataModel('A',
             {a : 'A', b : 'B'});
+            
+            
+            Templar.dataModel('Example',{
+    banner : 'Hello World',
+    items : [1,2,3]
+});
