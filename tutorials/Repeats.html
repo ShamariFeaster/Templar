@@ -54,7 +54,7 @@ Templar.dataModel('Example',{
     To bind a repeatable `DMA` an element, place a valid non-terminal (NT) between 
     any tag, including any custom tags (components) you create. 
 
-    ```<any-tag data-apl-repeat="{{modelName,attributeName}}"></any-tag>```
+    ```<any-tag data-apl-repeat="{{Example.SimpleRepeat}}"></any-tag>```
 
     The tag itself, and everything inside it, be repeated 1 time for every element in the `DMA` it is bound to.
 
@@ -73,7 +73,7 @@ Templar.dataModel('Example',{
    
     <h3>Here's our markup</h3>
      ```
-    <div data-apl-repeat="{{Example,SimpleRepeat}}">
+    <div data-apl-repeat="{{Example.SimpleRepeat}}">
       Position: {{$index}} <span class="red">{{}}</span>
     </div>
     ```
@@ -108,7 +108,7 @@ Templar.dataModel('Example',{
     
     <h3>Here's our markup</h3>
     ```
-    <div data-apl-repeat="{{Example,SimpleRepeat}}">
+    <div data-apl-repeat="{{Example.SimpleRepeat}}">
       <span class="red">{{}}</span>
     </div>
     ``` 

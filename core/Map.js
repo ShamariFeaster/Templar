@@ -206,17 +206,16 @@ return {
       tmp_node = new TMP_Node(DOMorTMPNode, modelName, attribName, index);
     
     /*If user references unknown model in template we get this error*/
-    if(!_.isDef(_map[tmp_node.modelName])){
-      throw 'FATAL ERROR: Model "' + tmp_node.modelName + ' Is Undeclared.';
+    if(_.isDef(_map[tmp_node.modelName])){
+
+      if( !_.isDef(_map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]) ){
+        _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName] = { nodes : []};
+      }
+
+      _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]['nodes'].push(tmp_node);
+    }else{
+      _.log('WARNING: Model "' + tmp_node.modelName + ' Is Undeclared.');
     }
-       
-    if( !_.isDef(_map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]) ){
-      _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName] = { nodes : []};
-
-    }
-
-    _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]['nodes'].push(tmp_node);
-
   },
   annotateWithLimitProps : function(model, attribName, value){
     
@@ -326,7 +325,7 @@ return {
         attribName = TMP_node.attribName,
         Model = _map[modelName]['api'];
     
-    if(_.isDef(attribute = returnVal = this.getAttribute(modelName,attribName))){
+    if(!_.isNull(attribute = returnVal = this.getAttribute(modelName,attribName))){
       if(_.isArray(attribute) || _.isObj(attribute)){
         
         /* get un-paged attrib length if used in template. */
@@ -347,6 +346,8 @@ return {
         returnVal = attribute;
       }
       
+    }else{
+      _.log('WARNING: ' + attribName + ' is not member of model ' + modelName);
     }
 
     return returnVal;

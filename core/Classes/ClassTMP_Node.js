@@ -24,12 +24,14 @@ var TMP_Node = function(node, modelName, attribName, index){
 };
 
 TMP_Node.prototype.inheritToken = function(Token){
-  this.modelName = Token.modelName;
-  this.attribName = Token.attribName;
-  this.repeatModelName = Token.repeatModelName ;
-  this.repeatAttribName = Token.repeatAttribName ;
-  this.repeatIndex = Token.repeatIndex;
-  this.indexQueue = Token.indexQueue.slice(0);
+  if(_.isDef(Token)){
+    this.modelName = Token.modelName;
+    this.attribName = Token.attribName;
+    this.repeatModelName = Token.repeatModelName ;
+    this.repeatAttribName = Token.repeatAttribName ;
+    this.repeatIndex = Token.repeatIndex;
+    this.indexQueue = Token.indexQueue.slice(0);
+  }
 }
 
 return TMP_Node;
