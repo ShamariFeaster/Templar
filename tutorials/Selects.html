@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="../builds/TemplarJS-0.11.min.js"></script>
+    <script>
+        /*Define your data model*/
+        Templar.dataModel('Example',{
+
+            SimpleSelect : [1,2,3],
+            
+            ComplexSelect : [{text : 'uno', value : '1'},
+                          {text : 'dos', value : '2'},
+                          {text : 'tres', value : '3'}]
+        });
+   </script>
+</head>
+<body>
+    
+    <h1>The Basics</h1>
+    
+    <h3>Here's a data model</h3>
+    <code>
+    Templar.dataModel('Example',{<br>
+ &nbsp;&nbsp;       SimpleSelect : [1,2,3],<br>
+        <br>
+ &nbsp;&nbsp;        ComplexSelect : [<br>
+  &nbsp;&nbsp; &nbsp;&nbsp;{text : 'uno', value : '1'},<br>
+ &nbsp;&nbsp; &nbsp;&nbsp;{text : 'dos', value : '2'},<br>
+ &nbsp;&nbsp; &nbsp;&nbsp;{text : 'tres', value : '3'}]<br>
+    });
+    
+    <br>
+    
+    </code>
+    The first argument to <code>Templar.dataModel()</code> is the modelName. Each property of the second argument
+    is called a data model attribute (DMA).
+    
+    <h3>Using your data models in templates</h3>
+    
+    To make use of DMAs in your template you use specially formatted variable called a nonterminal (NT).
+    It looks like this:
+    {{modelName,attributeName}}
+    The example above has a ',' where a '.' should be. This is to keep Templar from trying to replace
+    the NT with a valid model attribute (which there isn't because we haven't defined a model named
+    "modelName" with an attribute named "attributeName."
+    
+    <h1>Using Selects</h1>
+    
+    <h3>Binding</h3>
+    To bind a DMA to a select, place a valid non-terminal (NT) between 
+    a select tag.
+    &lt;select&gt;{{modelName,attributeName}}&lt;/select&gt;
+    <br/>
+
+    <h3>Using different types of lists</h3>
+    
+    Notice the difference between the SimpleSelect and ComplexSelect attributes.
+    
+    <br>
+    
+    <label>Simple Select</label>
+    <select>{{Example.SimpleSelect}}</select>
+    Templar will use each element in the list as both the name and value
+    
+
+    <br/>
+    
+    <label>Complex Select</label>
+    <select>{{Example.ComplexSelect}}</select>
+    You can specify different names and values by binding to a list of objects that have
+    name and value properties
+    
+    
+    <br/>
+    
+    <h3>The 'current_selection' property</h3>
+    
+    Once a list is bound to a select, it gets a "current_selection" property that can be used to
+    get/set the value of the currently selected option.
+    <br/>
+
+    <br/>
+    <h3>Selecting an option using the 'current_selection' property</h3>
+    To set a select's current selection, assign 'current_selection' to a value that is in the list.
+    In the case of a complex list, Templar will recognize both valid text and value properties
+    
+    <br/>
+    
+    Select simple select's current selection by typing a valid value here
+    <ol>
+    <li>Type in '3' and notice the simple select changes to '3'</li>
+    <li>Type in '2' and notice the simple select changes to '2'</li>
+    </ol>
+    <input value="{{Example.SimpleSelect.current_selection}}"/>
+    Simple select's current selection is <strong>{{Example.SimpleSelect.current_selection}}</strong>
+    
+    <br/>
+    
+    Select complex select's current selection by typing a valid value here
+    <ol>
+    <li>Type in '3' and notice the complex select changes to 'tres'</li>
+    <li>Type in 'dos' and notice the complex select changes to 'dos'</li>
+    <li>Notice that the current selection output above will read '2' and not 'dos'</li>
+    <li>This is because current selection returns the 'value' property of a list</li>
+    </ol>
+    <input value="{{Example.ComplexSelect.current_selection}}"/> 
+    Complex select's current selection is <strong>{{Example.ComplexSelect.current_selection}}</strong>
+    
+</body>
+</html>

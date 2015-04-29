@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="../builds/TemplarJS-0.11.min.js"></script>
+    <script src="Components/MarkDown.js"></script>
+    <script>
+        /*Define your data model*/
+        Templar.dataModel('Example',{
+
+            SimpleRepeat : ['a','b','c'],
+            
+            ComplexRepeat : [
+            {fn : 'bob', ln : 'johnson'},
+            {fn : 'michael', ln : 'jackson'},
+            {fn : 'benadict', ln : 'cabbagepatch'}],
+            
+            EmbeddedRepeat : [
+            {name : 'daryl', friends : ['bill','tommy']},
+            {name : 'carl', friends : ['susan','sicky']},
+            {name : 'rick', friends : ['jane','tammy']}]
+        });
+   </script>
+   <style>
+   .red {color : red;}
+   .blue {color : blue;}
+
+   </style>
+</head>
+<body>
+
+   <h3>Here's a data model</h3>
+   
+   <MarkDown>
+   
+   
+```
+Templar.dataModel('Example',{
+
+  SimpleRepeat : ['a','b','c'],
+  
+  ComplexRepeat : [
+    {fn : 'bob', ln : 'johnson'},
+    {fn : 'michael', ln : 'jackson'},
+    {fn : 'benadict', ln : 'cabbagepatch'}],
+  
+  EmbeddedRepeat : [
+    {name : 'daryl', friends : ['bill','tommy']},
+    {name : 'carl', friends : ['susan','sicky']},
+    {name : 'rick', friends : ['jane','tammy']}]
+});```
+  <h3>Binding</h3>
+    To be repeated the `DMA` must be an array.
+
+    To bind a repeatable `DMA` an element, place a valid non-terminal (NT) between 
+    any tag, including any custom tags (components) you create. 
+
+    ```<any-tag data-apl-repeat="{{modelName,attributeName}}"></any-tag>```
+
+    The tag itself, and everything inside it, be repeated 1 time for every element in the `DMA` it is bound to.
+
+    <h3>Special Repeat Nonterminals</h3>
+
+    `{{}}` - Will be replaced by the value of the `DMA` at a given index
+    `{{$index}}` - Will be replaced by the current 0-based index in the repeat loop
+    `{{$item}}` - if `DMA` elements are objects, used to access the current object
+    `{{propertyName}}` - If `DMA` elements are objects, used to access the property "propertyName" 
+    of the current object
+
+    <h3>Simple Repeat Examples</h3>
+    We'll use the `{{}}` and `{{$index}}` repeat `NT`s for this example. 
+    Our goal is to print out each element of our SimpleRepeat `DMA` along each element's position in its
+    `DMA`.
+   
+    <h3>Here's our markup</h3>
+     ```
+    <div data-apl-repeat="{{Example,SimpleRepeat}}">
+      Position: {{$index}} <span class="red">{{}}</span>
+    </div>
+    ```
+    
+    <h3>Here's the markup output</h3>
+    ```
+      <div>
+          <span class="red"><span>1</span></span>
+      </div>
+    <div>
+          <span class="red"><span>2</span></span>
+    </div>
+    <div>
+          <span class="red"><span>3</span></span>
+    </div>
+    ``` 
+    
+    Notice the only extra markup added by Templar was the span tag around the `DMA` element. there's a 
+    reason for this that is beyond the scope of this tutorial. 
+    
+    <h3>Here's the Actual output</h3>
+    <div>
+      <div data-apl-repeat="{{Example.SimpleRepeat}}">
+        Position: {{$index}} <span class="red">{{}}</span>
+      </div>
+    </div>
+
+    <h3>Complex Repeat Examples</h3>
+    
+    We'll use the `{{$index}}` and `{{propertyName}}` repeat NTs for this example. 
+    We basically want to print out each element of our SimpleRepeat `DMA`. 
+    
+    <h3>Here's our markup</h3>
+    ```
+    <div data-apl-repeat="{{Example,SimpleRepeat}}">
+      <span class="red">{{}}</span>
+    </div>
+    ``` 
+    
+    <h3>Here's the markup output</h3>
+    ```
+      <div>
+          Position: 0 <span class="red"><span>1</span></span>
+      </div>
+    <div>
+         Position: 1 <span class="red"><span>2</span></span>
+    </div>
+    <div>
+        Position: 2 <span class="red"><span>3</span></span>
+    </div>
+    ``` 
+    
+    Notice the only extra markup added by Templar was the span tag around the `DMA` element. there's a 
+    reason for this that is beyond the scope of this tutorial. 
+
+    
+    
+  </MarkDown>  
+</body>
+</html>
