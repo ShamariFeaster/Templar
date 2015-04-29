@@ -31,3 +31,20 @@ Templar.dataModel('A',
                     d : { e : 'f'} 
                   }
             });
+            
+            
+            
+Templar.dataModel('Example',{
+
+    SimpleRepeat : ['a','b','c'],
+    
+    ComplexRepeat : [
+    {fn : 'bob', ln : 'johnson'},
+    {fn : 'michael', ln : 'jackson'},
+    {fn : 'benadict', ln : 'cabbagepatch'}],
+    
+    EmbeddedRepeat : [
+    {name : 'daryl', friends : ['bill','tommy']},
+    {name : 'carl', friends : ['susan','sicky']},
+    {name : 'rick', friends : ['jane','tammy']}]
+});

@@ -6,9 +6,19 @@
         data-project-config="../../lib/structureJS/dev-test-config">
 </script></head>
 <body>
+<MarkDown>
 
-{{A.c.d.e}}
 
-<!-- 
--->
+<div data-apl-repeat="{{Example.SimpleRepeat}}">
+  Position: {{$index}} <span class="red">{{}}</span>
+</div>
+
+
+<h3>Here's the Markup</h3>
+```
+<div data-apl-repeat="{{Example.SimpleRepeat}}">
+  Position: {{$index}} <span class="red">{{}}</span>
+</div>
+```
+</MarkDown>
 </body></html>
