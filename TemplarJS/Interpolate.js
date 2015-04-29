@@ -58,6 +58,7 @@ return {
           tokens;
       
       for(var i = 0; i < elemAttributes.length; i++){
+        if(elemAttributes[i].name == 'data-' + _.IE_MODEL_REPEAT_KEY) continue;
         elemAttribName = elemAttributes[i].name;
 
         uninterpolatedString = (_.isDef(tmp_node.symbolMap[elemAttribName])) ? 
@@ -104,10 +105,17 @@ return {
   },
   interpolateSpan : function(tmp_node){
     var node = tmp_node.node,
-        retVal = Map.dereferenceAttribute(tmp_node);
-    node.innerText = node.innerHTML = 
-      (!_.isArray(retVal) && !_.isObj(retVal)) ? retVal : '';
-
+        retVal = Map.dereferenceAttribute(tmp_node),
+        temp = '';
+    temp =
+      (!_.isArray(retVal) && !_.isObj(retVal)) ? retVal : node.textContent || tmp_node.node.innerText;
+    
+    /* http://stackoverflow.com/questions/1359469/innertext-works-in-ie-but-not-in-firefox */
+    if(_.isDef(node.textContent)){ 
+      node.textContent = temp
+    }else{
+      node.innerText = temp;
+    }
   },
   /*Returns the whole attribute if no limit is defined for this attribute*/
   getPageSlice : function(Model, attributeName, target){

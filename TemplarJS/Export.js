@@ -114,8 +114,7 @@ structureJS.done(function(){
         }else{
           container.removeChild(styles[i]);
         }
-       
-        
+
       }
       
       component.templateContent = container.innerHTML;

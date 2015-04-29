@@ -192,13 +192,16 @@ return {
               attribVal,
               templateContent,
               matches = null,
-              repeatKey;
+              repeatKey,
+              beforeInsertNodeCnt = nodes.length;
+              addedNodecnt = 0;
           if(_.isDef(component)
               && !_.isNullOrEmpty(component.templateContent)
               && !_.isNull(DOM_Node.parentNode)){
             //_.log('Is Defined Component: ' + DOM_Node.tagName);
-
+            
             DOM_Node.insertAdjacentHTML('afterend', component.templateContent);
+            addedNodecnt = nodes.length - beforeInsertNodeCnt;
             DOM_component = DOM_Node.nextElementSibling;
             
             /*Transclude content*/
@@ -266,7 +269,7 @@ return {
               DOM_Node.setAttribute('data-' + _.IE_MODEL_REPEAT_KEY, repeatKey);
             }
             
-            i++;//make sure we don't recompile this node
+            i += addedNodecnt;//make sure we don't recompile this node
           }
           //log('Recursing on :' + DOM_Node.tagName);
           repeatKey = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);
