@@ -23,7 +23,8 @@
    <style>
    .red {color : red;}
    .blue {color : blue;}
-
+   .friend {}
+  .underline {text-decoration : underline;}
    </style>
 </head>
 <body>
@@ -65,7 +66,9 @@ Templar.dataModel('Example',{
     `{{$item}}` - if `DMA` elements are objects, used to access the current object
     `{{propertyName}}` - If `DMA` elements are objects, used to access the property "propertyName" 
     of the current object
-
+    
+    
+    <!-- SECTION -->
     <h3>Simple Repeat Examples</h3>
     We'll use the `{{}}` and `{{$index}}` repeat `NT`s for this example. 
     Our goal is to print out each element of our SimpleRepeat `DMA` along each element's position in its
@@ -74,15 +77,15 @@ Templar.dataModel('Example',{
     <h3>Here's our markup</h3>
      ```
     <div data-apl-repeat="{{Example.SimpleRepeat}}">
-      Position: {{$index}} <span class="red">{{}}</span>
+      Position: {{$index}} <span class="underline">{{}}</span>
     </div>
     ```
     
     <h3>Here's the markup output</h3>
     ```
-      <div>
-          <span class="red"><span>1</span></span>
-      </div>
+    <div>
+        <span class="red"><span>1</span></span>
+    </div>
     <div>
           <span class="red"><span>2</span></span>
     </div>
@@ -97,39 +100,106 @@ Templar.dataModel('Example',{
     <h3>Here's the Actual output</h3>
     <div>
       <div data-apl-repeat="{{Example.SimpleRepeat}}">
-        Position: {{$index}} <span class="red">{{}}</span>
+        Position: {{$index}} <span class="underline">{{}}</span>
       </div>
     </div>
-
+    
+    
+    <!-- SECTION -->
     <h3>Complex Repeat Examples</h3>
     
-    We'll use the `{{$index}}` and `{{propertyName}}` repeat NTs for this example. 
-    We basically want to print out each element of our SimpleRepeat `DMA`. 
+    We'll use the `{{$index}}` and `{{propertyName}}` repeat `NT`s for this example. 
+    We want to print out properties of each element of our ComplexRepeat `DMA`. 
     
     <h3>Here's our markup</h3>
     ```
-    <div data-apl-repeat="{{Example.SimpleRepeat}}">
-      <span class="red">{{}}</span>
+    <div data-apl-repeat="{{Example.ComplexRepeat}}">
+      <span class="underline">Welcome {{ln}}, {{fn}}</span>
     </div>
     ``` 
     
     <h3>Here's the markup output</h3>
     ```
-      <div>
-          Position: 0 <span class="red"><span>1</span></span>
-      </div>
     <div>
-         Position: 1 <span class="red"><span>2</span></span>
+        Welcome <span>johnson</span>, <span>bob</span></div>
     </div>
     <div>
-        Position: 2 <span class="red"><span>3</span></span>
+         Welcome <span>jackson</span>, <span>michael</span></div>
+    </div>
+    <div>
+        Welcome <span>cabbagepatch</span>, <span>benadict</span></div>
+    </div>
+    ``` 
+        
+    <h3>Here's the Actual output</h3>
+
+    <div data-apl-repeat="{{Example.ComplexRepeat}}">
+      Welcome {{ln}}, {{fn}}
+    </div>
+    <br>
+    Here we made use of the `{{propertyName}}` shorthand. This keeps you from redundantly typing the
+    model name. This shorthand is only valid inside repeats. Also note that the `{{}}` shorthand will
+    not work here becuse `{{}}` is, in this case, an object and not a printable string.
+    
+    
+    <!-- SECTION -->
+    <h3>Embedded Repeat Examples</h3>
+    
+    We'll use the `{{$item}}` repeat `NT`s for this example. 
+    We want to display the `name` property of each object in our ComplexRepeat `DMA`. We also want 
+    to iterate over, and print out the `friends` property (which is a repeatable list) of each  
+    object in our ComplexRepeat `DMA`.    
+    
+    <h3>Here's our markup</h3>
+    ```
+    <div data-apl-repeat="{{Example.EmbeddedRepeat}}">
+      Name : {{name}} 
+      
+      <br/>
+      
+      <div class="friend" data-apl-repeat="{{$item}}.friends">
+        Friend {{$index}} -> {{}}
+      </div>
+      
+      <br/>
     </div>
     ``` 
     
-    Notice the only extra markup added by Templar was the span tag around the `DMA` element. there's a 
-    reason for this that is beyond the scope of this tutorial. 
+    <h3>Here's the markup output</h3>
+    ```
+    <div>
+      Name : <span>daryl</span><br>
+      
+      <div class="friend">
+        Friend 0 -> <span>bill</span>
+      </div>
+      <div class="friend">
+        Friend 1 -> <span>tommy</span>
+      </div>
+      
+      <br>
+    </div>
+    ``` 
+        
+    <h3>Here's the Actual output</h3>
 
+    <div data-apl-repeat="{{Example.EmbeddedRepeat}}">
+      Name : {{name}} 
+      
+      <br/>
+      
+      <div class="friend" data-apl-repeat="{{$item}}.friends">
+        Friend {{$index}} -> {{}}
+      </div>
+      
+      <br/>
+    </div>
     
+    <br>
+    
+    Here we made use of the all our shorthands. It should be noted that the scope for all special
+    repeat `NT`s is local to each repeat. For example, a child repeat's `{{$index}}` will always be
+    its index and not its parent's index. 
     
   </MarkDown>  
 </body>
