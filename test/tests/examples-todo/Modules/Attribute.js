@@ -11,9 +11,9 @@ Templar.attribute('isDisabled',{
 Templar.attribute('showIf',{
   onChange : function(self, val){
     if(val === true || val == 'true' || parseInt(val) > 0){
-      self.style.visibility = '';
+      self.style.display = '';
     }else{
-      self.style.visibility = 'hidden';
+      self.style.display = 'none';
     }
   }
 });
@@ -21,9 +21,9 @@ Templar.attribute('showIf',{
 Templar.attribute('hideIf',{
   onChange : function(self, val){
     if(val === true || val == 'true' || parseInt(val) > 0){
-      self.style.visibility = 'hidden';
+      self.style.display = 'none';
     }else{
-      self.style.visibility = '';
+      self.style.display = '';
     }
   }
 });
