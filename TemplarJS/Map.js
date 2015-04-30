@@ -390,12 +390,12 @@ return {
         
         lastRef[lastProp] = value;
         
+      }else{
+        this.setAttribute(modelName, attribName, value);
       }
-        
-    
+
     }
-      
-    
+
   },
   
   getListeners : function(modelName, attributeName){

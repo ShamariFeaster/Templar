@@ -356,9 +356,11 @@ return {
         set : function(value){
           if(value == '')
             return;
-          var annotations = DOM.getDOMAnnotations(select);
           this._value_ = value;
-
+          var annotations = DOM.getDOMAnnotations(select),
+              boundProperties = (_.isDef(select.token.indexQueue)) ? 
+                  select.token.indexQueue.slice(0) : [];
+                  
           for(var s = 0; s < select.children.length; s++){
             if(select.children[s].value == value || select.children[s].text == value){
               select.selectedIndex = s;
@@ -378,6 +380,7 @@ return {
                     , value : select.children[s].value
                     , text : select.children[s].text
                     , index : select.selectedIndex
+                    , properties : boundProperties
                   }
               );
               
@@ -395,16 +398,24 @@ return {
     
 
   },
-  
+  /* properties event object property is experimental. The alternative is let users listen to
+    sub properties, but this would require some shorthand for unknown indexes like:
+    items[x].property, where x is a substitute for any index in a repeat. I hate special syntaxes
+    so I may end up sticking with a programmatic solution, but I would need to standardize the
+    event object interface.*/
   bindCheckboxListener : function(node){
   
     node.addEventListener('click',function(e){
       var attrib = Map.dereferenceAttribute(this.token),
+          boundProperties = (_.isDef(this.token.indexQueue)) ? 
+             this.token.indexQueue.slice(0) : []
           cbObj = 
             {
               type : _.MODEL_EVENT_TYPES.checkbox_change
               , checked : (e.target.checked === true)
               , value : e.target.value
+              , target : e.target
+              , properties : boundProperties
             },
           annotations = DOM.getDOMAnnotations(this);
       /*for checkboxes we should not set current_selection to value if it was unchecked*/
@@ -554,12 +565,16 @@ return {
         
         DOM_Node.addEventListener('change', function(e){
           var attrib = Map.dereferenceAttribute(this.token),
+              boundProperties = (_.isDef(this.token.indexQueue)) ? 
+                this.token.indexQueue.slice(0) : [],
               selectObj = 
                 {
                   type : _.MODEL_EVENT_TYPES.select_change
                   , value : e.target.options[e.target.selectedIndex].value
                   , text : e.target.options[e.target.selectedIndex].text
                   , index : e.target.selectedIndex
+                  , target : e.target
+                  , properties : boundProperties
                 },
               annotations = DOM.getDOMAnnotations(this);
           
