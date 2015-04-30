@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style>
+.red-x {width: 15px; height : 15px;}
+.active {color : blue;}
+.completed {color : red; text-decoration : line-through;}
+#filters {display : inline-block;}
+.selected {border: 1px solid rgba(0, 0, 0, 1) !important;}
+#filters a {
+  color: inherit;
+  margin: 3px;
+  padding: 3px 7px;
+  text-decoration: none;
+  border: 1px solid rgba(239, 222, 222, 1);
+  border-radius: 3px;
+}
+</style>
+<!--
+<script src="../../../build/TemplarJS-0.11.min.js"></script>
+<script src="../../lib/jquery.js"></script>
+<script src="Modules/Attribute.js"></script>
+-->
+<script src="../../../../structureJS/core/structureJS-core.js" id="structureJS"
+        data-project-manifest="../../lib/structureJS/dev-test-manifest"
+        data-project-config="../../lib/structureJS/dev-test-config">
+</script>
+<script>
+
+
+structureJS.done(function(){
+
+  Templar.dataModel('Todo',{
+    items : [],
+    input : 'What needs to be done',
+    activeCount : 0,
+    currentFilter : '',
+    filters : [
+      {selected : 'selected', label : 'All', by : 'all'},
+      {selected : '', label : 'Active', by : 'active'},
+      {selected : '', label : 'Completed', by : 'completed'}
+      ]
+  });
+  
+  var Todo = Templar.getModel('Todo');
+
+  function TodoItem(text, index){
+    this.text = text;
+    this.status = 'active';
+    this.index = index;
+    this.isVisible = true;
+    this.statusCheckbox = [''];
+  }
+
+  function inputFocus(e){
+    Todo.input = '';
+  }
+  
+  function addItem(e){
+    Todo.items.push(new TodoItem(Todo.input, Todo.items.length));
+    Todo.update('items');
+  }
+  
+  function deleteItem(e){
+    Todo.items.splice(e.currentTarget.getAttribute('index'),1);
+    Todo.update('items');
+  }
+  
+  function filter(e){
+    var by;
+    if(typeof e !== 'string'){
+      by = e.currentTarget.getAttribute('by');
+    }else{
+      by = e;
+    }
+     
+    Todo.currentFilter = by;
+    Todo.items.map(function(item){
+      item.isVisible = true;
+      if(item.status != by){
+        item.isVisible = false || (by == 'all');
+      }
+      return item;
+    });
+    
+    Todo.filters.map(function(item){
+      if(item.by == by){
+        item.selected = 'selected';
+      }else{
+        item.selected = '';
+      }
+      return item;
+    });
+    Todo.update('filters');
+    Todo.update('items');
+  }
+  
+  $('#input').focus(inputFocus);
+  $('#add-item').click(addItem);
+  
+  Todo.listen('items',function(e){
+   var activeCount = 0; 
+    /*need to rebind b/c these repeated nodes are destroyed on each update*/
+    $('.delete-item').click(deleteItem);
+    
+    if(e.properties.pop() == 'statusCheckbox'){
+      var index = e.target.getAttribute('index');
+        item = Todo.items[index]; 
+      switch(item.status){
+        case 'active':
+          item.status = 'completed';
+          break;
+        case 'completed':
+          item.status = 'active';
+          break;
+      }
+      Todo.items[index] = item;
+      Todo.update('items');
+      filter(Todo.currentFilter);
+    }
+    
+    Todo.items.forEach(function(item){
+      if(item.status == 'active') activeCount++;
+    });
+    
+    Todo.activeCount = activeCount;
+    
+  });
+  
+  Todo.listen('filters',function(e){
+    $('.filter').click(filter);
+  });
+});
+
+</script>
+</head>
+<body>
+
+
+What needs to be done? 
+<input id="input" value="{{Todo.input}}"/><br/>
+
+<div data-apl-repeat="{{Todo.items}}" showIf="{{isVisible}}">
+
+  <input type="checkbox" value="{{statusCheckbox}}" index="{{$index}}"/>
+  
+  <span class="{{status}}">{{text}}</span>
+  
+  <a class="delete-item" index="{{$index}}"><img class="red-x" src="images/x.gif"></img></a>
+  
+</div>
+<button id="add-item">Add Item</button>
+
+<div showIf="{{Todo.items.length}}">
+  You have {{Todo.activeCount}} item(s) left.
+  <br/>
+  <div id="filters">
+    <a data-apl-repeat="{{Todo.filters}}" 
+      class="{{selected}} filter" 
+      by="{{by}}">{{label}}
+    </a>
+  </div>
+</div>
+</body></html>
