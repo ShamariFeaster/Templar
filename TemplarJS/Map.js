@@ -336,7 +336,7 @@ return {
             returnVal = Model.attributes[attribName].length;
           } 
         }else{
-          while((prop = queue.shift()) != null && _.isDef(attribute[prop])){
+          while((prop = queue.shift()) != null ){
             returnVal = attribute = attribute[prop];
           }
         }
