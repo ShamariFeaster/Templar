@@ -19,25 +19,11 @@
 </style>
 
 <script src="../../../build/TemplarJS-0.11.min.js"></script>
-<script src="../../lib/jquery.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="Modules/Attribute.js"></script>
 
 <script>
-Templar.dataModel('Todo',{
-  items : [],
-  mainInput : 'What needs to be done?',
-  modifyInput : '',
-  activeCount : 0,
-  edittingIndex : -1,
-  currentFilter : 'all',
-  filters : [
-    {selected : 'selected', label : 'All', by : 'all'},
-    {selected : '', label : 'Active', by : 'active'},
-    {selected : '', label : 'Completed', by : 'completed'}
-    ]
-});
-
-var Todo = Templar.getModel('Todo');
+var Todo;
 
 function TodoItem(text, index){
   this.text = text;
@@ -61,11 +47,10 @@ function clearModifyInput(e){
 }
 
 function stopEditting(){
-  Todo.items.map(function(item){
+  Todo.items = Todo.items.map(function(item){
     item.editting = false;
   });
   Todo.indexBeingEdited = -1;
-  Todo.update('items');
 }
 
 function addItem(e){
@@ -105,7 +90,7 @@ function filter(e){
   Todo.currentFilter = by;
   
   /*Using selected filter to control item visibility*/
-  Todo.items.map(function(item){
+  Todo.items = Todo.items.map(function(item){
     item.isVisible = true;
     if(item.status != by){
       item.isVisible = false || (by == 'all');
@@ -114,7 +99,7 @@ function filter(e){
   });
   
   /*Change which filter is currently selected*/
-  Todo.filters.map(function(filter){
+  Todo.filters = Todo.filters.map(function(filter){
     if(filter.by == by){
       filter.selected = 'selected';
     }else{
@@ -122,8 +107,7 @@ function filter(e){
     }
     return filter;
   });
-  Todo.update('filters');
-  Todo.update('items');
+
 }
 
 function editOnDblClick(e){
@@ -144,6 +128,22 @@ document.onkeydown = function(e) {
 }
 
 $(function(){
+  Templar.dataModel('Todo',{
+    items : [],
+    mainInput : 'What needs to be done?',
+    modifyInput : '',
+    activeCount : 0,
+    edittingIndex : -1,
+    currentFilter : 'all',
+    filters : [
+      {selected : 'selected', label : 'All', by : 'all'},
+      {selected : '', label : 'Active', by : 'active'},
+      {selected : '', label : 'Completed', by : 'completed'}
+      ]
+  });
+
+  Todo = Templar.getModel('Todo');
+
 
   $('#main-input').focus(clearMainInput);
   $('#main-input').blur(reinstateMainInputMsg);
@@ -162,7 +162,7 @@ $(function(){
       'statusCheckbox' property of each element in Todo.items.*/
     if(e.properties.pop() == 'statusCheckbox'){
       var checkbox = e.target,
-        index = checkbox.getAttribute('index');
+        index = checkbox.getAttribute('index'),
         item = Todo.items[index]; 
       switch(item.status){
         case 'active':
@@ -202,7 +202,7 @@ $(function(){
 </script>
 </head>
 <body>
-
+<h1>TemplarJS' TodoMVC Demo</h1>
 <input id="main-input" value="{{Todo.mainInput}}"/><br/>
 
 <!-- Todo list item template, repeated once for every item in Todo.items-->
