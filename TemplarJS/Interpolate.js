@@ -105,10 +105,11 @@ return {
   },
   interpolateSpan : function(tmp_node){
     var node = tmp_node.node,
-        retVal = Map.dereferenceAttribute(tmp_node),
-        temp = '';
+        retVal = Map.dereferenceAttribute(tmp_node) || '',
+        temp = '',
+        currVal = node.textContent || node.innerText;
     temp =
-      (!_.isArray(retVal) && !_.isObj(retVal)) ? retVal : node.textContent || tmp_node.node.innerText;
+      (!_.isArray(retVal) && !_.isObj(retVal)) ? retVal : currVal;
     
     /* http://stackoverflow.com/questions/1359469/innertext-works-in-ie-but-not-in-firefox */
     if(_.isDef(node.textContent)){ 
