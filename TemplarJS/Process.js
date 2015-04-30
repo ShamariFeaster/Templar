@@ -42,11 +42,12 @@ return {
         node._setAttribute = node.setAttribute;
         node.__customAttributes__ = {};
         node.setAttribute = function(name, val){
+          var normalizedName = name.toLowerCase();
           /*If we don't check, we end up with onChange being called on every call to the
           overriden setAttribute(). The side effects are that the user's cust attrib handler
           will have unexpected behavior.*/
           for(var caName in this.__customAttributes__){
-            if(this.__customAttributes__[caName].name == name)
+            if(this.__customAttributes__[caName].name == normalizedName)
               this.__customAttributes__[caName].onChange.call(this.__customAttributes__[caName], this, val);
           }
           this._setAttribute.call(this, name, val);
@@ -66,6 +67,7 @@ return {
         tmp_node = null,
         preProcessedTMPNodes = [],
         origValue,
+        origName,
         Interpolate = Circular('Interpolate'),
         tokens;
     repeatIndex = (_.isInt(repeatIndex)) ? parseInt(repeatIndex) : -1;
@@ -74,12 +76,14 @@ return {
       attributes = node.attributes;
       /*search node attributes for non-terminals*/
       for(var i = 0; i < attributes.length; i++){
+        /* for IE9 attributes is a live list, attribute onCreates/Change may modify it so we cache 
+            it*/
         origValue = attributes[i].value;
-        
-        this.checkForCustomAttribute(node, attributes[i].name);
+        origName = attributes[i].name;
+        this.checkForCustomAttribute(node, origName);
         
         tokens = Circular('Compile').getAllTokens(origValue);
-        
+        /* possible issue: data-apl-repeat attribs getting pushed to cache */
         for(var x = 0 ; x < tokens.length; x++){
           if(tmp_node == null ||
             (tmp_node != null && (tokens[x].modelName != tmp_node.modelName || tokens[x].attribName != tmp_node.attribName))){
@@ -88,7 +92,7 @@ return {
             Map.pushNodes(tmp_node);
           }
 
-          tmp_node.symbolMap[attributes[i].name] = origValue;
+          tmp_node.symbolMap[origName] = origValue;
           tmp_node.scope = scope;
           
           /*This is necessary for repeats as their child nodes aren't added to Interpolation array

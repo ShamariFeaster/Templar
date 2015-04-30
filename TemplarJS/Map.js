@@ -324,8 +324,8 @@ return {
         modelName = TMP_node.modelName,
         attribName = TMP_node.attribName,
         Model = _map[modelName]['api'];
-    
-    if(!_.isNull(attribute = returnVal = this.getAttribute(modelName,attribName))){
+    attribute = returnVal = this.getAttribute(modelName,attribName);
+    if(!_.isNull(attribute)){
       if(_.isArray(attribute) || _.isObj(attribute)){
         
         /* get un-paged attrib length if used in template. */
@@ -497,7 +497,7 @@ return {
       }
 
       /*only remove visible elements from DOM, don't remove base node from DOM*/
-      if(!_.isNull(tmp_node.node.parentNode) && tmp_node.index > _.UNINDEXED){
+      if(document.body.contains(tmp_node.node) && tmp_node.index > _.UNINDEXED){
         tmp_node.node.parentNode.removeChild(tmp_node.node);
         
       }
