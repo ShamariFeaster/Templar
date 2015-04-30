@@ -20,9 +20,10 @@ var _isAttribute = function(name){
 }
 
 Attribute.prototype.getAttribute = function(name){
-  var result = null;
-  if(_isAttribute(name)){
-    result = Templar._attributes[name];
+  var result = null,
+      normalizedName = name.toLowerCase();
+  if(_isAttribute(normalizedName)){
+    result = Templar._attributes[normalizedName];
   }
   return result;
 }

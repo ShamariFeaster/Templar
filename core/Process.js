@@ -42,11 +42,12 @@ return {
         node._setAttribute = node.setAttribute;
         node.__customAttributes__ = {};
         node.setAttribute = function(name, val){
+          var normalizedName = name.toLowerCase();
           /*If we don't check, we end up with onChange being called on every call to the
           overriden setAttribute(). The side effects are that the user's cust attrib handler
           will have unexpected behavior.*/
           for(var caName in this.__customAttributes__){
-            if(this.__customAttributes__[caName].name == name)
+            if(this.__customAttributes__[caName].name == normalizedName)
               this.__customAttributes__[caName].onChange.call(this.__customAttributes__[caName], this, val);
           }
           this._setAttribute.call(this, name, val);
@@ -66,6 +67,7 @@ return {
         tmp_node = null,
         preProcessedTMPNodes = [],
         origValue,
+        origName,
         Interpolate = Circular('Interpolate'),
         tokens;
     repeatIndex = (_.isInt(repeatIndex)) ? parseInt(repeatIndex) : -1;
@@ -74,12 +76,14 @@ return {
       attributes = node.attributes;
       /*search node attributes for non-terminals*/
       for(var i = 0; i < attributes.length; i++){
+        /* for IE9 attributes is a live list, attribute onCreates/Change may modify it so we cache 
+            it*/
         origValue = attributes[i].value;
-        
-        this.checkForCustomAttribute(node, attributes[i].name);
+        origName = attributes[i].name;
+        this.checkForCustomAttribute(node, origName);
         
         tokens = Circular('Compile').getAllTokens(origValue);
-        
+        /* possible issue: data-apl-repeat attribs getting pushed to cache */
         for(var x = 0 ; x < tokens.length; x++){
           if(tmp_node == null ||
             (tmp_node != null && (tokens[x].modelName != tmp_node.modelName || tokens[x].attribName != tmp_node.attribName))){
@@ -88,7 +92,7 @@ return {
             Map.pushNodes(tmp_node);
           }
 
-          tmp_node.symbolMap[attributes[i].name] = origValue;
+          tmp_node.symbolMap[origName] = origValue;
           tmp_node.scope = scope;
           
           /*This is necessary for repeats as their child nodes aren't added to Interpolation array
@@ -356,9 +360,11 @@ return {
         set : function(value){
           if(value == '')
             return;
-          var annotations = DOM.getDOMAnnotations(select);
           this._value_ = value;
-
+          var annotations = DOM.getDOMAnnotations(select),
+              boundProperties = (_.isDef(select.token.indexQueue)) ? 
+                  select.token.indexQueue.slice(0) : [];
+                  
           for(var s = 0; s < select.children.length; s++){
             if(select.children[s].value == value || select.children[s].text == value){
               select.selectedIndex = s;
@@ -378,6 +384,7 @@ return {
                     , value : select.children[s].value
                     , text : select.children[s].text
                     , index : select.selectedIndex
+                    , properties : boundProperties
                   }
               );
               
@@ -395,16 +402,24 @@ return {
     
 
   },
-  
+  /* properties event object property is experimental. The alternative is let users listen to
+    sub properties, but this would require some shorthand for unknown indexes like:
+    items[x].property, where x is a substitute for any index in a repeat. I hate special syntaxes
+    so I may end up sticking with a programmatic solution, but I would need to standardize the
+    event object interface.*/
   bindCheckboxListener : function(node){
   
     node.addEventListener('click',function(e){
       var attrib = Map.dereferenceAttribute(this.token),
+          boundProperties = (_.isDef(this.token.indexQueue)) ? 
+             this.token.indexQueue.slice(0) : []
           cbObj = 
             {
               type : _.MODEL_EVENT_TYPES.checkbox_change
               , checked : (e.target.checked === true)
               , value : e.target.value
+              , target : e.target
+              , properties : boundProperties
             },
           annotations = DOM.getDOMAnnotations(this);
       /*for checkboxes we should not set current_selection to value if it was unchecked*/
@@ -554,12 +569,16 @@ return {
         
         DOM_Node.addEventListener('change', function(e){
           var attrib = Map.dereferenceAttribute(this.token),
+              boundProperties = (_.isDef(this.token.indexQueue)) ? 
+                this.token.indexQueue.slice(0) : [],
               selectObj = 
                 {
                   type : _.MODEL_EVENT_TYPES.select_change
                   , value : e.target.options[e.target.selectedIndex].value
                   , text : e.target.options[e.target.selectedIndex].text
                   , index : e.target.selectedIndex
+                  , target : e.target
+                  , properties : boundProperties
                 },
               annotations = DOM.getDOMAnnotations(this);
           
