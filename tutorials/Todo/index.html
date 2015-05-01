@@ -25,6 +25,20 @@
 <script>
 var Todo;
 
+Templar.dataModel('Todo',{
+  items : [],
+  mainInput : 'What needs to be done?',
+  itemInput : '',
+  activeCount : 0,
+  indexBeingEdited : -1,
+  currentFilter : 'all',
+  filterButtons : [
+    {_class : 'selected', label : 'All', by : 'all'},
+    {_class : '', label : 'Active', by : 'active'},
+    {_class : '', label : 'Completed', by : 'completed'}
+    ]
+});
+
 function TodoItem(text, index){
   this.text = text;
   this.status = 'active';
@@ -43,7 +57,7 @@ function reinstateMainInputMsg(){
 }
 
 function clearModifyInput(e){
-  Todo.modifyInput = '';
+  Todo.itemInput = '';
 }
 
 function stopEditting(){
@@ -59,7 +73,7 @@ function addItem(e){
 }
 
 function updateItem(){
-  Todo.items[Todo.indexBeingEdited].text = Todo.modifyInput;
+  Todo.items[Todo.indexBeingEdited].text = Todo.itemInput;
   Todo.items[Todo.indexBeingEdited].editting = false;
   Todo.indexBeingEdited = -1;
   Todo.update('items');
@@ -99,11 +113,11 @@ function filter(e){
   });
   
   /*Change which filter is currently selected*/
-  Todo.filters = Todo.filters.map(function(filter){
+  Todo.filterButtons = Todo.filterButtons.map(function(filter){
     if(filter.by == by){
-      filter.selected = 'selected';
+      filter._class = 'selected';
     }else{
-      filter.selected = '';
+      filter._class = '';
     }
     return filter;
   });
@@ -128,23 +142,9 @@ document.onkeydown = function(e) {
 }
 
 $(function(){
-  Templar.dataModel('Todo',{
-    items : [],
-    mainInput : 'What needs to be done?',
-    modifyInput : '',
-    activeCount : 0,
-    edittingIndex : -1,
-    currentFilter : 'all',
-    filters : [
-      {selected : 'selected', label : 'All', by : 'all'},
-      {selected : '', label : 'Active', by : 'active'},
-      {selected : '', label : 'Completed', by : 'completed'}
-      ]
-  });
-
+  
   Todo = Templar.getModel('Todo');
-
-
+  
   $('#main-input').focus(clearMainInput);
   $('#main-input').blur(reinstateMainInputMsg);
   
@@ -181,7 +181,7 @@ $(function(){
     
     /*we could've directly incremented Todo.activeCount, but this would be unecessarily expensive.
       Each increment is treated as a re-assingment and would trigger a re-interpolation. Better to
-      computer it using a local variable then perform a single re-assignment*/
+      compute it using a local variable then perform a single re-assignment*/
     Todo.items.forEach(function(item){
       if(item.status == 'active') activeCount++;
     });
@@ -193,14 +193,14 @@ $(function(){
   /*After Todo.filter's intial build this gets fired. Remember the DOM is not fully constructed until
     all out repeats are build. This also handles a situation where you change the filters at run-time.
     We would need to re-bind DOM listeners b/c the old DOM has been blown up by the repeat rebuilding.*/
-  Todo.listen('filters',function(e){
+  Todo.listen('filterButtons',function(e){
     $('.filter').click(filter);
   });
   
 });
-
 </script>
 </head>
+<!--******** VIEW *********-->
 <body>
 <h1>TemplarJS' TodoMVC Demo</h1>
 <input id="main-input" value="{{Todo.mainInput}}"/><br/>
@@ -214,7 +214,7 @@ $(function(){
       updated, will be reflected in our UI-->
   <div class="todoText" index="{{$index}}">
     <span hideIf="{{editting}}" class="{{status}}">{{text}}</span>
-    <input showIf="{{editting}}" class="modify-input" value="{{Todo.modifyInput}}"/>
+    <input showIf="{{editting}}" class="modify-input" value="{{Todo.itemInput}}"/>
   </div>
   <a class="delete-item" index="{{$index}}"><img class="red-x" src="images/x.gif"></img></a>
   
@@ -226,8 +226,8 @@ $(function(){
   <br/>
   <div id="filters">
   <!-- A button is generated for every item in Todo.filters-->
-    <a data-apl-repeat="{{Todo.filters}}" 
-      class="{{selected}} filter" 
+    <a data-apl-repeat="{{Todo.filterButtons}}" 
+      class="{{_class}} filter" 
       by="{{by}}">{{label}}
     </a>
   </div>
