@@ -20,7 +20,7 @@
 
 <script src="../../build/TemplarJS-0.11.min.js"></script>
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-<script src="Modules/Attribute.js"></script>
+<script src="Modules/CustomAttributes.js"></script>
 
 <script>
 var Todo;
@@ -96,13 +96,11 @@ function filter(e){
   /*We can explicitly call this or use it as an event handler*/
   var by;
   if(typeof e !== 'undefined'){
-    by = e.currentTarget.getAttribute('by');
+    by = Todo.currentFilter = e.currentTarget.getAttribute('by');
   }else{
     by = Todo.currentFilter;
   }
-   
-  Todo.currentFilter = by;
-  
+
   /*Using selected filter to control item visibility*/
   Todo.items = Todo.items.map(function(item){
     item.isVisible = true;
@@ -138,6 +136,7 @@ function editOnDblClick(e){
 document.onkeydown = function(e) {
   if (e.keyCode == '13') {
     modifyItems();
+    filter();
   }
 }
 
@@ -150,7 +149,7 @@ $(function(){
   
   /*This fires everytime Todo.items is updated either through Todo.update() or re-assignment*/
   Todo.listen('items',function(e){
-   var activeCount = 0; 
+    var activeCount = 0; 
     
     /*need to rebind b/c these repeated nodes are destroyed on each call to Todo.update()*/
     $('.delete-item').click(deleteItem);
