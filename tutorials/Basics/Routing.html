@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="../../build/TemplarJS-0.11.min.js"></script>
+    <script src="Components/Codedown.js"></script>
+    <script>
+        /*Define your data model*/
+        Templar.dataModel('Example',{
+
+            SimpleRepeat : ['a','b','c'],
+            
+            ComplexRepeat : [
+            {fn : 'bob', ln : 'johnson'},
+            {fn : 'michael', ln : 'jackson'},
+            {fn : 'benadict', ln : 'cabbagepatch'}],
+            
+            EmbeddedRepeat : [
+            {name : 'daryl', friends : ['bill','tommy']},
+            {name : 'carl', friends : ['susan','sicky']},
+            {name : 'rick', friends : ['jane','tammy']}]
+        });
+   </script>
+   <style>
+   .red {color : red;}
+   .blue {color : blue;}
+   .friend {}
+  .underline {text-decoration : underline;}
+   </style>
+</head>
+<body>
+<Codedown>
+<h3>Use Routes and UI States</h3>
+
+To support SPAs, Templar allows you to use anchor links as routes. When a user navigates to a 
+anchor link that is a recognized route Templar will compile and load that route's partial HTML files 
+into the specified `<div>`s.
+
+```
+Templar.Route([
+/*This will compile/load into the defualt content div*/
+{
+    route : '#/route1',
+    partial : 'partials/route1.html'
+},
+/*This will comile/load partial into specific div*/
+{
+    route : '#/route2',
+    partial : 'partials/route2.html',
+    target : '#some-div-id'
+}];
+```
+
+A route can also be used to set model attribute data. This effectively functions as GET query parameters.
+
+```
+Templar.Route([
+/*This will compile/load route1.html 
+  then assigns whatever value is after #/route1/
+  to modelName.attribName*/
+{
+    route : '#/route1/modelName:attribName',
+    partial : 'partials/route1.html'
+}];
+```
+
+A route can also be composed of other routes (although there are some best practices to keep in
+mind when doing this). 
+
+UI states allow you to decompose a UI into loosely coupled, re-usable
+components.
+
+<h4>Here's an example UI state:</h4>
+
+```
+Templar.Route([
+{
+  route : '#/main-layout',
+  partial : 'partials/three-column-layout.html'
+},
+{
+  route : '#/ad-search',
+  partial : ['#/main-layout', 
+    {
+      partial : 'partials/Ad-Search/ad-list.html',
+      target : '#layout-center-col'
+    },
+    {
+      partial : 'partials/Ad-Search/ad-options-bar.html',
+      target : '#layout-right-col'
+    },        
+    {
+      partial : 'partials/main/sidebar.html',
+      target : '#layout-left-col'
+  }]
+}];
+```
+
+This means that the various parts of you application's UI like the sidebar, navigation, and
+main content area can be stored as separate partial HTML files. This makes for easier
+maintenence and re-use of view components. 
+
+For example if you are displaying the same list in multiple places, you can specify it as a 
+component of multiple UI states as opposed to copying and pasting the list template mutliple places.
+
+<h3>Onload events</h3>
+
+You can specify and bind onload functions to the loading of routes or partial HTML files (which make 
+up the components of routes), giving you a granular level of control. The handlers will not fire 
+until all of a route or partial HTML file's content has been loaded, compiled, and, in the case of
+repeated elements, built.
+
+<h4>Using the above UI state example:</h4>
+
+```
+Templar.success('partials/Ad-Search/ad-options-bar.html', function(){
+  /*do stuff after options bar is compiled/loaded*/
+});
+
+```
+
+Suppose I want to do stuff after ALL components are loaded. Then I bind to the success of the route itself (as opposed to it's individual components). Simply change the first argument to the above function to `'#/ad-search'` Templar guarantees all of `'#/ad-search'`s components are compiled/loaded before firing any onload bound to the route.
+<Codedown>
+</body>
+</html>

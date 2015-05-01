@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <script src="../../build/TemplarJS-0.11.min.js"></script>
-    <script src="Components/MarkDown.js"></script>
+    <script src="Components/Codedown.js"></script>
     <script>
         /*Define your data model*/
         Templar.dataModel('Example',{
@@ -16,7 +16,7 @@
    </script>
 </head>
 <body>
-    <MarkDown>
+    <Codedown>
     <h1>The Basics</h1>
     
     <h3>Here's a data model</h3>
@@ -42,14 +42,14 @@ Templar.dataModel('Example',{
     
     To make use of `DMA`s in your template you use specially formatted variable called a nonterminal (`NT`).
     It looks like this:
-    ```{{Example.SimpleSelect}}```
+    `{{Example.SimpleSelect}}`
         
     <h1>Using Selects</h1>
     
     <h3>Binding</h3>
     To bind a `DMA` to a select, place a valid non-terminal `NT` between 
     a select tag.
-    ```<select>{{Example.SimpleSelect}}</select>```
+    `<select>{{Example.SimpleSelect}}</select>`
     <br/>
 
     <h3>Using different types of lists</h3>
@@ -113,6 +113,6 @@ Templar.dataModel('Example',{
     
     current_selection is <strong>{{Example.ComplexSelect,current_selection}}</strong>
     ```
-    </MarkDown>
+    </Codedown>
 </body>
 </html>

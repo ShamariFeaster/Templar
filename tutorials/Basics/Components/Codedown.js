@@ -1,5 +1,5 @@
-Templar.component('MarkDown',{
-  templateURL : 'Components/Markdown.html',
+Templar.component('Codedown',{
+  templateURL : 'Components/Codedown.html',
   attributes : {},
 
   escapeSpecialRegexChars : function(input){
@@ -8,11 +8,13 @@ Templar.component('MarkDown',{
   
   syntaxHighlight : function(text, Rule){
     var  matches = null,
+        token = null,
         output = text;
         
      while((matches = Rule.regex.exec(text)) != null){
-        output = output.replace(new RegExp(this.escapeSpecialRegexChars(matches[0]),'g'), 
-                            Rule.template.replace('%%',matches[Rule.matchIndex]));
+        token = Rule.transform.call(this, matches, Rule);
+        output = output.replace(new RegExp(this.escapeSpecialRegexChars(token.token),'g'), 
+                            Rule.template.replace('%%',token.tranformation));
 
     }
     return output;
@@ -47,6 +49,8 @@ Templar.component('MarkDown',{
     this.regex = regex
     this.template = template;
     this.matchIndex = (typeof matchIndex !== 'undefined') ? matchIndex : 1;
+    this.transform = function(matches, Rule){
+      return {token : matches[0], tranformation : matches[Rule.matchIndex], input : matches.input};};
   },
   onCreate : function(self){
     var contentNode = self.querySelector('[id=content]'),
@@ -60,9 +64,25 @@ Templar.component('MarkDown',{
       singleLineCode : 
         new Rule(/`([^`]+)+?`/gm, '<code class="sf-md-sinlge-line-code">%%</code>'),
       htmlTags : 
-        new Rule(/&lt;\/*[\s\d\w\-]+?&gt;|&lt;\/*([\s\d\w\-]+)+? */gm, '<span class="sf-md-html-tag">%%</span>', WHOLE_MATCH)
+        new Rule(/&lt;\/*[\s\d\w\-]+?&gt;|&lt;\/*([\s\d\w\-]+)+? */gm, '<span class="sf-md-html-tag">%%</span>', WHOLE_MATCH),
+      MuliLineComments : 
+        /* Credit to: http://blog.ostermiller.org/find-comment for multiline comment regex*/
+        new Rule(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/gm, '<span class="sf-md-multi-comment">%%</span>', WHOLE_MATCH),
+      jsKeywords : 
+        new Rule(/(var|continue|true|false|while|for|switch|case|this|function|if|else)\b/g, 
+              '<span class="sf-md-js-keyword">%%</span>', WHOLE_MATCH),
     };
-    this.processMultiLineCode(contentNode, [HighlightRules.string,HighlightRules.htmlTags]);
+    
+    HighlightRules.singleLineCode.transform = function(matches, Rule){
+      var transformedToken = matches[Rule.matchIndex].replace(/>/g, '&gt;').replace(/</g, '&lt;');
+      return {
+        token : matches[0],
+        tranformation : transformedToken,
+        input : matches.input
+      };
+    }
+    this.processMultiLineCode(contentNode, 
+        [HighlightRules.string,HighlightRules.htmlTags, HighlightRules.MuliLineComments, HighlightRules.jsKeywords]);
     contentNode.innerHTML = this.syntaxHighlight(contentNode.innerHTML, HighlightRules.singleLineCode, false);
   }
   
