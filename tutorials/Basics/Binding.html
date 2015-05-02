@@ -1,0 +1,95 @@
+<Codedown>
+<h1>The Basics</h1>
+
+A Templar application consists of two things: data models and templates. Data models are
+designed to contain only data - not functions. Data can be JavaScript primatives or objects.
+They could even be functions but it's not considered best practice to store functions on
+your data model.
+
+<br/>
+
+Templar data models are just plain JavaScript objects with a couple of built-in methods
+designed to help you efficently modify and monitor your applications data.
+
+<h4>Here's a data model</h4>
+```
+Templar.dataModel('Example',{
+  aString : 'Hello World',
+  numbers : [1,2,3],
+  
+  objects : [
+      {text : 'uno', value : '1'},
+      {text : 'dos', value : '2'},
+      {text : 'tres', value : '3'}]
+});
+```
+
+<br/>
+Each property of a data model object is called a data model attribute (`DMA`).
+
+<br/>
+
+Templar's `DMA`s are designed to be bound into your application's templates. Template
+are just plain-old HTML files. The HTML contained in your templates spring to life once you
+bind Templar data models in them.
+
+<br/>
+
+Inside of a template, a data model acts as a variable. Whenever the value of that variable changes,
+Templar will immediately update the output of that variable in your template. This is the time
+and complexity saving aspect of Templar and other modern front-end frameworks.
+
+<br/>
+
+<h3>Using your data models in templates</h3>
+
+To make use of `DMA`s in your template you use specially formatted variable called a nonterminal (`NT`).
+It looks like this:
+`{{Helper.aStringNT}}`
+
+<br/>
+
+<h4>Let's look at an example:</h4>
+
+```
+&lt;html&gt;
+&lt;body&gt;
+  <!-- Using the data model defined above, the un-compiled template looks like -->
+  The value of Example.aString is:  {{Helper.aStringNT}}
+&lt;/body&gt;
+&lt;/html&gt;
+```
+
+Here's what it looks like to the end-user:
+
+`The value of Example.aString is:  {{Example.aString}}`
+<br/>
+<br/>
+Now change the value of Example.aString and watch Templar automatically update this page
+to reflect the new value you type in:
+
+<input value="{{Example.aString}}"/>
+
+<h4>Hey, how'd you do that?! (2-way data binding)</h4>
+
+Templar has what's called 2-way data binding. This means you can bind a `DMA` to DOM elements that 
+get user input and the `DMA`s value will change instantly. Like this:
+
+<br/><br/>
+`<input value="{{Helper.aStringNT}}"/>`
+<br/><br/>
+
+Think of this as the inbound lane of a highway. Learn how to inbound  bind 
+<a href="#/selects">selects</a> and 
+<a href="#/selects">other inputs.</a>
+
+<br/></br>
+
+We can push data out to our template (ie, print `DMA` values to the screen) by sticking 
+`{{Helper.aStringNT}}` in our markup (like we did above). This is out outbound lane.
+Learn how to outbound  bind  <a href="#/repeats">lists and arrays.</a>
+
+<br/></br>
+
+
+</Codedown>

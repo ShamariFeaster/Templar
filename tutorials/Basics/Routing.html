@@ -119,6 +119,17 @@ Templar.success('partials/Ad-Search/ad-options-bar.html', function(){
 ```
 
 Suppose I want to do stuff after ALL components are loaded. Then I bind to the success of the route itself (as opposed to it's individual components). Simply change the first argument to the above function to `'#/ad-search'` Templar guarantees all of `'#/ad-search'`s components are compiled/loaded before firing any onload bound to the route.
+
+<h4>Best practices</h4>
+apl-default and when not to use it
+
+only compose routes with other if the child routes don't have handlers attached.
+
+although you can set a Model's state from anywhere, best practice
+is to set an attribute using routing if the route makes use of that attribute. 
+Don't do inter-route communication directly on a model.
+
+Opening routes programmatically using Route.open();
 <Codedown>
 </body>
 </html>

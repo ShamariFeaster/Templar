@@ -61,13 +61,16 @@ Templar.component('Codedown',{
     
     var HighlightRules = {
       string : new Rule(/(?:'|")([^'"]+)+?(?:'|")/gm, '<span class="sf-md-string-color">%%</span>', INCLUDE_QUOTES),
+      NT : new Rule(/\{\{\w+\.\w+\}\}/gm, '<span>%%</span>', WHOLE_MATCH),
       singleLineCode : 
         new Rule(/`([^`]+)+?`/gm, '<code class="sf-md-sinlge-line-code">%%</code>'),
       htmlTags : 
         new Rule(/&lt;\/*[\s\d\w\-]+?&gt;|&lt;\/*([\s\d\w\-]+)+? */gm, '<span class="sf-md-html-tag">%%</span>', WHOLE_MATCH),
       MuliLineComments : 
         /* Credit to: http://blog.ostermiller.org/find-comment for multiline comment regex*/
-        new Rule(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/gm, '<span class="sf-md-multi-comment">%%</span>', WHOLE_MATCH),
+        new Rule(/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+/gm, '<span class="sf-md-multi-comment">%%</span>', WHOLE_MATCH),
+      HTMLComments : 
+        new Rule(/&lt;!--[\s\S]*?--&gt;/gm, '<span class="sf-md-multi-comment">%%</span>', WHOLE_MATCH),
       jsKeywords : 
         new Rule(/(var|continue|true|false|while|for|switch|case|this|function|if|else)\b/g, 
               '<span class="sf-md-js-keyword">%%</span>', WHOLE_MATCH),
@@ -81,9 +84,17 @@ Templar.component('Codedown',{
         input : matches.input
       };
     }
+    
+    HighlightRules.HTMLComments.transform = HighlightRules.singleLineCode.transform;
+    
     this.processMultiLineCode(contentNode, 
-        [HighlightRules.string,HighlightRules.htmlTags, HighlightRules.MuliLineComments, HighlightRules.jsKeywords]);
-    contentNode.innerHTML = this.syntaxHighlight(contentNode.innerHTML, HighlightRules.singleLineCode, false);
+        [HighlightRules.string,
+         HighlightRules.htmlTags, 
+         HighlightRules.MuliLineComments, 
+         HighlightRules.jsKeywords,
+         HighlightRules.HTMLComments,
+          ]);
+    contentNode.innerHTML = this.syntaxHighlight(contentNode.innerHTML, HighlightRules.singleLineCode);
   }
   
 });
