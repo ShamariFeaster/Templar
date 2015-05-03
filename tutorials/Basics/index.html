@@ -13,7 +13,7 @@
       paging : limit,page
       filter and sort
       cookbook: cascading selects, Templar.done, a generic Controller, dynamic 
-      nav buttons
+      nav buttons, hide/show using checkboxes
     */
         /*Define your data model*/
         Templar.dataModel('Example',{
@@ -65,6 +65,10 @@
           { 
             route : '#/binding',
             partial : 'Binding.html'
+          },
+          { 
+            route : '#/advanced',
+            partial : 'AdvancedTopics.html'
           }
         ]);
    </script>
@@ -75,6 +79,7 @@
 <a href="#/selects">Selects</a>
 <a href="#/routing">Routing</a>
 <a href="#/binding">Binding</a>
+<a href="#/advanced">Advanced Topics</a>
 <div id="apl-content" data-apl-default="Repeats.html"></div>
  
 </body>

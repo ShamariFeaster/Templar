@@ -1,0 +1,134 @@
+<Codedown>
+
+<h3>Saving and Loading Models</h3>
+
+Although Templar is designed to hepl you build single page applications (`SPA`s)
+, there are going to be time when a user might have to refresh the page. 
+
+<br/>
+
+`void Model.save()` and `void Model.load([string serializedJSON])` give you 
+the ability to
+save a nodel's state to `sessionStorage`; these functions make sure the 
+application's state isn't lost if the user refreshes the page.
+
+<br/>
+
+`save()` is a makes a serialized copy of the model's attributes using `JSON.stringify()`.
+`load()` uses the stringified copy stored in `sessionStorage` and feeds it to 
+`JSON.parse()` to de-serialize the string back into JavaScript variables.
+
+<h3>Authentication</h3>
+
+`void Templar.setAuthenticator(function authenticater)` is passed a callback we'll call
+`authenticater`. `authenticater`'s prototype looks like this:
+
+<br/><br/>
+
+```bool authenticater([object authenticationData])```
+
+<br/><br/>
+
+Once set, `authenticater` is stored as a private member of one of Templar's internal
+classes and once 
+initally set, it cannot be 
+reset at run-time. Typically the function will POST a user's credentials back 
+to the server, where they will be checked and a response will be given back to 
+the client.
+
+<h4>Example:</h4>
+
+```
+Templar.setAuthenticator(function(authenticationData){
+  var cookie = this;
+  
+  $.ajax('myServer/authenticate.php',
+    {
+      username: authenticationData.userName,
+      password : authenticationData.encryptedPassword
+    },
+    /*called on server response*/
+    function(dataFromServer){
+      cookie['authenticated'] = dataFromServer.isAuthenticated;
+
+      if(cookie['authenticated'] == false){
+        /*let user know authentication failed */
+      }else{
+        Templar.Route.open('/my-profile');
+      }
+    }
+  );
+});
+
+```
+
+<br/>
+
+`authenticater` is executed by calling `Templar.Route.authenticate([object authenticationData])`.
+Typically, this will be called in a click handler for a 'login' button.
+
+<h3>Authorization</h3>
+
+Before a UI state is shown, an assignable route authorization function is executed. 
+This allows you to restrict certain UI's (and hence certain data) to a desired subset 
+of users. The authorization function is private and once initally set, it cannot be 
+reset at run-time.
+
+<br/>
+
+`void Templar.setAuthorizer(function authorizer)` is passed a callback we'll call
+`authorizer`. `authorizer`'s prototype looks like this:
+
+<br/><br/>
+
+```bool authorizer([object data])```
+
+<br/><br/>
+
+ The context (or `this`) of 
+`authorizer` will be private member of one of Templar's internal, unreachable
+classes. We'll call the context `cookie`. `cookie` is used to store session 
+private information about a user's session (such as whether or not they are logged
+in, or have admin privileges). 
+
+<br/>
+
+The `data` argument that is passed to the `authorizer` callback contains a single 
+property, `route` which is the signature of the route currently being loaded.
+Using the information contained in `cookie` and `data.route`, `authorizer` can 
+contain logic that determines whether a user is authorized to have access to 
+`data.route`.
+
+<br/>
+
+<h4>Example: </h4>
+
+```
+Templar.setAuthorizer(function(data){
+  var cookie = this,
+      url = data.route,
+      isAuthorized = false;
+      
+  function isSignedIn(){
+    return (cookie['authenticated'] == true);
+  }
+  
+  /*Users are always allowed access to the login route*/
+  if(url.indexOf('#/login') == 0){
+    isAuthorized = true;
+  }
+  
+  /*Users must be signed in to see their profile*/
+  else if(url.indexOf('#/my-profile') == 0 || url.indexOf('#/editProfile') == 0){
+    isAuthorized = isSignedIn();
+  }
+  
+  return isAuthorized;
+
+});
+
+```
+
+
+
+</Codedown>

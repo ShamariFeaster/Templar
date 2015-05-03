@@ -72,7 +72,7 @@ Templar.component('Codedown',{
       HTMLComments : 
         new Rule(/&lt;!--[\s\S]*?--&gt;/gm, '<span class="sf-md-multi-comment">%%</span>', WHOLE_MATCH),
       jsKeywords : 
-        new Rule(/(var|continue|true|false|while|for|switch|case|this|function|if|else)\b/g, 
+        new Rule(/(bool|int|return|var|continue|true|false|while|for|switch|case|this|function|if|else)\b/g, 
               '<span class="sf-md-js-keyword">%%</span>', WHOLE_MATCH),
     };
     

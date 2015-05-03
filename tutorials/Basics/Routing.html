@@ -1,33 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <script src="../../build/TemplarJS-0.11.min.js"></script>
-    <script src="Components/Codedown.js"></script>
-    <script>
-        /*Define your data model*/
-        Templar.dataModel('Example',{
-
-            SimpleRepeat : ['a','b','c'],
-            
-            ComplexRepeat : [
-            {fn : 'bob', ln : 'johnson'},
-            {fn : 'michael', ln : 'jackson'},
-            {fn : 'benadict', ln : 'cabbagepatch'}],
-            
-            EmbeddedRepeat : [
-            {name : 'daryl', friends : ['bill','tommy']},
-            {name : 'carl', friends : ['susan','sicky']},
-            {name : 'rick', friends : ['jane','tammy']}]
-        });
-   </script>
-   <style>
-   .red {color : red;}
-   .blue {color : blue;}
-   .friend {}
-  .underline {text-decoration : underline;}
-   </style>
-</head>
-<body>
 <Codedown>
 <h3>Use Routes and UI States</h3>
 
@@ -131,5 +101,3 @@ Don't do inter-route communication directly on a model.
 
 Opening routes programmatically using Route.open();
 <Codedown>
-</body>
-</html>
