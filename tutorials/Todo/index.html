@@ -27,7 +27,7 @@ var Todo;
 
 Templar.dataModel('Todo',{
   items : [],
-  mainInput : 'What needs to be done?',
+  mainInput : '',
   itemInput : '',
   activeCount : 0,
   indexBeingEdited : -1,
@@ -48,23 +48,13 @@ function TodoItem(text, index){
   this.statusCheckbox = [''];
 }
 
-function clearMainInput(e){
-  Todo.mainInput = '';
-}
-
-function reinstateMainInputMsg(){
-  Todo.mainInput = 'What needs to be done?';
-}
-
-function clearModifyInput(e){
-  Todo.itemInput = '';
-}
-
 function stopEditting(){
   Todo.items = Todo.items.map(function(item){
     item.editting = false;
+    return item;
   });
   Todo.indexBeingEdited = -1;
+  Todo.itemInput = '';
 }
 
 function addItem(e){
@@ -127,7 +117,7 @@ function editOnDblClick(e){
   Todo.items[index].editting = true;
   Todo.indexBeingEdited = index;
   Todo.update('items');
-  $('.modify-input').focus(clearModifyInput);
+  
   $('.modify-input').focus();
   $('.modify-input').blur(stopEditting);
 }
@@ -143,9 +133,6 @@ document.onkeydown = function(e) {
 $(function(){
   
   Todo = Templar.getModel('Todo');
-  
-  $('#main-input').focus(clearMainInput);
-  $('#main-input').blur(reinstateMainInputMsg);
   
   /*This fires everytime Todo.items is updated either through Todo.update() or re-assignment*/
   Todo.listen('items',function(e){
@@ -202,7 +189,7 @@ $(function(){
 <!--******** VIEW *********-->
 <body>
 <h1>TemplarJS' TodoMVC Demo</h1>
-<input id="main-input" value="{{Todo.mainInput}}"/><br/>
+<input id="main-input" placeholder="What needs to be done?" value="{{Todo.mainInput}}"/><br/>
 
 <!-- Todo list item template, repeated once for every item in Todo.items-->
 <div data-apl-repeat="{{Todo.items}}" showIf="{{isVisible}}">
@@ -213,7 +200,7 @@ $(function(){
       updated, will be reflected in our UI-->
   <div class="todoText" index="{{$index}}">
     <span hideIf="{{editting}}" class="{{status}}">{{text}}</span>
-    <input showIf="{{editting}}" class="modify-input" value="{{Todo.itemInput}}"/>
+    <input showIf="{{editting}}" placeholder="Update this item" class="modify-input" value="{{Todo.itemInput}}"/>
   </div>
   <a class="delete-item" index="{{$index}}"><img class="red-x" src="images/x.gif"></img></a>
   
