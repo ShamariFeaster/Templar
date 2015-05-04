@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     <script src="../../build/TemplarJS-0.11.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"></script>
     <script src="Components/Codedown.js"></script>
     <link rel="stylesheet" href="css/styles.css"></link>
     <script>
@@ -38,11 +41,28 @@
             
             aString : 'Hello World',
             numbers : [1,2,3],
-            
+            pageDemo : [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
             objects : [
             {text : 'uno', value : '1'},
             {text : 'dos', value : '2'},
-            {text : 'tres', value : '3'}]
+            {text : 'tres', value : '3'}],
+            
+            biologyTaxonomyData : [
+            {kingdom : 'animalia', Class : 'mammalia', species : 'dog'},
+            {kingdom : 'animalia', Class : 'mammalia'}, species : 'cat'},  
+            {kingdom : 'animalia', Class : 'mammalia', species : 'human'},
+            {kingdom : 'animalia', Class : 'arthropod'}, species : 'crab'}, 
+            {kingdom : 'animalia', Class : 'arthropod', species : 'butterfly'},
+            {kingdom : 'plantae', Class : 'monocots'}, species : 'corn'}, 
+            {kingdom : 'plantae', Class : 'monocots', species : 'wheat'},
+            {kingdom : 'plantae', Class : 'monocots'}, species : 'rice'}, 
+            {kingdom : 'plantae', Class : 'magnoliopsida ', species : 'oak'},
+            {kingdom : 'plantae', Class : 'magnoliopsida'}, species : 'sunflower'},
+            {kingdom : 'plantae', Class : 'magnoliopsida'}, species : 'rose'}            
+            ],
+            biologyTaxonomyColumns : (function(){
+              return Object.keys(this.biologyTaxonomyData[0]);
+            })()
         });
         
         Templar.dataModel('Helper',{
@@ -50,7 +70,11 @@
           userName : '{{UserProfile.userProfile}}',
           signedIn : '{{DataModelName.isSignedIn}}',
           listLength : '{{DataModelName.someList.length}}',
-          items : '{{TodoList.items}}'
+          items : '{{TodoList.items}}',
+          pageDemo : '{{Exmaple.pageDemo}}',
+          pageDemoLimit : '{{Exmaple.pageDemo.limit}}',
+          pageDemoPage : '{{Exmaple.pageDemo.page}}',
+          pageDemoTotal : '{{Exmaple.pageDemo.totalPages}}'
         });
         
         Templar.Route([
@@ -85,8 +109,23 @@
           { 
             route : '#/listening',
             partial : 'Listening.html'
+          },
+          { 
+            route : '#/paging',
+            partial : 'Paging.html'
+          },
+          ,
+          { 
+            route : '#/filter-and-sort',
+            partial : 'FilterAndSort.html'
           }
         ]);
+        Templar.success('Paging.html', function(){
+          var ExampleModel = Templar.getModel('Example');
+          $('#page-up').click(function(){ExampleModel.pageDemo.page++;});
+          $('#page-down').click(function(){ExampleModel.pageDemo.page--;});
+        });
+        
    </script>
 
 </head>
@@ -99,6 +138,8 @@
 <a href="#/components">Components</a>
 <a href="#/listening">Change Detection</a>
 <a href="#/custom-attributes">Custom Tag Attribute</a>
+<a href="#/paging">Paging</a>
+<a href="#/filter-and-sort">Filtering & Sorting</a>
 <div id="apl-content" data-apl-default="Repeats.html"></div>
  
 </body>
