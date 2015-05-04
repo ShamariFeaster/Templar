@@ -18,12 +18,26 @@
 .todoText {display : inline-block;}
 </style>
 
-<script src="../../../build/TemplarJS-0.11.min.js"></script>
+<script src="../../build/TemplarJS-0.11.min.js"></script>
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-<script src="Modules/Attribute.js"></script>
+<script src="Modules/CustomAttributes.js"></script>
 
 <script>
 var Todo;
+
+Templar.dataModel('Todo',{
+  items : [],
+  mainInput : '',
+  itemInput : '',
+  activeCount : 0,
+  indexBeingEdited : -1,
+  currentFilter : 'all',
+  filterButtons : [
+    {_class : 'selected', label : 'All', by : 'all'},
+    {_class : '', label : 'Active', by : 'active'},
+    {_class : '', label : 'Completed', by : 'completed'}
+    ]
+});
 
 function TodoItem(text, index){
   this.text = text;
@@ -34,23 +48,13 @@ function TodoItem(text, index){
   this.statusCheckbox = [''];
 }
 
-function clearMainInput(e){
-  Todo.mainInput = '';
-}
-
-function reinstateMainInputMsg(){
-  Todo.mainInput = 'What needs to be done?';
-}
-
-function clearModifyInput(e){
-  Todo.modifyInput = '';
-}
-
 function stopEditting(){
   Todo.items = Todo.items.map(function(item){
     item.editting = false;
+    return item;
   });
   Todo.indexBeingEdited = -1;
+  Todo.itemInput = '';
 }
 
 function addItem(e){
@@ -59,7 +63,7 @@ function addItem(e){
 }
 
 function updateItem(){
-  Todo.items[Todo.indexBeingEdited].text = Todo.modifyInput;
+  Todo.items[Todo.indexBeingEdited].text = Todo.itemInput;
   Todo.items[Todo.indexBeingEdited].editting = false;
   Todo.indexBeingEdited = -1;
   Todo.update('items');
@@ -82,13 +86,11 @@ function filter(e){
   /*We can explicitly call this or use it as an event handler*/
   var by;
   if(typeof e !== 'undefined'){
-    by = e.currentTarget.getAttribute('by');
+    by = Todo.currentFilter = e.currentTarget.getAttribute('by');
   }else{
     by = Todo.currentFilter;
   }
-   
-  Todo.currentFilter = by;
-  
+
   /*Using selected filter to control item visibility*/
   Todo.items = Todo.items.map(function(item){
     item.isVisible = true;
@@ -99,11 +101,11 @@ function filter(e){
   });
   
   /*Change which filter is currently selected*/
-  Todo.filters = Todo.filters.map(function(filter){
+  Todo.filterButtons = Todo.filterButtons.map(function(filter){
     if(filter.by == by){
-      filter.selected = 'selected';
+      filter._class = 'selected';
     }else{
-      filter.selected = '';
+      filter._class = '';
     }
     return filter;
   });
@@ -115,7 +117,7 @@ function editOnDblClick(e){
   Todo.items[index].editting = true;
   Todo.indexBeingEdited = index;
   Todo.update('items');
-  $('.modify-input').focus(clearModifyInput);
+  
   $('.modify-input').focus();
   $('.modify-input').blur(stopEditting);
 }
@@ -124,33 +126,17 @@ function editOnDblClick(e){
 document.onkeydown = function(e) {
   if (e.keyCode == '13') {
     modifyItems();
+    filter();
   }
 }
 
 $(function(){
-  Templar.dataModel('Todo',{
-    items : [],
-    mainInput : 'What needs to be done?',
-    modifyInput : '',
-    activeCount : 0,
-    edittingIndex : -1,
-    currentFilter : 'all',
-    filters : [
-      {selected : 'selected', label : 'All', by : 'all'},
-      {selected : '', label : 'Active', by : 'active'},
-      {selected : '', label : 'Completed', by : 'completed'}
-      ]
-  });
-
+  
   Todo = Templar.getModel('Todo');
-
-
-  $('#main-input').focus(clearMainInput);
-  $('#main-input').blur(reinstateMainInputMsg);
   
   /*This fires everytime Todo.items is updated either through Todo.update() or re-assignment*/
   Todo.listen('items',function(e){
-   var activeCount = 0; 
+    var activeCount = 0; 
     
     /*need to rebind b/c these repeated nodes are destroyed on each call to Todo.update()*/
     $('.delete-item').click(deleteItem);
@@ -162,7 +148,7 @@ $(function(){
       'statusCheckbox' property of each element in Todo.items.*/
     if(e.properties.pop() == 'statusCheckbox'){
       var checkbox = e.target,
-        index = checkbox.getAttribute('index'),
+        index = e.properties.pop(),
         item = Todo.items[index]; 
       switch(item.status){
         case 'active':
@@ -181,7 +167,7 @@ $(function(){
     
     /*we could've directly incremented Todo.activeCount, but this would be unecessarily expensive.
       Each increment is treated as a re-assingment and would trigger a re-interpolation. Better to
-      computer it using a local variable then perform a single re-assignment*/
+      compute it using a local variable then perform a single re-assignment*/
     Todo.items.forEach(function(item){
       if(item.status == 'active') activeCount++;
     });
@@ -193,28 +179,28 @@ $(function(){
   /*After Todo.filter's intial build this gets fired. Remember the DOM is not fully constructed until
     all out repeats are build. This also handles a situation where you change the filters at run-time.
     We would need to re-bind DOM listeners b/c the old DOM has been blown up by the repeat rebuilding.*/
-  Todo.listen('filters',function(e){
+  Todo.listen('filterButtons',function(e){
     $('.filter').click(filter);
   });
   
 });
-
 </script>
 </head>
+<!--******** VIEW *********-->
 <body>
 <h1>TemplarJS' TodoMVC Demo</h1>
-<input id="main-input" value="{{Todo.mainInput}}"/><br/>
+<input id="main-input" placeholder="What needs to be done?" value="{{Todo.mainInput}}"/><br/>
 
 <!-- Todo list item template, repeated once for every item in Todo.items-->
 <div data-apl-repeat="{{Todo.items}}" showIf="{{isVisible}}">
 
-  <input type="checkbox" value="{{statusCheckbox}}" index="{{$index}}"/>
+  <input type="checkbox" value="{{statusCheckbox}}" />
   <!--we use the {{$index}} shorthand to pull the index of this instance of the list item template.
       We use this throughout the app to modify the intended element in Todo.items , which when 
       updated, will be reflected in our UI-->
   <div class="todoText" index="{{$index}}">
     <span hideIf="{{editting}}" class="{{status}}">{{text}}</span>
-    <input showIf="{{editting}}" class="modify-input" value="{{Todo.modifyInput}}"/>
+    <input showIf="{{editting}}" placeholder="Update this item" class="modify-input" value="{{Todo.itemInput}}"/>
   </div>
   <a class="delete-item" index="{{$index}}"><img class="red-x" src="images/x.gif"></img></a>
   
@@ -226,8 +212,8 @@ $(function(){
   <br/>
   <div id="filters">
   <!-- A button is generated for every item in Todo.filters-->
-    <a data-apl-repeat="{{Todo.filters}}" 
-      class="{{selected}} filter" 
+    <a data-apl-repeat="{{Todo.filterButtons}}" 
+      class="{{_class}} filter" 
       by="{{by}}">{{label}}
     </a>
   </div>

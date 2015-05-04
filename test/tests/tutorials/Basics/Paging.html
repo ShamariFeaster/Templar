@@ -1,0 +1,62 @@
+<Codedown>
+
+<h2>Page your data with a simple '++'</h2>
+
+
+All data model list attributes are annotated with a `page` and `limit` properties that you 
+can use to implement instant pagination. 
+<br/><br/>
+For example, if you have a data model attribute `MyModel.myList` and it has 30 elements in it;
+if you wanted to only show 5 at a time this is what you'd do:
+<br/><br/>
+`MyModel.myList.limit = 5;`
+<br/><br/>
+Now your view would immediately update to show only the first 5 elements. If you wanted to let
+the user go through the pages, you could bind the following to a button press:
+<br/><br/>
+- `MyModel.myList.page++` to go to the next page <br/>
+- `MyModel.myList.page--` to go to the previous page <br/>
+- `MyModel.myList.page = 4` to go to the 4th page <br/>
+
+<h3>Live Example</h3>
+
+```
+/*data model*/
+
+Templar.dataModel('Example',{
+  pageDemo : [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+});
+
+/*markup*/
+
+<h3>Numbers</h3>
+<ul>
+  <li data-apl-repeat="{{Helper.pageDemo}}">{{}}</li>
+</ul>
+
+<label>Change Page</label>
+<a id="page-up">Up</a><a id="page-up">Down</a><br/>
+
+<label>Select a limit</label>
+<input type="range" min="0" max="15" value="{{Helper.pageDemoLimit}}"/>
+
+/*Logic*/
+
+var ExampleModel = Templar.getModel('Example');
+$('#page-up').click(function(){ExampleModel.pageDemo.page++;});
+$('#page-down').click(function(){ExampleModel.pageDemo.page--;});
+```
+
+<h3>Numbers</h3>
+<ul>
+  <li data-apl-repeat="{{Example.pageDemo}}">{{}}</li>
+</ul>
+
+<label>Change Page</label>
+<a id="page-up">Up</a><a id="page-down">Down</a><br/>
+
+<label>Select a limit</label>
+<input type="range" min="0" max="15" value="{{Example.pageDemo.limit}}"/> Limit : {{Example.pageDemo.limit}}
+
+
+</Codedown>

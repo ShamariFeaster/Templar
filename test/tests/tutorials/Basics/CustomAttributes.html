@@ -1,0 +1,56 @@
+<Codedown>
+<h2>Custom HTML Attributes</h2>
+
+You may want to add custom attributes to the `HTMLElement`'s on your page, or even to your custom 
+tags (components). This process is even more simple than creating a custom component. 
+
+<h3>Use Case</h3>  
+You want to create an attribute that controls an `HTMLElement`'s visibility.
+
+<h4>The code:</h4>
+
+```
+Templar.attribute('showIf',{
+
+  onChange : function(self, val){
+  
+    if(val === false || val == 'false' || parseInt(val) > 0){
+      self.style.visibility = 'hidden';
+    }else{
+      self.style.visibility = '';
+    }
+    
+  }
+});
+```
+Your `onChange` functions should have a prototype that looks like this:
+
+<br/><br/>
+
+`void onChangeCallback(DOMNode self, Any value)`
+
+<br/><br/>
+
+`self` is the node the attribute was set on. `value` is the value of the attribute. 
+
+<br/><br/>
+
+Now I can bind a data model attribute to the value of the `showIf` attribute on some element like so:
+
+`<div showIf="{{Helper.signedIn}}">Welcome User</div>`
+
+Now I can contorl the visibilty of this element by programmatically setting the value of 
+`{{Helper.signedIn}}`. Using this attribute I've managed to keep logic out of my view and put 
+it in code where it belongs. I've also built myself a re-usable tool for all of my projects.
+<br/><br/>
+As a side-note, notice that the `onChange` handler for `showIf` checks for a numerical value. I wrote
+this in so I can bind to a list length and the element will only show if the list presently contains
+elements like so:
+
+```
+<h1 showIf="{{Helper.listLength}}">
+  Header That Should Be Invisble When No Elements In List
+</h1>
+```
+
+</Codedown>

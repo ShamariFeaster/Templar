@@ -522,6 +522,9 @@ return {
       case 'text':
         this.preProcessTextInput(DOM_Node);
         break;
+      case 'range':
+        this.preProcessTextInput(DOM_Node, 'change');
+        break;
       case 'date':
         this.preProcessTextInput(DOM_Node);
         this.preProcessTextInput(DOM_Node, 'blur');

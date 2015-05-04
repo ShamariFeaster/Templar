@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="../../../../../structureJS/core/structureJS-core.js" id="structureJS"
+          data-project-manifest="../../../lib/structureJS/dev-tutorial-manifest"
+          data-project-config="../../../lib/structureJS/dev-tutorial-config">
+    </script>
+    
+    <link rel="stylesheet" href="css/styles.css"></link>
+    
+    <!--
+    
+    <script src="../../build/TemplarJS-0.11.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="Components/Codedown.js"></script>
+
+    -->
+    <script>
+    /*Advanced: freeze/thaw, authentication/authorization
+      components: generic page button, limit selects
+      custom attributes: use them to store UI-specific logic, take logic
+      out of the template. hideIF/showIF/isDisbled examples
+      change detection : listen
+      paging : limit,page
+      filter and sort
+      cookbook: cascading selects, Templar.done, a generic Controller, dynamic 
+      nav buttons, hide/show using checkboxes
+    */
+    structureJS.done(function(){//comment in deployment
+    
+      /*Define your data model*/
+      Templar.dataModel('Example',{
+
+          SimpleRepeat : ['a','b','c'],
+          
+          ComplexRepeat : [
+          {fn : 'bob', ln : 'johnson'},
+          {fn : 'michael', ln : 'jackson'},
+          {fn : 'benadict', ln : 'cabbagepatch'}],
+          
+          EmbeddedRepeat : [
+          {name : 'daryl', friends : ['bill','tommy']},
+          {name : 'carl', friends : ['susan','sicky']},
+          {name : 'rick', friends : ['jane','tammy']}],
+          
+          SimpleSelect : [1,2,3],
+          ComplexSelect : [
+          {text : 'uno', value : 1},
+          {text : 'dos', value : 2},
+          {text : 'tres', value : 3}],
+          
+          aString : 'Hello World',
+          numbers : [1,2,3],
+          pageDemo : [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+          objects : [
+          {text : 'uno', value : '1'},
+          {text : 'dos', value : '2'},
+          {text : 'tres', value : '3'}]
+      });
+      
+      Templar.dataModel('Helper',{
+        aStringNT : '{{Example.aString}}',
+        userName : '{{UserProfile.userProfile}}',
+        signedIn : '{{DataModelName.isSignedIn}}',
+        listLength : '{{DataModelName.someList.length}}',
+        items : '{{TodoList.items}}',
+        pageDemo : '{{Exmaple.pageDemo}}',
+        pageDemoLimit : '{{Exmaple.pageDemo.limit}}'
+      });
+      
+      Templar.Route([
+        { 
+          route : '#/repeats',
+          partial : 'Repeats.html'
+        },
+        { 
+          route : '#/selects',
+          partial : 'Selects.html'
+        },
+        { 
+          route : '#/routing',
+          partial : 'Routing.html'
+        },
+        { 
+          route : '#/binding',
+          partial : 'Binding.html'
+        },
+        { 
+          route : '#/advanced',
+          partial : 'AdvancedTopics.html'
+        },
+        { 
+          route : '#/components',
+          partial : 'Components.html'
+        },
+        { 
+          route : '#/custom-attributes',
+          partial : 'CustomAttributes.html'
+        },
+        { 
+          route : '#/listening',
+          partial : 'Listening.html'
+        },
+        { 
+          route : '#/paging',
+          partial : 'Paging.html'
+        }
+      ]);
+      Templar.success('Paging.html', function(){
+        var ExampleModel = Templar.getModel('Example');
+        $('#page-up').click(function(){ExampleModel.pageDemo.page++;});
+        $('#page-down').click(function(){ExampleModel.pageDemo.page--;});
+      });
+      
+    });//comment in deployment
+      
+        
+   </script>
+
+</head>
+<body>
+<a href="#/repeats">Repeats</a>
+<a href="#/selects">Selects</a>
+<a href="#/routing">Routing</a>
+<a href="#/binding">Binding</a>
+<a href="#/advanced">Advanced Topics</a>
+<a href="#/components">Components</a>
+<a href="#/listening">Change Detection</a>
+<a href="#/custom-attributes">Custom Tag Attribute</a>
+<a href="#/paging">Paging</a>
+<div id="apl-content" data-apl-default="Repeats.html"></div>
+ 
+</body>
+</html>

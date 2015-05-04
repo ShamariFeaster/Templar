@@ -1,0 +1,143 @@
+<Codedown>
+<h2>Listening for changes in your model</h2>
+
+Re-assigning your model attribute data will automatically update your view. Changes in your
+view, like user input, are instantly reflected in your data model. Re-assinging a list that
+is bound to your view will rebuild that list to reflect the new list items. Templar
+takes care of all the DOM manipulation.
+
+<br/><br/>
+
+From the user's perspective, Templar makes both application data and the DOM the same thing;
+so rather than listening to changes in the DOM, you use the Templar API to listen for changes to
+a data model attribute.
+
+For example, if you are listening to a data model attribute named 'Animals' that is bound to a 
+`&lt;select>` tag, to print out a end-user's selection do this:
+
+<br/><br/>
+
+```
+DataModelName.listen('Animals', function(e){
+  console.log('The user selected: ' + e.value);
+});
+```
+
+`listen` looks and works exactly like traditional JavaScript event handling. The event object passed
+to your event handler looks like this:
+
+<br/><br/>
+
+```
+Event = {
+  text : string,
+  value : any,
+  type : string,
+  target : DOMNode, /*DOM element that triggered the event*/
+  properties : Array
+}
+
+```
+Remember that our listeners are fired whenever the DOM element our `DMA` is bound to is updated in 
+some way. For a `DMA` bound to an `<input>`'s `value` attribute,  the listener would fire `onkeyup`.
+For a `DMA` bound to a `&lt;select>`, the listener would fire `onchange`. 
+
+<br/><br/>
+
+For `DMA`s bound to `&lt;select>` and `<input type="checkbox"/>`, `Event.text` and `Event.value` can
+have different values. For all other elements,  `Event.text` and `Event.value` are interchangable.
+
+<h4>Explanation of Event.properties</h4>
+
+Assume we have a data model that looks like this:
+
+```
+Templar.dataModel('TodoList',{
+  items :[ 
+    {
+      text : '', 
+      markCompleteCheckbox : ['complete?']
+    }]
+});
+```
+
+<br/><br/>
+
+There's a single item in our todo list. The template to display our todo list items looks like this:
+
+```
+&lt;html&gt;
+&lt;body&gt;
+
+  <ul>
+  
+    <li data-apl-repeat="{{Helper.items}}">
+      <input type="checkbox" value="{{markCompleteCheckbox}}" index="{{$index}}"/>
+      <span>{{text}}</span>
+    </li>
+    
+  </ul>
+  
+&lt;/body&gt;
+&lt;/html&gt;
+```
+
+<br/><br/>
+
+Each item has a checkbox that allows the user to mark it as complete. We bind a sub-property of a
+todo item (`markCompleteCheckbox`) to a checkbox. We would like to be notified when that checkbox
+has been changed, but we can't do this:
+
+```
+TodoList.listen('items[0].markCompleteCheckbox', function(e){
+  /*do stuff......*/
+});
+```
+
+<br/><br/>
+
+Even if we could it wouldn't be very useful. It would only listen for changes to the first item's 
+checkbox. What syntax could we use to generically represent the element index, which in this case is
+'0'? An 'x' maybe? How about a 'y'? Or maybe a '*'? All of these symbols would just be arbitrary 
+and increase the complexity of the listening system for both users and the framework.
+
+<br/></br>
+
+Rather than create an abstract mini language for binding listeners, Templar will simply
+pass a stack of the sub-properties to your listener. 
+
+<br/><br/>
+
+Getting back to the example, how do we listen for changes to that checkbox? 
+This is where `Event.properties` comes into play.
+We listen to changes in `TodoList.items` but, using `Event.properties` we are able to distinguish 
+if the change happened to a DOM element that is bound to a sub-property of `TodoList.items`. In this
+case we want to know if the value of an indiviual items's `markCompleteCheckbox` sub-property has
+changed due to the DOM element it's bound to being changed/updated.
+
+<h4>Here's how we would do this </h4>
+
+```
+TodoList.listen('items', function(e){
+  if(e.properties.pop() == 'markCompleteCheckbox'){
+    /*we know the sub-property that changed was 'markCompleteCheckbox'*/
+    
+    /*do stuff with that info*/
+  }
+});
+```
+
+`Event.properties` is a stack that contains the sub-properties of `items` that the DOM element that
+triggered the change event was bound to. In this case the checkbox was bound to 
+`items[0].markCompleteCheckbox`
+so `Event.properties` looks like this: `['0', 'markCompleteCheckbox']`. 
+
+<br/><br/>
+
+This is designed to keep the complexity of the listening system down for both the you and the 
+framework. Listen to the `DMA` and use the information passed to distinguish sub-properties on your own
+. This as opposed to you having to rememeber another abstract syntax for setting up listeners 
+to sub-properties.
+
+
+</Codedown>
