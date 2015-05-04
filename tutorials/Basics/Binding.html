@@ -45,7 +45,9 @@ and complexity saving aspect of Templar and other modern front-end frameworks.
 
 To make use of `DMA`s in your template you use specially formatted variable called a nonterminal (`NT`).
 It looks like this:
-`{{Helper.aStringNT}}`
+`{{Helper.aStringNT}}`. This style of `NT` is referred to as 'mustache bindings' because the curly
+braces (`{{`) looke like little mustaches. The text inside the mustaces have the model name, followed
+by a period, followed by the attribute of that model you wish to output or bind a DOM element to.
 
 <br/>
 
@@ -89,6 +91,56 @@ We can push data out to our template (ie, print `DMA` values to the screen) by s
 `{{Helper.aStringNT}}` in our markup (like we did above). This is out outbound lane.
 Learn how to outbound  bind  <a href="#/repeats">lists and arrays.</a>
 
-<br/></br>
+<h2>Use multiple data models, anywhere</h2>
+
+Some frameworks have a concept of 'scope.' Usually all the data displayed on any given
+part of your site must share a single scope. Usually the scope is a JavaScript object,
+and it is passed by the framework to a controller
+that handles the business logic of a given part of your app. 
+
+<br/><br/>
+
+Since Templar doesn't force you to use a controller-based architecture, you are free
+to use whatever data you want, from whatever model you want, anywhere in your app. 
+Templar allows you to declare multiple data models, which act as namespaces
+for different types of data. This allows you to organize your app's data any way you want.
+
+<h4>For example: </h4> 
+
+You could create a model to store and access the data of a form in your app. You may also
+want to create a model to hold all the data pertaining to a logged in user. These two sets
+of data may very well end up o the same page in your app, but, from an organizational standpoint
+, they are very different types of data; therefore it seems prudent to namespace them on different
+model like so:
+
+```
+Templar.dataModel('UserProfile',
+{
+  userName :  '',
+  uid : '',
+  email : '',
+  firstName : '',
+  lastName : ''
+});
+
+Templar.dataModel('CommentForm',{
+  commentText : '',
+  posterUid : -1,
+  submitText : 'Post',
+  cancelText : 'Cancel',
+  isWritingComment : false
+});
+```
+
+`UserProfile.userName` is a piece of data you will probably output all over the place in your app,
+so you can place a mustache variable `{{Helper.userName}}` anywhere you want. 
+
+<br/><br/>
+
+Your app's view are decomposed into partial templates, but that is only for organizational and re-use
+considerations. Those partials are still part of the same application and might need access to either
+output or set any part of your application's data. This is why there are no contraints on data
+model usage between templates and directives.
+
 
 </Codedown>

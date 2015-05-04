@@ -148,7 +148,7 @@ $(function(){
       'statusCheckbox' property of each element in Todo.items.*/
     if(e.properties.pop() == 'statusCheckbox'){
       var checkbox = e.target,
-        index = checkbox.getAttribute('index'),
+        index = e.properties.pop(),
         item = Todo.items[index]; 
       switch(item.status){
         case 'active':
@@ -194,7 +194,7 @@ $(function(){
 <!-- Todo list item template, repeated once for every item in Todo.items-->
 <div data-apl-repeat="{{Todo.items}}" showIf="{{isVisible}}">
 
-  <input type="checkbox" value="{{statusCheckbox}}" index="{{$index}}"/>
+  <input type="checkbox" value="{{statusCheckbox}}" />
   <!--we use the {{$index}} shorthand to pull the index of this instance of the list item template.
       We use this throughout the app to modify the intended element in Todo.items , which when 
       updated, will be reflected in our UI-->

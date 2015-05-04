@@ -60,7 +60,7 @@ Templar.component('Codedown',{
         DONT_INCLUDE_QUOTES = 1;
     
     var HighlightRules = {
-      string : new Rule(/(?:'|")([^'"]+)+?(?:'|")/gm, '<span class="sf-md-string-color">%%</span>', INCLUDE_QUOTES),
+      string : new Rule(/(?:'|")([^'"]*)+?(?:'|")/gm, '<span class="sf-md-string-color">%%</span>', INCLUDE_QUOTES),
       NT : new Rule(/\{\{\w+\.\w+\}\}/gm, '<span>%%</span>', WHOLE_MATCH),
       singleLineCode : 
         new Rule(/`([^`]+)+?`/gm, '<code class="sf-md-sinlge-line-code">%%</code>'),

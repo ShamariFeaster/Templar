@@ -46,7 +46,11 @@
         });
         
         Templar.dataModel('Helper',{
-          aStringNT : '{{Example.aString}}'
+          aStringNT : '{{Example.aString}}',
+          userName : '{{UserProfile.userProfile}}',
+          signedIn : '{{DataModelName.isSignedIn}}',
+          listLength : '{{DataModelName.someList.length}}',
+          items : '{{TodoList.items}}'
         });
         
         Templar.Route([
@@ -69,6 +73,18 @@
           { 
             route : '#/advanced',
             partial : 'AdvancedTopics.html'
+          },
+          { 
+            route : '#/components',
+            partial : 'Components.html'
+          },
+          { 
+            route : '#/custom-attributes',
+            partial : 'CustomAttributes.html'
+          },
+          { 
+            route : '#/listening',
+            partial : 'Listening.html'
           }
         ]);
    </script>
@@ -80,6 +96,9 @@
 <a href="#/routing">Routing</a>
 <a href="#/binding">Binding</a>
 <a href="#/advanced">Advanced Topics</a>
+<a href="#/components">Components</a>
+<a href="#/listening">Change Detection</a>
+<a href="#/custom-attributes">Custom Tag Attribute</a>
 <div id="apl-content" data-apl-default="Repeats.html"></div>
  
 </body>
