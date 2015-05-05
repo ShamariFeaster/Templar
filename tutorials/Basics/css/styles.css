@@ -3,3 +3,4 @@ body { background-color: rgb(242, 247, 247);}
 .blue {color : blue;}
 .friend {}
 .underline {text-decoration : underline;}
+.sortableColumn {cursor : pointer;}

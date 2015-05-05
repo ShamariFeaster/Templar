@@ -22,6 +22,8 @@ Installation
 1. Download the repo [here](https://github.com/ShamariFeaster/Templar/archive/master.zip)
 2. Include `build/TemplarJS-0.11.min.js` as a script in an HTML file.
 
+[Docs & Examples](http://templar.de-occupy.org/)
+
 First Use
 =========
 Create a file called `Model.js` and put the following in it.

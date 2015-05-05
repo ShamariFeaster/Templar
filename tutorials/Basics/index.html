@@ -6,6 +6,8 @@
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"></script>
     <script src="Components/Codedown.js"></script>
+    <script src="Data/Models.js"></script>
+    <script src="Data/Routes.js"></script>
     <link rel="stylesheet" href="css/styles.css"></link>
     <script>
     /*Advanced: freeze/thaw, authentication/authorization
@@ -19,113 +21,42 @@
       nav buttons, hide/show using checkboxes
     */
         /*Define your data model*/
-        Templar.dataModel('Example',{
-
-            SimpleRepeat : ['a','b','c'],
-            
-            ComplexRepeat : [
-            {fn : 'bob', ln : 'johnson'},
-            {fn : 'michael', ln : 'jackson'},
-            {fn : 'benadict', ln : 'cabbagepatch'}],
-            
-            EmbeddedRepeat : [
-            {name : 'daryl', friends : ['bill','tommy']},
-            {name : 'carl', friends : ['susan','sicky']},
-            {name : 'rick', friends : ['jane','tammy']}],
-            
-            SimpleSelect : [1,2,3],
-            ComplexSelect : [
-            {text : 'uno', value : 1},
-            {text : 'dos', value : 2},
-            {text : 'tres', value : 3}],
-            
-            aString : 'Hello World',
-            numbers : [1,2,3],
-            pageDemo : [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-            objects : [
-            {text : 'uno', value : '1'},
-            {text : 'dos', value : '2'},
-            {text : 'tres', value : '3'}],
-            
-            biologyTaxonomyData : [
-            {kingdom : 'animalia', Class : 'mammalia', species : 'dog'},
-            {kingdom : 'animalia', Class : 'mammalia'}, species : 'cat'},  
-            {kingdom : 'animalia', Class : 'mammalia', species : 'human'},
-            {kingdom : 'animalia', Class : 'arthropod'}, species : 'crab'}, 
-            {kingdom : 'animalia', Class : 'arthropod', species : 'butterfly'},
-            {kingdom : 'plantae', Class : 'monocots'}, species : 'corn'}, 
-            {kingdom : 'plantae', Class : 'monocots', species : 'wheat'},
-            {kingdom : 'plantae', Class : 'monocots'}, species : 'rice'}, 
-            {kingdom : 'plantae', Class : 'magnoliopsida ', species : 'oak'},
-            {kingdom : 'plantae', Class : 'magnoliopsida'}, species : 'sunflower'},
-            {kingdom : 'plantae', Class : 'magnoliopsida'}, species : 'rose'}            
-            ],
-            biologyTaxonomyColumns : (function(){
-              return Object.keys(this.biologyTaxonomyData[0]);
-            })()
+  
+    Templar.success('#/paging', function(){
+      var ExampleModel = Templar.getModel('Example');
+      $('#page-up').click(function(){ExampleModel.pageDemo.page++;});
+      $('#page-down').click(function(){ExampleModel.pageDemo.page--;});
+    });
+    
+    Templar.success('#/filter-and-sort', function(){
+      var Example = Templar.getModel('Example'),
+         Taxonomy = Templar.getModel('Taxonomy');
+      
+      $('.scramble').click(function(e){
+        var attribName = e.currentTarget.getAttribute('x-target');
+        Example[attribName].map(function(item,i,arr){
+          var newIndex = Math.floor(Math.random() * (arr.length - 0)) + 0;
+          var a = arr[i];
+          var b = arr[newIndex];
+          arr[newIndex] = a;
+          arr[i] = b;
         });
-        
-        Templar.dataModel('Helper',{
-          aStringNT : '{{Example.aString}}',
-          userName : '{{UserProfile.userProfile}}',
-          signedIn : '{{DataModelName.isSignedIn}}',
-          listLength : '{{DataModelName.someList.length}}',
-          items : '{{TodoList.items}}',
-          pageDemo : '{{Exmaple.pageDemo}}',
-          pageDemoLimit : '{{Exmaple.pageDemo.limit}}',
-          pageDemoPage : '{{Exmaple.pageDemo.page}}',
-          pageDemoTotal : '{{Exmaple.pageDemo.totalPages}}'
-        });
-        
-        Templar.Route([
-          { 
-            route : '#/repeats',
-            partial : 'Repeats.html'
-          },
-          { 
-            route : '#/selects',
-            partial : 'Selects.html'
-          },
-          { 
-            route : '#/routing',
-            partial : 'Routing.html'
-          },
-          { 
-            route : '#/binding',
-            partial : 'Binding.html'
-          },
-          { 
-            route : '#/advanced',
-            partial : 'AdvancedTopics.html'
-          },
-          { 
-            route : '#/components',
-            partial : 'Components.html'
-          },
-          { 
-            route : '#/custom-attributes',
-            partial : 'CustomAttributes.html'
-          },
-          { 
-            route : '#/listening',
-            partial : 'Listening.html'
-          },
-          { 
-            route : '#/paging',
-            partial : 'Paging.html'
-          },
-          ,
-          { 
-            route : '#/filter-and-sort',
-            partial : 'FilterAndSort.html'
-          }
-        ]);
-        Templar.success('Paging.html', function(){
-          var ExampleModel = Templar.getModel('Example');
-          $('#page-up').click(function(){ExampleModel.pageDemo.page++;});
-          $('#page-down').click(function(){ExampleModel.pageDemo.page--;});
-        });
-        
+        Example.update(attribName);
+      });
+      
+     $('.sort').click(function(e){
+        var attribName = e.currentTarget.getAttribute('x-target');
+        Example.sort(attribName);
+        Example.update(attribName);
+      }); 
+      
+      $('.sortableColumn').click(function(e){
+        var column = e.currentTarget.getAttribute('x-name');
+        //var compliment = Taxonomy.columns.filter(function(name){return (name != sortcol);})
+        Taxonomy.sort('data').orderBy(column);
+        Taxonomy.update('data'); 
+      });
+    });
    </script>
 
 </head>
@@ -140,7 +71,7 @@
 <a href="#/custom-attributes">Custom Tag Attribute</a>
 <a href="#/paging">Paging</a>
 <a href="#/filter-and-sort">Filtering & Sorting</a>
-<div id="apl-content" data-apl-default="Repeats.html"></div>
+<div id="apl-content" class="container" data-apl-default="Repeats.html"></div>
  
 </body>
 </html>
