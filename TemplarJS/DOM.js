@@ -1,13 +1,15 @@
-structureJS.module('DOM', function(require){
+window.structureJS.module('DOM', function(require){
 
-var Circular = structureJS.circular(),
-    State = require('State'),
-    _  = this;
+'use strict';
+
+var Circular = window.structureJS.circular();
+var State = require('State');
+var _  = this;
 
 return {
   modifyClasses : function(node, add, remove){
-    var nodeClassList = '',
-        removeAsArray = remove.split(_.CLASS_SEPARATOR);
+    var nodeClassList = '';
+    var removeAsArray = remove.split(_.CLASS_SEPARATOR);
     
     if(!_.isNull(node)){
       /*getAttribute may return '' or null so we check below*/
@@ -19,19 +21,7 @@ return {
       node.setAttribute('class', nodeClassList + ' ' + add);
     }
   },
-  hideByIdList : function(commaSeparatedIdList){
-    var nodeToHide = null,
-        idListAsArray = null;
-        
-    if(commaSeparatedIdList != null && commaSeparatedIdList != ''){
-      idListAsArray = commaSeparatedIdList.split(_.CLASS_SEPARATOR);
-      for(var i = 0; i < idListAsArray.length; i++){
-        nodeToHide = document.getElementById(idListAsArray[i]);
-        this.modifyClasses(nodeToHide,'apl-hide','apl-show,apl-hide');
-        
-      }
-    }
-  },
+
   appendTo : function(child, parent){  
     if(!_.isDef(parent) || !_.isDef(child) || _.isNull(parent.parentNode))
       return;
@@ -39,8 +29,12 @@ return {
   },
   
   cloneAttributes : function(fromNode, toNode, noClobber){
-    var noClobber = (!_.isDef(noClobber)) ? false : true,
-        toNodeAttrib;
+    
+    var toNodeAttrib = null;
+    var attributes = null;
+    
+    noClobber = (!_.isDef(noClobber)) ? false : true;
+    
     if(fromNode.hasAttributes()){
       attributes = fromNode.attributes;
       /*search node attributes for non-terminals*/
@@ -48,11 +42,10 @@ return {
         if(attributes[i].name == 'data-apl-repeat' || attributes[i].name == 'style')
           continue;
           
-        if(noClobber == false){
+        if(noClobber === false){
           toNode.setAttribute(attributes[i].name, attributes[i].value);
         }else{
-          toNodeAttrib = (_.isNullOrEmpty(toNodeAttrib = toNode.getAttribute(attributes[i].name))) 
-                            ? '' : toNodeAttrib + ' ';
+          toNodeAttrib = (_.isNullOrEmpty(toNodeAttrib = toNode.getAttribute(attributes[i].name))) ? '' : toNodeAttrib + ' ';
           toNode.setAttribute(attributes[i].name, toNodeAttrib + attributes[i].value);
         }
         
@@ -60,28 +53,23 @@ return {
 
     }
   },
-  
-  isVisible : function(DOM_node){
-    if(_.isNull(DOM_node))
-      return false;
-    
-    return (DOM_node.offsetWidth > 0 || DOM_node.offsetHeight > 0);
-  },
-  
+
   asynGetPartial : function(fileName, callback, targetId, node){
     var xhr = new XMLHttpRequest();
     xhr.onload = callback;
     xhr.fileName = fileName;
     xhr.targetId = targetId;
     xhr.targetNode = node;
+    
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4){   //if complete
         State.compilationThreadCount--;
-          if(xhr.status === 404){  //check if "OK" (200)
-            _.log('WARNING(404): FILE "'+xhr.fileName+'" NOT FOUND');
-          }
-        } 
-      }
+        if(xhr.status === 404){  //check if "OK" (200)
+          _.log('WARNING(404): FILE "'+xhr.fileName+'" NOT FOUND');
+        }
+      } 
+    };
+    
     if(!_.isNullOrEmpty(xhr.fileName)){
       State.compilationThreadCount++;
       xhr.open('get',  fileName, true);
@@ -92,16 +80,16 @@ return {
   },
   
   fetchNestedRouteFiles : function(routes, onloadList){
-    var xhr = new XMLHttpRequest(),
-        routeObj = null;
+    var xhr = new XMLHttpRequest();
+    var routeObj = null;
     
-    if((routeObj = routes.shift()) != null){
+    if((routeObj = routes.shift()) !== null){
       xhr.onload = Circular('Bootstrap').loadPartialIntoTemplate;
       xhr.fileName = routeObj.partial;
       xhr.targetId = routeObj.target;
       xhr.route = routeObj.route;
       xhr.fallback = routeObj.fallback || '';
-      xhr.callbackOnComplete = routes.onComplete || function(){},
+      xhr.callbackOnComplete = routes.onComplete || function(){};
       /*We copy the route array b/c the next xhr call will alter the reference
         and will blow up the length check we use to determine when to call
         onComplete*/
@@ -114,7 +102,7 @@ return {
         if(_.isDef(this.route))
           State.onloadFileQueue.push(this.route);
         */
-        if(this.callbackParam1.length == 0){
+        if(this.callbackParam1.length === 0){
 
           this.callbackOnComplete.call(null);
           this.fileName = onloadList;
@@ -122,22 +110,22 @@ return {
           Circular('DOM').fetchNestedRouteFiles.call(null, this.callbackParam1, onloadList);
         }
 
-      }
+      };
       
       xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4){   //if complete
-        State.compilationThreadCount--;
-        if(xhr.status === 404){  //check if "OK" (200)
-            
+        if (xhr.readyState === 4){   
+          State.compilationThreadCount--;
+          if(xhr.status === 404){  
+              
             _.log('WARNING(404): FILE "'+xhr.fileName+'" NOT FOUND');
             if(!_.isNullOrEmpty(xhr.fallback)){
               _.log('WARNING (404): ATTEMPTING FALLBACK ROUTE "'+xhr.fallback+'".');
               Circular('Route').open(xhr.fallback);
             }
-            
+              
           }
         } 
-      }
+      };
       if(!_.isNullOrEmpty(xhr.fileName)){
         State.compilationThreadCount++;
         _.log('FETCHIGN: ' + xhr.fileName);
@@ -172,12 +160,10 @@ return {
     twice: once here and the other in the fetcher's callback. */
   asynFetchRoutes : function(routeObj, onComplete){
     State.onloadFileQueue.length = 0;
+    var routes = [];
+    var onloadList = '';
     
-    var currFile = '',
-        routes = [],
-        routeName = routeObj.route,
-        onloadList = '';
-        routes.onComplete = onComplete || function(){};
+    routes.onComplete = onComplete || function(){};
     
     if(_.isArray(routeObj.partial)){
       onloadList = this.buildOnloadList([routeObj.route].concat(routeObj.partial));
@@ -195,7 +181,9 @@ return {
   
   /*Solution from: http://stackoverflow.com/questions/7378186/ie9-childnodes-not-updated-after-splittext*/
   insertAfter : function(node, precedingNode) {
-    var nextNode = precedingNode.nextSibling, parent = precedingNode.parentNode;
+    var nextNode = precedingNode.nextSibling;
+    var parent = precedingNode.parentNode;
+    
     if (nextNode) {
       parent.insertBefore(node, nextNode);
     } else {
@@ -220,6 +208,7 @@ return {
   getDataAttribute : function(DOM_Node, attributeKey){
     var parts = (_.isString(attributeKey)) ? attributeKey.split('-') : [];
     var value = null;
+    
     /*camelcase from the first word on*/
     var camelCaseKey = parts.slice(0,1).concat(parts.slice(1).map(function(part){
       return part.charAt(0).toUpperCase() + part.slice(1);

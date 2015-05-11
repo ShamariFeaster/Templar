@@ -1,21 +1,20 @@
-structureJS.module('Process', function(require){
+window.structureJS.module('Process', function(require){
 
-var _ = this,
-    TMP_Node = require('TMP_Node'),
-    Map = require('Map'),
-    DOM = require('DOM'),
-    Attribute = require('Attribute')(),
-    Circular = structureJS.circular();
-    
+'use strict';
+
+var _ = this;
+var TMP_Node = require('TMP_Node');
+var Map = require('Map');
+var DOM = require('DOM');
+var State = require('State');
+var Attribute = require('Attribute')();
+var Circular = window.structureJS.circular();
+var Interpolate = Circular('Interpolate');   
+
 return {
 
   parseModelAttribName : function(qualifiedAttribName){
-    var modelNameParts = ['',''];
-
-    if( _.isDef(qualifiedAttribName) && ((modelNameParts = qualifiedAttribName.split('.')).length > 1)  ){
-        ;//noop
-    }
-    return modelNameParts;
+   return ( _.isDef(qualifiedAttribName)) ? qualifiedAttribName.split('.') : ['',''];
   },
 
   buildNT : function(Token){
@@ -24,7 +23,7 @@ return {
       queue = (_.isArray(Token.indexQueue)) ? Token.indexQueue.slice(0) : [],
       unfoldedIndexes = '';
         
-    while( (prop = queue.shift(queue)) != null ){
+    while( (prop = queue.shift(queue)) !== null ){
       unfoldedIndexes += '[' + prop + ']';
     }
     return '{{' + NT + unfoldedIndexes + '}}';
@@ -36,7 +35,7 @@ return {
   
   checkForCustomAttribute : function(node, attribName){
     var customAttribute;
-    if((customAttribute = Attribute.getAttribute(attribName)) != null){
+    if((customAttribute = Attribute.getAttribute(attribName)) !== null){
           
       if(!_.isDef(node.__customAttributes__)){
         node._setAttribute = node.setAttribute;
@@ -62,14 +61,15 @@ return {
   },
   
   preProcessNodeAttributes : function(node, scope, repeatIndex){
-    var attributes = null,
-        match = null,
-        tmp_node = null,
-        preProcessedTMPNodes = [],
-        origValue,
-        origName,
-        Interpolate = Circular('Interpolate'),
-        tokens;
+    var attributes = null;
+
+    var tmp_node = null;
+    var preProcessedTMPNodes = [];
+    var origValue;
+    var origName;
+    var Interpolate = Circular('Interpolate');
+    var tokens;
+    
     repeatIndex = (_.isInt(repeatIndex)) ? parseInt(repeatIndex) : -1;
     /*Options don't need to be in the node tree due to having NTs in 'value' attribute*/
     if(node.hasAttributes() && node.tagName != 'OPTION'){
@@ -85,8 +85,8 @@ return {
         tokens = Circular('Compile').getAllTokens(origValue);
         /* possible issue: data-apl-repeat attribs getting pushed to cache */
         for(var x = 0 ; x < tokens.length; x++){
-          if(tmp_node == null ||
-            (tmp_node != null && (tokens[x].modelName != tmp_node.modelName || tokens[x].attribName != tmp_node.attribName))){
+          if(tmp_node === null ||
+            (tmp_node !== null && (tokens[x].modelName != tmp_node.modelName || tokens[x].attribName != tmp_node.attribName))){
             
             tmp_node = new TMP_Node(node, tokens[x].modelName, tokens[x].attribName, repeatIndex);   
             Map.pushNodes(tmp_node);
@@ -110,20 +110,20 @@ return {
     return preProcessedTMPNodes;
   },
   _preProcessRepeatAttributes : function(DOM_Node, TMP_baseNode, index){
-    var attributes, 
-        idvRepeatedProperty = null,
-        preProcessedOutput,
-        symbol,
-        hasNonTerminals = false;
+    var attributes;
+    var idvRepeatedProperty = null;
+    var preProcessedOutput;
+    var symbol;
+    var hasNonTerminals = false;
     
-    if(DOM_Node.hasAttributes() && node.tagName != 'OPTION'){
+    if(DOM_Node.hasAttributes()){
       attributes = DOM_Node.attributes;
 
       for(var i = 0; i < attributes.length; i++){
         preProcessedOutput = attributes[i].value;
           
         _.RX_RPT_SPC_SYM.lastIndex = 0;
-        while((idvRepeatedProperty = _.RX_RPT_SPC_SYM.exec(preProcessedOutput)) != null){
+        while((idvRepeatedProperty = _.RX_RPT_SPC_SYM.exec(preProcessedOutput)) !== null){
           hasNonTerminals = true;
           symbol = idvRepeatedProperty[0];
           if(symbol == '{{}}'){
@@ -157,22 +157,22 @@ return {
   },
   
   _preprocessInPlace : function(TMP_node, index){
-    var repeatedProperties = null,
-        nodeValue = '',
-        intraCompilation = '',
-        idvRepeatedProperty = null,
-        preProcessedOutput;
-        nonTerminal = '',
-        match = null,
-        templateText = TMP_node.node.nodeValue,
-        annotatedNT = '',
-        symbol = '';
+
+  
+  
+    var idvRepeatedProperty = null;
+    var preProcessedOutput = null;
+
+    var match = null;
+    var templateText = TMP_node.node.nodeValue;
+    var annotatedNT = '';
+    var symbol = '';
     
     TMP_node.hasNonTerminals = true;
     preProcessedOutput = TMP_node.node.nodeValue;
     
     _.RX_RPT_SPC_SYM.lastIndex = 0;
-    while( (idvRepeatedProperty = _.RX_RPT_SPC_SYM.exec(TMP_node.node.nodeValue) ) != null ){
+    while( (idvRepeatedProperty = _.RX_RPT_SPC_SYM.exec(TMP_node.node.nodeValue) ) !== null ){
       /*w/ this symbol our token already has instructions to build our NT.
         we use the index of the repeated node to index the attrib our NT
         refers to*/
@@ -188,7 +188,7 @@ return {
       }
       
       if(symbol == '{{$item}}'){
-        preProcessedOutput = preProcessedOutput.replace(symbol, this.buildItemNT(TMP_baseNode, index));
+        preProcessedOutput = preProcessedOutput.replace(symbol, this.buildItemNT(TMP_node, index));
       }
       /*simple property access*/
       if(symbol != '{{}}' && symbol != '{{$index}}'){
@@ -204,7 +204,7 @@ return {
     
     _.RX_M_ATTR_TOK.lastIndex = 0;
     /*test if already been annotated as embed, we don't wantv to double that*/
-    while((match = _.RX_M_ATTR_TOK.exec(templateText)) != null && !/%(\w+)%/.test(templateText)){
+    while((match = _.RX_M_ATTR_TOK.exec(templateText)) !== null && !/%(\w+)%/.test(templateText)){
       if(match[1] != TMP_node.modelName || match[2] != TMP_node.attribName){
         TMP_node.embeddedModelAttribs[match[1] + '.' + match[2]] = true;
         annotatedNT = 
@@ -219,7 +219,7 @@ return {
     }
     
     /*if no NTs found, repeatNode innerHTML must be empty to be clobbered over by model attrib value*/
-    TMP_node.hasNonTerminals = (TMP_node.hasNonTerminals == false) ? 
+    TMP_node.hasNonTerminals = (TMP_node.hasNonTerminals === false) ? 
                                   !_.isNullOrEmpty(TMP_node.node.nodeValue.trim()) :
                                   TMP_node.hasNonTerminals;
 
@@ -228,31 +228,33 @@ return {
   },
   
   _cloneBaseNode : function(TMP_baseNode, index){
-    var newId = null,
-        newDomNode = document.createElement(TMP_baseNode.node.tagName.toLowerCase()),
-        TMP_repeatedNode = new TMP_Node(newDomNode, TMP_baseNode.modelName, TMP_baseNode.attribName, index);
+    var newId = null;
+    var newDomNode = document.createElement(TMP_baseNode.node.tagName.toLowerCase());
+    var TMP_repeatedNode = new TMP_Node(newDomNode, TMP_baseNode.modelName, TMP_baseNode.attribName, index);
 
     DOM.cloneAttributes(TMP_baseNode.node, TMP_repeatedNode.node);
 
     /*auto enumeration of existing id attribute*/
     newId = TMP_baseNode.node.getAttribute('id');
-    newId = ( newId == null) ? '' : TMP_repeatedNode.node.setAttribute('id', newId + '-' + index); 
+    newId = ( newId === null) ? '' : TMP_repeatedNode.node.setAttribute('id', newId + '-' + index); 
     TMP_repeatedNode.hasNonTerminals = TMP_baseNode.hasNonTerminals;
     TMP_repeatedNode.node.innerHTML = TMP_baseNode.node.innerHTML;
     return TMP_repeatedNode;
   },
   
   _traverseRepeatNode : function(nodes, index, TMP_baseNode){
-    var TMP_textNode = null,
-        processedNode = null,
-        repeatKey = '',
-        tokens = null,
-        hasNonTerminals = false;
+    var TMP_textNode = null;
+
+    var repeatKey = '';
+    var tokens = null;
+    var hasNonTerminals = false;
+    
     for(var i = 0; i < nodes.length; i++){
       
       if(nodes[i].nodeType == _.ELEMENT_NODE){
 
-        hasNonTerminals |= this._preProcessRepeatAttributes(nodes[i], TMP_baseNode, index);
+        hasNonTerminals = hasNonTerminals || 
+                        this._preProcessRepeatAttributes(nodes[i], TMP_baseNode, index);
         /*traverse node attributes looking for repeat-specific symbols and replacing them w/ NTs.
             This function would need to take the base node to build the NTs just like _preprocessInPlace()
             preProcessNodeAttributes() needs to be modified to understand complex references*/
@@ -263,8 +265,8 @@ return {
         if(!_.isNullOrEmpty(repeatKey)){
           nodes[i].setAttribute('data-' + _.IE_MODEL_REPEAT_KEY, repeatKey);
           
-          if(tokens[0].modelName != TMP_baseNode.modelName 
-             || tokens[0].attribName != TMP_baseNode.attribName){
+          if(tokens[0].modelName != TMP_baseNode.modelName || 
+            tokens[0].attribName != TMP_baseNode.attribName){
              
             TMP_baseNode.embeddedRepeats[tokens[0].modelName + '.' + tokens[0].attribName] = true;
           /*I need to signal to the interpolater to build this nested repeat b/c
@@ -275,7 +277,8 @@ return {
         }
         
         if(nodes[i].hasChildNodes())
-          hasNonTerminals |= this._traverseRepeatNode(nodes[i].childNodes, index, TMP_baseNode);
+          hasNonTerminals = hasNonTerminals || 
+                          this._traverseRepeatNode(nodes[i].childNodes, index, TMP_baseNode);
         else
           continue;
       }
@@ -283,7 +286,7 @@ return {
       if(nodes[i].nodeType == _.TEXT_NODE){
         TMP_textNode = new TMP_Node(nodes[i], TMP_baseNode.modelName, TMP_baseNode.attribName, index);
         TMP_textNode.inheritToken(TMP_baseNode);
-        hasNonTerminals |= this._preprocessInPlace(TMP_textNode, index);
+        hasNonTerminals = hasNonTerminals || this._preprocessInPlace(TMP_textNode, index);
         _.mixin(TMP_textNode.embeddedModelAttribs, TMP_baseNode.embeddedModelAttribs);
       }
     }
@@ -292,9 +295,10 @@ return {
   },
   
   preProcessRepeatNode : function(TMP_baseNode, index){
-    var PreProcessedNode = this._cloneBaseNode(TMP_baseNode, index),
-        Component = TMP_baseNode.node.tmp_component,
-        isComponent = _.isDef(Component);
+    var PreProcessedNode = this._cloneBaseNode(TMP_baseNode, index);
+    var Component = TMP_baseNode.node.tmp_component;
+    var isComponent = _.isDef(Component);
+    
     PreProcessedNode.hasNonTerminals = this._traverseRepeatNode([PreProcessedNode.node], index, TMP_baseNode);
     /* For nodes with no children the compiler will not call preProcessNodeAttributes() so
         we should check for that and call it ourselves*/
@@ -358,12 +362,12 @@ return {
       Object.defineProperty(attrib, 'current_selection', {
         configurable : true,
         set : function(value){
-          if(value == '')
+          if(value === '')
             return;
           this._value_ = value;
-          var annotations = DOM.getDOMAnnotations(select),
-              boundProperties = (_.isDef(select.token.indexQueue)) ? 
-                  select.token.indexQueue.slice(0) : [];
+          var annotations = DOM.getDOMAnnotations(select);
+          var boundProperties = (_.isDef(select.token.indexQueue)) ? 
+                                select.token.indexQueue.slice(0) : [];
                   
           for(var s = 0; s < select.children.length; s++){
             if(select.children[s].value == value || select.children[s].text == value){
@@ -378,13 +382,13 @@ return {
               
               
               Interpolate.dispatchListeners(
-                Map.getListeners(annotations.modelName, annotations.attribName)
-                , {
-                    type : _.MODEL_EVENT_TYPES.select_change
-                    , value : select.children[s].value
-                    , text : select.children[s].text
-                    , index : select.selectedIndex
-                    , properties : boundProperties
+                Map.getListeners(annotations.modelName, annotations.attribName),
+                  {
+                    type : _.MODEL_EVENT_TYPES.select_change, 
+                    value : select.children[s].value, 
+                    text : select.children[s].text, 
+                    index : select.selectedIndex, 
+                    properties : boundProperties
                   }
               );
               
@@ -410,40 +414,40 @@ return {
   bindCheckboxListener : function(node){
   
     node.addEventListener('click',function(e){
-      var attrib = Map.dereferenceAttribute(this.token),
-          boundProperties = (_.isDef(this.token.indexQueue)) ? 
-             this.token.indexQueue.slice(0) : []
-          cbObj = 
-            {
-              type : _.MODEL_EVENT_TYPES.checkbox_change
-              , checked : (e.target.checked === true)
-              , value : e.target.value
-              , target : e.target
-              , properties : boundProperties
-            },
-          annotations = DOM.getDOMAnnotations(this);
+      
+      var attrib = Map.dereferenceAttribute(this.token);
+      var boundProperties = (_.isDef(this.token.indexQueue)) ? 
+                            this.token.indexQueue.slice(0) : [];
+      var cbObj = 
+        {
+          type : _.MODEL_EVENT_TYPES.checkbox_change, 
+          checked : (e.target.checked === true), 
+          value : e.target.value, 
+          target : e.target, 
+          properties : boundProperties
+        };
+      var annotations = DOM.getDOMAnnotations(this);
+      var listeners = Map.getListeners(annotations.modelName, annotations.attribName);
+      
       /*for checkboxes we should not set current_selection to value if it was unchecked*/
-      attrib._value_ = (cbObj.checked == true) ? e.target.value : false;
+      attrib._value_ = (cbObj.checked === true) ? e.target.value : false;
       attrib.checked[this.getAttribute('id')] = cbObj.checked;
       
       State.dispatchListeners = false;
       Interpolate.interpolate(annotations.modelName, annotations.attribName);
       State.dispatchListeners = true;
       
-      Interpolate.dispatchListeners(
-        Map.getListeners(annotations.modelName, annotations.attribName)
-        , cbObj
-      ); 
+      Interpolate.dispatchListeners( listeners, cbObj); 
     });
   },
  
   preProcessInputNode : function(DOM_Node, scope){
-    var match = null,
-        inputType = DOM_Node.getAttribute('type') || '',
-        tokens = Circular('Compile').getTokens(DOM_Node.getAttribute('value')),
-        token,
-        Interpolate = Circular('Interpolate'),
-        __COMPILER_FLG__ = _.COMPILE_ME;
+
+    var inputType = DOM_Node.getAttribute('type') || '';
+    var tokens = Circular('Compile').getTokens(DOM_Node.getAttribute('value'));
+    var token;
+
+    var __COMPILER_FLG__ = _.COMPILE_ME;
         
     if( tokens.length < 1 )
       return;
@@ -456,12 +460,12 @@ return {
     switch(inputType){
       case 'checkbox':
       case 'radio':
-        var attrib,
-          TMP_checkbox = null,
-          value = '',
-          description = '',
-          checked = false,
-          checkedStateId = '';
+        var attrib = null;
+        var TMP_checkbox = null;
+        var value = '';
+        var description = '';
+        var checked = false;
+        var checkedStateId = '';
 
         attrib = Map.dereferenceAttribute(token);
         if(_.isArray(attrib)){
@@ -495,7 +499,7 @@ return {
             }
             
             attrib.checked[checkedStateId] = checked; 
-            if(checked == true){
+            if(checked === true){
               attrib._value_ = value;
               TMP_checkbox.node.setAttribute('checked', checked);
             }
@@ -538,24 +542,24 @@ return {
   },
   
   preProcessNode : function(DOM_Node, scope, repeatIndex){
-    if(!_.isDef(DOM_Node) || DOM_Node === null )
-      return;
+    if(!_.isDef(DOM_Node) || DOM_Node === null ) return;
+    
     repeatIndex = (_.isInt(repeatIndex)) ? parseInt(repeatIndex) : -1;
     
     var repeatValue = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);
-    var type = (!_.isNullOrEmpty(repeatValue)) 
-                  ? 'REPEAT' :
-                    DOM_Node.tagName;
-    var tokens = [],
-        uninterpolatedString = '',
-        TMP_RepeatBase = null,
-        TMP_select = null,
-        __COMPILER_FLG__ = _.COMPILE_ME;
+    var type = (!_.isNullOrEmpty(repeatValue)) ? 'REPEAT' : DOM_Node.tagName;
+    var tokens = [];
+
+    var TMP_RepeatBase = null;
+    var TMP_select = null;
+    var __COMPILER_FLG__ = _.COMPILE_ME;
     
     switch(type){
     
       case 'SELECT':
-        var modelName, attribName, token;
+
+        var token = null;
+        
         _.RX_M_ATTR.lastIndex = 0;
         if( (tokens = Circular('Compile').getTokens(DOM_Node.innerHTML)).length < 1) 
           break;
@@ -571,25 +575,23 @@ return {
         Map.pushNodes(TMP_select);
         
         DOM_Node.addEventListener('change', function(e){
-          var attrib = Map.dereferenceAttribute(this.token),
-              boundProperties = (_.isDef(this.token.indexQueue)) ? 
-                this.token.indexQueue.slice(0) : [],
-              selectObj = 
+          var attrib = Map.dereferenceAttribute(this.token);
+          var boundProperties = (_.isDef(this.token.indexQueue)) ? 
+                                this.token.indexQueue.slice(0) : [];
+          var selectObj = 
                 {
-                  type : _.MODEL_EVENT_TYPES.select_change
-                  , value : e.target.options[e.target.selectedIndex].value
-                  , text : e.target.options[e.target.selectedIndex].text
-                  , index : e.target.selectedIndex
-                  , target : e.target
-                  , properties : boundProperties
-                },
-              annotations = DOM.getDOMAnnotations(this);
+                  type : _.MODEL_EVENT_TYPES.select_change, 
+                  value : e.target.options[e.target.selectedIndex].value, 
+                  text : e.target.options[e.target.selectedIndex].text, 
+                  index : e.target.selectedIndex, 
+                  target : e.target, 
+                  properties : boundProperties
+                };
+          var annotations = DOM.getDOMAnnotations(this);
+          var listeners = Map.getListeners(annotations.modelName, annotations.attribName);
           
           attrib.current_selection = selectObj.value;
-          Interpolate.dispatchListeners(
-            Map.getListeners(annotations.modelName, annotations.attribName)
-            , selectObj
-          );                  
+          Interpolate.dispatchListeners(listeners, selectObj);                  
         });
         break;
       case 'INPUT':

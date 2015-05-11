@@ -1,27 +1,29 @@
-structureJS.module('Templar', function(require){
+window.structureJS.module('Templar', function(require){
+
+'use strict';
 
 var _ = this;
 var Map = require('Map');
 var Route = require('Route');
 var Model = require('ModelHeader');
 var System = require('System');
-var DOM = require('DOM');
+
 var Attribute = require('Attribute');
 var Component = require('Component');
 
-var Templar = function(controlName){
-};
+var Templar = function(){};
 
-Templar._onloadHandlerMap = Object.create(null);
-Templar._components = Object.create(null);
+Templar._onloadHandlerMap = {};
+Templar._components = {};
 Templar._components.length = 0;
 
-Templar._attributes = Object.create(null);
+Templar._attributes = {};
 Templar._attributes.length = 0;
 
 Templar.success = function(partialFileName, onloadFunction){
-  var isUnique = true,
-      handler;
+  var isUnique = true;
+  var handler;
+  
   if(!_.isDef(this._onloadHandlerMap[partialFileName])){
     this._onloadHandlerMap[partialFileName] = [];
   }
@@ -30,10 +32,10 @@ Templar.success = function(partialFileName, onloadFunction){
   
     for(var i = 0; i < this._onloadHandlerMap[partialFileName].length; i++){
       handler = this._onloadHandlerMap[partialFileName][i];
-      isUnique &= handler.toString() != onloadFunction.toString();
+      isUnique = isUnique && handler.toString() != onloadFunction.toString();
     }
     
-    if(isUnique == true){
+    if(isUnique === true){
       this._onloadHandlerMap[partialFileName].push(onloadFunction);
     }
     
@@ -88,18 +90,19 @@ Templar.done = function( func){
 Templar.attribute = function(name, definitionObj){
   if(!_.isString(name) || !_.isDef(definitionObj)) return;
   
-  var attribute = new Attribute(name.toLowerCase()),
-      onCreate = function(){},
-      onChange = function(){};
+  var attribute = new Attribute(name.toLowerCase());
+  var onCreate = function(){};
+  var onChange = function(){};
+  
   for(var prop in definitionObj){
     if(definitionObj.hasOwnProperty(prop)){
       switch(prop){
         case 'onCreate' :
-          onCreate = definitionObj['onCreate'];
+          onCreate = definitionObj.onCreate;
           attribute.onCreate = onCreate = (_.isFunc(onCreate)) ? onCreate : function(){};
           break;
         case 'onChange' :
-          onChange = definitionObj['onChange'];
+          onChange = definitionObj.onCreate;
           attribute.onChange = onChange = (_.isFunc(onChange)) ? onChange : function(){};
           break;
       }
@@ -111,9 +114,9 @@ Templar.attribute = function(name, definitionObj){
       target.*/
     attribute.onChange.call(attribute, DOM_node, DOM_node.getAttribute(attribute.name));
     onCreate.call(attribute, DOM_node);
-  }
+  };
   Templar._attributes[attribute.name] = attribute;
-}
+};
 
 Templar.component = function(name, definitionObj){
   if(!_.isString(name) || !_.isDef(definitionObj)) return;
@@ -124,7 +127,7 @@ Templar.component = function(name, definitionObj){
     if(definitionObj.hasOwnProperty(prop)){
       switch(prop){
         case 'templateURL' :
-          component.templateURL = definitionObj['templateURL'];
+          component.templateURL = definitionObj.templateURL;
           
           if(_.isNullOrEmpty(component.templateURL)){
             /*Throwing an error causes the rest of the code in whatever
@@ -138,10 +141,11 @@ Templar.component = function(name, definitionObj){
           
           break;
         case 'attributes' :
-          var attribs = definitionObj['attributes'];
+          var attribs = definitionObj.attributes;
           try{
             component.attributes = (_.isObject(attribs)) ? attribs : {};
             for(var attrib in component.attributes){
+              if(!component.attributes.hasOwnProperty(attrib)) continue;
               component.attributes[attrib] = (_.isFunc(component.attributes[attrib])) ? 
                                                 component.attributes[attrib] : 
                                                 function(){};
@@ -154,7 +158,7 @@ Templar.component = function(name, definitionObj){
           
           break;
         case 'onCreate' :
-          var onCreate = definitionObj['onCreate'];
+          var onCreate = definitionObj.onCreate;
           component.onCreate = (_.isFunc(onCreate)) ? onCreate : function(){};
           break;
         default:
@@ -177,7 +181,7 @@ Templar.component = function(name, definitionObj){
 Templar.RouteObj = Route;
 Templar.Map = Map;
 
-window['Templar'] = Templar;
+window.Templar = Templar;
 return Templar;
 
 });

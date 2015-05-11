@@ -1,39 +1,34 @@
-structureJS.module('Bootstrap', function(require){
+window.structureJS.module('Bootstrap', function(require){
 
+'use strict';
 
 var _ = this;
 var Map = require('Map');
 var Link = require('Link');
 var State = require('State');
 var Compile = require('Compile');
-var DOM = require('DOM');
 var Route = require('Route'); 
 
 var Bootstrap = {
 
-  /*handlers with same handler are not duplicate bound. handler needs to be defined on persistent
-    object or global scope*/
-  setTarget : function(e){
-    State.target = DOM.getDataAttribute(e.target, _.IE_TARGET_ATTRIB_KEY);
-    State.target = (!_.isNullOrEmpty(State.target)) ? 
-                        State.target : '';
-  },
   /* even if compilation epilogue fires early we will not fire onloads until whole
       route path has been walked*/
   fireOnloads : function(fileName){
-    var file = '',
-        handlers = null,
-        onloadNames = fileName.split(','),
-        isInList = false;
+    var file = '';
+    var handlers = null;
+    var onloadNames = fileName.split(',');
+    var isInList = false;
+    
     for(var i = 0; i < State.onloadFileQueue.length; i++){
       file = State.onloadFileQueue[i];
-      onloadNames.forEach(function(listIndex){
-        isInList |= listIndex == file;
-      });
       
-      if(isInList == true){
+      for(var y  = 0; y < onloadNames.length; y++){
+        isInList = isInList || onloadNames[y] == file;
+      }
+      
+      if(isInList === true){
         file = State.onloadFileQueue.splice(i,1);
-        handlers = Templar.getPartialOnlodHandler(file);
+        handlers = window.Templar.getPartialOnlodHandler(file);
         _.log('Firing '+handlers.length +' handlers(s) for: ' + file);
         for(var x = 0; x < handlers.length; x++){
           handlers[x].call(null);
@@ -43,36 +38,23 @@ var Bootstrap = {
     }
     _.log('Un-Fired on queue: ' + State.onloadFileQueue.toString());
   },
-  
-  bindTargetSetter : function(){
-    var aplLinkNodeList = document.getElementsByTagName('a');
-        
-    if(aplLinkNodeList != null){
-      for(var i = 0; i < aplLinkNodeList.length; i++){
-        aplLinkNodeList[i].addEventListener('click', this.setTarget);
-      }
-    }
-    
-  },
+
   /*Preloading audio players will hang the framework.*/
   loadPartialIntoTemplate : function(){
 
-    
     /*Graceful fail on file not found. Error is logged from aync function*/
     if(this.status == 200){
-      var partialContents = this.responseText,
-        fileName = this.fileName,
-        targetId = (!_.isNullOrEmpty(this.targetId)) ? 
-                      this.targetId.replace('#','') : _.MAIN_CONTENT_ID,
-        targetNode = (!_.isNull(this.targetNode)) ? this.targetNode : document.getElementById(targetId),
-        /*a partial can define parent template dom elements to be hidden*/
-        nodeToShow = null,
-        href = document.location.href,
-        timestamp = new Date().getTime(),
-        scope = fileName +  ' ' + timestamp,
-        /*These are for calls from DOM.asynFetchRoutes(). The context is set
-          as the xhr object*/
-        DOMGetFileContents = this.callback || function(){};
+      var partialContents = this.responseText;
+      var fileName = this.fileName;
+      var targetId = (!_.isNullOrEmpty(this.targetId)) ? 
+                      this.targetId.replace('#','') 
+                      : _.MAIN_CONTENT_ID;
+      var targetNode = (!_.isNull(this.targetNode)) ? this.targetNode : document.getElementById(targetId);
+      //a partial can define parent template dom elements to be hidden
+      var timestamp = new Date().getTime();
+      var scope = fileName +  ' ' + timestamp;
+      //These are for calls from DOM.asynFetchRoutes(). The context is set as the xhr object
+      var DOMGetFileContents = this.callback || function(){};
   
       
       if(_.isNull(targetNode)){
@@ -104,7 +86,6 @@ var Bootstrap = {
           Map.pruneNodeTreeByScope( State.compiledScopes ); 
           Link.bindModel( State.compiledScopes );
           Bootstrap.fireOnloads(this.fileName);
-          Bootstrap.bindTargetSetter();
           State.compilationThreadCount = 0;
         }
       }

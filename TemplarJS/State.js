@@ -1,4 +1,6 @@
-structureJS.module('State', function(require){
+window.structureJS.module('State', function(){
+'use strict';
+
 return {
   preventUpdate : false,
   target : '',

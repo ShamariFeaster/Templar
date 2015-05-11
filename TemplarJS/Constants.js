@@ -1,5 +1,5 @@
-structureJS.module('Constants', function(require){
-  _ = {};
+window.structureJS.module('Constants', function(){
+  var _ = {};
   
   _.MODEL_ATTRIB_KEY = 'aplAttrib';
   _.MODEL_ATTRIB_REPEAT_KEY = 'aplRepeat';
@@ -21,7 +21,7 @@ structureJS.module('Constants', function(require){
   _.RX_M_ATTR = /\{\{(\w+)\.(\w+)([^}]*)*/g;
   _.RX_M_ATTR_TOK = /\{\{(\w+)\.([\w\d_\-\.\[\]]+)\}\}+?/gm;
   _.RX_IDX_ITER = /\[(\w+|\d+)\]|\.(\w+)/g;
-  _.RX_ANNOT = /%(\w+)%([^%]+)%\/(?:\w+)%/g
+  _.RX_ANNOT = /%(\w+)%([^%]+)%\/(?:\w+)%/g;
   /*Repeat Regex*/
   _.RX_RPT_M_ATTR = /(\w+\.\w+)(.*)*/g;
   _.RX_RPT_ALL_INX = /((\w+\.\w+)([^}]*)*)/g;
@@ -45,12 +45,13 @@ structureJS.module('Constants', function(require){
   _.MODEL_EVENT_TYPES = {
     interp_change : 'i_change',
     select_change : 's_change',
-    checkbox_change : 'cb_change'
+    checkbox_change : 'cb_change',
+    reassignment : 'reassignment',
   };
   
   _.RESTRICTED = 'RESTRICTED';
   _.DOM_MDL_NAME = 'model';
   _.DOM_ATTR_NAME = 'attrib';
   _.DOM_TOKEN = 'token';
-  structureJS.extendContext(_); 
+  window.structureJS.extendContext(_); 
 });

@@ -1,17 +1,21 @@
-structureJS.module('Link', function(require){
+window.structureJS.module('Link', function(require){
+
+'use strict';
 
 var _ = this;
 var Map = require('Map');
 var Interpolate = require('Interpolate');
 var System = require('System');
+var State = require('State');
+
 return {
   
   bindModel : function(compiledScopes){
-    var updateObj = Object.create(null);
+
     /*get model name names*/
-    Map.forEach(function(ctx, modelName){
+    Map.forEach(function(ctx){
       /*get model attribute names*/
-      Map.forEach(modelName, function(ctx, attribName){
+      Map.forEach(ctx.modelName, function(ctx){
         Interpolate.interpolate( ctx.modelName, ctx.modelAtrribName, 
                                   Map.getAttribute(ctx.modelName,ctx.modelAtrribName), compiledScopes);
       });

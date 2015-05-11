@@ -1,10 +1,11 @@
-structureJS.module('ModelAPI', function(require){
+window.structureJS.module('ModelAPI', function(require){
+
+'use strict';
 
 var _ = this;
 var Model = require('ModelHeader');
 var Map = require('Map');
 var Interpolate = require('Interpolate');
-var State = require('State');
 
 /************************GENERAL************************************/
 
@@ -28,86 +29,103 @@ Model.prototype.unlisten = function(attributeName, func){
 };
 
 Model.prototype.save = function(){
+
   var output = '';
-  if(!_.isDef(this.attributes['__meta__']))
-    this.attributes['__meta__'] = {};
+  var attrib = null;
+  
+  if(!_.isDef(this.attributes.__meta__)){
+    this.attributes.__meta__ = {};
+  }
   
   for(var attribName in this.attributes){
-    var attrib = this.attributes[attribName];
-    if(_.isArray(attrib)){
-      for(var arrProp in attrib){
+  
+    if(!this.attributes.hasOwnProperty(attribName)) continue;
+    if(!_.isArray(attrib = this.attributes[attribName])) continue;
+    
+    for(var arrProp in attrib){
+      if(!attrib.hasOwnProperty(arrProp)) continue;
       
-        if(attrib.hasOwnProperty(arrProp) && !_.isInt(arrProp)){
-           
-           if(!_.isDef(this.attributes['__meta__'][attribName])){
-            this.attributes['__meta__'][attribName] = {};
-           }
-           
-           this.attributes['__meta__'][attribName][arrProp] = 
-            (_.isString(attrib[arrProp])) ? 
-              attrib[arrProp] :
-              JSON.stringify(attrib[arrProp]);
-        }
+      if(!attrib.hasOwnProperty(arrProp) || _.isInt(arrProp)) continue;
+         
+      if(!_.isDef(this.attributes.__meta__[attribName])){
+        this.attributes.__meta__[attribName] = {};
       }
+
+      this.attributes.__meta__[attribName][arrProp] = 
+        (_.isString(attrib[arrProp])) ? attrib[arrProp] : JSON.stringify(attrib[arrProp]);
       
     }
+
   }
+  
   output = JSON.stringify(this.attributes);
-  delete this.attributes['__meta__'];
+  delete this.attributes.__meta__;
+  
   if(_.isDef(window.sessionStorage)){
     window.sessionStorage[this.modelName] = output;
   }
+  
   return output;
 };
 
 Model.prototype.load = function(jsonString){
-var thawed, thawFailed = false;
+
+  var thawed = null;
+  var thawFailed = false;
+  var meta = null;
+  var metaProp = null;
+  var thawedItem = null;
   
   if(_.isDef(window.sessionStorage) && !_.isDef(jsonString)){
     jsonString = window.sessionStorage[this.modelName];
     window.sessionStorage.removeItem(this.modelName);
   }
+  
   try{
     thawed = JSON.parse(jsonString);
   }catch(e){
-    thawFailed = true
+    thawFailed = true;
   }
   
-  if(thawFailed == true){
+  if(thawFailed === true){
     _.log('ERROR: Frozen item was not proper JSON. Thaw failed.');
     return;
   }
-  
-  var meta,
-    metaProp,
-    thawedItem;
-  
+
   for(var prop in thawed){
-    if(prop != '__meta__')
-      this[prop] = thawed[prop];
+    if(thawed.hasOwnProperty(prop) && prop != '__meta__'){
+      this.attributes[prop] = thawed[prop];
+    }
   }
   
-  if(_.isDef(meta = thawed['__meta__'])){
+  if(_.isDef(meta = thawed.__meta__)){
     /*Reinstate meta*/
-    for(var prop in meta){
-      metaProp = meta[prop];
+    for(var prop2 in meta){
+      
+      if(!meta.hasOwnProperty(prop2)) continue;
+      
+      metaProp = meta[prop2];
+      
       for(var item in metaProp){
-        if(_.isDef(this.attributes[prop])){
+        
+        if(!metaProp.hasOwnProperty(item)) continue;
+        
+        if(_.isDef(this.attributes[prop2])){
           try{
             thawedItem = JSON.parse(metaProp[item]);
           }catch(e){
             thawedItem = metaProp[item];
           }
           if(item == '_value_'){
-            this.attributes[prop]['current_selection'] = thawedItem;
+            this.attributes[prop2].current_selection = thawedItem;
           }
-          this.attributes[prop][item] = thawedItem;
+          this.attributes[prop2][item] = thawedItem;
         }
       }
       
     }
   }
-  
+  return this.attributes;
 };
 
 });

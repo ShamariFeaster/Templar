@@ -1,4 +1,6 @@
-structureJS.module('ModelFilter', function(require){
+window.structureJS.module('ModelFilter', function(require){
+
+'use strict';
 
 var _ = this;
 var Model = require('ModelHeader');
@@ -7,13 +9,13 @@ var Interpolate = require('Interpolate');
 
 
 Model.prototype.sort = function(attribName, pageNum, sortFunc){
-  var chain = Object.create(null),
-      Model = this,
-      oldPageNum = (_.isDef(Model.limitTable[attribName])) ? Model.limitTable[attribName].page : 0,
-      oldLimit = 0,
-      A_FIRST = -1,
-      B_FIRST = 1,
-      NO_CHANGE = 0;
+  var chain = {};
+  var Model = this;
+  var oldPageNum = (_.isDef(Model.limitTable[attribName])) ? Model.limitTable[attribName].page : 0;
+  var oldLimit = 0;
+  var A_FIRST = -1;
+  var B_FIRST = 1;
+  var NO_CHANGE = 0;
       
   chain.target = Map.getAttribute(Model.modelName, attribName);
   /*substituting target for the page slice. Also need to set the 'page' meta-data
@@ -62,35 +64,37 @@ Model.prototype.sort = function(attribName, pageNum, sortFunc){
   chain.arePastPropsAligned = function(a,b){
     var pastPropsAligned = true;
     for(var i = 0; i < chain.prevProps.length; i++){
-      pastPropsAligned &= (a[chain.prevProps[i]] == b[chain.prevProps[i]]);
+      pastPropsAligned = pastPropsAligned && (a[chain.prevProps[i]] === b[chain.prevProps[i]]);
     }
     return pastPropsAligned;
   };
   
   /* we wrap custom sorter so that we can make sure past orderBy orderings are respected */
   chain.getSorter = function(func){
+  
     var wrapped = function(a,b){
       var sortAction = func.call(null,a,b);
-      sortAction = (chain.arePastPropsAligned(a, b) == true) ? sortAction : NO_CHANGE;
+      sortAction = (chain.arePastPropsAligned(a, b) === true) ? sortAction : NO_CHANGE;
       return sortAction;
     };
+    
     return (_.isFunc(func)) ? wrapped : chain.sorter;
   };
   
-  chain.sorter = function(a,b){
-    var orig_a = a,
-        orig_b = b,
-        a = (!_.isNull(chain.propName)) ? a[chain.propName] : a,
-        b = (!_.isNull(chain.propName)) ? b[chain.propName] : b,
-        sortAction = NO_CHANGE;
+  chain.sorter = function(_a,_b){
+    var orig_a = _a;
+    var orig_b = _b;
+    var sortAction = NO_CHANGE;
+    var a = (!_.isNull(chain.propName)) ? _a[chain.propName] : _a;
+    var b = (!_.isNull(chain.propName)) ? _b[chain.propName] : _b;
         
     if(!_.isDef(a) || !_.isDef(b)){
       return NO_CHANGE;
     }
 
-    sortAction = (b == a) ? NO_CHANGE : (b < a) ? B_FIRST : A_FIRST;
-    sortAction = (chain.arePastPropsAligned(orig_a, orig_b) == true) ? sortAction : NO_CHANGE;
-    return sortAction
+    sortAction = (b === a) ? NO_CHANGE : (b < a) ? B_FIRST : A_FIRST;
+    sortAction = (chain.arePastPropsAligned(orig_a, orig_b) === true) ? sortAction : NO_CHANGE;
+    return sortAction;
   };
     
   chain.orderBy = function(propName, sortFunc){
@@ -107,22 +111,21 @@ Model.prototype.sort = function(attribName, pageNum, sortFunc){
     chain.insertSortedSlice(chain.target, Model, attribName, pageNum);
     chain.prevProps.push(propName);
     return chain;
-  }
+  };
 
   chain.target.sort(chain.getSorter(sortFunc));
   chain.insertSortedSlice(chain.target, Model, attribName, pageNum);
   return chain;
   
-}
+};
 
 Model.prototype.sortCurrentPageOf = function(attribName){
-  var chain = Object.create(null),
-      Model = this,
-      limitTable = Model.limitTable[attribName];
+  var Model = this;
+  var limitTable = Model.limitTable[attribName];
       
   if(_.isDef(limitTable)){
     return Model.sort(attribName, limitTable.currentPage);
   }
-}
+};
 
 });

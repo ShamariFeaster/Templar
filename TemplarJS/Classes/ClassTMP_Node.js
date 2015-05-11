@@ -1,14 +1,18 @@
-structureJS.module('TMP_Node', function(require){
+window.structureJS.module('TMP_Node', function(){
+
+'use strict';
+
 var _ = this;
+
 var TMP_Node = function(node, modelName, attribName, index){
   if(!(this instanceof TMP_Node))
-    return new TMP_Node(node, id, modelName, attribName, index);
+    return new TMP_Node(node, modelName, attribName, index);
     
   this.node = node;
   this.modelName = modelName;
   this.attribName = attribName;
   this.index = (_.isDef(index))? index : -1;
-  this.symbolMap = Object.create(null);
+  this.symbolMap = {};
   this.hasNonTerminals = false;
   this.embeddedModelAttribs = {};
   this.embeddedRepeats = {};
@@ -32,7 +36,7 @@ TMP_Node.prototype.inheritToken = function(Token){
     this.repeatIndex = Token.repeatIndex;
     this.indexQueue = Token.indexQueue.slice(0);
   }
-}
+};
 
 return TMP_Node;
 

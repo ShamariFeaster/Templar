@@ -1,13 +1,12 @@
-structureJS.module('Map', function(require){
+window.structureJS.module('Map', function(require){
 
 var _ = this;
-var DOM = require('DOM');
-var _repeatTable = Object.create(null);/*modelName : { attribName : node}*/
-var _controlTable = Object.create(null);/*ctrlId : [ctrl1, ctrl2,......]*/
-var _map = Object.create(null);/*no prototype chain, better iteration performance >= IE9*/
+
+var _repeatTable = {};/*modelName : { attribName : node}*/
+var _map = {};/*no prototype chain, better iteration performance >= IE9*/
   /*Add system event types to listener pool*/
-_map[_.SYSTEM_EVENT_TYPES.system] = Object.create(null);
-_map[_.SYSTEM_EVENT_TYPES.system]['listeners'] = Object.create(null);
+_map[_.SYSTEM_EVENT_TYPES.system] = {};
+_map[_.SYSTEM_EVENT_TYPES.system].listeners = {};
 
 var TMP_Node = require('TMP_Node');
 
@@ -45,7 +44,7 @@ return {
   
   addRepeatBaseNode : function(tmp_node){
     if(!_.isDef(_repeatTable[tmp_node.modelName])){
-      _repeatTable[tmp_node.modelName] = Object.create(null);
+      _repeatTable[tmp_node.modelName] = {};
     }
     
     if(!_.isDef(_repeatTable[tmp_node.modelName][tmp_node.attribName])){
@@ -74,12 +73,14 @@ return {
   },
   /*Checks currentScope against a comma-separated list of scopes*/
   isInScopeList : function(currentScope, compiledScopes, tryMatchTime){
-    var scopeListParts = null,
-        currScopeParts = (_.isDef(currentScope)) ? currentScope.split(' ') : [],
-        compiledScopes = (_.isDef(compiledScopes)) ? compiledScopes.split(',') : [],
-        tryMatchTime = (_.isDef(tryMatchTime)) ? tryMatchTime : false;
-        inScope = false;
-        
+    
+    var scopeListParts = null;
+    var currScopeParts = (_.isDef(currentScope)) ? currentScope.split(' ') : [];    
+    var inScope = false;
+    
+    tryMatchTime = (_.isDef(tryMatchTime)) ? tryMatchTime : false;
+    compiledScopes = (_.isDef(compiledScopes)) ? compiledScopes.split(',') : [];
+    
     if(compiledScopes.length > 0){
       /*incorrectly formatted scopes get set to [nuul,null]*/
       currScopeParts = (currScopeParts.length > 1) ? currScopeParts : [null, null];
@@ -94,7 +95,7 @@ return {
             continue;
             
           if(currScopeParts[0] == scopeListParts[i][0]){
-            inScope = (tryMatchTime == true) ? (true && (currScopeParts[1] == scopeListParts[i][1])) : true;
+            inScope = (tryMatchTime === true) ? (true && (currScopeParts[1] == scopeListParts[i][1])) : true;
             break;
           }
         
@@ -105,10 +106,11 @@ return {
   },
 
   forEach : function(modelName, attribName, mapFunction){
-    //__modelMap[modelName] = {modelObj : modelObj, nodes : Object.create(null), api : api, listeners : Object.create(null)};
+    //__modelMap[modelName] = {modelObj : modelObj, nodes : {}, api : api, listeners : {}};
     var target = null;
-    var Map = this;
-    var ctx = Object.create(null);
+    var ctx = {};
+    var modelAttribName = '';
+    
     ctx.endingIndex = 0;
     ctx.modelName = '';
     ctx.modelAtrribName = '';
@@ -123,17 +125,7 @@ return {
     ctx.modelAttribLength = 0;
     ctx.removeItem = function(i){
       ctx.target.splice(i, 1);
-      /*
-      var indexCnt = Object.create(null);
-      
-      for(var i = 0; i < ctx.target.length; i++ ){
-        if(ctx.target[i].index > _.UNINDEXED)
-          indexCnt[ctx.target[i].index] = true;
-      }
-      ctx.modelAttribLength = Object.keys(indexCnt).length;
-      */
       ctx.index--;
-
     };
 
     /*model names*/
@@ -142,30 +134,33 @@ return {
       mapFunction = modelName;
       target = _map;
       for(var key in target){
-          mapFunction.call(null, {modelName : key}, key);
-        
+        if(!target.hasOwnProperty(key)) continue;
+        mapFunction.call(null, {modelName : key}, key);
       }
+      
     /*model attribute names*/
     }else if(!_.isFunc(modelName) && _.isFunc(attribName)){ 
     
       mapFunction = attribName;
-      var modelAttribName = '';
+      modelAttribName = '';
 
-      target = (_.isDef(_map[modelName]) && _.isDef(_map[modelName]['nodeTable'])) ? 
-                  _map[modelName]['nodeTable'] : Object.create(null);
+      target = (_.isDef(_map[modelName]) && _.isDef(_map[modelName].nodeTable)) ? 
+                  _map[modelName].nodeTable : {};
                   
-      for(var key in target){
+      for(var key2 in target){
+        if(!target.hasOwnProperty(key2)) continue;
+        
         ctx.modelName = modelName;
-        ctx.modelAtrribName = key;
-        mapFunction.call(null, ctx, key);
+        ctx.modelAtrribName = key2;
+        mapFunction.call(null, ctx, key2);
       }
     /*model attribute node tables (index table and interpolatation array)*/
     }else if(!_.isFunc(modelName) && !_.isFunc(attribName) && _.isFunc(mapFunction)){
-      var tmp_node = null,
-          indexCnt = {},
-          startingLength;
-      if( _.isDef(_map[modelName]['nodeTable'][attribName]) ){
-        ctx.target = _map[modelName]['nodeTable'][attribName]['nodes'];
+      var tmp_node = null;
+      var indexCnt = {};
+      
+      if( _.isDef(_map[modelName].nodeTable[attribName]) ){
+        ctx.target = _map[modelName].nodeTable[attribName].nodes;
         /* I'm trying to elimante the use of ctx.stop. The goal is to allow the use of repeated
             array length (and other props) in templates. This is currently being blocked by 2 things.
             First, Map.destroyRepeatTree() was blowing up all cahced nodes indexed in the attribName.
@@ -190,7 +185,6 @@ return {
           ctx.modelName = modelName;
           ctx.modelAtrribName = attribName;
           ctx.modelAttribIndex = tmp_node.index;
-          ctx.key = key;
           ctx.hasAttributes = (Object.keys(ctx.target[ctx.index].symbolMap).length > 0) ? true : false;
           mapFunction.call(null, ctx, tmp_node);
           
@@ -208,11 +202,11 @@ return {
     /*If user references unknown model in template we get this error*/
     if(_.isDef(_map[tmp_node.modelName])){
 
-      if( !_.isDef(_map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]) ){
-        _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName] = { nodes : []};
+      if( !_.isDef(_map[tmp_node.modelName].nodeTable[tmp_node.attribName]) ){
+        _map[tmp_node.modelName].nodeTable[tmp_node.attribName] = { nodes : []};
       }
 
-      _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]['nodes'].push(tmp_node);
+      _map[tmp_node.modelName].nodeTable[tmp_node.attribName].nodes.push(tmp_node);
     }else{
       _.log('WARNING: Model "' + tmp_node.modelName + ' Is Undeclared.');
     }
@@ -227,7 +221,7 @@ return {
         get : function(){ return model.currentPageOf(attribName);}
       });
       Object.defineProperty(value, 'totalPages', {
-        set : function(val){},
+        set : function(){},
         get : function(){return model.totalPagesOf(attribName);}
       });
       Object.defineProperty(value, 'limit', {
@@ -244,11 +238,12 @@ return {
     
   },
   getPageSlice : function(Model, attributeName, target){
-    var start = 0,
-        end = target.length,
-        limit = 0, 
-        page = 0,
-        results = target;
+    var start = 0;
+    var end = target.length;
+    var limit = 0;
+    var page = 0;
+    var results = target;
+    
     if(_.isDef(Model.limitTable[attributeName]) && _.isArray(target)){
       page = Model.limitTable[attributeName].page;
       limit = Model.limitTable[attributeName].limit;
@@ -271,16 +266,16 @@ return {
       return null;
       
     var returnVal = null,
-        Model = _map[modelName]['api'];
+        Model = _map[modelName].api;
     
     
-    if(_.isDef(_map[modelName]) && _.isDef(_map[modelName]['modelObj'][attribName])){
-      returnVal = _map[modelName]['modelObj'][attribName];
+    if(_.isDef(_map[modelName]) && _.isDef(_map[modelName].modelObj[attribName])){
+      returnVal = _map[modelName].modelObj[attribName];
     }
     
     /*We should always pull the filtered subset if a static filter has been applied*/
-    if(_.isDef(_map[modelName]['filterResults'][attribName])){
-      returnVal = _map[modelName]['filterResults'][attribName];
+    if(_.isDef(_map[modelName].filterResults[attribName])){
+      returnVal = _map[modelName].filterResults[attribName];
     }
     
     /*Get page, if limit has been defined*/    
@@ -293,8 +288,8 @@ return {
       attrib during filtering so instead we create a link to the filtered version. This is signaled
       by the existence of an entry in the Model's cachedResults with a key of the model attrib name.
       This link is broken when the filter fails by removing the entry from the link table.*/
-    if(_.isDef(_map[modelName]['cachedResults'][attribName])){
-      returnVal = _map[modelName]['cachedResults'][attribName];
+    if(_.isDef(_map[modelName].cachedResults[attribName])){
+      returnVal = _map[modelName].cachedResults[attribName];
     }
     
 
@@ -317,13 +312,14 @@ return {
     if(!_.isDef(_map[TMP_node.modelName])) 
       return null;
       
-    var returnVal = null,
-        attribute = null,
-        prop = null,
-        queue = TMP_node.indexQueue.slice(0),
-        modelName = TMP_node.modelName,
-        attribName = TMP_node.attribName,
-        Model = _map[modelName]['api'];
+    var returnVal = null;
+    var attribute = null;
+    var prop = null;
+    var queue = TMP_node.indexQueue.slice(0);
+    var modelName = TMP_node.modelName;
+    var attribName = TMP_node.attribName;
+    var Model = _map[modelName].api;
+    
     attribute = returnVal = this.getAttribute(modelName,attribName);
     if(!_.isNull(attribute)){
       if(_.isArray(attribute) || _.isObj(attribute)){
@@ -336,7 +332,7 @@ return {
             returnVal = Model.attributes[attribName].length;
           } 
         }else{
-          while((prop = queue.shift()) != null ){
+          while((prop = queue.shift()) !== null ){
             returnVal = attribute = attribute[prop];
           }
         }
@@ -355,13 +351,13 @@ return {
   
   setAttribute : function(modelName, attribName, value){
     var returnVal = null;
-    if(_.isDef(_map[modelName]) && _.isDef(_map[modelName]['modelObj'][attribName])){
+    if(_.isDef(_map[modelName]) && _.isDef(_map[modelName].modelObj[attribName])){
       
       if(_.isArray(value)){
-        this.annotateWithLimitProps(_map[modelName]['api'], attribName, value);
+        this.annotateWithLimitProps(_map[modelName].api, attribName, value);
       }
       
-      _map[modelName]['modelObj'][attribName] = value;
+      _map[modelName].modelObj[attribName] = value;
     }
     return returnVal;
   },
@@ -370,19 +366,19 @@ return {
     if(!_.isDef(_map[token.modelName])) 
       return null;
       
-    var lastRef = null,
-        lastProp = null;
-        attribute = null,
-        prop = null,
-        queue = token.indexQueue.slice(0),
-        modelName = token.modelName,
-        attribName = token.attribName,
-        Model = _map[modelName]['api'];
+    var lastRef = null;
+    var lastProp = null;
+    var attribute = null;
+    var prop = null;
+    var queue = token.indexQueue.slice(0);
+    var modelName = token.modelName;
+    var attribName = token.attribName;
+
     
     if(_.isDef(attribute = this.getAttribute(modelName,attribName))){
       if(_.isArray(attribute) || _.isObj(attribute)){
 
-        while((prop = queue.shift()) != null && _.isDef(attribute[prop])){
+        while((prop = queue.shift()) !== null && _.isDef(attribute[prop])){
           lastRef = attribute;
           lastProp = prop;
           attribute = attribute[prop];
@@ -400,41 +396,43 @@ return {
   
   getListeners : function(modelName, attributeName){
     var listeners = [];
-    if(_.isDef(_map[modelName]['listeners'][attributeName])){
-      listeners = _map[modelName]['listeners'][attributeName];
+    if(_.isDef(_map[modelName].listeners[attributeName])){
+      listeners = _map[modelName].listeners[attributeName];
     }
     
     return listeners;
   },
   getFuncHash : function(func){
-    var string = func.toString(),
-        hash = string.length + string.charAt(string.length/2);
+    var string = func.toString();
+    var hash = string.length + string.charAt(string.length/2);
+    
     return hash;
   },
   setListener : function(modelName, attributeName, listener, isFilterListener){        
     if(_.isFunc(listener)){
       var hash = this.getFuncHash(listener);
-      if(_.isDef(isFilterListener) && isFilterListener == true){
+      if(_.isDef(isFilterListener) && isFilterListener === true){
         hash = '_LIVE_FILTER_' + hash + Math.random();
         _.log('Adding duplicate with hash ' + hash + ' on ' + modelName + '.' + attributeName);
       }
 
-      if(!_.isDef(_map[modelName]['listeners'][attributeName])){
-        _map[modelName]['listeners'][attributeName] = Object.create(null);
+      if(!_.isDef(_map[modelName].listeners[attributeName])){
+        _map[modelName].listeners[attributeName] = {};
       }
       
-      _map[modelName]['listeners'][attributeName][hash] = listener;
+      _map[modelName].listeners[attributeName][hash] = listener;
     }        
   },
   
   removeAllListeners : function(modelName, attribName){
-    delete _map[modelName]['listeners'][attribName];
+    delete _map[modelName].listeners[attribName];
   },
   
   removeListener : function(modelName, attribName, listener){
-    var listeners = _map[modelName]['listeners'][attribName],
-        needleHash = this.getFuncHash(listener),
-        deleteFunc = false;
+    var listeners = _map[modelName].listeners[attribName];
+    var needleHash = this.getFuncHash(listener);
+
+    
     for(var haystackHash in listeners){
       if(needleHash == haystackHash){
         delete listeners[haystackHash];
@@ -454,10 +452,10 @@ return {
   },
   
   removeFilterListeners : function(modelName, attribName){
-    if(_.isDef(_map[modelName]['listeners'][attribName])){
-      var listeners = _map[modelName]['listeners'][attribName];
+    if(_.isDef(_map[modelName].listeners[attribName])){
+      var listeners = _map[modelName].listeners[attribName];
       for(var hash in listeners){
-        if(hash.indexOf('_LIVE_FILTER_') == 0){
+        if(hash.indexOf('_LIVE_FILTER_') === 0){
           _.log('REMOVING Listener with hash: ' + hash);
           delete listeners[hash];
         }
@@ -468,7 +466,7 @@ return {
   getModel : function(modelName){
     var model = null;
     if(this.exists(modelName)){
-      model = _map[modelName]['api'];
+      model = _map[modelName].api;
     }else{
       _.log('WARNING: Attempt To Get Model "' + modelName + '" Failed.');
     }
@@ -476,8 +474,8 @@ return {
   },
   
   initModel : function(model_obj){
-    _map[model_obj.modelName] = {modelObj : model_obj.attributes, nodeTable : Object.create(null),
-                      api : model_obj, listeners : Object.create(null), cachedResults : model_obj.cachedResults,
+    _map[model_obj.modelName] = {modelObj : model_obj.attributes, nodeTable : {},
+                      api : model_obj, listeners : {}, cachedResults : model_obj.cachedResults,
                       limitTable : model_obj.limitTable, filterResults : model_obj.filterResults};
                       
   },
@@ -489,7 +487,7 @@ return {
   
   /*----REPEAT INTERPOLATION CLEANUP-----------------*/
   destroyRepeatTree : function(modelName, attribName){
-    var _this = this;
+
     this.forEach(modelName, attribName, function(ctx, tmp_node){
     
       if(tmp_node.index > -1 || !document.body.contains(tmp_node.node)){
@@ -508,12 +506,14 @@ return {
   pruneDeadEmbeds : function(){
     var Map = this;
         
-    Map.forEach(function(ctx, modelName){
-      Map.forEach(ctx.modelName, function(ctx, attribName){
+    Map.forEach(function(ctx){
+      Map.forEach(ctx.modelName, function(ctx){
         Map.forEach(ctx.modelName, ctx.modelAtrribName, function(ctx, tmp_node){
           var node = tmp_node.node;
-          if((!_.isNullOrEmpty(tmp_node.repeatModelName) && !_.isNullOrEmpty(tmp_node.repeatAttribName)) 
-            && !document.body.contains(node)){
+          if((!_.isNullOrEmpty(tmp_node.repeatModelName) && 
+            !_.isNullOrEmpty(tmp_node.repeatAttribName)) && 
+            !document.body.contains(node)){
+            
             ctx.removeItem(ctx.index);
           }
         });
@@ -529,14 +529,14 @@ return {
     if(_.isNullOrEmpty(compiledScopes) )
       return;
     
-    var attribNodes = null,
-        nodeScopeParts = null,
-        interpolateNodes = null,
-        indexNodes = null,
-        Map = this;
+
+    var nodeScopeParts = null;
+
+    
+    var Map = this;
         
-    Map.forEach(function(ctx, modelName){
-      Map.forEach(ctx.modelName, function(ctx, attribName){
+    Map.forEach(function(ctx){
+      Map.forEach(ctx.modelName, function(ctx){
         /*remove listeners*/
           
         Map.forEach(ctx.modelName, ctx.modelAtrribName, function(ctx, tmp_node){
@@ -546,8 +546,8 @@ return {
             if(Map.isInScopeList(tmp_node.scope, compiledScopes) && !Map.isInScopeList(tmp_node.scope, compiledScopes, true)){
               ctx.removeItem(ctx.index);
               //Map.removeListener(ctx.modelName, ctx.modelAtrribName);
-              _.log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName 
-                  + ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
+              _.log('Pruning ' + node.tagName + ' for ' + ctx.modelName + '.' + ctx.modelAtrribName + 
+                  ' scope: ' + nodeScopeParts[0] + ' ' + nodeScopeParts[1]);
             }
           }
         });
@@ -559,7 +559,7 @@ return {
   },
   /*----DEBUGGING-----------------*/
   getInternalModel : function(modelName){
-    results = null;
+    var results = null;
     if(this.exists(modelName))
       results = _map[modelName];
     return results;

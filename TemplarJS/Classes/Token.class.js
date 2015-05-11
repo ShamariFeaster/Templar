@@ -1,5 +1,9 @@
-structureJS.module('Token', function(require){
+window.structureJS.module('Token', function(){
+
+'use strict';
+
 var _ = this;
+
 var Token = function(modelName, attribName){
   if(!(this instanceof Token))
     return new Token(modelName, attribName);

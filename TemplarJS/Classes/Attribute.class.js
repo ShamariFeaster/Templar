@@ -1,4 +1,6 @@
-structureJS.module('Attribute', function(require){
+window.structureJS.module('Attribute', function(){
+
+"use strict";
 
 var _ = this;
 
@@ -14,19 +16,19 @@ var Attribute = function(name){
 var _isAttribute = function(name){
   var result = false;
   if(_.isString(name)){
-    result = _.isDef(Templar._attributes[name]);
+    result = _.isDef(window.Templar._attributes[name]);
   }
   return result;
-}
+};
 
 Attribute.prototype.getAttribute = function(name){
   var result = null,
       normalizedName = name.toLowerCase();
   if(_isAttribute(normalizedName)){
-    result = Templar._attributes[normalizedName];
+    result = window.Templar._attributes[normalizedName];
   }
   return result;
-}
+};
 
 return Attribute;
 

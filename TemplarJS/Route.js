@@ -1,42 +1,43 @@
-structureJS.module('Route', function(require){
+window.structureJS.module('Route', function(require){
+'use strict';
 
-var _ = this,
-    _routeTree = Object.create(null),
-    _routeObjArray = [],
-    _authorizationSet = false,
-    _authorizationFunc = function(){ return true;},
-    _authenticatorSet = false,
-    _authenticatorFunc = function(){ return true;},
-    _deAuthenticatorSet = false,
-    _deAuthenticatorFunc = function(){ return true;},
-    _clientCookie = (_.isDef(Storage)) ? sessionStorage : {},
-    State = require('State'),
-    DOM = require('DOM'),
-    Map = require('Map'),
-    Interpolate = require('Interpolate'),
-    Circular = structureJS.circular();
+var _ = this;
+var _routeTree = {};
+var _routeObjArray = [];
+var _authorizationSet = false;
+var _authorizationFunc = function(){ return true;};
+var _authenticatorSet = false;
+var _authenticatorFunc = function(){ return true;};
+var _deAuthenticatorSet = false;
+var _deAuthenticatorFunc = function(){ return true;};
+var _clientCookie = (_.isDef(window.Storage)) ? sessionStorage : {};
+var State = require('State');
+var DOM = require('DOM');
+var Map = require('Map');
+var Interpolate = require('Interpolate');
+var Bootstrap = require('Bootstrap');
 
 return {
-  routeTree : Object.create(null),
+  routeTree : {},
   buildRouteTree : function(routes){
-    var  routeObj = Object.create(null),
-         ambiguityTree = Object.create(null),
-         normalizedName = null,
-         routePartName = '',
-         tmp = null,
-         tat = null,
-         terminalBranchCreated = false,
-         nonAmbiguousBranchCreated = false,
-         lookahead = null,
-         route = '',
-         parts = null,
-         thisPart = '',
-         thisType = null,
-         nextPart = null,
-         nextType = null,
-         target = '',
-         partial = '',
-         fallback = '';
+    var routeObj = {};
+    var ambiguityTree = {};
+    var normalizedName = null;
+    var routePartName = '';
+    var tmp = null;
+    var tat = null;
+    var terminalBranchCreated = false;
+    var nonAmbiguousBranchCreated = false;
+
+    var route = null;
+    var parts = null;
+
+    var thisType = null;
+    var nextPart = null;
+    var nextType = null;
+    var target = '';
+    var partial = '';
+    var fallback = '';
   
 
     for(var i = 0; i < routes.length; i++){
@@ -50,7 +51,7 @@ return {
       
       for(var x = 0; x < parts.length; x++){
         /*this nullifies no leading / or trailing /*/
-        if(parts[x] == '' || parts[x] == '#')
+        if(parts[x] === '' || parts[x] == '#')
           continue;
 
         
@@ -69,7 +70,7 @@ return {
         normalizedName = (_.NT_REGEX.test(parts[x])) ? 'NT' : routePartName;
         
         if(!_.isDef(tmp[routePartName])){
-          tmp[routePartName] = Object.create(null);
+          tmp[routePartName] = {};
           tmp[routePartName].endOfChain = false;
           tmp[routePartName].thisVal = routePartName;
           tmp[routePartName].thisType = thisType;
@@ -82,7 +83,7 @@ return {
         
         /*Make parallel tree with NT names normalized so they don't spawn branches. */
         if(!_.isDef(tat[normalizedName])){
-          tat[normalizedName] = Object.create(null);
+          tat[normalizedName] = {};
           nonAmbiguousBranchCreated = true;
         }
         
@@ -95,7 +96,7 @@ return {
       }
 
       /*we can get away with not creatin a new branch if pattern before us has same pattern but longer*/
-      if(!terminalBranchCreated && tmp.endOfChain == true){
+      if(!terminalBranchCreated && tmp.endOfChain === true){
         throw 'Error: Duplicate Route "' + routes[i].route + '" Detected';
       }
 
@@ -121,16 +122,15 @@ return {
     this.buildRouteTree(_routeObjArray);
   },
   resolveRoute : function(route){
-    var parts = route.trim().split('/'),
-      nonTerminalValues = [],
-      key = '',
-      skipKeyAssignment = false;
-  
-    routePart = _routeTree;
+    var parts = route.trim().split('/');
+    var nonTerminalValues = [];
+    var key = '';
+
+    var routePart = _routeTree;
    
     for(var i = 0; i < parts.length; i++){
       
-      if(parts[i] == '' || parts[i] == '#')
+      if(parts[i] === '' || parts[i] == '#')
           continue;
           
       if(_.isDef(routePart.lookaheadType) && routePart.lookaheadType == _.NON_TERMINAL){
@@ -147,7 +147,7 @@ return {
         throw 'Error: Route "' + route + '" not found';
     }
     
-    if(routePart.endOfChain == true)
+    if(routePart.endOfChain === true)
       _.log('Route matched: ' + route + ' with ' + routePart.route);
     else
       throw 'Route "' + route + '" was only a partial match of declared routes.';
@@ -208,15 +208,11 @@ return {
   /*need de-authenticator function too*/
   handleRoute : function(url){
     var href = DOM.getHashValue(url);
-    
-    /*Hide target node, we will unhide after compilation. Prevents seeing uncompiled template*/
-    var targetId = '',
-        targetNode = document.getElementById(targetId),
-        resolvedRouteObject = null,
-        NTDirectives = null,
-        modelParts = null;
-        
-    if(State.hasDeclaredRoutes == true){
+    var resolvedRouteObject = null;
+    var NTDirectives = null;
+    var modelParts = null;
+    var Route = this;
+    if(State.hasDeclaredRoutes === true){
       try{
         if(this.authorize.call(_clientCookie, {route : href}) === true){
           resolvedRouteObject = Route.resolveRoute(href);
@@ -250,9 +246,8 @@ return {
   },
   /* Opens route */
   open : function(routeId){
-
-    if((resolvedRouteObj = this.handleRoute(routeId)) != null 
-        && resolvedRouteObj !== _.RESTRICTED){
+    var resolvedRouteObj = null;
+    if((resolvedRouteObj = this.handleRoute(routeId)) !== null && resolvedRouteObj !== _.RESTRICTED){
 
       DOM.asynFetchRoutes(resolvedRouteObj, function(){
         State.ignoreHashChange = true;
@@ -270,7 +265,7 @@ return {
   },
   
   openPartial : function(partialUri, targetId){
-    var targetId = (_.isDef(targetId)) ? targetId : _.MAIN_CONTENT_ID;
+    targetId = (_.isDef(targetId)) ? targetId : _.MAIN_CONTENT_ID;
     if(!_.isNullOrEmpty(partialUri)){
       DOM.asynGetPartial(partialUri, Bootstrap.loadPartialIntoTemplate, targetId);
     }
@@ -298,15 +293,16 @@ return {
   },
   
   deferenceNestedRoutes : function(inArr, outArr){
-    var routeName = null,//route1
-        routeObj = '',
-        /*by value b/c we need the partial array for subsequent calls to 
-          DOM.asynFetchRoutes(). We can't consume it so we use the value.*/
-        inArr = inArr.slice(0),
-        isRoute,
-        isString;
-
-    while((routeName = inArr.shift()) != null){
+    var routeName = null;
+    var routeObj = '';
+    var isRoute;
+    var isString;
+    
+    /*by value b/c we need the partial array for subsequent calls to 
+      DOM.asynFetchRoutes(). We can't consume it so we use the value.*/
+    inArr = inArr.slice(0);
+    
+    while((routeName = inArr.shift()) !== null){
     
       if((isString = _.isString(routeName)) && (isRoute = this.isRoute(routeName))){
         routeObj = this.getRouteObj(routeName);
