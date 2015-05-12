@@ -19,7 +19,6 @@ var System = require('System');
 function bootstrapComplete(msg){
   Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.framework_loaded);
   System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.framework_loaded);
-  Bootstrap.bindTargetSetter();
   _.log('Running bootstrap Complete: ' + msg);
 }
 
@@ -31,7 +30,7 @@ function beginBootstrap(scope){
   
   State.compiledScopes += scope + ',';
   
-  if((resolvedRouteObj = Route.handleRoute(window.location.href)) !== null){
+  if(_.isNotNull(resolvedRouteObj = Route.handleRoute(window.location.href))){
     if(!_.isNullOrEmpty(resolvedRouteObj.partial)){
 
       routeContentNode = document.getElementById(resolvedRouteObj.target);
@@ -77,7 +76,7 @@ window.structureJS.done(function(){
       return;
     }
 
-    if((resolvedRouteObj = Route.handleRoute(window.location.href)) !== null){
+    if(_.isNotNull(resolvedRouteObj = Route.handleRoute(window.location.href))){
       DOM.asynFetchRoutes(resolvedRouteObj, function(){
         _.log('asynFetchRoutes complete for ' + resolvedRouteObj.route);
       });

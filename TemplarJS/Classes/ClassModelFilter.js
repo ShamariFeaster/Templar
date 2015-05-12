@@ -130,7 +130,7 @@ Model.prototype.filter = function(attribName){
             var isInputFilter = (chain.liveAndFuncs[i].length === 1);
             passedInputFilter = chain.liveAndFuncs[i].funct.call(null, data.text, chain.propName,
                                                         isInputFilter);
-            overrideDefaultLiveFilter = overrideDefaultLiveFilter || !isInputFilter; 
+            overrideDefaultLiveFilter = overrideDefaultLiveFilter | !isInputFilter; 
           }
           _.log('overrideDefaultLiveFilter: ' + overrideDefaultLiveFilter);
           /*if we passed input filter, we shoould move on to default filter.

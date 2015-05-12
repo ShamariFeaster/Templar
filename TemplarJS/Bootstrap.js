@@ -49,7 +49,7 @@ var Bootstrap = {
       var targetId = (!_.isNullOrEmpty(this.targetId)) ? 
                       this.targetId.replace('#','') 
                       : _.MAIN_CONTENT_ID;
-      var targetNode = (!_.isNull(this.targetNode)) ? this.targetNode : document.getElementById(targetId);
+      var targetNode = (_.isNotNull(this.targetNode)) ? this.targetNode : document.getElementById(targetId);
       //a partial can define parent template dom elements to be hidden
       var timestamp = new Date().getTime();
       var scope = fileName +  ' ' + timestamp;

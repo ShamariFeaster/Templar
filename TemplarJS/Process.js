@@ -9,7 +9,7 @@ var DOM = require('DOM');
 var State = require('State');
 var Attribute = require('Attribute')();
 var Circular = window.structureJS.circular();
-var Interpolate = Circular('Interpolate');   
+
 
 return {
 
@@ -23,7 +23,7 @@ return {
       queue = (_.isArray(Token.indexQueue)) ? Token.indexQueue.slice(0) : [],
       unfoldedIndexes = '';
         
-    while( (prop = queue.shift(queue)) !== null ){
+    while( _.isNotNull(prop = queue.shift(queue)) ){
       unfoldedIndexes += '[' + prop + ']';
     }
     return '{{' + NT + unfoldedIndexes + '}}';
@@ -35,7 +35,7 @@ return {
   
   checkForCustomAttribute : function(node, attribName){
     var customAttribute;
-    if((customAttribute = Attribute.getAttribute(attribName)) !== null){
+    if(_.isNotNull(customAttribute = Attribute.getAttribute(attribName))){
           
       if(!_.isDef(node.__customAttributes__)){
         node._setAttribute = node.setAttribute;
@@ -123,7 +123,7 @@ return {
         preProcessedOutput = attributes[i].value;
           
         _.RX_RPT_SPC_SYM.lastIndex = 0;
-        while((idvRepeatedProperty = _.RX_RPT_SPC_SYM.exec(preProcessedOutput)) !== null){
+        while( _.isNotNull(idvRepeatedProperty = _.RX_RPT_SPC_SYM.exec(preProcessedOutput))){
           hasNonTerminals = true;
           symbol = idvRepeatedProperty[0];
           if(symbol == '{{}}'){
@@ -172,7 +172,7 @@ return {
     preProcessedOutput = TMP_node.node.nodeValue;
     
     _.RX_RPT_SPC_SYM.lastIndex = 0;
-    while( (idvRepeatedProperty = _.RX_RPT_SPC_SYM.exec(TMP_node.node.nodeValue) ) !== null ){
+    while( _.isNotNull(idvRepeatedProperty = _.RX_RPT_SPC_SYM.exec(TMP_node.node.nodeValue) )){
       /*w/ this symbol our token already has instructions to build our NT.
         we use the index of the repeated node to index the attrib our NT
         refers to*/
@@ -204,7 +204,7 @@ return {
     
     _.RX_M_ATTR_TOK.lastIndex = 0;
     /*test if already been annotated as embed, we don't wantv to double that*/
-    while((match = _.RX_M_ATTR_TOK.exec(templateText)) !== null && !/%(\w+)%/.test(templateText)){
+    while(_.isNotNull(match = _.RX_M_ATTR_TOK.exec(templateText)) && !/%(\w+)%/.test(templateText)){
       if(match[1] != TMP_node.modelName || match[2] != TMP_node.attribName){
         TMP_node.embeddedModelAttribs[match[1] + '.' + match[2]] = true;
         annotatedNT = 
@@ -253,7 +253,7 @@ return {
       
       if(nodes[i].nodeType == _.ELEMENT_NODE){
 
-        hasNonTerminals = hasNonTerminals || 
+        hasNonTerminals = hasNonTerminals | 
                         this._preProcessRepeatAttributes(nodes[i], TMP_baseNode, index);
         /*traverse node attributes looking for repeat-specific symbols and replacing them w/ NTs.
             This function would need to take the base node to build the NTs just like _preprocessInPlace()
@@ -277,7 +277,7 @@ return {
         }
         
         if(nodes[i].hasChildNodes())
-          hasNonTerminals = hasNonTerminals || 
+          hasNonTerminals = hasNonTerminals | 
                           this._traverseRepeatNode(nodes[i].childNodes, index, TMP_baseNode);
         else
           continue;
@@ -286,7 +286,7 @@ return {
       if(nodes[i].nodeType == _.TEXT_NODE){
         TMP_textNode = new TMP_Node(nodes[i], TMP_baseNode.modelName, TMP_baseNode.attribName, index);
         TMP_textNode.inheritToken(TMP_baseNode);
-        hasNonTerminals = hasNonTerminals || this._preprocessInPlace(TMP_textNode, index);
+        hasNonTerminals = hasNonTerminals | this._preprocessInPlace(TMP_textNode, index);
         _.mixin(TMP_textNode.embeddedModelAttribs, TMP_baseNode.embeddedModelAttribs);
       }
     }
@@ -316,6 +316,7 @@ return {
     /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
     DOM_Node.addEventListener(eventType, function(e){
       var annotations = DOM.getDOMAnnotations(this);
+      var Interpolate = Circular('Interpolate'); 
       Map.setAttributeWithToken(this.token, e.target.value);
       //Map.setAttribute(annotations.modelName, annotations.attribName, e.target.value);
       /*a change to an input that is interpolated will redraw the input value pushing the cursor 
@@ -351,8 +352,10 @@ return {
   },
   
   addCurrentSelectionToSelect : function(DOM_Node, attrib){
+    //Component has defined current_selection, don't override
+    if(attrib.noClobber === true) return;
     
-    /* init to first value */
+    // init to first value
     if(!_.isDef(attrib.current_selection)){
       attrib._value_ = attrib[0].value || attrib[0];
     }
@@ -368,7 +371,7 @@ return {
           var annotations = DOM.getDOMAnnotations(select);
           var boundProperties = (_.isDef(select.token.indexQueue)) ? 
                                 select.token.indexQueue.slice(0) : [];
-                  
+          var Interpolate = Circular('Interpolate');         
           for(var s = 0; s < select.children.length; s++){
             if(select.children[s].value == value || select.children[s].text == value){
               select.selectedIndex = s;
@@ -428,7 +431,7 @@ return {
         };
       var annotations = DOM.getDOMAnnotations(this);
       var listeners = Map.getListeners(annotations.modelName, annotations.attribName);
-      
+      var Interpolate = Circular('Interpolate'); 
       /*for checkboxes we should not set current_selection to value if it was unchecked*/
       attrib._value_ = (cbObj.checked === true) ? e.target.value : false;
       attrib.checked[this.getAttribute('id')] = cbObj.checked;
@@ -553,7 +556,7 @@ return {
     var TMP_RepeatBase = null;
     var TMP_select = null;
     var __COMPILER_FLG__ = _.COMPILE_ME;
-    
+    var Interpolate = Circular('Interpolate'); 
     switch(type){
     
       case 'SELECT':

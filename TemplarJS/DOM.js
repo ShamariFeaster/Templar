@@ -83,7 +83,7 @@ return {
     var xhr = new XMLHttpRequest();
     var routeObj = null;
     
-    if((routeObj = routes.shift()) !== null){
+    if(_.isNotNull(routeObj = routes.shift())){
       xhr.onload = Circular('Bootstrap').loadPartialIntoTemplate;
       xhr.fileName = routeObj.partial;
       xhr.targetId = routeObj.target;

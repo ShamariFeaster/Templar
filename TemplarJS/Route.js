@@ -247,7 +247,7 @@ return {
   /* Opens route */
   open : function(routeId){
     var resolvedRouteObj = null;
-    if((resolvedRouteObj = this.handleRoute(routeId)) !== null && resolvedRouteObj !== _.RESTRICTED){
+    if(_.isNotNull(resolvedRouteObj = this.handleRoute(routeId)) && resolvedRouteObj !== _.RESTRICTED){
 
       DOM.asynFetchRoutes(resolvedRouteObj, function(){
         State.ignoreHashChange = true;
@@ -302,7 +302,7 @@ return {
       DOM.asynFetchRoutes(). We can't consume it so we use the value.*/
     inArr = inArr.slice(0);
     
-    while((routeName = inArr.shift()) !== null){
+    while(_.isNotNull(routeName = inArr.shift())){
     
       if((isString = _.isString(routeName)) && (isRoute = this.isRoute(routeName))){
         routeObj = this.getRouteObj(routeName);

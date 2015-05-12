@@ -200,6 +200,7 @@ return {
           DOM_Node.insertAdjacentHTML('afterend', component.templateContent);
           addedNodecnt = nodes.length - beforeInsertNodeCnt;
           DOM_component = DOM_Node.nextElementSibling;
+          DOM_component.scope = scope;
           
           /*Transclude content*/
           if(component.transclude === true){
@@ -259,6 +260,20 @@ return {
           
           /*fire onCreate*/
           component.onCreate.call(component, DOM_component);
+          
+          if(_.isNotNull(component.onChange)){
+            (function(component, DOM_component){
+              DOM_component.addEventListener("DOMCharacterDataModified", function(event){
+                component.onChange.call(component, DOM_component, event);
+              });
+            })(component, DOM_component);
+            
+          }
+          
+          component.onDone.node = DOM_component;
+          component.onDone.context = component;
+          window.Templar.done(component.onDone);
+          
           repeatKey = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);
           DOM_Node.parentNode.removeChild(DOM_Node);
           DOM_Node = DOM_component;

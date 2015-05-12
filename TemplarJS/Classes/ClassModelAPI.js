@@ -19,6 +19,25 @@ Model.prototype.listen = function(attributeName, listener){
     Map.setListener(this.modelName, attributeName, listener);
 };
 
+Model.prototype.onAssignment = function(attributeName, listener){
+  this.listen(attributeName, function(e){
+    if(e.type == _.MODEL_EVENT_TYPES.reassignment){
+      listener.call(null,e);
+    }
+  });
+};
+
+Model.prototype.onRepeatDone = function(attributeName, listener){
+  var _this = this;
+  this.listen(attributeName, function(e){
+    if(e.type == _.SYSTEM_EVENT_TYPES.repeat_built && 
+      e.modelName == _this.modelName &&
+      e.attribName == attributeName){
+      listener.call(null, e);
+    }
+  });
+};
+
 Model.prototype.unlisten = function(attributeName, func){
   if(_.isFunc(func)){
     Map.removeListener(this.modelName, attributeName, func);

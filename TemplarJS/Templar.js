@@ -7,7 +7,7 @@ var Map = require('Map');
 var Route = require('Route');
 var Model = require('ModelHeader');
 var System = require('System');
-
+var DOM = require('DOM');
 var Attribute = require('Attribute');
 var Component = require('Component');
 
@@ -19,6 +19,14 @@ Templar._components.length = 0;
 
 Templar._attributes = {};
 Templar._attributes.length = 0;
+
+Templar.addClass = function(node, className){
+  DOM.modifyClasses(node, className, '');
+};
+
+Templar.removeClass = function(node, className){
+  DOM.modifyClasses(node, '', className);
+};
 
 Templar.success = function(partialFileName, onloadFunction){
   var isUnique = true;
@@ -82,7 +90,7 @@ Templar.setDeAuthenticator = function(func){
   Route.setDeAuthenticator(func);
 };
 
-Templar.done = function( func){
+Templar.done = function(func){
   System.setSystemListeners(_.SYSTEM_EVENT_TYPES.link_done, func);
 };
 
@@ -161,6 +169,16 @@ Templar.component = function(name, definitionObj){
           var onCreate = definitionObj.onCreate;
           component.onCreate = (_.isFunc(onCreate)) ? onCreate : function(){};
           break;
+        case 'onDone' :
+          component.onDone = (_.isFunc(definitionObj.onDone)) ? definitionObj.onDone : function(){};
+          break;
+        case 'onChange' :
+          component.onChange = (_.isFunc(definitionObj.onChange)) ? definitionObj.onChange : null;
+          break;
+        case 'onDestroy' :
+          //Un-implemented
+          component.onDestroy = (_.isFunc(definitionObj.onDestroy)) ? definitionObj.onChange : function(){};
+          break;
         default:
           /* allowing component to have static functions and data  */
           component[prop] = definitionObj[prop];
@@ -177,6 +195,7 @@ Templar.component = function(name, definitionObj){
   }
 
 };
+
 
 Templar.RouteObj = Route;
 Templar.Map = Map;

@@ -24,21 +24,23 @@ return {
     }
 
   },
-  
-  dispatchSystemListeners : function(type){
+  //context and node are coming from Component dispatches
+  dispatchSystemListeners : function(type, e){
     if(!_.isNullOrEmpty(type)){
       var listeners = System.getSystemListeners(type);
-          
+      e = (!_.isObj(e)) ? {} : e;
       if(_.SYSTEM_EVENT_TYPES.LIST_TYPE == _.QUEUE){
         for(var i = 0;i < listeners.length; i++){
           if(_.isFunc(listeners[i])){
-            listeners[i].call(null);
+            e.target = listeners[i].node;
+            listeners[i].call(listeners[i].context || null, e);
           }
         }
       }else if(_.SYSTEM_EVENT_TYPES.LIST_TYPE == _.STACK){
         for(var x = listeners.length - 1;x >= 0; x--){
           if(_.isFunc(listeners[x])){
-            listeners[x].call(null);
+            e.target = listeners[x].node;
+            listeners[x].call(listeners[x].context || null, e);
           }
         }
       }
@@ -399,17 +401,19 @@ return {
                 Map.pushNodes(TMP_repeatedNode);
                 if(TMP_repeatedNode.hasNonTerminals === false)
                   TMP_repeatedNode.node.innerHTML = attributeVal[i];
+                //Animation: onEnter
                 TMP_repeatBaseNode.node.parentNode.insertBefore(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
                 Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope, i);
                 Process.preProcessNodeAttributes(TMP_repeatedNode.node, TMP_repeatBaseNode.scope, i);
                 Interpolate.interpolateEmbeddedRepeats(TMP_repeatBaseNode, i);
               }
               Map.pruneDeadEmbeds();
-              Interpolate.dispatchSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built); 
-              System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built);
-              updateObj.type = 'repeat';
+              updateObj.type = _.SYSTEM_EVENT_TYPES.repeat_built;
               updateObj.value = attributeVal;
+              updateObj.modelName = tmp_node.modelName;
+              updateObj.attribName = tmp_node.attribName;
               updateObj.properties = boundProperties;
+              Interpolate.dispatchListeners(listeners, updateObj);
             }
             TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 
             

@@ -332,7 +332,7 @@ return {
             returnVal = Model.attributes[attribName].length;
           } 
         }else{
-          while((prop = queue.shift()) !== null ){
+          while(_.isNotNull(prop = queue.shift())){
             returnVal = attribute = attribute[prop];
           }
         }
@@ -378,7 +378,7 @@ return {
     if(_.isDef(attribute = this.getAttribute(modelName,attribName))){
       if(_.isArray(attribute) || _.isObj(attribute)){
 
-        while((prop = queue.shift()) !== null && _.isDef(attribute[prop])){
+        while(_.isNotNull(prop = queue.shift()) && _.isDef(attribute[prop])){
           lastRef = attribute;
           lastProp = prop;
           attribute = attribute[prop];
@@ -494,7 +494,8 @@ return {
         ctx.removeItem(ctx.index);
       }
 
-      /*only remove visible elements from DOM, don't remove base node from DOM*/
+      //only remove visible elements from DOM, don't remove base node from DOM
+      //Animation: onExit 
       if(document.body.contains(tmp_node.node) && tmp_node.index > _.UNINDEXED){
         tmp_node.node.parentNode.removeChild(tmp_node.node);
         
@@ -542,7 +543,7 @@ return {
         Map.forEach(ctx.modelName, ctx.modelAtrribName, function(ctx, tmp_node){
           var node = tmp_node.node;
           
-          if(( nodeScopeParts = tmp_node.scope.split(' ')) !== null){
+          if( _.isNotNull( nodeScopeParts = tmp_node.scope.split(' ') ) ){
             if(Map.isInScopeList(tmp_node.scope, compiledScopes) && !Map.isInScopeList(tmp_node.scope, compiledScopes, true)){
               ctx.removeItem(ctx.index);
               //Map.removeListener(ctx.modelName, ctx.modelAtrribName);
