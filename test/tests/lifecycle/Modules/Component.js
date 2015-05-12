@@ -38,8 +38,7 @@ Templar.component('test',{
         if(newSelectionFound === false){
           window.Templar.addClass(currentSelection,'selected');
         }
-      },
-      tokens[0].attribute[0]
+      }
     );
   },
   

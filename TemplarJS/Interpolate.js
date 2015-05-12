@@ -264,7 +264,15 @@ return {
     Process.addCurrentSelectionToSelect(tmp_node.node, attributeVal);
   },
   
-  interpolate : function(modelName, attributeName, attributeVal, compiledScopes){  
+  targetedInterpolate : function(tokens){
+    var token = (tokens.length > 0) ? tokens[0] : null;
+    
+    if(!_.isNull(token)){
+      this.interpolate(token.modelName, token.attribName, null, void(0), token);
+    }
+  },
+  
+  interpolate : function(modelName, attributeName, attributeVal, compiledScopes, token){  
     if(!Map.exists(modelName)) return;
 
     var listeners = Map.getListeners(modelName, attributeName);
@@ -287,7 +295,9 @@ return {
         //_.log('Not Interpolating '  + modelName + '.' + attributeName + ' for scope <' + tmp_node.scope + '> not in <' + compiledScopes +'>');
         return;
       }
-        
+      if(_.isDef(token) && !token.equals(tmp_node)){
+        return;
+      }  
       node = tmp_node.node;
       tagName = (tmp_node.isComponent === true) ? 'COMPONENT' : node.tagName;
       tagName = (_.isDef(tmp_node.symbolMap['data-' + _.IE_MODEL_REPEAT_KEY])) ? 'REPEAT' : node.tagName;

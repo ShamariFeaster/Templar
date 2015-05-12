@@ -35,6 +35,7 @@ TMP_Node.prototype.inheritToken = function(Token){
     this.repeatAttribName = Token.repeatAttribName ;
     this.repeatIndex = Token.repeatIndex;
     this.indexQueue = Token.indexQueue.slice(0);
+    this.fullToken = Token.fullToken;
   }
 };
 

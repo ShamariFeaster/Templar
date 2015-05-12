@@ -6,11 +6,17 @@ var _ = this;
 var Model = require('ModelHeader');
 var Map = require('Map');
 var Interpolate = require('Interpolate');
-
+var Circular = window.structureJS.circular();
 /************************GENERAL************************************/
 
 Model.prototype.update = function(attribName){
-  Interpolate.interpolate(this.modelName, attribName, Map.getAttribute(this.modelName, attribName));
+  var tokens = Circular('Compile').getTokens(this.modelName + '.' + attribName, true);
+  if(tokens.length > 0){
+    Interpolate.targetedInterpolate(tokens);
+  }else{
+    Interpolate.interpolate(this.modelName, attribName, Map.getAttribute(this.modelName, attribName));
+  }
+  
 };
 
 /*public*/
@@ -33,7 +39,7 @@ Model.prototype.onRepeatDone = function(attributeName, listener){
     if(e.type == _.SYSTEM_EVENT_TYPES.repeat_built && 
       e.modelName == _this.modelName &&
       e.attribName == attributeName){
-      listener.call(null, e);
+      listener.call(listener, e);
     }
   });
 };

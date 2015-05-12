@@ -19,6 +19,11 @@ var Token = function(modelName, attribName){
   this.indexQueue = [];
 };
 
+Token.prototype.equals = function(target){
+  if(!_.isDef(target.fullToken)) return false;
+  return (target.fullToken.indexOf(this.fullToken) > -1);
+};
+
 return Token;
 
 });

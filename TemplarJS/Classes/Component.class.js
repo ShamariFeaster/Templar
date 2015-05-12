@@ -35,7 +35,7 @@ Component.prototype.dereference = function(NT){
 Component.prototype.defineSelector = function(token, setter, initValue){
   if(_.isArray(token.attribute) && !_.isDef(token.attribute.noClobber)){
     token.attribute.noClobber = true;
-    token.attribute._value_ = initValue || '';
+    token.attribute._value_ = initValue || token.attribute[0];
     Object.defineProperty(token.attribute, 'current_selection',{
       set : function(value){ setter.call(token, value); },
       get : function(){ return token.attribute._value_; },
