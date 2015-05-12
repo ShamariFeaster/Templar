@@ -1,17 +1,17 @@
-<row hideIf="{{AdSearch.returnedAds.length}}" class="my-ad-header">
-  <column colnum="0"><a class="clickable-word" id="ad-search-date-sort">Posted</a></column>
-  <column colnum="1.5"><a class="clickable-word" id="ad-search-title-sort">Title</a></column>
-</row>
+<div hideIf="{{AdSearch.returnedAds.length}}" class="my-ad-header">
+  <div><a class="clickable-word" id="ad-search-date-sort">Posted</a></div>
+  <div><a class="clickable-word" id="ad-search-title-sort">Title</a></div>
+</div>
   
-<row data-apl-repeat="{{AdSearch.returnedAds}}">
-  <row class="my-ad-body">
+<div data-apl-repeat="{{AdSearch.returnedAds}}">
+  <div class="my-ad-body">
   
-    <column colnum="0">{{start}}</column>
-    <column colnum="1.5">
+    <div>{{start}}</div>
+    <div>
       <a class="clickable-word view-ad" index="{{$index}}" 
         href="#/ad-search/show-ad/{{ad_id}}/creator/{{uid}}">{{title}}</a>
-    </column>
+    </div>
   
-  </row>
+  </div>
   
-</row>
+</div>

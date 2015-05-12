@@ -46,6 +46,7 @@ _Templar.setAuthenticator(function(inputObj){
             Route.open('/editProfile');
           }
         }
+        UserProfile.isSignedIn = true;
       }
     },
     function(){},

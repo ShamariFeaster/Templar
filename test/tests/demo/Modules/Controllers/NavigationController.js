@@ -2,11 +2,12 @@ structureJS.module('NavigationControler', function(require){
 
 var _ = require('Util'),
     Route = require('Route'),
-    _Templar = Templar,
+    _Templar = window.Templar,
     EnvModel = _Templar.getModel('Environment'),
+    UserProfileMdl = _Templar.getModel('UserProfile'),
     ProfileFormMdl = _Templar.getModel('ProfileForm'),
     GeoInfo = require('GeoInfo-US'),
-    _$ = $;   /*stop unecessary scope lookup*/
+    _$ = window.$;   /*stop unecessary scope lookup*/
 
 _Templar.done(function(){
 
@@ -14,6 +15,7 @@ $('#goto-logout').click(function(e){
   EnvModel.error = '';
   Route.logout();
   sessionStorage.clear();
+  UserProfileMdl.isSignedIn = false;
   Route.open('/login');
 });
 

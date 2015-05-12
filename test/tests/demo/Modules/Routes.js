@@ -27,7 +27,7 @@ Templar.Route([
     partial : ['#/main-layout', 
     {
       partial : 'partials/Profile/profile.html',
-      target : '#layout-center-col'
+      target : '#layout-left-col'
     }]
 },
 /*---- MESSAGES -----*/

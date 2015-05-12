@@ -146,7 +146,8 @@ Templar.dataModel('UserProfile',
   role : '',
   description : '',
   pp_src : '',
-  ads : []
+  ads : [],
+  isSignedIn : false
 });
 
 });

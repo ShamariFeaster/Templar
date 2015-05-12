@@ -78,10 +78,11 @@ structureJS.module('test', function(require){
     return mdl;
   }
   
-  var frozen = freeze(E);
+  var frozen = E.save();
   A.a = [];
   delete E.attributes.range.checked;
-  var thawed = thaw(frozen, E);
+  E.attributes = {};
+  var thawed = E.load();
   _.log(frozen);
   _.log(thawed);
 });

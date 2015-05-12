@@ -1,32 +1,35 @@
-<div id="profile-left-col">
-  <row><img class="full-profile-img" src="{{UserProfile.pp_src}}"/></row>
-  <div id="about-me" class="center">
-    <row>{{UserProfile.fn}} {{UserProfile.ln}}, {{UserProfile.age}}</row>
-    <row>{{UserProfile.city}}, {{UserProfile.state}}</row>
-    <row>{{UserProfile.description}}</row>
-  </div>
-</div>
-<div id="profile-right-col">
-  <row>Posted Ads</row>
-  <div id="profile-ads">
-    <row class="my-ad-header">
-      <column colnum="0">Posted</column>
-      <column colnum="3.5">Title</column>
-    </row>
-    <row data-apl-repeat="{{UserProfile.ads}}">
-
-      <row class="my-ad-body">
-        <column colnum="0">{{start}}</column>
-        <column colnum="3.5">{{title}}</column>
-      </row>
-      
-    </row>
+<div class="row">
+    <div class="col-lg-5 col-xs-6 col-xs-offset-3 col-lg-offset-0">
+        <img class="img-thumbnail img-responsive" src="{{UserProfile.pp_src}}"/>
+        
+    </div>
+    
+    <div class="clearfix hidden-lg"></div>
 
     
-    <a class="clickable-word">See All</a>
-  </div>
-  <div style="clear: both;"></div>
-
-  <row>Buyer Reviews</row>
-
+    <div class="col-lg-7 col-xs-6 col-xs-offset-3 col-lg-offset-0">
+    
+        <div class="row">
+            <div class="col-xs-1"><span class="glyphicon glyphicon-map-marker"></span></div>
+            <div class="col-xs-16">
+                <div>{{UserProfile.city}}, {{UserProfile.state}}</div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-xs-1"><span class="glyphicon glyphicon-user"></span></div>
+            <div class="col-xs-16">
+                <div>{{UserProfile.fn}} {{UserProfile.ln}}</div>
+                <div>Age: {{UserProfile.age}}</div>
+            </div>
+        </div>
+        
+    </div>
+    
 </div>
+
+<div class="profile-description-box text-center">
+    {{UserProfile.description}}
+</div>
+
+

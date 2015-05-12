@@ -304,7 +304,14 @@ label {font-weight: bold;}
 .success {color : green;}
 
 .pp_preview {width : 80px; height : 80px;}
-.full-profile-img{width : 200px; height : 230px;}
+.full-profile-img{}
+
+.profile-description-box{
+  min-height: 4em;
+  /*border: 1px solid rgba(213, 210, 210, 0.33);*/
+  border-radius: 5px;
+  padding: 5px;
+}
 
 form#form_pp_pic label { 
   min-width: 80px;
@@ -353,41 +360,6 @@ form#form_pp_pic textarea{
   color: #fff;
   background-color: rgba(89, 107, 80, 0.92);
   text-decoration : none;
-}
-
-#layout-left-col {
-  float : left;
-  width : 13%;
-  padding: 1px;
-}
-
-#layout-center-col {
-  float : left;
-  margin-left : 10px;
-  width : 70%;
-  min-height : 300px;
-  position : relative;
-  padding: 1px;
-  padding-bottom: 50px;
-}
-
-#layout-right-col {
-  float : left;
-  width : 13%;
-  padding: 1px;
-}
-
-#profile-left-col{
-  padding : 1px;
-  float : left;
-  width : 33%;
-}
-
-#profile-right-col{
-  padding : 1px;
-  float : left;
-  width : 66%;
-  padding-left : 25px;
 }
 
 #ad-form-description {
@@ -456,3 +428,12 @@ textarea#comment-form-comment {
   width: 100%;
   height: 120px;
 }
+/* cenetr bav items on collapsed
+.navbar-collapse {
+  text-align:center !important;
+}
+.navbar-nav {
+    display:inline-block;
+    float:none;
+}
+*/

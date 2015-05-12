@@ -5,7 +5,7 @@ var _ = require('Util'),
     Helper = require('Helper'),
     _Templar = window.Templar,
     EnvModel = _Templar.getModel('Environment'),
-    UserProfileModel = _Templar.getModel('MyProfile'),
+    UserProfileMdl = _Templar.getModel('UserProfile'),
     LoginFormMdl = _Templar.getModel('LoginForm'),
     Config = require('Config'),
     SelectQuery = new (require('JRDBI').QueryCollection.Select)(),
@@ -16,6 +16,7 @@ function loginHandler(e){
   Route.authenticate({
     un : LoginFormMdl.un,
     pw : LoginFormMdl.pw,
+    UserProfile : UserProfileMdl,
     badPassword : function(msg){
       EnvModel.error = msg;
     }
