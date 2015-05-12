@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../../../../structureJS/core/structureJS-core.js" id="structureJS"
+        data-project-manifest="../../lib/structureJS/dev-test-manifest"
+        data-project-config="../../lib/structureJS/dev-test-config">
+</script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<style type="text/css">
+  .top{
+    padding-top: 200px;
+    padding-bottom: 200px;
+  }
+  .container{
+    background-color: #333;
+  }
+</style>
+
+</head>
+<body>
+ <div class="container">
+      <div class="row top">
+        <div class="col-sm-4 col-sm-offset-4">
+          <div class="input-group input-group-lg">
+            <input type="text" class="form-control" placeholder="Enter bill set name" value="{{billSetCollection.input}}">
+            <span class="input-group-btn">
+              <button id="add-bill-set-btn" class="btn btn-primary" type="button">Add</button>
+            </span>
+          </div><!-- /input-group -->
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="panel panel-default" data-apl-repeat="{{billSetCollection.items}}">
+            <div class="panel-heading">
+              <h3 class="panel-title">{{title}}</h3>
+            </div>
+            <div class="panel-body">
+              <div class="row">
+                <div class="col-sm-4">
+                  <div class="form-group">
+                    <label>Bill name</label>
+                    <input id="add-bill-input" type="text" class="form-control" placeholder="Enter bill name" value="{{titleInput}}">
+                  </div>
+                  <div class="form-group">
+                    <label>Amount</label>
+                    <div class="input-group">
+                      <span class="input-group-addon">$</span>
+                      <input id="bill-amount" type="number" class="form-control" placeholder="Enter amount" value="{{amountInput}}">
+                    </div>
+                  </div>
+                  <button id="add-bill-btn" class="btn btn-primary" index="{{$index}}">Add new bill</button>
+                </div>
+              </div>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Bill</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-apl-repeat="{{$item}}.items">
+                  <td>{{title}}</td>
+                  <td>${{amount}}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr showIf="{{$item}}.items.length}}">
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

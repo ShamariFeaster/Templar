@@ -21,7 +21,8 @@ var Token = function(modelName, attribName){
 
 Token.prototype.equals = function(target){
   if(!_.isDef(target.fullToken)) return false;
-  return (target.fullToken.indexOf(this.fullToken) > -1);
+  var normalized = target.fullToken.replace('{{','').replace('}}','');
+  return (normalized == this.fullToken.replace('{{','').replace('}}',''));
 };
 
 return Token;

@@ -270,9 +270,12 @@ return {
             
           }
           
-          component.onDone.node = DOM_component;
-          component.onDone.context = component;
-          window.Templar.done(component.onDone);
+          if(_.isNotNull(component.onDone)){
+            component.onDone.node = DOM_component;
+            component.onDone.context = component;
+            window.Templar.done(component.onDone);
+          }
+          
           
           repeatKey = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);
           DOM_Node.parentNode.removeChild(DOM_Node);

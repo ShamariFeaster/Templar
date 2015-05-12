@@ -85,10 +85,10 @@ return {
         tokens = Circular('Compile').getAllTokens(origValue);
         /* possible issue: data-apl-repeat attribs getting pushed to cache */
         for(var x = 0 ; x < tokens.length; x++){
-          if(tmp_node === null ||
-            (tmp_node !== null && (tokens[x].modelName != tmp_node.modelName || tokens[x].attribName != tmp_node.attribName))){
+          if(tmp_node === null || (tmp_node !== null && !tokens[x].equals(tmp_node))){
             
-            tmp_node = new TMP_Node(node, tokens[x].modelName, tokens[x].attribName, repeatIndex);   
+            tmp_node = new TMP_Node(node, tokens[x].modelName, tokens[x].attribName, repeatIndex);
+            tmp_node.inheritToken(tokens[x]);
             Map.pushNodes(tmp_node);
           }
 
@@ -322,7 +322,7 @@ return {
       /*a change to an input that is interpolated will redraw the input value pushing the cursor 
         to the end. This prevents that.*/
       State.ignoreKeyUp = true; 
-      Interpolate.interpolate(annotations.modelName, annotations.attribName, e.target.value );
+      Interpolate.interpolate(annotations.modelName, annotations.attribName, e.target.value, void(0), this.token );
       State.ignoreKeyUp = false;
     });
   },

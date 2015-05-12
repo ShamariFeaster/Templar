@@ -11,7 +11,7 @@ var Circular = window.structureJS.circular();
 
 Model.prototype.update = function(attribName){
   var tokens = Circular('Compile').getTokens(this.modelName + '.' + attribName, true);
-  if(tokens.length > 0){
+  if(tokens.length > 0 && tokens[0].indexQueue.length > 0){
     Interpolate.targetedInterpolate(tokens);
   }else{
     Interpolate.interpolate(this.modelName, attribName, Map.getAttribute(this.modelName, attribName));

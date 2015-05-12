@@ -170,7 +170,7 @@ Templar.component = function(name, definitionObj){
           component.onCreate = (_.isFunc(onCreate)) ? onCreate : function(){};
           break;
         case 'onDone' :
-          component.onDone = (_.isFunc(definitionObj.onDone)) ? definitionObj.onDone : function(){};
+          component.onDone = (_.isFunc(definitionObj.onDone)) ? definitionObj.onDone : null;
           break;
         case 'onChange' :
           component.onChange = (_.isFunc(definitionObj.onChange)) ? definitionObj.onChange : null;

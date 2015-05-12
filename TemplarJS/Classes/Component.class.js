@@ -8,6 +8,8 @@ var Component = function(attributes, onCreate, templateURL){
     
   this.attributes = attributes || {};
   this.onCreate = onCreate || function(){};
+  this.onDone = null;
+  this.onChange =  null;
   this.templateURL = templateURL || '';
   this.templateContent = '';
   this.templateStyle = null;

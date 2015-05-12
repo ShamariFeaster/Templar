@@ -25,6 +25,7 @@ var TMP_Node = function(node, modelName, attribName, index){
   this.componentName = '';
   this.indexQueue = [];
   this.token = {};
+  this.fullToken = '';
 };
 
 TMP_Node.prototype.inheritToken = function(Token){
