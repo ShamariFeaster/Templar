@@ -64,7 +64,9 @@ return {
       
       
       for(var i = 0; i < elemAttributes.length; i++){
-        if(elemAttributes[i].name == 'data-' + _.IE_MODEL_REPEAT_KEY) continue;
+        if(elemAttributes[i].name == 'data-' + _.IE_MODEL_REPEAT_KEY){ 
+          continue;
+        }
         elemAttribName = elemAttributes[i].name;
 
         uninterpolatedString = (_.isDef(tmp_node.symbolMap[elemAttribName])) ? 
@@ -200,8 +202,11 @@ return {
               TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
               TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
               Map.pushNodes(TMP_repeatedNode);
-              if(TMP_repeatedNode.hasNonTerminals === false)
+              
+              if(TMP_repeatedNode.hasNonTerminals === false){
                 TMP_repeatedNode.node.innerHTML = attributeVal[i];
+              }
+              
               TMP_repeatBaseNode.node.parentNode.insertBefore(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
               Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope, i);
             }
@@ -273,7 +278,9 @@ return {
   },
   
   interpolate : function(modelName, attributeName, attributeVal, compiledScopes, token){  
-    if(!Map.exists(modelName)) return;
+    if(!Map.exists(modelName)){ 
+      return;
+    }
 
     var listeners = Map.getListeners(modelName, attributeName);
     var Interpolate = this;
@@ -409,8 +416,10 @@ return {
                 TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
                 TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
                 Map.pushNodes(TMP_repeatedNode);
-                if(TMP_repeatedNode.hasNonTerminals === false)
+                
+                if(TMP_repeatedNode.hasNonTerminals === false){
                   TMP_repeatedNode.node.innerHTML = attributeVal[i];
+                }
                 //Animation: onEnter
                 TMP_repeatBaseNode.node.parentNode.insertBefore(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
                 Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope, i);

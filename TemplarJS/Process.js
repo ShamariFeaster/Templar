@@ -46,8 +46,11 @@ return {
           overriden setAttribute(). The side effects are that the user's cust attrib handler
           will have unexpected behavior.*/
           for(var caName in this.__customAttributes__){
-            if(this.__customAttributes__[caName].name == normalizedName)
+            
+            if(this.__customAttributes__[caName].name == normalizedName){
               this.__customAttributes__[caName].onChange.call(this.__customAttributes__[caName], this, val);
+            }
+            
           }
           this._setAttribute.call(this, name, val);
         };
@@ -276,11 +279,12 @@ return {
           continue;
         }
         
-        if(nodes[i].hasChildNodes())
+        if(nodes[i].hasChildNodes()){
           hasNonTerminals = hasNonTerminals | 
                           this._traverseRepeatNode(nodes[i].childNodes, index, TMP_baseNode);
-        else
+        }else{
           continue;
+        }
       }
       
       if(nodes[i].nodeType == _.TEXT_NODE){
@@ -305,8 +309,10 @@ return {
     if(!PreProcessedNode.node.hasChildNodes() || isComponent){
       this.preProcessNode(PreProcessedNode.node, PreProcessedNode.scope);
       this.preProcessNodeAttributes(PreProcessedNode.node, PreProcessedNode.scope, index);
-      if(isComponent)
+      
+      if(isComponent){
         Component.onCreate.call(Component, PreProcessedNode.node);
+      }
     }
     return PreProcessedNode;
   },
@@ -352,8 +358,11 @@ return {
   },
   
   addCurrentSelectionToSelect : function(DOM_Node, attrib){
+    
     //Component has defined current_selection, don't override
-    if(attrib.noClobber === true) return;
+    if(attrib.noClobber === true){ 
+      return;
+    }
     
     // init to first value
     if(!_.isDef(attrib.current_selection)){
@@ -365,8 +374,11 @@ return {
       Object.defineProperty(attrib, 'current_selection', {
         configurable : true,
         set : function(value){
-          if(value === '')
+          
+          if(value === ''){
             return;
+          }
+          
           this._value_ = value;
           var annotations = DOM.getDOMAnnotations(select);
           var boundProperties = (_.isDef(select.token.indexQueue)) ? 
@@ -452,8 +464,9 @@ return {
 
     var __COMPILER_FLG__ = _.COMPILE_ME;
         
-    if( tokens.length < 1 )
+    if( tokens.length < 1 ){
       return;
+    }
     
     token = tokens[0];
     
@@ -545,7 +558,10 @@ return {
   },
   
   preProcessNode : function(DOM_Node, scope, repeatIndex){
-    if(!_.isDef(DOM_Node) || DOM_Node === null ) return;
+    
+    if(!_.isDef(DOM_Node) || DOM_Node === null ){ 
+      return;
+    }
     
     repeatIndex = (_.isInt(repeatIndex)) ? parseInt(repeatIndex) : -1;
     
@@ -564,8 +580,11 @@ return {
         var token = null;
         
         _.RX_M_ATTR.lastIndex = 0;
-        if( (tokens = Circular('Compile').getTokens(DOM_Node.innerHTML)).length < 1) 
+        
+        if( (tokens = Circular('Compile').getTokens(DOM_Node.innerHTML)).length < 1){ 
           break;
+        }
+        
         token = tokens[0];  
         DOM_Node.innerHTML = '';
 
@@ -617,9 +636,12 @@ return {
       default: 
         break;
     }
+    
     /*Don't process and cached removed nodes*/
-    if(document.body.contains(DOM_Node))
+    if(document.body.contains(DOM_Node)){
       this.preProcessNodeAttributes(DOM_Node, scope, repeatIndex);
+    }
+    
     return __COMPILER_FLG__;
   }
   

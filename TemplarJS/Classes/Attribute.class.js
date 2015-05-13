@@ -5,8 +5,10 @@ window.structureJS.module('Attribute', function(){
 var _ = this;
 
 var Attribute = function(name){
-  if(!(this instanceof Attribute))
+  
+  if(!(this instanceof Attribute)){
     return new Attribute();
+  }
 
   this.onCreate = function(){};
   this.onChange = function(){};

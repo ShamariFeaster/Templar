@@ -3,8 +3,10 @@ window.structureJS.module('Component', function(){
 var Circular = window.structureJS.circular();
 var _ = this;
 var Component = function(attributes, onCreate, templateURL){
-  if(!(this instanceof Component))
+  
+  if(!(this instanceof Component)){
     return new Component();
+  }
     
   this.attributes = attributes || {};
   this.onCreate = onCreate || function(){};

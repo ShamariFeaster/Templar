@@ -81,12 +81,39 @@ return {
   getRepeatToken : function(input){
     return this.getTokens(input, true);
   },
+  
   getAllTokens : function(input){
-    return this.getTokens(input);//.concat(this.getRepeatToken(input));
+    return this.getTokens(input);
   },
+  
+  //this is DOM_Node setAttribute is being called on
+  setAttributeOverride : function(name, val){
+    var component = this.tmp_component;
+    var updateFunc = null;
+
+    if(_.isFunc(updateFunc = component.attributes[name])){
+      updateFunc.call(component, this, val);
+    }
+    
+    if(_.isDef(this._setAttributeWrapper)){
+      this._setAttributeWrapper.call(this,name, val);
+    }else{
+      this._setAttribute.call(this,name, val);
+    }
+            
+  },
+  
+  bindComponentOnChangeHandler : function(DOM_component, component){
+    DOM_component.addEventListener("DOMCharacterDataModified", function(event){
+      component.onChange.call(component, this, event);
+    });
+  },
+  
   compile : function(root, scope, repeatIndex){
   
-    if(_.isNull(root) || _.isNull(root.childNodes)) return scope;
+    if(_.isNull(root) || _.isNull(root.childNodes)) {
+      return scope;
+    }
     
     repeatIndex = (_.isInt(repeatIndex)) ? parseInt(repeatIndex) : -1;
 
@@ -156,8 +183,9 @@ return {
           }
           DOM_Node = nodes[++i];
           
-          if(DOM_Node.nodeType != _.TEXT_NODE)
-              break;
+          if(DOM_Node.nodeType != _.TEXT_NODE){
+            break;
+          }
               
           splitNode = DOM.splitText(DOM_Node, tokens[x].end  - prevLength);
           prevLength += DOM_Node.nodeValue.length;
@@ -177,8 +205,9 @@ return {
           
           DOM_Node = nodes[++i];
 
-          if(DOM_Node.nodeType != _.TEXT_NODE)
-              break;
+          if(DOM_Node.nodeType != _.TEXT_NODE){
+            break;
+          }
             
         }
         tokens.length = 0;
@@ -235,21 +264,7 @@ return {
             DOM_component._setAttribute = DOM_component.setAttribute;
           }
           
-          DOM_component.setAttribute = function(name, val){
-            var component = this.tmp_component,
-                updateFunc;
-
-            if(_.isFunc(updateFunc = component.attributes[name])){
-              updateFunc.call(component, this, val);
-            }
-            
-            if(_.isDef(this._setAttributeWrapper)){
-              this._setAttributeWrapper.call(this,name, val);
-            }else{
-              this._setAttribute.call(this,name, val);
-            }
-            
-          };
+          DOM_component.setAttribute = this.setAttributeOverride;
           
           /*Strange lesson here. The iter variable was named 'i'. This 'i' was clobbering
           the value of the main loop's 'i' and 'sending the main loop back in time'. */
@@ -262,16 +277,11 @@ return {
           component.onCreate.call(component, DOM_component);
           
           if(_.isNotNull(component.onChange)){
-            (function(component, DOM_component){
-              DOM_component.addEventListener("DOMCharacterDataModified", function(event){
-                component.onChange.call(component, DOM_component, event);
-              });
-            })(component, DOM_component);
-            
+            this.bindComponentOnChangeHandler(DOM_component, component );
           }
           
           if(_.isNotNull(component.onDone)){
-            component.onDone.node = DOM_component;
+            component.target = DOM_component;
             component.onDone.context = component;
             window.Templar.done(component.onDone);
           }

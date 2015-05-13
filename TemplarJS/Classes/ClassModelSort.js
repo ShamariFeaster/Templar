@@ -32,9 +32,11 @@ Model.prototype.sort = function(attribName, pageNum, sortFunc){
   
   /*in a page sort chain.target is a slice of the full target*/
   chain.insertSortedSlice = function(targetSlice, Model, attribName, pageNum){
+    
     /*Short circuit this so we don't set limitTable.page to undefined*/
-    if(!_.isDef(Model.limitTable[attribName]))
+    if(!_.isDef(Model.limitTable[attribName])){
       return;
+    }
       
     Model.limitTable[attribName].page = (_.isDef(pageNum)) ? pageNum : oldPageNum;
     /*we have to trick getAttribute() to give us the full slice*/

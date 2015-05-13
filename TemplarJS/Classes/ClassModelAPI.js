@@ -11,18 +11,21 @@ var Circular = window.structureJS.circular();
 
 Model.prototype.update = function(attribName){
   var tokens = Circular('Compile').getTokens(this.modelName + '.' + attribName, true);
+  
   if(tokens.length > 0 && tokens[0].indexQueue.length > 0){
     Interpolate.targetedInterpolate(tokens);
   }else{
     Interpolate.interpolate(this.modelName, attribName, Map.getAttribute(this.modelName, attribName));
   }
-  
 };
 
 /*public*/
 Model.prototype.listen = function(attributeName, listener){
-  if(!Map.isDuplicateListener(this.modelName, attributeName, listener))
+  
+  if(!Map.isDuplicateListener(this.modelName, attributeName, listener)){
     Map.setListener(this.modelName, attributeName, listener);
+  }
+  
 };
 
 Model.prototype.onAssignment = function(attributeName, listener){
@@ -64,13 +67,23 @@ Model.prototype.save = function(){
   
   for(var attribName in this.attributes){
   
-    if(!this.attributes.hasOwnProperty(attribName)) continue;
-    if(!_.isArray(attrib = this.attributes[attribName])) continue;
+    if(!this.attributes.hasOwnProperty(attribName)){ 
+      continue;
+    }
+    
+    if(!_.isArray(attrib = this.attributes[attribName])){ 
+      continue;
+    }
     
     for(var arrProp in attrib){
-      if(!attrib.hasOwnProperty(arrProp)) continue;
       
-      if(!attrib.hasOwnProperty(arrProp) || _.isInt(arrProp)) continue;
+      if(!attrib.hasOwnProperty(arrProp)){ 
+        continue;
+      }
+      
+      if(!attrib.hasOwnProperty(arrProp) || _.isInt(arrProp)){ 
+        continue;
+      }
          
       if(!_.isDef(this.attributes.__meta__[attribName])){
         this.attributes.__meta__[attribName] = {};
@@ -127,13 +140,17 @@ Model.prototype.load = function(jsonString){
     /*Reinstate meta*/
     for(var prop2 in meta){
       
-      if(!meta.hasOwnProperty(prop2)) continue;
+      if(!meta.hasOwnProperty(prop2)){ 
+        continue;
+      }
       
       metaProp = meta[prop2];
       
       for(var item in metaProp){
         
-        if(!metaProp.hasOwnProperty(item)) continue;
+        if(!metaProp.hasOwnProperty(item)){ 
+          continue;
+        }
         
         if(_.isDef(this.attributes[prop2])){
           try{

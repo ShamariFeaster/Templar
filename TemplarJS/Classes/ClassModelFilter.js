@@ -22,8 +22,10 @@ Model.prototype.filterWarapper = function(/*req*/attribName, /*nullable*/propert
   /*if we fail input filter we should restore he attribute to original state*/
   if(_.isDef(isInputFilter) && isInputFilter === true){
     if(filterFunc.call(null, input) === false){
-      if(_.isNullOrEmpty(input))
+      
+      if(_.isNullOrEmpty(input)){
         Interpolate.interpolate(this.modelName, attribName,  Map.getAttribute(this.modelName, attribName));
+      }
 
       return false;
     }

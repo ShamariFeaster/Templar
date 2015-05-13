@@ -50,9 +50,11 @@ return {
       tat = ambiguityTree;
       
       for(var x = 0; x < parts.length; x++){
+        
         /*this nullifies no leading / or trailing /*/
-        if(parts[x] === '' || parts[x] == '#')
+        if(parts[x] === '' || parts[x] == '#'){
           continue;
+        }
 
         
         thisType = (_.NT_REGEX.test(parts[x])) ? _.NON_TERMINAL : _.TERMINAL;
@@ -130,8 +132,9 @@ return {
    
     for(var i = 0; i < parts.length; i++){
       
-      if(parts[i] === '' || parts[i] == '#')
-          continue;
+      if(parts[i] === '' || parts[i] == '#'){
+        continue;
+      }
           
       if(_.isDef(routePart.lookaheadType) && routePart.lookaheadType == _.NON_TERMINAL){
         key = routePart.lookaheadVal;
@@ -143,14 +146,17 @@ return {
       
       routePart = routePart[key];
       
-      if(!_.isDef(routePart))
+      if(!_.isDef(routePart)){
         throw 'Error: Route "' + route + '" not found';
+      }
+      
     }
     
-    if(routePart.endOfChain === true)
+    if(routePart.endOfChain === true){
       _.log('Route matched: ' + route + ' with ' + routePart.route);
-    else
+    }else{
       throw 'Route "' + route + '" was only a partial match of declared routes.';
+    }
     
     routePart.nonTerminalValues = nonTerminalValues;
     return routePart;

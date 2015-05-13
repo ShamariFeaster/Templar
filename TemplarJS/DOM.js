@@ -23,8 +23,9 @@ return {
   },
 
   appendTo : function(child, parent){  
-    if(!_.isDef(parent) || !_.isDef(child) || _.isNull(parent.parentNode))
+    if(!_.isDef(parent) || !_.isDef(child) || _.isNull(parent.parentNode)){
       return;
+    }
     parent.parentNode.insertBefore(child, child.nextSibling);
   },
   
@@ -39,8 +40,9 @@ return {
       attributes = fromNode.attributes;
       /*search node attributes for non-terminals*/
       for(var i = 0; i < attributes.length; i++){
-        if(attributes[i].name == 'data-apl-repeat' || attributes[i].name == 'style')
+        if(attributes[i].name == 'data-apl-repeat' || attributes[i].name == 'style'){
           continue;
+        }
           
         if(noClobber === false){
           toNode.setAttribute(attributes[i].name, attributes[i].value);

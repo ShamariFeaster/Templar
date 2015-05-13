@@ -122,8 +122,14 @@ window.structureJS.done(function(){
   };
   
   for(var cName in Templar._components){
-    if(!Templar._components.hasOwnProperty(cName) ) continue;
-    if(cName === 'length') continue;
+    
+    if( !Templar._components.hasOwnProperty(cName) ){
+      continue;
+    }
+    
+    if(cName === 'length'){ 
+      continue;
+    }
 
     var component = Templar._components[cName];
 

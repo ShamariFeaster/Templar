@@ -5,8 +5,10 @@ window.structureJS.module('TMP_Node', function(){
 var _ = this;
 
 var TMP_Node = function(node, modelName, attribName, index){
-  if(!(this instanceof TMP_Node))
+  
+  if(!(this instanceof TMP_Node)){
     return new TMP_Node(node, modelName, attribName, index);
+  }
     
   this.node = node;
   this.modelName = modelName;

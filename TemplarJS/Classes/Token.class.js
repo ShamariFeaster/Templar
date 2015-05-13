@@ -5,8 +5,10 @@ window.structureJS.module('Token', function(){
 var _ = this;
 
 var Token = function(modelName, attribName){
-  if(!(this instanceof Token))
+  
+  if(!(this instanceof Token)){
     return new Token(modelName, attribName);
+  }
     
   this.start = '';
   this.end = '';
@@ -20,7 +22,11 @@ var Token = function(modelName, attribName){
 };
 
 Token.prototype.equals = function(target){
-  if(!_.isDef(target.fullToken)) return false;
+  
+  if(!_.isDef(target.fullToken)){ 
+    return false;
+  }
+  
   var normalized = target.fullToken.replace('{{','').replace('}}','');
   return (normalized == this.fullToken.replace('{{','').replace('}}',''));
 };

@@ -1,5 +1,7 @@
 window.structureJS.module('Map', function(require){
 
+'use strict';
+
 var _ = this;
 
 var _repeatTable = {};/*modelName : { attribName : node}*/
@@ -17,10 +19,13 @@ return {
   getRepeatBaseNodes : function(modelName, attribName){
     var baseNodes = [];
 
-    if((_.isDef(attribName) && _.isDef(modelName)) &&
+    if((_.isDef(attribName) && 
+        _.isDef(modelName)) &&
         _.isDef(_repeatTable[modelName]) && 
-        _.isDef(_repeatTable[modelName][attribName]))
+        _.isDef(_repeatTable[modelName][attribName])){
+      
       baseNodes = _repeatTable[modelName][attribName];
+    }
     
     return baseNodes;
   },
@@ -59,8 +64,9 @@ return {
   },
   
   contains : function(array, needle){
-    if(!_.isArray(array))
+    if(!_.isArray(array)){
       return false;
+    }
       
     var result = false;
     for(var i = 0; i < array.length; i++){
@@ -91,8 +97,11 @@ return {
                       });
       /*if either comparisson operator is null*/
       for(var i = 0; i < scopeListParts.length; i++){
-          if(_.isNullOrEmpty(currScopeParts[0]) || _.isNullOrEmpty(scopeListParts[i][0]))
+      
+          if(_.isNullOrEmpty(currScopeParts[0]) || 
+             _.isNullOrEmpty(scopeListParts[i][0])){
             continue;
+          }
             
           if(currScopeParts[0] == scopeListParts[i][0]){
             inScope = (tryMatchTime === true) ? (true && (currScopeParts[1] == scopeListParts[i][1])) : true;
@@ -134,8 +143,13 @@ return {
       mapFunction = modelName;
       target = _map;
       for(var key in target){
-        if(!target.hasOwnProperty(key)) continue;
+        
+        if(!target.hasOwnProperty(key)){ 
+          continue;
+        }
+        
         mapFunction.call(null, {modelName : key}, key);
+        
       }
       
     /*model attribute names*/
@@ -148,7 +162,10 @@ return {
                   _map[modelName].nodeTable : {};
                   
       for(var key2 in target){
-        if(!target.hasOwnProperty(key2)) continue;
+        
+        if(!target.hasOwnProperty(key2)){ 
+          continue;
+        }
         
         ctx.modelName = modelName;
         ctx.modelAtrribName = key2;
@@ -177,8 +194,10 @@ return {
             an app. The cache would contain 2 nodes per index and modelAttribLength would be
             # of options * 2. We should only count nodes that share my scope, meaning */
           for(var i = 0; i < ctx.target.length; i++ ){
-            if(ctx.target[i].index > _.UNINDEXED && tmp_node.scope == ctx.target[i].scope)
+            
+            if(ctx.target[i].index > _.UNINDEXED && tmp_node.scope == ctx.target[i].scope){
               indexCnt[ctx.target[i].index] = true;
+            }
           }
           
           ctx.modelAttribLength = Object.keys(indexCnt).length;
@@ -196,8 +215,10 @@ return {
   },
   pushNodes : function(DOMorTMPNode, modelName, attribName, index){
     var tmp_node = DOMorTMPNode;
-    if(!(tmp_node instanceof TMP_Node))
+    
+    if(!(tmp_node instanceof TMP_Node)){
       tmp_node = new TMP_Node(DOMorTMPNode, modelName, attribName, index);
+    }
     
     /*If user references unknown model in template we get this error*/
     if(_.isDef(_map[tmp_node.modelName])){
@@ -262,8 +283,10 @@ return {
   },
   
   getAttribute : function(modelName, attribName, index, property){
-    if(!_.isDef(_map[modelName])) 
+    
+    if(!_.isDef(_map[modelName])){ 
       return null;
+    }
       
     var returnVal = null,
         Model = _map[modelName].api;
@@ -309,8 +332,10 @@ return {
   },
   
   dereferenceAttribute : function(TMP_node){
-    if(!_.isDef(_map[TMP_node.modelName])) 
+    
+    if(!_.isDef(_map[TMP_node.modelName])){ 
       return null;
+    }
       
     var returnVal = null;
     var attribute = null;
@@ -363,8 +388,10 @@ return {
   },
   
   setAttributeWithToken : function(token, value){
-    if(!_.isDef(_map[token.modelName])) 
+    
+    if(!_.isDef(_map[token.modelName])){ 
       return null;
+    }
       
     var lastRef = null;
     var lastProp = null;
@@ -443,8 +470,10 @@ return {
     var listeners = this.getListeners(modelName, attribName);
     
     for(var hash in listeners){
-      if(listener.toString() == listeners[hash].toString())
+      
+      if(listener.toString() == listeners[hash].toString()){
         return true;
+      }
     }
     
     return false;
@@ -527,8 +556,10 @@ return {
   
   /*----SCOPE CHANGE CLEANUP-----------------*/
   pruneNodeTreeByScope : function( compiledScopes ){
-    if(_.isNullOrEmpty(compiledScopes) )
+    
+    if(_.isNullOrEmpty(compiledScopes) ){
       return;
+    }
     
 
     var nodeScopeParts = null;
@@ -561,8 +592,11 @@ return {
   /*----DEBUGGING-----------------*/
   getInternalModel : function(modelName){
     var results = null;
-    if(this.exists(modelName))
+    
+    if(this.exists(modelName)){
       results = _map[modelName];
+    }
+    
     return results;
   },
   getMap : function(){

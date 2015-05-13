@@ -96,22 +96,25 @@ Templar.done = function(func){
 
 
 Templar.attribute = function(name, definitionObj){
-  if(!_.isString(name) || !_.isDef(definitionObj)) return;
+  
+  if(!_.isString(name) || !_.isDef(definitionObj)){ 
+    return;
+  }
   
   var attribute = new Attribute(name.toLowerCase());
   var onCreate = function(){};
   var onChange = function(){};
-  
+  var emptyFunc = function(){};
   for(var prop in definitionObj){
     if(definitionObj.hasOwnProperty(prop)){
       switch(prop){
         case 'onCreate' :
           onCreate = definitionObj.onCreate;
-          attribute.onCreate = onCreate = (_.isFunc(onCreate)) ? onCreate : function(){};
+          attribute.onCreate = onCreate = (_.isFunc(onCreate)) ? onCreate : emptyFunc;
           break;
         case 'onChange' :
           onChange = definitionObj.onCreate;
-          attribute.onChange = onChange = (_.isFunc(onChange)) ? onChange : function(){};
+          attribute.onChange = onChange = (_.isFunc(onChange)) ? onChange : emptyFunc;
           break;
       }
     }
@@ -127,9 +130,13 @@ Templar.attribute = function(name, definitionObj){
 };
 
 Templar.component = function(name, definitionObj){
-  if(!_.isString(name) || !_.isDef(definitionObj)) return;
+  
+  if(!_.isString(name) || !_.isDef(definitionObj)){ 
+    return;
+  }
   
   var component = new Component();
+  var emptyFunc = function(){};
   
   for(var prop in definitionObj){
     if(definitionObj.hasOwnProperty(prop)){
@@ -153,10 +160,14 @@ Templar.component = function(name, definitionObj){
           try{
             component.attributes = (_.isObject(attribs)) ? attribs : {};
             for(var attrib in component.attributes){
-              if(!component.attributes.hasOwnProperty(attrib)) continue;
+              
+              if(!component.attributes.hasOwnProperty(attrib)){ 
+                continue;
+              }
+              
               component.attributes[attrib] = (_.isFunc(component.attributes[attrib])) ? 
                                                 component.attributes[attrib] : 
-                                                function(){};
+                                                emptyFunc;
             }
           }catch(e){
             /*Firefox throws type error on isObject*/
@@ -167,7 +178,7 @@ Templar.component = function(name, definitionObj){
           break;
         case 'onCreate' :
           var onCreate = definitionObj.onCreate;
-          component.onCreate = (_.isFunc(onCreate)) ? onCreate : function(){};
+          component.onCreate = (_.isFunc(onCreate)) ? onCreate : emptyFunc;
           break;
         case 'onDone' :
           component.onDone = (_.isFunc(definitionObj.onDone)) ? definitionObj.onDone : null;
@@ -177,7 +188,7 @@ Templar.component = function(name, definitionObj){
           break;
         case 'onDestroy' :
           //Un-implemented
-          component.onDestroy = (_.isFunc(definitionObj.onDestroy)) ? definitionObj.onChange : function(){};
+          component.onDestroy = (_.isFunc(definitionObj.onDestroy)) ? definitionObj.onChange : emptyFunc;
           break;
         default:
           /* allowing component to have static functions and data  */

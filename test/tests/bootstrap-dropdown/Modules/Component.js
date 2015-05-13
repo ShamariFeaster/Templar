@@ -16,7 +16,7 @@ Templar.component('BSDropdown', {
       items[i].addEventListener('click', listener.bind({textNode : textNode, attribute : tokens[0].attribute}));
     }
     
-    tokens[0].data['root'] = root;
+    tokens[0].data.root = root;
     
     this.defineSelector(
       tokens[0],
@@ -28,16 +28,23 @@ Templar.component('BSDropdown', {
         this.model.update(this.attribName + '.current_selection');
       });
   },
-  onDone : function(e){
+  
+  onDone : function(){
+    //this.target = component root node
+    //this = component
+  },
+  
+  //don't add prop unless using, existence causes bind to mutation event
+  onChange : function(root, e){
 
   },
   
-  onCreate : function(self){
-    var itemTemplate = self.getElementsByTagName('LI');
-    var tokens = this.dereference(self.getAttribute('data'));
+  onCreate : function(root){
+    var itemTemplate = root.getElementsByTagName('LI');
+    var tokens = this.dereference(root.getAttribute('data'));
     
     itemTemplate[0].setAttribute('data-apl-repeat', tokens[0].fullToken);
-    tokens[0].model.onRepeatDone(tokens[0].attribName, this.bindClickListeners.bind(this,self));
+    tokens[0].model.onRepeatDone(tokens[0].attribName, this.bindClickListeners.bind(this, root));
 
   }
   

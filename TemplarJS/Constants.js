@@ -1,4 +1,6 @@
 window.structureJS.module('Constants', function(){
+  'use strict';
+  
   var _ = {};
   
   _.MODEL_ATTRIB_KEY = 'aplAttrib';

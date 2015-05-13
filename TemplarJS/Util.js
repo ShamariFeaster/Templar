@@ -39,7 +39,11 @@ window.structureJS.module('Util', function(){
   
   _.forIn = function(obj, func){
     for(var prop in obj){
-      if(!obj.hasOwnProperty(prop)) continue;
+      
+      if(!obj.hasOwnProperty(prop)){ 
+        continue;
+      }
+      
       func.call(obj, prop);
     }
   };
