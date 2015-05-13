@@ -14,6 +14,7 @@ Templar.dataModel('Example',
               image_templar : 'images/Cross_Templar.svg',
               selects : [[1,2,3,], { test : [4,5,6]}],
               cb : [1,2,3],
+              zero : 0,
               complex_repeat : [
                 {title : 'hello world', 
                 author : 'Shamari Feaster', 

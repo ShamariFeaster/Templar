@@ -21,8 +21,7 @@ var Model = function(modelName ,modelObj){
           it will always be the last value of the iteration*/
         set : (function(attribName, model){
                 return function(value){
-                  _.log('SET FIRED for ' + model.modelName + '.' + attribName);
-
+                  _.log('Fired: ' + attribName + ' value ' + value);
                   //kill old static filter results as dataset has changed
                   if(_.isDef(model.filterResults[attribName])){
                     delete model.filterResults[attribName];

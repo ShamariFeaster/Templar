@@ -145,13 +145,14 @@ return {
     for(var i = 0; i < nodes.length; i++){
       DOM_Node = nodes[i];
       parentNode = DOM_Node.parentNode;
-      /*option innerText should not be compiled*/
+      
+      //option innerText should not be compiled
       if(DOM_Node.nodeType === _.TEXT_NODE && (!_.isNull(parentNode) && parentNode.tagName !== 'OPTION') ){
         text = DOM_Node.nodeValue;
 
         tokens = this.getTokens(text);
         
-        /*splitNode is right split, DOM_Node is left of split (ie original DOM_Node) */
+        //splitNode is right split, DOM_Node is left of split (ie original DOM_Node)
 
         for(var x = 0; x < tokens.length; x++){
           parentTagName = parentNode.tagName;
@@ -213,8 +214,8 @@ return {
         tokens.length = 0;
         prevLength = 0;
       }else if(DOM_Node.nodeType === _.ELEMENT_NODE){
-        /* TODO: Move to 'Component' Class
-          Initial component replacement*/
+      
+        // TODO: Move to 'Component' Class Initial component replacement
         var componentName = DOM_Node.tagName.toLowerCase();
         var component = window.Templar._components[componentName]; 
         var DOM_component = null;
@@ -224,8 +225,7 @@ return {
         var addedNodecnt = 0;
         
         if(_.isDef(component) && !_.isNullOrEmpty(component.templateContent) && !_.isNull(DOM_Node.parentNode)){
-          //_.log('Is Defined Component: ' + DOM_Node.tagName);
-          
+
           DOM_Node.insertAdjacentHTML('afterend', component.templateContent);
           addedNodecnt = nodes.length - beforeInsertNodeCnt;
           DOM_component = DOM_Node.nextElementSibling;
@@ -242,7 +242,8 @@ return {
                   contentNode.parentNode.insertBefore(DOM_Node.childNodes[q], contentNode);
                 }
                 
-                q--;/*Live list, insertBefore() shortents childNodes by 1*/
+                //Live list, insertBefore() shortents childNodes by 1
+                q--;
               }
               
               if(!_.isNull(contentNode.parentNode)){
@@ -253,7 +254,8 @@ return {
           }
           
           DOM_component.tmp_component = component;
-          /*probably unecessary*/
+          
+          //probably unecessary
           DOM.cloneAttributes(DOM_Node, DOM_component, true);
 
           TMP_processed_components = Process.preProcessNodeAttributes(DOM_component, scope, repeatIndex);
@@ -267,7 +269,7 @@ return {
           DOM_component.setAttribute = this.setAttributeOverride;
           
           /*Strange lesson here. The iter variable was named 'i'. This 'i' was clobbering
-          the value of the main loop's 'i' and 'sending the main loop back in time'. */
+              the value of the main loop's 'i' and 'sending the main loop back in time'. */
           for(var z = 0; z < TMP_processed_components.length; z++){
             TMP_processed_components[z].isComponent = true;
             TMP_processed_components[z].componentName = componentName;
@@ -293,10 +295,10 @@ return {
           if(!_.isNullOrEmpty(repeatKey)){
             DOM_Node.setAttribute('data-' + _.IE_MODEL_REPEAT_KEY, repeatKey);
           }
-          
-          i += addedNodecnt;//make sure we don't recompile this node
+          //make sure we don't recompile this node
+          i += addedNodecnt-1;
         }
-        //log('Recursing on :' + DOM_Node.tagName);
+
         repeatKey = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);
 
         if(!_.isNullOrEmpty(repeatKey) && (tokens = this.getRepeatToken(repeatKey)).length > 0){

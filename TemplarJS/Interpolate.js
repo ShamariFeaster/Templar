@@ -111,9 +111,10 @@ return {
 
     return updateObject;
   },
+  
   interpolateSpan : function(tmp_node){
     var node = tmp_node.node;
-    var retVal = Map.dereferenceAttribute(tmp_node) || '';
+    var retVal = Map.dereferenceAttribute(tmp_node);
     var currVal = node.textContent || node.innerText;
     var temp = (!_.isArray(retVal) && !_.isObj(retVal)) ? retVal : currVal;
     
@@ -124,6 +125,7 @@ return {
       node.innerText = temp;
     }
   },
+  
   /*Returns the whole attribute if no limit is defined for this attribute*/
   getPageSlice : function(Model, attributeName, target){
     var start = 0;
@@ -145,6 +147,7 @@ return {
             
     return results;
   },
+  
   getPageSliceData : function(Model, attributeName, target){
     var start = 0;
     var length = target.length;

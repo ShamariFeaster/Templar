@@ -318,7 +318,7 @@ return {
   },
   
   preProcessTextInput : function(DOM_Node, eventType){
-    eventType = (_.isDef(eventType)) ? eventType : 'keyup';
+    eventType = (_.isDef(eventType)) ? eventType : 'input';
     /*Note use of keyup. keydown misses backspace on IE and some other browsers*/
     DOM_Node.addEventListener(eventType, function(e){
       var annotations = DOM.getDOMAnnotations(this);
@@ -538,9 +538,6 @@ return {
         
         DOM_Node.parentNode.removeChild(DOM_Node);
         __COMPILER_FLG__ = _.RECOMPILE_ME;
-        break;
-      case 'text':
-        this.preProcessTextInput(DOM_Node);
         break;
       case 'range':
         this.preProcessTextInput(DOM_Node, 'change');
