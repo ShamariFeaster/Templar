@@ -1,10 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="../../../../structureJS/core/structureJS-core.js" id="structureJS"
-        data-project-manifest="../../lib/structureJS/dev-test-manifest"
-        data-project-config="../../lib/structureJS/dev-test-config">
-</script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 <style type="text/css">
@@ -19,7 +16,8 @@
 
 </head>
 <body>
- <div class="container">
+    <div class="container">
+      <h1 class="billboard text-align-center">Billder</h1>
       <div class="row top">
         <div class="col-sm-4 col-sm-offset-4">
           <div class="input-group input-group-lg">
@@ -32,25 +30,49 @@
       </div>
       <div class="row">
         <div class="col-sm-12">
-          <div class="panel panel-default" data-apl-repeat="{{billSetCollection.items}}">
+          <div class="panel panel-default" data-apl-repeat="{{billSetCollection.billSets}}">
             <div class="panel-heading">
               <h3 class="panel-title">{{title}}</h3>
             </div>
             <div class="panel-body">
               <div class="row">
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                   <div class="form-group">
                     <label>Bill name</label>
-                    <input id="add-bill-input" type="text" class="form-control" placeholder="Enter bill name" value="{{titleInput}}">
+                    <input type="text" class="form-control" placeholder="Enter bill name" value="{{titleInput}}">
                   </div>
                   <div class="form-group">
                     <label>Amount</label>
                     <div class="input-group">
                       <span class="input-group-addon">$</span>
-                      <input id="bill-amount" type="number" class="form-control" placeholder="Enter amount" value="{{amountInput}}">
+                      <input type="number" class="form-control" placeholder="Enter amount" value="{{amountInput}}">
                     </div>
                   </div>
-                  <button id="add-bill-btn" class="btn btn-primary" index="{{$index}}">Add new bill</button>
+                  <button class="btn btn-primary add-bill-btn" index="{{$index}}">Add new bill</button>
+                </div>
+                <div class="col-sm-9">
+                  <div class="row">
+                    <div data-apl-repeat="{{$item}}.payers">
+                      <div class="col-sm-4">
+                        <div class="panel panel-default">
+                          <!--<div class="panel-heading">{{name}}</div>-->
+                          <DblClickEditor x-nt="{{name}}"></DblClickEditor>
+                          <div class="panel-body">
+                            <div>Balance:</div>
+                            <div class="payer-balance">${{balance}}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-sm-4">
+                      <div class="panel panel-default add-new-payer" index="{{$index}}">
+                        <div class="panel-body">
+                          <p class="text-center">Add new payer</p>
+                          <i class="add-new-payer-icon fa fa-user-plus"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -62,15 +84,15 @@
                 </tr>
               </thead>
               <tbody>
-                <tr data-apl-repeat="{{$item}}.items">
+                <tr data-apl-repeat="{{$item}}.bills">
                   <td>{{title}}</td>
                   <td>${{amount}}</td>
                 </tr>
               </tbody>
               <tfoot>
-                <tr showIf="{{$item}}.items.length}}">
-                  <td></td>
-                  <td></td>
+                <tr showIf="{{$item}}.bills.length">
+                  <td><strong class="pull-right">Total</strong></td>
+                  <td>${{total}}</td>
                 </tr>
               </tfoot>
             </table>
@@ -78,5 +100,9 @@
         </div>
       </div>
     </div>
-</body>
+  </body>
+  <script src="../../../../structureJS/core/structureJS-core.js" id="structureJS"
+        data-project-manifest="../../lib/structureJS/dev-test-manifest"
+        data-project-config="../../lib/structureJS/dev-test-config">
+</script>
 </html>
