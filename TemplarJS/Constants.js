@@ -49,6 +49,7 @@ window.structureJS.module('Constants', function(){
     select_change : 's_change',
     checkbox_change : 'cb_change',
     reassignment : 'reassignment',
+    elem_attrib_update : 'ea_update'
   };
   
   _.RESTRICTED = 'RESTRICTED';

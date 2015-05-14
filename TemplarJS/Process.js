@@ -83,6 +83,9 @@ return {
             it*/
         origValue = attributes[i].value;
         origName = attributes[i].name;
+        if(origName === 'x-nt'){
+          continue;
+        }
         this.checkForCustomAttribute(node, origName);
         
         tokens = Circular('Compile').getAllTokens(origValue);

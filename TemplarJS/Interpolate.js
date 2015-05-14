@@ -49,7 +49,7 @@ return {
   },
   
   updateNodeAttributes : function(tmp_node){
-    var updateObject = {};
+    var updateObject = {type : []};
     var node = tmp_node.node;
     var intermediateValue = '';
     var uninterpolatedString = '';
@@ -108,7 +108,11 @@ return {
       }
 
     }
-
+    updateObject.text = null;
+    updateObject.value = null;
+    updateObject.type.push(_.MODEL_EVENT_TYPES.elem_attrib_update);
+    updateObject.target = null;
+    updateObject.properties = [];
     return updateObject;
   },
   
@@ -289,7 +293,7 @@ return {
     var Interpolate = this;
     var updateObject = {};
     var TMP_repeatBaseNode = null;
-    var updateObj = {};
+    var updateObj = {type : []};
     var node = null;
     var tagName = '';
     var attributes = null;
@@ -302,12 +306,13 @@ return {
              
       /*On Link() only interp nodes belonging to the linked scope*/
       if(_.isDef(compiledScopes) && !Map.isInScopeList(tmp_node.scope, compiledScopes)){
-        //_.log('Not Interpolating '  + modelName + '.' + attributeName + ' for scope <' + tmp_node.scope + '> not in <' + compiledScopes +'>');
         return;
       }
+      
       if(_.isDef(token) && !token.equals(tmp_node)){
         return;
-      }  
+      } 
+      
       node = tmp_node.node;
       tagName = (tmp_node.isComponent === true) ? 'COMPONENT' : node.tagName;
       tagName = (_.isDef(tmp_node.symbolMap['data-' + _.IE_MODEL_REPEAT_KEY])) ? 'REPEAT' : node.tagName;
@@ -338,7 +343,7 @@ return {
             }
             updateObj.value = selectNode.options[selectNode.selectedIndex].value;
             updateObj.text = selectNode.options[selectNode.selectedIndex].text;
-            updateObj.type = _.MODEL_EVENT_TYPES.interp_change;
+            updateObj.type.push(_.MODEL_EVENT_TYPES.interp_change);
             updateObj.index = selectNode.selectedIndex;
             updateObj._attrib_ = attributeVal;
             updateObj.properties = boundProperties;
@@ -362,7 +367,7 @@ return {
           Interpolate.interpolateSpan(tmp_node);
           updateObj.text = node.innerText;
           updateObj.value = node.innerText;
-          updateObj.type = node.tagName.toLowerCase();
+          updateObj.type.push(node.tagName.toLowerCase());
           updateObj.properties = boundProperties;
           break;
         case 'INPUT':
@@ -380,7 +385,7 @@ return {
             
             updateObj.text = node.value;
             updateObj.value = node.value;
-            updateObj.type = node.tagName.toLowerCase();
+            updateObj.type.push(node.tagName.toLowerCase());
             updateObj.target = node;
             updateObj.properties = boundProperties;
            }
@@ -390,14 +395,14 @@ return {
           tmp_node.node.value = attributeVal;
           updateObj.text = node.value;
           updateObj.value = node.value;
-          updateObj.type = node.tagName.toLowerCase();
+          updateObj.type.push(node.tagName.toLowerCase());
           updateObj.target = node;
           updateObj.properties = boundProperties;
           break;
         case 'REPEAT':
           var TMP_repeatedNode = null;
           var baseNodes = null;
-          
+          var repeatBuilt = false;
           ctx.endingIndex = ctx.target.length;//ctx.target.length;
           
           /*cache and DOM housekeeping*/
@@ -413,7 +418,7 @@ return {
               _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode)) && 
               attributeVal.length > 0)
             {
-              
+              repeatBuilt = true;
               /*rebuild new one*/
               for(var i = 0; i < attributeVal.length; i++){
                 TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
@@ -430,36 +435,34 @@ return {
                 Interpolate.interpolateEmbeddedRepeats(TMP_repeatBaseNode, i);
               }
               Map.pruneDeadEmbeds();
-              updateObj.type = _.SYSTEM_EVENT_TYPES.repeat_built;
+              
               updateObj.value = attributeVal;
               updateObj.modelName = tmp_node.modelName;
               updateObj.attribName = tmp_node.attribName;
               updateObj.properties = boundProperties;
-              Interpolate.dispatchListeners(listeners, updateObj);
+              
             }
             TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 
             
           }
           
+          if(repeatBuilt === true){
+            updateObj.type.push(_.SYSTEM_EVENT_TYPES.repeat_built);
+          }
           /*Stop outter loop. We build the updated repeat nodes in one pass*/
           //outerCtx.stop = true;
           
           break;
         default:
-          updateObj.text = null;
-          updateObj.value = null;
-          updateObj.type = _.MODEL_EVENT_TYPES.reassignment;
-          updateObj.target = node;
-          updateObj.properties = boundProperties;
-          Interpolate.dispatchListeners(listeners, updateObj);
+          
           break;
         }
       
     });
     /*only dispatchListeners() for interps which change node values*/
-    if(_.isDef(updateObj.type)){
+    if(updateObj.type.length > 0){
     
-      if(updateObj.type == _.MODEL_EVENT_TYPES.interp_change){
+      if(Map.contains(updateObj.type, _.MODEL_EVENT_TYPES.interp_change)){
         updateObj._attrib_._value_ = updateObj.value;
       }
       

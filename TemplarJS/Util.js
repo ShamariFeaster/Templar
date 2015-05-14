@@ -37,17 +37,6 @@ window.structureJS.module('Util', function(){
     return retVal;
   };
   
-  _.forIn = function(obj, func){
-    for(var prop in obj){
-      
-      if(!obj.hasOwnProperty(prop)){ 
-        continue;
-      }
-      
-      func.call(obj, prop);
-    }
-  };
-  
   window.structureJS.extendContext(_); 
   
   /* If window.structureJS depenedency resolver is missing we need to reassign */

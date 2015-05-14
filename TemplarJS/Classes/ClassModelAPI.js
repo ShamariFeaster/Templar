@@ -11,7 +11,7 @@ var Circular = window.structureJS.circular();
 
 Model.prototype.update = function(attribName){
   var tokens = Circular('Compile').getTokens(this.modelName + '.' + attribName, true);
-  
+  //for a targeted update, attribName will be some complex ref (a[a].current_selection)
   if(tokens.length > 0 && tokens[0].indexQueue.length > 0){
     Interpolate.targetedInterpolate(tokens);
   }else{
@@ -30,7 +30,7 @@ Model.prototype.listen = function(attributeName, listener){
 
 Model.prototype.onAssignment = function(attributeName, listener){
   this.listen(attributeName, function(e){
-    if(e.type == _.MODEL_EVENT_TYPES.reassignment){
+    if(Map.contains(e.type, _.MODEL_EVENT_TYPES.reassignment)){
       listener.call(null,e);
     }
   });
@@ -39,7 +39,8 @@ Model.prototype.onAssignment = function(attributeName, listener){
 Model.prototype.onRepeatDone = function(attributeName, listener){
   var _this = this;
   this.listen(attributeName, function(e){
-    if(e.type == _.SYSTEM_EVENT_TYPES.repeat_built && 
+
+    if(Map.contains(e.type, _.SYSTEM_EVENT_TYPES.repeat_built) && 
       e.modelName == _this.modelName &&
       e.attribName == attributeName){
       listener.call(listener, e);

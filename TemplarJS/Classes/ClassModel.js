@@ -22,6 +22,8 @@ var Model = function(modelName ,modelObj){
         set : (function(attribName, model){
                 return function(value){
                   _.log('Fired: ' + attribName + ' value ' + value);
+                  
+                  
                   //kill old static filter results as dataset has changed
                   if(_.isDef(model.filterResults[attribName])){
                     delete model.filterResults[attribName];
@@ -31,6 +33,16 @@ var Model = function(modelName ,modelObj){
                   if(_.isDef(model.cachedResults[attribName])){
                     delete model.cachedResults[attribName];
                   }
+                  /*
+                      var listeners = Circular('Map').getListeners(model.modelName, attribName);
+                      var updateObj = {};
+                      updateObj.text = null;
+                      updateObj.value = null;
+                      updateObj.type = [_.MODEL_EVENT_TYPES.reassignment];
+                      updateObj.target = null;
+                      updateObj.properties = [];
+                      Interpolate.dispatchListeners(listeners, updateObj);
+                      */
                   
                   // Expose page info on the attribute
                   Circular('Map').annotateWithLimitProps(model, attribName, value);

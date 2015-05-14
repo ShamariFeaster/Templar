@@ -83,7 +83,9 @@ return {
   },
   
   getAllTokens : function(input){
-    return this.getTokens(input);
+    var mustachetokens = this.getTokens(input);
+    var allTokens = (mustachetokens.length < 1) ? this.getRepeatToken(input) : mustachetokens;
+    return allTokens;
   },
   
   //this is DOM_Node setAttribute is being called on

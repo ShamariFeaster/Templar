@@ -113,7 +113,7 @@ Templar.attribute = function(name, definitionObj){
           attribute.onCreate = onCreate = (_.isFunc(onCreate)) ? onCreate : emptyFunc;
           break;
         case 'onChange' :
-          onChange = definitionObj.onCreate;
+          onChange = definitionObj.onChange;
           attribute.onChange = onChange = (_.isFunc(onChange)) ? onChange : emptyFunc;
           break;
       }
