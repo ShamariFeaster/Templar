@@ -49,7 +49,7 @@ return {
   },
   
   updateNodeAttributes : function(tmp_node){
-    var updateObject = {type : []};
+
     var node = tmp_node.node;
     var intermediateValue = '';
     var uninterpolatedString = '';
@@ -64,7 +64,8 @@ return {
       
       
       for(var i = 0; i < elemAttributes.length; i++){
-        if(elemAttributes[i].name == 'data-' + _.IE_MODEL_REPEAT_KEY){ 
+        if(elemAttributes[i].name == 'data-' + _.IE_MODEL_REPEAT_KEY ||
+          elemAttributes[i].name == 'data-' + _.IE_DEFAULT_ATTRIB_KEY){ 
           continue;
         }
         elemAttribName = elemAttributes[i].name;
@@ -90,7 +91,6 @@ return {
           }
           
           node.setAttribute(elemAttribName, intermediateValue);
-          updateObject[elemAttribName] = intermediateValue;
         }
       }
     }else if(tmp_node.isComponent === true){
@@ -108,12 +108,7 @@ return {
       }
 
     }
-    updateObject.text = null;
-    updateObject.value = null;
-    updateObject.type.push(_.MODEL_EVENT_TYPES.elem_attrib_update);
-    updateObject.target = null;
-    updateObject.properties = [];
-    return updateObject;
+
   },
   
   interpolateSpan : function(tmp_node){
@@ -286,7 +281,7 @@ return {
   
   interpolate : function(modelName, attributeName, attributeVal, compiledScopes, token){  
     if(!Map.exists(modelName)){ 
-      return;
+      return false;
     }
 
     var listeners = Map.getListeners(modelName, attributeName);
@@ -301,6 +296,7 @@ return {
     var selectNode = null;
     var text = '';
     var value = '';
+    var interpPerformed = false;
     /*Note that listeners are only fired for attribs that are in the nodeTree (ie, visible in the UI)*/
     Map.forEach(modelName, attributeName, function(ctx, tmp_node){
              
@@ -317,7 +313,8 @@ return {
       tagName = (tmp_node.isComponent === true) ? 'COMPONENT' : node.tagName;
       tagName = (_.isDef(tmp_node.symbolMap['data-' + _.IE_MODEL_REPEAT_KEY])) ? 'REPEAT' : node.tagName;
       if(ctx.hasAttributes === true){
-        updateObject = Interpolate.updateNodeAttributes(tmp_node, modelName, attributeName);
+        interpPerformed = true;
+        Interpolate.updateNodeAttributes(tmp_node, modelName, attributeName);
       } 
       
       boundProperties = (_.isDef(node.token) && _.isDef(node.token.indexQueue)) ? 
@@ -459,16 +456,18 @@ return {
         }
       
     });
+    
     /*only dispatchListeners() for interps which change node values*/
     if(updateObj.type.length > 0){
     
       if(Map.contains(updateObj.type, _.MODEL_EVENT_TYPES.interp_change)){
         updateObj._attrib_._value_ = updateObj.value;
       }
-      
+      interpPerformed = true;
       Interpolate.dispatchListeners(listeners, updateObj);
     }
     
+    return interpPerformed;
   }
   
 };

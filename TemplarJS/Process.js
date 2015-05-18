@@ -368,7 +368,7 @@ return {
     }
     
     // init to first value
-    if(!_.isDef(attrib.current_selection)){
+    if(!_.isDef(attrib.current_selection) && attrib.length > 0){
       attrib._value_ = attrib[0].value || attrib[0];
     }
     

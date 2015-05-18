@@ -22,8 +22,8 @@ var Model = function(modelName ,modelObj){
         set : (function(attribName, model){
                 return function(value){
                   _.log('Fired: ' + attribName + ' value ' + value);
-                  
-                  
+                  var Map = Circular('Map');
+                  var Interpolate = Circular('Interpolate');
                   //kill old static filter results as dataset has changed
                   if(_.isDef(model.filterResults[attribName])){
                     delete model.filterResults[attribName];
@@ -33,21 +33,19 @@ var Model = function(modelName ,modelObj){
                   if(_.isDef(model.cachedResults[attribName])){
                     delete model.cachedResults[attribName];
                   }
-                  /*
-                      var listeners = Circular('Map').getListeners(model.modelName, attribName);
-                      var updateObj = {};
-                      updateObj.text = null;
-                      updateObj.value = null;
-                      updateObj.type = [_.MODEL_EVENT_TYPES.reassignment];
-                      updateObj.target = null;
-                      updateObj.properties = [];
-                      Interpolate.dispatchListeners(listeners, updateObj);
-                      */
                   
                   // Expose page info on the attribute
-                  Circular('Map').annotateWithLimitProps(model, attribName, value);
-                  Circular('Map').setAttribute(model.modelName, attribName, value);
-                  Circular('Interpolate').interpolate(model.modelName, attribName, value);
+                  Map.annotateWithLimitProps(model, attribName, value);
+                  Map.setAttribute(model.modelName, attribName, value);
+                  if(!Interpolate.interpolate(model.modelName, attribName, value)){
+                    var updateObj = {};
+                    var listeners = Map.getListeners(model.modelName, attribName);
+                    updateObj.value = value;
+                    updateObj.text = value;
+                    updateObj.type = [_.MODEL_EVENT_TYPES.reassignment];
+                    updateObj.properties = [];
+                    Interpolate.dispatchListeners(listeners, updateObj);
+                  }
                 };
               })(attribName, this),
         get : (function(attribName, model){
