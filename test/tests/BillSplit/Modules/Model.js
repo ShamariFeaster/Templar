@@ -1,14 +1,13 @@
 Templar.dataModel('billSetCollection',{
   billSets: [],
-  input: "January Bills"
+  input: ""
 });
 
 function billSet(title, index){
   this.bills = [];
-  this.payers = [{"name": "Payer 1", "balance": 0}];
+  this.payers = [];
   this.title = title;
   this.index = index;
-  this.splitBy = 1;
   this.total = 0;
   this.isVisible = true;
   this.titleInput = "";

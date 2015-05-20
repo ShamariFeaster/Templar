@@ -1,0 +1,76 @@
+html{
+  position: relative;
+  min-height: 100%;
+}
+body {
+  color: #ECF0F1;
+  background-color: #2C3E50;
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+.top-nav{
+  padding: 15px;
+}
+.top-nav h1{
+  padding: 0px;
+  margin: 0px;
+}
+.top-nav .branding a{
+  font-size: 30px;
+}
+.top-nav .branding a{
+  color: #ECF0F1;
+}
+.info-heading{
+  display: inline-block;
+  padding: 30px 60px;
+  border-bottom: 2px solid #2980B9;
+}
+.info-heading .info-app-name{
+  font-size: 100px;
+}
+.info-heading .info-app-tagline{
+  font-family: 'Quicksand', sans-serif;
+  font-size: 25px;
+  color: #E74C3C;
+}
+.info-content{
+  font-family: 'Quicksand', sans-serif;
+  font-size: 15px;
+  margin: 50px auto;
+}
+.info-content .add-billset{
+  margin: 20px auto;
+  width: 350px;
+}
+.container{
+  
+}
+.add-new-payer{
+  color: #ccc;
+  border: 5px dashed #ccc;
+}
+.add-new-payer:hover{
+  cursor: pointer;
+}
+.add-new-payer .add-new-payer-icon{
+  display: block;
+  text-align: center;
+  color: #ccc;
+  font-size: 80px;
+}
+.payer-balance {
+  color: #3DCC40;
+  font-size: 25px;
+}
+.billset-panel{
+  color: #2980B9;
+}
+/* Sticky footer styles
+-------------------------------------------------- */
+.footer {
+  position: absolute;
+  bottom: 0;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+}

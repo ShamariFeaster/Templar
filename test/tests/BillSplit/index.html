@@ -4,33 +4,35 @@
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-<style type="text/css">
-  .top{
-    padding-top: 200px;
-    padding-bottom: 200px;
-  }
-  .container{
-    background-color: #333;
-  }
-</style>
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<link href='http://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet' type='text/css'>
+<!-- Live Version -->
+<script src="TemplarJS-0.11.1.min.js"></script>
+<script src="Modules/Model.js"></script>
+<script src="Modules/Attribute.js"></script>
+<script src="Modules/Component.js"></script>
+<script src="Modules/Controller.js"></script>
+
 
 </head>
 <body>
     <div class="container">
-      <h1 class="billboard text-align-center">Billder</h1>
-      <div class="row top">
-        <div class="col-sm-4 col-sm-offset-4">
-          <div class="input-group input-group-lg">
-            <input type="text" class="form-control" placeholder="Enter bill set name" value="{{billSetCollection.input}}">
-            <span class="input-group-btn">
-              <button id="add-bill-set-btn" class="btn btn-primary" type="button">Add</button>
-            </span>
-          </div><!-- /input-group -->
+      <div class="top-nav row">
+        <div class="branding pull-left">
+          <a href="#">Billder</a>
         </div>
+        <ul class="nav nav-pills pull-right">
+          <li role="presentation" class="active"><a href="#/home">Home</a></li>
+          <li role="presentation"><a href="#/about">About</a></li>
+          <li role="presentation"><a href="http://nickla.us">nickla.us</a></li>
+        </ul>
+      </div>
+      <div class="row">
+        <div id="target" data-apl-default="partials/home-info.html"></div>
       </div>
       <div class="row">
         <div class="col-sm-12">
-          <div class="panel panel-default" data-apl-repeat="{{billSetCollection.billSets}}">
+          <div class="billset-panel panel panel-default" data-apl-repeat="{{billSetCollection.billSets}}">
             <div class="panel-heading">
               <h3 class="panel-title">{{title}}</h3>
             </div>
@@ -56,7 +58,7 @@
                       <div class="col-sm-4">
                         <div class="panel panel-default">
                           <!--<div class="panel-heading">{{name}}</div>-->
-                          <DblClickEditor x-nt="{{name}}"></DblClickEditor>
+                          <DblClickEditor class="panel-heading" x-nt="{{name}}"></DblClickEditor>
                           <div class="panel-body">
                             <div>Balance:</div>
                             <div class="payer-balance">${{balance}}</div>
@@ -65,7 +67,7 @@
                       </div>
                     </div>
                     <div class="col-sm-4">
-                      <div class="panel panel-default add-new-payer" index="{{$index}}">
+                      <div class="add-new-payer panel panel-default" index="{{$index}}">
                         <div class="panel-body">
                           <p class="text-center">Add new payer</p>
                           <i class="add-new-payer-icon fa fa-user-plus"></i>
@@ -100,9 +102,18 @@
         </div>
       </div>
     </div>
+    <footer class="footer">
+      <div class="container text-center">
+        <p class="text-muted">Powered by <a href="https://github.com/ShamariFeaster/Templar">Templar</a></p>
+      </div>
+    </footer>
   </body>
+  
+  <!-- Debug Version -->
+  <!--
   <script src="../../../../structureJS/core/structureJS-core.js" id="structureJS"
         data-project-manifest="../../lib/structureJS/dev-test-manifest"
         data-project-config="../../lib/structureJS/dev-test-config">
+  -->  
 </script>
 </html>

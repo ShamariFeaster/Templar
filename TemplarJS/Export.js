@@ -43,7 +43,7 @@ function beginBootstrap(scope){
         _.log('asynFetchRoutes complete for ' + resolvedRouteObj.route);
         bootstrapComplete('ASYN FETCH ROUTES');
       });
-      State.blockBodyCompilation = true;
+      State.blockBodyCompilation = false;
     }
     
   }
