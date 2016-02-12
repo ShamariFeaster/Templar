@@ -1,5 +1,5 @@
 /*Data structures*/
-structureJS.declare('templar/State');
+
 structureJS.declare('templar/Map');
 structureJS.declare('templar/System');
 /*Parse + Compile + Link _ Interpolate*/
@@ -16,9 +16,6 @@ structureJS.declare('classes/ClassModelFilter');
 structureJS.declare('templar/Route');
 structureJS.declare('templar/Templar');
 /*Loading*/
+structureJS.declare('modules/Model');
 structureJS.declare('templar/Bootstrap');
-structureJS.declare('modules/Models');
 structureJS.declare('templar/Export');
-/*App*/
-structureJS.declare('modules/MusicController');
-structureJS.declare('modules/CommentController');
