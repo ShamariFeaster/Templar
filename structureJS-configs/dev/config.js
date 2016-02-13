@@ -12,8 +12,8 @@ structureJS.configure(
             'templar/DOM'],
   directory_aliases: {
                         modules: 'Modules/',
-                       templar: '../TemplarJS/core/',
-                      classes: '../TemplarJS/core/Classes/'
+                       templar: '../Templar/TemplarJS/',
+                      classes: '../Templar/TemplarJS/Classes/'
   }
 });
 

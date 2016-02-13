@@ -11,7 +11,7 @@ interpolation_done system event. The interface for this is called QUnit.framewor
 */
 QUnit.frameworkLoaded = function(callback){
 
-  var _ = structureJS.config.context,
+  var _ = structureJS.state.context,
       System = structureJS.require('System');
   QUnit.config.autostart = false;
   
