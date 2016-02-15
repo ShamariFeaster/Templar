@@ -8,13 +8,8 @@ exports.config = {
         };
   },
   multiCapabilities: [
+
 {
-   'browserName': 'internet explorer',
-    'platform': 'ANY',
-    'version': '9'
-}
-/*
-  {
   'browserName': 'chrome'
 }, {
   'browserName': 'firefox'
@@ -23,7 +18,7 @@ exports.config = {
     'platform': 'ANY',
     'version': '9'
 }
-*/
+
 ]
 }
 

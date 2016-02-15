@@ -174,17 +174,21 @@ QUnit = {
 		}
 		// A slight delay, to avoid any current callbacks
 		if ( defined.setTimeout ) {
-			setTimeout(function() {
-				if ( config.semaphore > 0 ) {
-					return;
-				}
-				if ( config.timeout ) {
-					clearTimeout( config.timeout );
-				}
-
-				config.blocking = false;
-				process( true );
+			/*
+      setTimeout(function() {
+				
 			}, 13);
+      */
+      if ( config.semaphore > 0 ) {
+					return;
+      }
+      if ( config.timeout ) {
+        clearTimeout( config.timeout );
+      }
+
+      config.blocking = false;
+      process( true );
+        
 		} else {
 			config.blocking = false;
 			process( true );
