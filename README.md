@@ -22,7 +22,7 @@ Installation
 1. Download the repo [here](https://github.com/ShamariFeaster/Templar/archive/master.zip)
 2. Include `build/TemplarJS-0.11.min.js` as a script in an HTML file.
 
-[Docs & Examples](http://templar.de-occupy.org/)
+[Docs & Examples](http://templar.bigfeastsoftware.com/#/custom-attributes)
 
 First Use
 =========
@@ -419,7 +419,7 @@ Tiny API
 
 If you've made it this far, you've learned about 60% of Templar's API. I wasn't lying when I said it
 was tiny. But don't mistake this smallness for weakness. Before I released it, I used Templar to 
-construct a real live working site that can be seen *here.* 
+construct a real live working site that can be seen [here](http://templar.bigfeastsoftware.com/).
 
 With Templar, you will be able to be up anbd running at a professional level in a matter of hours or
 days - not weeks or months. 
