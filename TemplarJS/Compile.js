@@ -151,8 +151,8 @@ return {
       //option innerText should not be compiled
       if(DOM_Node.nodeType === _.TEXT_NODE && (!_.isNull(parentNode) && parentNode.tagName !== 'OPTION') ){
         text = DOM_Node.nodeValue;
-
-        tokens = this.getTokens(text);
+        //changed from getTokens() on 5/16/2016
+        tokens = this.getAllTokens(text);
         
         //splitNode is right split, DOM_Node is left of split (ie original DOM_Node)
 
