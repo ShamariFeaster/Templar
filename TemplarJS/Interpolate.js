@@ -89,8 +89,11 @@ return {
             intermediateValue = uninterpolatedString.replace(tokens[x].fullToken, currAttribVal );
             uninterpolatedString = intermediateValue;
           }
+          //String.replace (above) converts null to 'null' 
+          if(intermediateValue != 'null'){
+            node.setAttribute(elemAttribName, intermediateValue);
+          }
           
-          node.setAttribute(elemAttribName, intermediateValue);
         }
       }
     }else if(tmp_node.isComponent === true){

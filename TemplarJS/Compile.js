@@ -140,7 +140,13 @@ return {
     
     if(!_.isNullOrEmpty(defaultPartialHref) && !shortCircuit){
       root.setAttribute('data-apl-default', '');
-      DOM.asynGetPartial(defaultPartialHref, Circular('Bootstrap').loadPartialIntoTemplate, null, root );
+      
+      if(Circular('Route').isRoute(defaultPartialHref)){
+        Circular('Route').open(defaultPartialHref);
+      }else{
+        DOM.asynGetPartial(defaultPartialHref, Circular('Bootstrap').loadPartialIntoTemplate, null, root );
+      }
+       
       _.log('Spawning Thread <' + defaultPartialHref + '> w/ target <' + root.id + '> w/ scope <' + scope + '>');
     }
 
