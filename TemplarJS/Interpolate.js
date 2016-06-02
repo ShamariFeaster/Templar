@@ -79,7 +79,7 @@ return {
           /*get each non-terminal then, using text replacement, we update the node attribute
             value*/
             
-          tokens = Circular('Compile').getTokens( uninterpolatedString );
+          tokens = Circular('Compile').getAllTokens( uninterpolatedString );
           
           for(var x = 0; x < tokens.length; x++ ){
             currAttribVal = Map.dereferenceAttribute(tokens[x]);

@@ -88,7 +88,7 @@ return {
         }
         this.checkForCustomAttribute(node, origName);
         
-        tokens = Circular('Compile').getTokens(origValue);
+        tokens = Circular('Compile').getAllTokens(origValue);
         /* possible issue: data-apl-repeat attribs getting pushed to cache */
         for(var x = 0 ; x < tokens.length; x++){
           if(tmp_node === null || (tmp_node !== null && !tokens[x].equals(tmp_node))){
