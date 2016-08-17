@@ -16,7 +16,7 @@ exports.config = {
 },{
    'browserName': 'internet explorer',
     'platform': 'ANY',
-    'version': '9'
+    'version': '11'
 }
 
 ]

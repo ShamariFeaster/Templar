@@ -75,7 +75,10 @@ return {
                                   '';
         /*short circuit: is this model attribute's non-terminal in the node attributes string?
           during compilation, any node with a non-terminal is annotated w/ a symbol map*/
-        if(!_.isNullOrEmpty( uninterpolatedString = tmp_node.symbolMap[elemAttribName]  ) ){
+        uninterpolatedString = tmp_node.symbolMap[elemAttribName]
+        if(!_.isNullOrEmpty( uninterpolatedString ) 
+            && uninterpolatedString.indexOf('{{') != -1
+            && uninterpolatedString.indexOf('}}') != -1){
           /*get each non-terminal then, using text replacement, we update the node attribute
             value*/
             
@@ -89,6 +92,7 @@ return {
             intermediateValue = uninterpolatedString.replace(tokens[x].fullToken, currAttribVal );
             uninterpolatedString = intermediateValue;
           }
+          
           //String.replace (above) converts null to 'null' 
           if(intermediateValue != 'null'){
             node.setAttribute(elemAttribName, intermediateValue);

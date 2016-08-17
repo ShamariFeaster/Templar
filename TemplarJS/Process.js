@@ -612,7 +612,7 @@ return {
           var annotations = DOM.getDOMAnnotations(this);
           var listeners = Map.getListeners(annotations.modelName, annotations.attribName);
           
-          attrib.current_selection = selectObj.value;
+          attrib._value_ = selectObj.value;
           Interpolate.dispatchListeners(listeners, selectObj);                  
         });
         break;

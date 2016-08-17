@@ -33,6 +33,7 @@ describe('Regression Suite', function() {
 
   it('Run Regression Suite', function() {
     test('body-interp');
+    /*
     test('templar-success');
     test('routing');
     //test('templar-nodeTree'); //See notes in tests.js
@@ -48,5 +49,6 @@ describe('Regression Suite', function() {
     test('templar-interpolation-input-radio');
     test('templar-component');
     test('templar-component-control');
+    */
   });
 });
