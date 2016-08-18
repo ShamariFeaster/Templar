@@ -19,7 +19,7 @@ Model.prototype.limit = function(attribName){
     delete Model.limitTable[attribName];
     modelAttrib = Map.getAttribute(Model.modelName, attribName);
     
-    if(_.isArray(modelAttrib) && limit >= 0){
+    if(_.isArray(modelAttrib) && limit > 0){
       totalPages = Math.floor(modelAttrib.length/limit);
       totalPages += ((modelAttrib.length%limit > 0) ? 1 : 0);
       Model.limitTable[attribName] = {limit : limit, page : 1, totalPages : totalPages, currentPage : 1};

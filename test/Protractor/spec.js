@@ -11,7 +11,7 @@ function screenShot(filename) {
 }
 
 function test(folderName){
-  browser.get(folderName);
+  browser.get(folderName+'/');
   element.all(by.css('ol.qunit-assert-list li.fail')).then(function(failures) {
     /*I could parse the error nodes for logging errors to file as well*/
     if(failures.length > 0){
@@ -20,6 +20,7 @@ function test(folderName){
       expect(false).toEqual(true);
     }else{
       expect(true).toEqual(true);
+      //screenShot(folderName);
     }
   });
 
@@ -33,6 +34,9 @@ describe('Regression Suite', function() {
 
   it('Run Regression Suite', function() {
     test('body-interp');
+    test('templar-interpolation-paging');
+    test('templar-interpolation-sort');
+    test('templar-interpolation-filter');
     /*
     test('templar-success');
     test('routing');

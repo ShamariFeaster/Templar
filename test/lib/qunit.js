@@ -777,7 +777,7 @@ QUnit.load = function() {
 	}
 };
 
-if ( defined.document ) {
+if ( defined.document && config.autostart) {
 	addEvent( window, "load", QUnit.load );
 }
 

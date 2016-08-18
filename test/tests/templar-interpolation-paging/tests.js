@@ -28,14 +28,15 @@ QUnit.frameworkLoaded(function(){
   var aModel, Map, System, DOM, _, 
       $div = null, _currentPage = 0, _totalPages = 0;
   QUnit.config.reorder = false;
-  QUnit.module('Paging: NOTE: getters are tested with paging implicitly in tests', 
+  //NOTE: getters are tested with paging implicitly in tests
+  QUnit.module('Paging: ', 
   {
     setup : function(){
       aModel = Templar.getModel('Attributes');
       Map = structureJS.require('Map');
       System = structureJS.require('System');
       DOM = structureJS.require('DOM');
-      _ = structureJS.config.context;
+      _ = structureJS.state.context;
       //aModel.limit('range').to(3);
     },
     teardown : function(){
@@ -62,61 +63,61 @@ QUnit.frameworkLoaded(function(){
   /*END Helpers*/
   
   //W/ No Limit Set
-  QUnit.test('Limit',function( assert ){
+  QUnit.test('No Limit Set: Sanity Check',function( assert ){
     $div = $('.paged-asset');
     /*minus 1 for the hidden base node*/
     runPageTests(assert, aModel.range.length, $div.length - 1, 0, 0, 'No limit set');
   });
   
-  QUnit.test('gotoPage: Out of range',function( assert ){
+  QUnit.test('No Limit Set: gotoPage: Out of range',function( assert ){
     $div = $('.paged-asset');
     /*minus 1 for the hidden base node*/
     aModel.gotoPage(20).of('range');
     runPageTests(assert, aModel.range.length, $div.length - 1, 0, 0, 'No limit set');
   });
   
-  QUnit.test('gotoNextPageOf',function( assert ){
+  QUnit.test('No Limit Set: gotoNextPageOf',function( assert ){
     $div = $('.paged-asset');
     aModel.gotoNextPageOf('range');
     runPageTests(assert, aModel.range.length, $div.length - 1, 0, 0, 'No limit set');
   });
   
-  QUnit.test('gotoPreviousPageOf',function( assert ){ 
+  QUnit.test('No Limit Set: gotoPreviousPageOf',function( assert ){ 
     $div = $('.paged-asset');
     aModel.gotoPreviousPageOf('range');
     runPageTests(assert, aModel.range.length, $div.length - 1, 0, 0, 'No limit set');
   });
   
   //W/ Limit Set
-  QUnit.test('Limit',function( assert ){
+  QUnit.test('Limit set: Sanity Check',function( assert ){
     aModel.limit('range').to(3);
     $div = $('.paged-asset');
-    runPageTests(assert, aModel.range.length, $div.length - 1, 1, 5, 'Limit set');
+    runPageTests(assert, 3, $div.length - 1, 1, 5, 'Limit set');
   });
   
-  QUnit.test('gotoPage',function( assert ){
+  QUnit.test('Limit set: gotoPage',function( assert ){
     $div = $('.paged-asset');
     aModel.limit('range').to(3);
     aModel.gotoPage(3).of('range');
-    runPageTests(assert, aModel.range.length, $div.length - 1, 3, 5, 'Limit set');
+    runPageTests(assert, 3, $div.length - 1, 3, 5, 'Limit set');
     aModel.gotoPage(23).of('range');
     assert.equal(_currentPage, 3, 'currentPage: out of range');
     assert.equal(_totalPages, 5, 'totalPages: out of range ');
   });
   
   
-  QUnit.test('gotoNextPageOf',function( assert ){
+  QUnit.test('Limit set: gotoNextPageOf',function( assert ){
     aModel.limit('range').to(3);
     $div = $('.paged-asset');
     aModel.gotoNextPageOf('range');
-    runPageTests(assert, aModel.range.length, $div.length - 1, 2, 5, 'Limit set');
+    runPageTests(assert, 3, $div.length - 1, 2, 5, 'Limit set');
   });
   
-  QUnit.test('gotoPreviousPageOf',function( assert ){ 
+  QUnit.test('Limit set: gotoPreviousPageOf',function( assert ){ 
     aModel.limit('range').to(3);
     $div = $('.paged-asset');
     aModel.gotoPreviousPageOf('range');
-    runPageTests(assert, aModel.range.length, $div.length - 1, 1, 5, 'Limit set');
+    runPageTests(assert, 3, $div.length - 1, 1, 5, 'Limit set');
   });
   /**/
   
