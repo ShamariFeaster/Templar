@@ -9,7 +9,7 @@ QUnit.frameworkLoaded(function(){
       Map = structureJS.require('Map');
       System = structureJS.require('System');
       DOM = structureJS.require('DOM');
-      _ = structureJS.config.context;
+      _ = structureJS.state.context;
       shuffleAll();
     },
     teardown : function(){
@@ -39,6 +39,7 @@ QUnit.frameworkLoaded(function(){
     fisherYatesShuffle(aModel.ns_mixed);
     aModel.update('ns_mixed');
   }
+  
   function runPageTests(assert, actual, expected){
     _currentPage = aModel.currentPageOf('range');  
     _totalPages = aModel.totalPagesOf('range');
@@ -60,10 +61,17 @@ QUnit.frameworkLoaded(function(){
   }
   /*END Helpers*/
   
+  QUnit.test('sort: unpaged using empty orderBy()',function( assert ){
+    var copy = getFullAttrib('Attributes', 'range').slice(0).sort(basicSort);
+    aModel.sort('range').orderBy();
+    runPageTests(assert, aModel.range, copy, 'No limit set');
+  });
+
+  
   //W/ No Limit Set
   QUnit.test('sort: unpaged',function( assert ){
     var copy = getFullAttrib('Attributes', 'range').slice(0).sort(basicSort);
-    aModel.sort('range').orderBy();
+    aModel.sort('range');
     runPageTests(assert, aModel.range, copy, 'No limit set');
   });
 
@@ -75,12 +83,11 @@ QUnit.frameworkLoaded(function(){
     aModel.limit('range').to(0);
     runPageTests(assert, aModel.range, sortedPage.concat(unsortedCopy.slice(3)), 'No limit set');
   });
-  /*We cannot expect stability unless we sort all properties.
-    
-    Thoughts on this: if the client doesn't want the field to be sorted then it really doesn't matter
-    what state that column is in at a given time. By sorting other fields, the client has declared
-    those field's states superior to that of un-sorted fields.
-  */
+  //We cannot expect stability unless we sort all properties.
+    //Thoughts on this: if the client doesn't want the field to be sorted then it really doesn't matter
+    //what state that column is in at a given time. By sorting other fields, the client has declared
+    //those field's states superior to that of un-sorted fields.
+  
   QUnit.test('sort orderBy: unpaged',function( assert ){
     var solution = [
   {p1: 1 , p2 : 5, p3 : 4},
@@ -159,6 +166,9 @@ QUnit.frameworkLoaded(function(){
     aModel.update('ns_alpha');
     runPageTests(assert, aModel.ns_alpha, solution, 'Correctly Sorted');
   });
+/*  
+  */
+  
   /*Fails because character comparisons are done by the ascii int val of the character.
   
     Other short comings:

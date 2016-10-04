@@ -11,14 +11,16 @@ exports.config = {
 
 {
   'browserName': 'chrome'
-}, {
+}
+
+, {
   'browserName': 'firefox'
 },{
    'browserName': 'internet explorer',
     'platform': 'ANY',
     'version': '11'
-}
-
+}/*
+*/
 ]
 }
 

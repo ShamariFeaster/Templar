@@ -84,6 +84,7 @@ Model.prototype.sort = function(attribName, pageNum, sortFunc){
   };
   
   chain.sorter = function(_a,_b){
+    
     var orig_a = _a;
     var orig_b = _b;
     var sortAction = NO_CHANGE;
@@ -97,10 +98,12 @@ Model.prototype.sort = function(attribName, pageNum, sortFunc){
     sortAction = (b === a) ? NO_CHANGE : (b < a) ? B_FIRST : A_FIRST;
     sortAction = (chain.arePastPropsAligned(orig_a, orig_b) === true) ? sortAction : NO_CHANGE;
     return sortAction;
+    
+    //return (_a < _b) ? -1 : (_a==_b) ? 0 : 1;
   };
     
   chain.orderBy = function(propName, sortFunc){
-    chain.propName = propName;
+    chain.propName = propName || null;
     chain.target.sort(chain.getSorter(sortFunc));
     chain.insertSortedSlice(chain.target, Model, attribName, pageNum);
     chain.prevProps.push(propName);
