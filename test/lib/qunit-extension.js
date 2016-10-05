@@ -14,7 +14,7 @@ QUnit.frameworkLoaded = function(callback){
   var _ = structureJS.state.context,
       System = structureJS.require('System');
   QUnit.config.autostart = false;
-  
+
   /*we need tests to run after all late binds*/
   _.SYSTEM_EVENT_TYPES.LIST_TYPE = _.STACK;
 

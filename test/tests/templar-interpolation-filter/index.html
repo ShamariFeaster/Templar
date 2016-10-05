@@ -22,39 +22,43 @@
 </div>
 <input id="input" value="{{Comments.searchInput}}"/>
 
-<div class="left pane">
-  <div class="left">
-    <div>first name: </div>
-    <div>last name: </div>
-  </div>
-  <div class="left space" id="comments" data-apl-repeat="Comments.comments">
-    <div class="comments-fn">{{fn}}</div>
-    <div class="comments-ln">{{ln}}</div>
+ 
+ 
+<div id="footer"></div>
+<div id="qunit" style="margin: 150px 0px 0px 0px;"></div>
+<div id="qunit-fixture"></div>
 
+<div class="left pane">
+  <div class="left space" id="comments" data-apl-repeat="Comments.comments">
+    <div class="comments-fn">{{fn}} {{ln}}</div>
   </div> 
 </div>    
+
+<div class="left space" id="comments2" data-apl-repeat="Comments.comments2">
+    <div class="comments2-item">{{fn}} {{ln}}</div>
+  </div> 
 
 <div class="left pane">
   <div class="left">
     <div>Range </div>
   </div>
   <div class="left space" id="range" data-apl-repeat="Comments.range">
-    <div class="range-{{$index}}">{{}}</div>
+    <div id="range-{{$index}}" class="range1">{{}}</div>
   </div> 
 </div>    
+
+<div class="left space" id="range" data-apl-repeat="Comments.range2">
+    <div id="range-{{$index}}" class="range2">{{}}</div>
+  </div>
 
 <div class="left pane">
   <div class="left">
     <div>Range3 </div>
   </div>
   <div class="left space" id="range3" data-apl-repeat="Comments.range3">
-    <div class="range3-{{$index}}">{{}}</div>
+     <div id="range-{{$index}}" class="range3">{{}}</div>
   </div> 
-</div>   
- 
-<div id="footer"></div>
-<div id="qunit" style="margin: 150px 0px 0px 0px;"></div>
-<div id="qunit-fixture"></div>
+</div>  
 </body>
 </html>
 

@@ -5,9 +5,10 @@ QUnit.frameworkLoaded(function(){
       Map = structureJS.require('Map'), 
       System = structureJS.require('System'), 
       DOM = structureJS.require('DOM'), 
-      _ = structureJS.config.context, 
+      _ = structureJS.state.context, 
       preFilterLength = cModel.comments.length,
       range3PreFilterLength = cModel.range3.length,
+      dispatchCnt = 0,
       $input = $('#input');
       
   QUnit.module('Input Elements', 
@@ -21,11 +22,16 @@ QUnit.frameworkLoaded(function(){
       cModel.unlisten('range');
       cModel.resetLiveFiltersOf('range');
       cModel.resetStaticFiltersOf('range2');
+      dispatchCnt = 0;
       while($('#input').val() != ''){
         $input.sendkeys('{backspace}');
       }
     }
   });
+  
+  function getCount(selector){
+    return $(selector).length - 1;
+  }
   
   /*Helpers*/
 
@@ -34,47 +40,50 @@ QUnit.frameworkLoaded(function(){
   Using https://github.com/dwachss/bililiteRange
           http://bililite.com/blog/
   */
+  
+ 
   QUnit.asyncTest('No match',function( assert ){
-
+     QUnit.stop();
+     
+    cModel.listen('comments', function(e){
+      assert.equal(cModel.comments.length, preFilterLength, 'Filtration working');
+      QUnit.start(2);
+    });
+    
     cModel
         .filter('comments')
         .by('fn')
         .using('searchInput');
         
     $input.sendkeys('z');
-    //$input.sendkeys('y');
-    //$input.sendkeys('{backspace}');
-    QUnit.start();
+
+  });
+  
+  //attib.length always returns prefiltered length.
+  QUnit.asyncTest('Match found',function( assert ){
     
-    
-        
     cModel.listen('comments', function(e){
-      assert.equal(cModel.comments.length, preFilterLength, 'Filtration working');
+      assert.equal(getCount('.comments-fn'), 2, 'Filtration working');
+      QUnit.start();
     })
     
-  });
-
-  QUnit.asyncTest('Match found',function( assert ){
+    
     cModel
         .filter('comments')
         .by('fn')
         .using('searchInput');
         
     $input.sendkeys('s');
-    //$input.sendkeys('y');
-    //$input.sendkeys('{backspace}');
-    QUnit.start();
+    
     
     
         
-    cModel.listen('comments', function(e){
-      assert.equal(cModel.comments.length, 2, 'Filtration working');
-    })
+    
     
   });
   
   QUnit.asyncTest('Match found, next input produces non-mtach',function( assert ){
-    dispatchCnt = 0;
+    
     cModel
         .filter('comments')
         .by('fn')
@@ -91,7 +100,7 @@ QUnit.frameworkLoaded(function(){
       dispatchCnt++;
       if(dispatchCnt == 2){
         assert.equal($input.val(), 'sy', 'Input is "sy"');
-        assert.equal(cModel.comments.length, preFilterLength, 'Filtration working');
+        assert.equal(getCount('.comments-fn'), preFilterLength, 'Filtration working');
         QUnit.start();
       }
       
@@ -100,7 +109,7 @@ QUnit.frameworkLoaded(function(){
   });
   
   QUnit.asyncTest('Match found, next input produces non-mtach, then backspace to match',function( assert ){
-    dispatchCnt = 0;
+
     cModel
         .filter('comments')
         .by('fn')
@@ -118,7 +127,7 @@ QUnit.frameworkLoaded(function(){
       dispatchCnt++;
       if(dispatchCnt == 2){
         assert.equal($input.val(), 's', 'Input is "s"');
-        assert.equal(cModel.comments.length, 2, 'Filtration working');
+        assert.equal(getCount('.comments-fn'), 2, 'Filtration working');
         QUnit.start();
       }
       
@@ -127,7 +136,7 @@ QUnit.frameworkLoaded(function(){
   });
   
   QUnit.asyncTest('Match found,switch search property, then no match',function( assert ){
-    dispatchCnt = 0;
+
     cModel
         .filter('comments')
         .by('fn')
@@ -136,10 +145,11 @@ QUnit.frameworkLoaded(function(){
     $input.sendkeys('s');   
         
     cModel.listen('comments', function(e){
-      dispatchCnt++;
-      if(dispatchCnt == 1){
+      
+      if(++dispatchCnt == 1){
+        
         assert.equal($input.val(), 's', 'Input is "s"');
-        assert.equal(cModel.comments.length, 2, 'Filtration working');
+        assert.equal(getCount('.comments-fn'), 2, 'Filtration working');
         
         cModel
           .filter('comments')
@@ -152,7 +162,7 @@ QUnit.frameworkLoaded(function(){
       
       if(dispatchCnt == 2){
         assert.equal($input.val(), '', 'Input is ""');
-        assert.equal(cModel.comments.length, preFilterLength, 'Filtration working');
+        assert.equal(getCount('.comments-fn'), preFilterLength, 'Filtration working');
       }
       
     })
@@ -160,7 +170,7 @@ QUnit.frameworkLoaded(function(){
   });
   
   QUnit.asyncTest('Match found,switch search property, then  match',function( assert ){
-    dispatchCnt = 0;
+
     cModel
         .filter('comments')
         .by('fn')
@@ -169,10 +179,10 @@ QUnit.frameworkLoaded(function(){
     $input.sendkeys('s');   
         
     cModel.listen('comments', function(e){
-      dispatchCnt++;
-      if(dispatchCnt == 1){
+
+      if(++dispatchCnt == 1){
         assert.equal($input.val(), 's', 'Input is "s"');
-        assert.equal(cModel.comments.length, 2, 'Filtration working');
+        assert.equal(getCount('.comments-fn'), 2, 'Filtration working');
         
         cModel
           .filter('comments')
@@ -186,7 +196,7 @@ QUnit.frameworkLoaded(function(){
       
       if(dispatchCnt == 3){
         assert.equal($input.val(), 'b', 'Input is "b"');
-        assert.equal(cModel.comments.length, 2, 'Filtration working');
+        assert.equal(getCount('.comments-fn'), 2, 'Filtration working');
       }
       
     })
@@ -204,10 +214,10 @@ QUnit.frameworkLoaded(function(){
     //$input.sendkeys('{backspace}');
     
     cModel.listen('range', function(e){
-      dispatchCnt++;
-      if(dispatchCnt == 2){
+
+      if(++dispatchCnt == 2){
         assert.equal($input.val(), '10', 'Input is "10"');
-        assert.equal(cModel.range.length, 1, 'Filtration working');
+        assert.equal(getCount('.range1'), 1, 'Filtration working');
         QUnit.start();
       }
       
@@ -221,7 +231,7 @@ QUnit.frameworkLoaded(function(){
         .using(function(a){ return a > 5;});
 
     cModel.update('range2');
-    assert.equal(cModel.range2.length, 5, 'Static Filtration working');
+    assert.equal(getCount('.range2'), 5, 'Static Filtration working');
     
   });
   
@@ -232,7 +242,7 @@ QUnit.frameworkLoaded(function(){
         .and(function(a){ return a < 7;});
 
     cModel.update('range2');
-    assert.equal(cModel.range2.length, 1, 'Static Filtration working');
+    assert.equal(getCount('.range2'), 1, 'Static Filtration working');
   });
   
   QUnit.test('Static filter using non-scalar array, Match found, multiple filters',function( assert ){
@@ -241,27 +251,29 @@ QUnit.frameworkLoaded(function(){
       .using(function(comment){ return parseInt(comment.id) > 7;})
       .and(function(comment){ return comment.ln.charAt(0) == ('m');});
 
-        assert.equal(cModel.comments2.length, 2, 'Static Filtration working');
+        assert.equal(getCount('.comments2-item'), 2, 'Static Filtration working');
   });
   
-  QUnit.asyncTest('Using scalar array, override default live filter + static. ',function( assert ){
-    dispatchCnt = 0;
-    /*ISSUE: if default filter is overridden by a contratiction, listeners are never fired*/
+  QUnit.asyncTest('Using scalar array, 2 live filter overrides. ',function( assert ){
+
+    //ISSUE: if default filter is overridden by a contratiction, listeners are never fired
     cModel
       .filter('range3')
       .using('searchInput')
-      .and(function(liveInput, el){ var el = el.toString();       /*default filter override*/
-                                    return (el.charAt(el.length-1) == liveInput.charAt(liveInput.length-1));})
-      .and(function(liveInput){ return (liveInput.length > 1);});/*input filter*/
+      .and(function(liveInput, el){ 
+            var el = el.toString();       //default filter override
+            return (el.charAt(el.length-1) == liveInput.charAt(liveInput.length-1));
+      })
+      .and(function(liveInput){ return (liveInput.length > 1);});//input filter
         
     $input.sendkeys('1');
     $input.sendkeys('0');
     
     cModel.listen('range3', function(e){
-      dispatchCnt++;
-      if(dispatchCnt == 1){
+
+      if(++dispatchCnt == 1){
         assert.equal($input.val(), '10', 'Input is "10". Listener didn\'t fire until input filter passed');
-        assert.equal(cModel.range3.length, 2, 'Default switched to endsWith');
+        assert.equal(getCount('.range3'), 2, 'Default switched to endsWith');
         QUnit.start();
       }
 
@@ -269,7 +281,7 @@ QUnit.frameworkLoaded(function(){
     })
     
   });
-  
+/*  */
 });
 
 

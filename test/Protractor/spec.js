@@ -36,9 +36,8 @@ describe('Regression Suite', function() {
     test('body-interp');
     test('templar-interpolation-paging');
     test('templar-interpolation-sort');
-    /*
     test('templar-interpolation-filter');
-    
+    /*
     test('templar-success');
     test('routing');
     //test('templar-nodeTree'); //See notes in tests.js
