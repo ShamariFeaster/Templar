@@ -1,0 +1,116 @@
+<Codedown>
+
+<h1>Sorting</h1>
+
+`Model.sort(string attributeName)` will not update the view automatically. You need to call 
+`Model.update(string attributeName)` to see
+the sort reflected in the view. 
+
+<h3>Primative Arrays</h3>
+Using Templar, performing complex sorting of`DMA`s is easy. The markup for the list of numbers below is:
+
+```
+<div class="btn-group">
+  <label class="btn btn-primary" data-apl-repeat="{{Example.numbers}}">
+    {{}}
+  </label>
+</div>
+```
+
+<br/>
+
+<h4>The code:</h4>
+
+```
+$('.sort').click(function(e){
+  Example.sort('numbers');
+  Example.update('numbers');
+}); 
+```
+
+
+
+<button class="btn scramble" x-target="numbers">Scramble</button>
+<button class="btn sort" x-target="numbers">sort</button>
+
+<div class="btn-group">
+  <label class="btn btn-primary" data-apl-repeat="{{Example.numbers}}">
+    {{}}
+  </label>
+</div>
+
+<br/><br/>
+
+<h3>Arrays of objects</h3>
+
+To sort an array of objects, you can specify the object property to order by. `Model.sort()` is
+chainable with `orderBy(string propertyName)`.
+
+<br/><br/>
+
+
+<h4>The markup:</h4>
+```
+<table class="table table-striped table-hover">
+  
+  <thead>
+    <tr>
+    
+      <th 
+        data-apl-repeat="{{Taxonomy.columns}}"
+        x-name="{{}}"
+        class="sortableColumn" >
+        
+        {{}}
+      
+      </th>
+      
+    </tr>
+  </thead>
+
+<h4>Live example:</h4>
+  
+  <tbody>
+    <tr data-apl-repeat="{{Taxonomy.data}}">
+      <td>{{Kingdom}}</td><td>{{Class}}</td><td>{{Species}}</td>
+    </tr>
+  </tbody>
+</table>
+```
+ 
+ <h4>The code:</h4>
+ ```
+ $('.sortableColumn').click(function(e){
+  var colName = e.currentTarget.getAttribute('x-colName'),
+      Taxonomy = Tempar.getModel('Taxonomy');
+  Taxonomy.sort('data').orderBy(colName);
+  Taxonomy.update('data'); 
+});
+```
+ 
+ <h4>Live example (Click the column names to sort):</h4>
+<table class="table table-striped table-hover">
+  
+  <thead>
+    <tr>
+    
+      <th 
+        data-apl-repeat="{{Taxonomy.columns}}"
+        x-name="{{}}"
+        class="sortableColumn" >
+        
+        {{}}
+      
+      </th>
+      
+    </tr>
+  </thead>
+  
+  <tbody>
+    <tr data-apl-repeat="{{Taxonomy.data}}">
+      <td>{{Kingdom}}</td><td>{{Class}}</td><td>{{Species}}</td>
+    </tr>
+  </tbody>
+</table>
+
+</Codedown>

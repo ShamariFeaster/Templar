@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="../lib/TemplarJS-0.11.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"></script>
+    <script src="Components/Codedown.js"></script>
+    <script src="Data/Models.js"></script>
+    <script src="Data/Routes.js"></script>
+    <link rel="stylesheet" href="css/styles.css"></link>
+    <script>
+    /*Advanced: freeze/thaw, authentication/authorization
+      components: generic page button, limit selects
+      custom attributes: use them to store UI-specific logic, take logic
+      out of the template. hideIF/showIF/isDisbled examples
+      change detection : listen
+      paging : limit,page
+      filter and sort
+      cookbook: cascading selects, Templar.done, a generic Controller, dynamic 
+      nav buttons, hide/show using checkboxes
+    */
+        /*Define your data model*/
+  
+    Templar.success('#/paging', function(){
+      var ExampleModel = Templar.getModel('Example');
+      $('#page-up').click(function(){ExampleModel.pageDemo.page++;});
+      $('#page-down').click(function(){ExampleModel.pageDemo.page--;});
+    });
+    
+    Templar.success('#/filter-and-sort', function(){
+      var Example = Templar.getModel('Example'),
+         Taxonomy = Templar.getModel('Taxonomy');
+      
+      $('.scramble').click(function(e){
+        var attribName = e.currentTarget.getAttribute('x-target');
+        Example[attribName].map(function(item,i,arr){
+          var newIndex = Math.floor(Math.random() * (arr.length - 0)) + 0;
+          var a = arr[i];
+          var b = arr[newIndex];
+          arr[newIndex] = a;
+          arr[i] = b;
+        });
+        Example.update(attribName);
+      });
+      
+     $('.sort').click(function(e){
+        var attribName = e.currentTarget.getAttribute('x-target');
+        Example.sort(attribName);
+        Example.update(attribName);
+      }); 
+      
+      $('.sortableColumn').click(function(e){
+        var column = e.currentTarget.getAttribute('x-name');
+        //var compliment = Taxonomy.columns.filter(function(name){return (name != sortcol);})
+        Taxonomy.sort('data').orderBy(column);
+        Taxonomy.update('data'); 
+      });
+    });
+   </script>
+
+</head>
+<body>
+<a href="#/repeats">Repeats</a>
+<a href="#/selects">Selects</a>
+<a href="#/routing">Routing</a>
+<a href="#/binding">Binding</a>
+<a href="#/advanced">Advanced Topics</a>
+<a href="#/components">Components</a>
+<a href="#/listening">Change Detection</a>
+<a href="#/custom-attributes">Custom Tag Attribute</a>
+<a href="#/paging">Paging</a>
+<a href="#/filter-and-sort">Filtering & Sorting</a>
+<div id="apl-content" class="container" data-apl-default="Repeats.html"></div>
+ 
+</body>
+</html>

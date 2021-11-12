@@ -1,0 +1,97 @@
+<Codedown>
+<h2>Custom HTML Tags</h2>
+Templar has the easiest API for creating custom HTML tags that the compiler will recognize and transform into whatever standard HTML you specify.
+
+<h3>A Simple Example:</h3>
+
+Suppose you want to create a tag called `<row>` that will stack on top of each other like a table's rows, but only using css.
+
+<h4>Here's the JavaScript:</h4>
+
+```
+Templar.component('row',{
+  templateURL : 'path/to/the/template.html'
+});
+```
+
+<h4>Here's the template</h4>
+
+```
+<style>
+.row{
+  /*css stuff......*/
+}
+</style>
+
+<div class="row"> 
+  <content></content>
+</div>
+```
+
+Each custom tag (or `component` as they're called in Templar) template can have a single `<style>` tag that Templar will inject. Be sure to use collision-resistant class names for your components as this is not implemented as the yet-to-be-standard Shadow DOM.
+
+It should be noted that `<content>` tag of a template will be replaced with the innerHTML of a component during compilation.
+
+<h3>A More Complex Example:</h3>
+
+For a tag that has more complex behavior, Templar has a simple component lifecycle. `onCreate` and `onChange` functions for component attributes. This example is a stub of a component called an `OverlayButton`. This component allows a user to specify a transparent image that will be overlayed on top of a main image. The use case is an image that tells the user they can delete it by clicking it. It conveys this by overlaying a big red "X" on top of an image.
+
+<h4>In use, the markup looks like:</h4>
+
+```
+<OverlayButton 
+  overlay="image/icon/big-red-x.png"
+  src="path-to-some-image.jpg">
+</OverlayButton>
+```
+
+<h4>Here's the component template markup:</h4>
+
+```
+<div class="container">
+  <a>
+
+    <div class="transcluded-text">
+      <content></content>
+    </div>
+
+    <img src="" id="main-image"/>
+    <img src="" id="overlay-image"/>
+
+  </a>
+<div>
+```
+
+Our template has two `<img>` tags: one for the main image and another for the overlay. We make the image clickable by wrapping both images in an `<a>` tag.
+
+In the component's JavaScript definition we can define its custom attributes and also the functions that control what happens when those attributes are changed at run-time.
+
+```
+Templar.component('OverlayButton', {
+  templateURL : 'path/to/the/template.html'
+  attributes : {
+
+    overlay : function(self, val){
+      var overlay;
+      if((overlay = self.querySelector('[id=overlay-image]')) != null){
+        overlay.setAttribute('src', val);
+      }
+    },
+
+    src : function(self, val){
+      var main;
+      if((main = self.querySelector('[id=main-image]') )!= null){
+        main.setAttribute('src', val);
+      }
+    }
+  },
+  onCreate : function(self){
+    /* do some stuff */
+  }
+});
+```
+
+So if you were to use `jQuery.attr()` or plain JavaScript's `setAttribute()` to set the overlay attribute to a different source, the function called overlay that is defined above would be called and it would update the src attribute of the component's image tag.
+
+I designed this process to be as close to native JavaScript as possible. there are no other options or complicated scoping or transclusion rules to remember. There may come a time when the limits of this simple approach are reached, but for now it's KISS all day.
+</Codedown>
