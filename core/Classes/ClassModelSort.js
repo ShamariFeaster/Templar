@@ -4,7 +4,8 @@ var _ = this;
 var Model = require('ModelHeader');
 var Map = require('Map');
 var Interpolate = require('Interpolate');
-
+//TODO: move error handling to class or function
+var errorState = { status : false, msg : ''};
 
 Model.prototype.sort = function(attribName, pageNum, sortFunc){
   var chain = Object.create(null),
@@ -84,6 +85,12 @@ Model.prototype.sort = function(attribName, pageNum, sortFunc){
         b = (!_.isNull(chain.propName)) ? b[chain.propName] : b,
         sortAction = NO_CHANGE;
         
+    if( (_.isObject(a) || _.isObject(a) ) && _.isNullOrEmpty(chain.propName)){
+        errorState.status = true;
+        errorState.msg = 'WARNING: orderBy or thenBy called with no property name of list of objects. \
+                Sort will be non-deterministic';
+    }
+        
     if(!_.isDef(a) || !_.isDef(b)){
       return NO_CHANGE;
     }
@@ -96,6 +103,10 @@ Model.prototype.sort = function(attribName, pageNum, sortFunc){
   chain.orderBy = function(propName, sortFunc){
     chain.propName = propName;
     chain.target.sort(chain.getSorter(sortFunc));
+    if(errorState.status){
+        _.log(errorState.msg);
+        errorState.status = false;
+    } 
     chain.insertSortedSlice(chain.target, Model, attribName, pageNum);
     chain.prevProps.push(propName);
     return chain;
@@ -104,6 +115,10 @@ Model.prototype.sort = function(attribName, pageNum, sortFunc){
   chain.thenBy = function(propName, sortFunc){
     chain.propName = propName;
     chain.target.sort(chain.getSorter(sortFunc));
+    if(errorState.status){
+        _.log(errorState.msg);
+        errorState.status = false;
+    } 
     chain.insertSortedSlice(chain.target, Model, attribName, pageNum);
     chain.prevProps.push(propName);
     return chain;

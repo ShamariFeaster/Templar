@@ -34,6 +34,7 @@ Templar.success('#/paging', function(){
         Taxonomy.sort('data').orderBy(column);
         Taxonomy.update('data'); 
       });
+
     });
     
 });
