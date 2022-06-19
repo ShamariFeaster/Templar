@@ -1,5 +1,5 @@
 Templar.dataModel('Example',{
-
+    hello : 'hi',
     SimpleRepeat : ['a','b','c'],
     
     ComplexRepeat : [

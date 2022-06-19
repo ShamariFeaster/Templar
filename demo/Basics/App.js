@@ -1,4 +1,4 @@
-structureJS.module('Export', function(require){
+structureJS.module('App', function(require){
 var Templar = require('Templar');
 Templar.success('#/paging', function(){
       var ExampleModel = Templar.getModel('Example');
