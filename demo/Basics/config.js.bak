@@ -2,8 +2,8 @@ structureJS.configure(
 {
   globals : [
             'templar/Util', 
-            'classes/ClassTMP_Node',
-            'classes/ClassModel',
+            'classes/TMP_Node',
+            'classes/ClassModelAPI',
             'templar/DOM'],
   directory_aliases : {modules : 'Modules/', templar : '../../core/', classes : '../../core/Classes/'}
 });

@@ -206,17 +206,16 @@ return {
       tmp_node = new TMP_Node(DOMorTMPNode, modelName, attribName, index);
     
     /*If user references unknown model in template we get this error*/
-    if(!_.isDef(_map[tmp_node.modelName])){
-      throw 'FATAL ERROR: Model "' + tmp_node.modelName + ' Is Undeclared.';
+    if(_.isDef(_map[tmp_node.modelName])){
+
+      if( !_.isDef(_map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]) ){
+        _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName] = { nodes : []};
+      }
+
+      _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]['nodes'].push(tmp_node);
+    }else{
+      _.log('WARNING: Model "' + tmp_node.modelName + ' Is Undeclared.');
     }
-       
-    if( !_.isDef(_map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]) ){
-      _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName] = { nodes : []};
-
-    }
-
-    _map[tmp_node.modelName]['nodeTable'][tmp_node.attribName]['nodes'].push(tmp_node);
-
   },
   annotateWithLimitProps : function(model, attribName, value){
     
@@ -325,8 +324,8 @@ return {
         modelName = TMP_node.modelName,
         attribName = TMP_node.attribName,
         Model = _map[modelName]['api'];
-    
-    if(_.isDef(attribute = returnVal = this.getAttribute(modelName,attribName))){
+    attribute = returnVal = this.getAttribute(modelName,attribName);
+    if(!_.isNull(attribute)){
       if(_.isArray(attribute) || _.isObj(attribute)){
         
         /* get un-paged attrib length if used in template. */
@@ -337,7 +336,7 @@ return {
             returnVal = Model.attributes[attribName].length;
           } 
         }else{
-          while((prop = queue.shift()) != null && _.isDef(attribute[prop])){
+          while((prop = queue.shift()) != null ){
             returnVal = attribute = attribute[prop];
           }
         }
@@ -347,6 +346,8 @@ return {
         returnVal = attribute;
       }
       
+    }else{
+      _.log('WARNING: ' + attribName + ' is not member of model ' + modelName);
     }
 
     return returnVal;
@@ -363,6 +364,38 @@ return {
       _map[modelName]['modelObj'][attribName] = value;
     }
     return returnVal;
+  },
+  
+  setAttributeWithToken : function(token, value){
+    if(!_.isDef(_map[token.modelName])) 
+      return null;
+      
+    var lastRef = null,
+        lastProp = null;
+        attribute = null,
+        prop = null,
+        queue = token.indexQueue.slice(0),
+        modelName = token.modelName,
+        attribName = token.attribName,
+        Model = _map[modelName]['api'];
+    
+    if(_.isDef(attribute = this.getAttribute(modelName,attribName))){
+      if(_.isArray(attribute) || _.isObj(attribute)){
+
+        while((prop = queue.shift()) != null && _.isDef(attribute[prop])){
+          lastRef = attribute;
+          lastProp = prop;
+          attribute = attribute[prop];
+        }
+        
+        lastRef[lastProp] = value;
+        
+      }else{
+        this.setAttribute(modelName, attribName, value);
+      }
+
+    }
+
   },
   
   getListeners : function(modelName, attributeName){
@@ -464,7 +497,7 @@ return {
       }
 
       /*only remove visible elements from DOM, don't remove base node from DOM*/
-      if(!_.isNull(tmp_node.node.parentNode) && tmp_node.index > _.UNINDEXED){
+      if(document.body.contains(tmp_node.node) && tmp_node.index > _.UNINDEXED){
         tmp_node.node.parentNode.removeChild(tmp_node.node);
         
       }

@@ -1,21 +1,16 @@
 /*Data structures*/
 structureJS.declare('templar/State');
-
-
-structureJS.declare('templar/Map');
+structureJS.declare('templar/Util');
+structureJS.declare('templar/DOM');
+structureJS.declare('templar/Constants');
+structureJS.declare('classes/TMP_Node');
+structureJS.declare('classes/ClassModel');
+structureJS.declare('templar/Map',['templar/DOM', 'templar/Util']);
 /*Parse + Compile + Link _ Interpolate*/
-structureJS.declare('templar/Process');
-structureJS.declare('templar/Interpolate');
-structureJS.declare('templar/Compile');
-
-structureJS.declare('templar/ClassModelSort');
-structureJS.declare('templar/ClassModelPage');
-structureJS.declare('templar/ClassModelFilter');
-structureJS.declare('templar/ClassModelAPI');
 
 
 
-structureJS.declare('templar/Link');
+
 /*Class Definitions*/
 structureJS.declare('classes/Attribute.class');
 structureJS.declare('classes/ClassModelSort');
@@ -24,19 +19,28 @@ structureJS.declare('classes/ClassModelFilter');
 structureJS.declare('classes/ClassModelAPI');
 structureJS.declare('classes/Component.class');
 structureJS.declare('classes/Token.class');
+
 /*API*/
 structureJS.declare('templar/Route');
 structureJS.declare('templar/Templar');
+structureJS.declare('templar/Process',['classes/Attribute.class', 'classes/TMP_Node']);
+
+structureJS.declare('templar/Interpolate',['classes/TMP_Node']);
+
+structureJS.declare('templar/Compile',['classes/TMP_Node']);
 structureJS.declare('templar/Link');
 /*Loading*/
 structureJS.declare('templar/Bootstrap');
 structureJS.declare('templar/Export');
-structureJS.declare('templar/Constants');
+
 structureJS.declare('templar/Route');
 structureJS.declare('templar/System');
-structureJS.declare('templar/Export')
+structureJS.declare('templar/Link');
+structureJS.declare('templar/Export',['templar/System']);
 
 /*App*/
-structureJS.declare("Components/Codedown");
-structureJS.declare("Data/Models");
+
 structureJS.declare("Data/Routes");
+structureJS.declare("Data/Models");
+structureJS.declare("Components/Codedown");
+structureJS.declare("../App");

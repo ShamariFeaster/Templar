@@ -2,13 +2,12 @@ structureJS.module('Compile', function(require){
 
 var _ = this,
     TMP_Node = require('TMP_Node'),
-    ControlNode = require('ControlNodeHeader'),
     Map = require('Map'),
     DOM = require('DOM'),
     Interpolate = require('Interpolate'),
     Process = require('Process'),
     State = require('State'),
-    Token = require('Token'),
+    Token = require('Token.class'),
     Circular = structureJS.circular();
 
 return {
@@ -192,16 +191,13 @@ return {
               attribVal,
               templateContent,
               matches = null,
-              repeatKey,
-              beforeInsertNodeCnt = nodes.length;
-              addedNodecnt = 0;
+              repeatKey;
           if(_.isDef(component)
               && !_.isNullOrEmpty(component.templateContent)
               && !_.isNull(DOM_Node.parentNode)){
             //_.log('Is Defined Component: ' + DOM_Node.tagName);
-            
+
             DOM_Node.insertAdjacentHTML('afterend', component.templateContent);
-            addedNodecnt = nodes.length - beforeInsertNodeCnt;
             DOM_component = DOM_Node.nextElementSibling;
             
             /*Transclude content*/
@@ -269,7 +265,7 @@ return {
               DOM_Node.setAttribute('data-' + _.IE_MODEL_REPEAT_KEY, repeatKey);
             }
             
-            i += addedNodecnt;//make sure we don't recompile this node
+            i++;//make sure we don't recompile this node
           }
           //log('Recursing on :' + DOM_Node.tagName);
           repeatKey = DOM.getDataAttribute(DOM_Node, _.IE_MODEL_REPEAT_KEY);

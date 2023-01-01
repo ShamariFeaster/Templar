@@ -20,4 +20,4 @@ structureJS.declare('templar/Templar');
 /*Loading*/
 structureJS.declare('templar/Bootstrap');
 structureJS.declare('templar/Export');
-
+structureJS.declare('App');

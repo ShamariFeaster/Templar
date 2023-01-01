@@ -1,4 +1,4 @@
-structureJS.module('ModelFilter', function(require){
+structureJS.module('ClassModelPage', function(require){
 
 var _ = this;
 var Model = require('ModelHeader');

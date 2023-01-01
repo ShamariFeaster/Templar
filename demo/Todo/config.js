@@ -3,7 +3,7 @@ structureJS.configure(
   globals : [
 
             
-            'classes/ClassTMP_Node',
+            'classes/TMP_Node',
             'classes/ClassModel',
             'classes/Attribute.class',
             'classes/Component.class',

@@ -1,4 +1,4 @@
-structureJS.module('Attribute', function(require){
+structureJS.module('Attribute.class', function(require){
 
 var _ = this;
 
@@ -20,10 +20,9 @@ var _isAttribute = function(name){
 }
 
 Attribute.prototype.getAttribute = function(name){
-  var result = null,
-      normalizedName = name.toLowerCase();
-  if(_isAttribute(normalizedName)){
-    result = Templar._attributes[normalizedName];
+  var result = null;
+  if(_isAttribute(name)){
+    result = Templar._attributes[name];
   }
   return result;
 }

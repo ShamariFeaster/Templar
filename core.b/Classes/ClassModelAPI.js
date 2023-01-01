@@ -7,16 +7,6 @@ var Interpolate = require('Interpolate');
 var State = require('State');
 
 /************************GENERAL************************************/
-/*Non-clobbering updating of interface using new data. Note that */
-/*public*/
-Model.prototype.softset = function(attribName, value){
-  this.cachedResults[attribName] = value;
-  Interpolate.interpolate(this.modelName, attribName, value);
-  delete this.cachedResults[attribName];
-  if(_.isDef(this.limitTable[attribName])){
-    this.limitTable[attribName].page = 1;
-  }
-};
 
 Model.prototype.update = function(attribName){
   Interpolate.interpolate(this.modelName, attribName, Map.getAttribute(this.modelName, attribName));

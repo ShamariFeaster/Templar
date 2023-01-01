@@ -1,4 +1,4 @@
-structureJS.module('Component', function(require){
+structureJS.module('Component.class', function(require){
 
 var _ = this;
 

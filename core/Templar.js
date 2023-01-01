@@ -6,8 +6,8 @@ var Route = require('Route');
 var Model = require('ModelHeader');
 var System = require('System');
 var DOM = require('DOM');
-var Attribute = require('Attribute');
-var Component = require('Component');
+var Attribute = require('Attribute.class');
+var Component = require('Component.class');
 
 var Templar = function(controlName){
 };
@@ -140,7 +140,7 @@ Templar.component = function(name, definitionObj){
         case 'attributes' :
           var attribs = definitionObj['attributes'];
           try{
-            component.attributes = (_.isObject(attribs)) ? attribs : {};
+            component.attributes = (_.isObject(attribs)) ? attribs : Object.create(null);
             for(var attrib in component.attributes){
               component.attributes[attrib] = (_.isFunc(component.attributes[attrib])) ? 
                                                 component.attributes[attrib] : 
@@ -149,17 +149,13 @@ Templar.component = function(name, definitionObj){
           }catch(e){
             /*Firefox throws type error on isObject*/
             _.log('Component "attributes" is not an object');
-            component.attributes = {};
+            component.attributes = Object.create(null);
           }
           
           break;
         case 'onCreate' :
           var onCreate = definitionObj['onCreate'];
           component.onCreate = (_.isFunc(onCreate)) ? onCreate : function(){};
-          break;
-        default:
-          /* allowing component to have static functions and data  */
-          component[prop] = definitionObj[prop];
           break;
       }
     }
@@ -171,7 +167,8 @@ Templar.component = function(name, definitionObj){
   }else{
     _.log('WARNING: Component "' + name + '" is declared more than once. Only the last declaration will be used.');
   }
-
+  
+  //blah
 };
 
 Templar.RouteObj = Route;

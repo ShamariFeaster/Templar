@@ -1,4 +1,4 @@
-structureJS.module('Token', function(require){
+structureJS.module('Token.class', function(require){
 var _ = this;
 var Token = function(modelName, attribName){
   if(!(this instanceof Token))

@@ -23,8 +23,7 @@ var structureJS = (typeof structureJS != 'undefined') ? structureJS : {
     pmiFilesSelectedForExport : '',    /*TODO: for consistency, change to array*/
     modules : {},
     cache : { structureJSTag : null },
-    doneQueue : [],
-    context : {}
+    doneQueue : []
   },
   
   /*@StartDeploymentRemove*/
@@ -45,7 +44,8 @@ var structureJS = (typeof structureJS != 'undefined') ? structureJS : {
     directory_aliases : {export_bootstrap : '../../structureJS/Bootstraps/'},
     globals : [],
     commons : [],
-    styles : []
+    styles : [],
+    context : Object.create(null)
     },
   /*
   @property flags
@@ -127,7 +127,6 @@ var structureJS = (typeof structureJS != 'undefined') ? structureJS : {
     this.config.globals.length = 0;
     this.config.commons.length = 0;
   },
-  /*@EndDeploymentRemove*/
   /*
   @method extend
   @module core
@@ -141,7 +140,6 @@ var structureJS = (typeof structureJS != 'undefined') ? structureJS : {
       false/undefined - put source's array at the end of target's
   @return void
   */
-
   extend : function(target, src, unshiftArrays){
     if( (target && typeof target !== 'object') || (src && typeof src !== 'object'))
       throw 'Error: extend param is not an an oject';
@@ -165,7 +163,6 @@ var structureJS = (typeof structureJS != 'undefined') ? structureJS : {
       
     }
   },
-  /*@StartDeploymentRemove*/
   /*
   @method configure
   @module core
@@ -520,7 +517,7 @@ var structureJS = (typeof structureJS != 'undefined') ? structureJS : {
 
     /*Put the return val of the module function into modules object
     so they can be retrieved later using 'require'*/
-    moduleWrapper['module'] = executeModule.call(structureJS.state.context, require); 
+    moduleWrapper['module'] = executeModule.call(structureJS.config.context, require); 
     /*
     if(typeof moduleWrapper['module'] == 'undefined')
       throw infoObj.name + ' FAILED: Module Function Definition Must Return Something';
@@ -626,7 +623,7 @@ var structureJS = (typeof structureJS != 'undefined') ? structureJS : {
   @return void
   */
   setContext : function(object){
-    this.state.context = object;
+    this.config.context = object;
   },
   /*
   Extends the existing context
@@ -639,7 +636,7 @@ var structureJS = (typeof structureJS != 'undefined') ? structureJS : {
   @return void
   */
   extendContext : function(object){
-    this.extend(this.state.context, object);
+    this.extend(this.config.context, object);
   },
   
   circular : function(depName){
@@ -650,13 +647,11 @@ var structureJS = (typeof structureJS != 'undefined') ? structureJS : {
           module = moduleWrapper.module;
       return module;
     }
-  }
-  /*@StartDeploymentRemove*/
-  ,
+  },
+  
   done : function(callback){
     this.state['doneQueue'].push(callback);
   }
-  /*@EndDeploymentRemove*/
 };
   
 (function(){

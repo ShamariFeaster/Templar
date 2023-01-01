@@ -58,6 +58,7 @@ return {
           tokens;
       
       for(var i = 0; i < elemAttributes.length; i++){
+        if(elemAttributes[i].name == 'data-' + _.IE_MODEL_REPEAT_KEY) continue;
         elemAttribName = elemAttributes[i].name;
 
         uninterpolatedString = (_.isDef(tmp_node.symbolMap[elemAttribName])) ? 
@@ -104,10 +105,18 @@ return {
   },
   interpolateSpan : function(tmp_node){
     var node = tmp_node.node,
-        retVal = Map.dereferenceAttribute(tmp_node);
-    node.innerText = node.innerHTML = 
-      (!_.isArray(retVal) && !_.isObj(retVal)) ? retVal : '';
-
+        retVal = Map.dereferenceAttribute(tmp_node) || '',
+        temp = '',
+        currVal = node.textContent || node.innerText;
+    temp =
+      (!_.isArray(retVal) && !_.isObj(retVal)) ? retVal : currVal;
+    
+    /* http://stackoverflow.com/questions/1359469/innertext-works-in-ie-but-not-in-firefox */
+    if(_.isDef(node.textContent)){ 
+      node.textContent = temp
+    }else{
+      node.innerText = temp;
+    }
   },
   /*Returns the whole attribute if no limit is defined for this attribute*/
   getPageSlice : function(Model, attributeName, target){
@@ -209,7 +218,7 @@ return {
         attributeName = tmp_node.attribName,
         selectedValue = attributeVal._value_;
         
-    Process.addCurrentSelectionToSelect(tmp_node.node, attributeVal);
+    
     
     if(run && _.isArray(attributeVal)){
       var isShittyIE = (modelAttribLength > 0 && tmp_node.node.children.length == 0);
@@ -245,6 +254,7 @@ return {
       }
       
     }
+    Process.addCurrentSelectionToSelect(tmp_node.node, attributeVal);
   },
   
   interpolate : function(modelName, attributeName, attributeVal, compiledScopes){  
@@ -265,7 +275,8 @@ return {
         nodeScopeParts = null,
         node = null,
         tagName = '',
-        attributes = null;
+        attributes = null,
+        boundProperties = [];
     /*Note that listeners are only fired for attribs that are in the nodeTree (ie, visible in the UI)*/
     Map.forEach(modelName, attributeName, function(ctx, tmp_node){
              
@@ -277,11 +288,13 @@ return {
         
       node = tmp_node.node;
       tagName = (tmp_node.isComponent == true) ? 'COMPONENT' : node.tagName;
-      tagName = (Map.isRepeatedAttribute(modelName, attributeName) == true && !Map.isRepeatArrayProperty(tmp_node)) ? 'REPEAT' : node.tagName;
+      tagName = (_.isDef(tmp_node.symbolMap['data-' + _.IE_MODEL_REPEAT_KEY])) ? 'REPEAT' : node.tagName;
       if(ctx.hasAttributes == true){
         updateObject = Interpolate.updateNodeAttributes(tmp_node, modelName, attributeName);
       } 
-        
+      
+      boundProperties = (_.isDef(node.token) && _.isDef(node.token.indexQueue)) ? 
+                  node.token.indexQueue.slice(0) : [];  
         
       switch(tagName){
         
@@ -307,6 +320,7 @@ return {
             updateObj.type = _.MODEL_EVENT_TYPES.interp_change;
             updateObj.index = selectNode.selectedIndex;
             updateObj._attrib_ = attributeVal;
+            updateObj.properties = boundProperties;
             
             /*This is here & not in preProcess... b/c when attrib is replaced as
             is the case with a cascading select, the preProcessor isn't called again,
@@ -328,6 +342,7 @@ return {
           updateObj.text = node.innerText;
           updateObj.value = node.innerText;
           updateObj.type = node.tagName.toLowerCase();
+          updateObj.properties = boundProperties;
           break;
         case 'INPUT':
           attributes = DOM.getDOMAnnotations(tmp_node.node);
@@ -346,6 +361,7 @@ return {
             updateObj.value = node.value;
             updateObj.type = node.tagName.toLowerCase();
             updateObj.target = node;
+            updateObj.properties = boundProperties;
            }
           
           break;
@@ -355,6 +371,7 @@ return {
           updateObj.value = node.value;
           updateObj.type = node.tagName.toLowerCase();
           updateObj.target = node;
+          updateObj.properties = boundProperties;
           break;
         case 'REPEAT':
           var TMP_newRepeatNode = null,
@@ -362,7 +379,7 @@ return {
               outerCtx = ctx,
               baseNodes = null,
               removedCnt = 0;
-          ctx.endingIndex = 0;//ctx.target.length;
+          ctx.endingIndex = ctx.target.length;//ctx.target.length;
           
           /*cache and DOM housekeeping*/
           Map.destroyRepeatTree(modelName, attributeName);
@@ -387,6 +404,7 @@ return {
                   TMP_repeatedNode.node.innerHTML = attributeVal[i];
                 TMP_repeatBaseNode.node.parentNode.insertBefore(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
                 Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope, i);
+                Process.preProcessNodeAttributes(TMP_repeatedNode.node, TMP_repeatBaseNode.scope, i);
                 Interpolate.interpolateEmbeddedRepeats(TMP_repeatBaseNode, i);
               }
               Map.pruneDeadEmbeds();
@@ -394,6 +412,7 @@ return {
               System.removeSystemListeners(_.SYSTEM_EVENT_TYPES.repeat_built);
               updateObj.type = 'repeat';
               updateObj.value = attributeVal;
+              updateObj.properties = boundProperties;
             }
             TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 
             

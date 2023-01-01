@@ -224,11 +224,7 @@ return {
                             resolvedRouteObject.target : _.MAIN_CONTENT_ID;
           NTDirectives = resolvedRouteObject.nonTerminalValues;
           /*TODO: support advanced derefencing to support a.b.current_selection and the like. Would 
-            require an upgraded setAttribute.
-            I can accomplish this by:
-            1. Calling Compile.getTokens(NTDirectives[i][0].replace(':','.'), true)
-            2. passing token to Map.setAttributeWithToken(tokens[0], NTDirectives[i][1])
-            */
+            require an upgraded setAttribute.*/
           for(var i = 0; i < NTDirectives.length; i++){
             modelParts = NTDirectives[i][0].split(':');
             Map.setAttribute(modelParts[0], modelParts[1], NTDirectives[i][1]);
