@@ -16,7 +16,6 @@ structureJS.declare('classes/Attribute.class');
 structureJS.declare('classes/ClassModelSort');
 structureJS.declare('classes/ClassModelPage');
 structureJS.declare('classes/ClassModelFilter');
-structureJS.declare('classes/ClassModelAPI');
 structureJS.declare('classes/Component.class');
 structureJS.declare('classes/Token.class');
 
@@ -26,7 +25,7 @@ structureJS.declare('templar/Templar');
 structureJS.declare('templar/Process',['classes/Attribute.class', 'classes/TMP_Node']);
 
 structureJS.declare('templar/Interpolate',['classes/TMP_Node']);
-
+structureJS.declare('classes/ClassModelAPI',['templar/Interpolate']);
 structureJS.declare('templar/Compile',['classes/TMP_Node']);
 structureJS.declare('templar/Link');
 /*Loading*/

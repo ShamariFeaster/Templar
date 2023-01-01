@@ -111,6 +111,7 @@ $(function(){
   
   /*This fires everytime Todo.items is updated either through Todo.update() or re-assignment*/
   Todo.listen('items',function(e){
+    
     var activeCount = 0; 
     
     /*need to rebind b/c these repeated nodes are destroyed on each call to Todo.update()*/
@@ -121,7 +122,8 @@ $(function(){
       model attribute, fire the handler. In the case of binding child properties to DOM elements
       , we can inspect {Array} event.properties. Notice in the view we bound a checkbox to the 
       'statusCheckbox' property of each element in Todo.items.*/
-    if(e.properties.pop() == 'statusCheckbox'){
+ 
+    if(e.type != 'repeat' && e.properties.pop() == 'statusCheckbox'){
       var checkbox = e.target,
         index = e.properties.pop(),
         item = Todo.items[index]; 

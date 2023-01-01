@@ -390,8 +390,10 @@ return {
               type : _.MODEL_EVENT_TYPES.checkbox_change
               , checked : (e.target.checked === true)
               , value : e.target.value
+              , target : e.target
             },
           annotations = DOM.getDOMAnnotations(this);
+      cbObj.properties = annotations.token?.indexQueue || [];
       /*for checkboxes we should not set current_selection to value if it was unchecked*/
       attrib._value_ = (cbObj.checked == true) ? e.target.value : false;
       attrib.checked[this.getAttribute('id')] = cbObj.checked;
