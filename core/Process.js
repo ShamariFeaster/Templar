@@ -393,7 +393,7 @@ return {
               , target : e.target
             },
           annotations = DOM.getDOMAnnotations(this);
-      cbObj.properties = annotations.token?.indexQueue || [];
+      cbObj.properties = annotations.token.indexQueue || [];
       /*for checkboxes we should not set current_selection to value if it was unchecked*/
       attrib._value_ = (cbObj.checked == true) ? e.target.value : false;
       attrib.checked[this.getAttribute('id')] = cbObj.checked;

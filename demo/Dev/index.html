@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style>
+.red-x {width: 15px; height : 15px;}
+.active {color : blue;}
+.completed {color : red; text-decoration : line-through;}
+#filters {display : inline-block;   margin-top: 6px;}
+.selected {border: 1px solid rgba(0, 0, 0, 1) !important;}
+#filters a {
+  color: inherit;
+  margin: 3px;
+  padding: 3px 7px;
+  text-decoration: none;
+  border: 1px solid rgba(239, 222, 222, 1);
+  border-radius: 3px;
+}
+.todoText {display : inline-block;}
+</style>
+
+<script 
+    data-project-manifest="../../lib/structureJS/manifest/dev-manifest" 
+    data-project-config="../../lib/structureJS/config/config" 
+    id="structureJS" 
+    src="../../lib/structureJS/structureJS-core.js"
+>
+</script>
+
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+
+<script>
+
+</script>
+</head>
+<!--******** VIEW *********-->
+<body>
+<h1>Dev Testing Ground</h1>
+<input id="main-input" value="{{Test.str}}"/><br/>
+
+<div data-apl-repeat="{{Test.items}}" >
+{{}}
+</div>
+
+</body></html>

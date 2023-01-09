@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+<meta charset="utf-8" />
+
+<!-- Development -->
+<!-- -->
+
+
+<!-- Production -->
+<!-- 
+<script id="structureJS" data-is-combined="true" src="combined.js"/>
+-->
+<script>
+var href = window.location.href;
+var match = /.*?exports=(.*)+/.exec(href);
+console.log(match);
+document.write(decodeURI(match[1]));
+</script>
+
+</head>
+<body>
+<div id="test"></div>
+<div id="minified"></div>
+</body>
+</html>

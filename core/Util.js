@@ -14,6 +14,7 @@ structureJS.module('Util', function(require){
   _.isObject = function(a){ return (isDef(a) && Object.keys(a).length > 0);};
   _.isNullOrEmpty = function(a){ return (!isDef(a) || (a === null || a === ''));};
   _.isArray = function(a){return (!isNull(a) && Array.isArray(a))};
+  
   _.log = function(a, printStack = true){
                 console.log(a); 
                 if(printStack){
@@ -46,7 +47,7 @@ structureJS.module('Util', function(require){
   }
   structureJS.extendContext(_); 
   
-  /* If structureJS depenedency resolver is missing we need to reassign */
+  /*If structureJS depenedency resolver is missing we need to reassign */
   if(!isDef(structureJS.done)){
     Object.defineProperty(structureJS,'done',{
       set : function(val){

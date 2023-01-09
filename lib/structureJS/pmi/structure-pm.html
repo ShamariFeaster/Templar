@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- data-core-manifest overrides the core's manifest. In this case the manifest we
+    ask the core to load for itself adds the export components. The basic core 
+    manifest is empty.
+    
+    data-project-config is used b/c the core uses "config" as the default. In this
+    case the pmi project has a pecial config it needs to use. Since config is the 
+    only entry point for an configuration, I added the tag level config when the config
+    itself needs to be configured, that's so meta.
+    -->
+<script id="structureJS" 
+        data-project-config="config/export-config"
+        data-core-manifest="manifest/core-export-manifest"
+        src="../core/structureJS-core.js"/>
+</script>
+
+</head>
+<body>
+  <label for="project_location">Project Name: </label><input id="project_name" type="text"></input><br>
+  <label for="project_location">Project Base Dir (Relative To This File): </label><input id="project_location" type="text"></input><br>
+  <label for="project_manifest_name">Project Maniefest Name: </label><input id="project_manifest_name" type="text"></input> *Leave Blank If It's Named 'maifest'<br>
+  <label for="project_manifest_location">Project Maniefest Location (Relative To Project Base Dir): </label><input id="project_manifest_location" type="text"></input><br>
+  <label for="project_config_name">Project Config Name: </label><input id="project_config_name" type="text"></input> *Leave Blank If It's Named 'config'<br>
+  <label for="project_config_location">Project Config Location (Relative To Project Base Dir): </label><input id="project_config_location" type="text"></input>*Leave Blank if same as project manifest location<br>
+  <!-- Probably should make config location configurable too -->
+  <br>
+  <br><label class="test" for="load_select">Load Project: </label><select id="load_select" type="text"></select><button id="load_project">Go</button>*If you have changed you manifest reload your project
+  <br><label class="test" for="delete_select">Delete Project: </label><select id="delete_select" type="text"></select><button id="delete_project">Go</button>
+  <br><button class="test" id="save_project">Save Project</button>
+  <br><button class="test" id="add_all">Add All</button><button class="test" id="compress_all">Compress All</button>
+  <br><label for="download_output">Download Output: </label><input id="download_output" type="checkbox"></input>
+  <br><label for="include-dependency">Include Dependency Resolver In Build?: </label>
+      <span id="include-dependency-feedback">No</span><input type="checkbox" id="include-dependency"/>
+  <br><label for="minify">Minify Project?: </label>
+      <span id="minify-feedback">Yes</span><input type="checkbox" id="minify" checked/>
+  <table id="target_builder">
+
+  </table>
+  
+  <br><button id="export_component">Export Components</button>
+  <br><button id="export_project">Export Compressed Project</button>
+  
+  <h2>Uncompressed Output</h2>
+  <pre id="cout"></pre>
+  <h2>Compressed Output</h2>
+  <div id="minified"></div>
+</body>
+
+</html>

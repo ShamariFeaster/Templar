@@ -466,3 +466,13 @@ Thanks
 
 Right now there's nobody but me, but I really hope that will change. 
 
+Dev notes:
+
+To execute project and test any changes you make
+
+Put project in root of a local server
+Start server
+Navigate to <you server url and port>/Templar/demo/Dev/
+
+This will execute the entire framework so you can open your browser dev console and
+see debug out put and/or set breakpoints
