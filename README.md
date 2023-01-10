@@ -466,9 +466,9 @@ Thanks
 
 Right now there's nobody but me, but I really hope that will change. 
 
-Dev notes:
+**Developing and Building Project**
 
-To execute project and test any changes you make
+**To execute project and test any changes you make**
 
 Put project in root of a local server
 Start server
@@ -476,3 +476,20 @@ Navigate to <you server url and port>/Templar/demo/Dev/
 
 This will execute the entire framework so you can open your browser dev console and
 see debug out put and/or set breakpoints
+
+**To build project into a compressed single file**
+
+Put project in root of a local server
+Start server
+Navigate to <you server url and port>/Templar/lib/structureJS/pmi/structure-pm.html
+
+use Templar\lib\structureJS\pmi\default-project-settings.js to fill in the form at top of page
+click "Save Project"
+Notice drop down next to "Load project" now shows "templar"
+Click "Go" next to load project drop down
+Click checkbox next to "Download Output:"
+Click "Export Compressed Project"
+
+**Uglify 3 Settings**
+
+Located at Templar/lib/structureJS/Modules/options.js
