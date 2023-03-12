@@ -1,6 +1,6 @@
 
 Templar.dataModel('Test',{
-  items : ['a','b','c'],
+  items : ['map','bat','car'],
   str : 'Hello Worl',
   
 });

@@ -10,6 +10,8 @@ return {
   ignoreHashChange : false,
   ignoreKeyUp : false,
   dispatchListeners : true,
-  blockBodyCompilation : false
+  blockBodyCompilation : false,
+  target : null,
+  compiledScopes : ''
 };
 });

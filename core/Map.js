@@ -15,6 +15,13 @@ return {
   buildAttribAlias : function(attribName){
     return '_' + attribName;
   },
+  clearRepeatTable : function(modelName, attribName){
+      if((_.isDef(attribName) && _.isDef(modelName)) &&
+        _.isDef(_repeatTable[modelName]) && 
+        _.isDef(_repeatTable[modelName][attribName])){
+            _repeatTable[modelName][attribName] = [];
+        }
+  },
   getRepeatBaseNodes : function(modelName, attribName){
     var baseNodes = [];
 
@@ -44,6 +51,7 @@ return {
   },
   
   addRepeatBaseNode : function(tmp_node){
+      debugger;
     if(!_.isDef(_repeatTable[tmp_node.modelName])){
       _repeatTable[tmp_node.modelName] = Object.create(null);
     }
@@ -153,11 +161,11 @@ return {
 
       target = (_.isDef(_map[modelName]) && _.isDef(_map[modelName]['nodeTable'])) ? 
                   _map[modelName]['nodeTable'] : Object.create(null);
-                  
-      for(var key in target){
+      /*signature Map.forEach('modelName', function(ctx, modelAtrribName){})*/
+      for(var modelAtrribName in target){
         ctx.modelName = modelName;
-        ctx.modelAtrribName = key;
-        mapFunction.call(null, ctx, key);
+        ctx.modelAtrribName = modelAtrribName;
+        mapFunction.call(null, ctx, modelAtrribName);
       }
     /*model attribute node tables (index table and interpolatation array)*/
     }else if(!_.isFunc(modelName) && !_.isFunc(attribName) && _.isFunc(mapFunction)){

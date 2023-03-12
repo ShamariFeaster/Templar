@@ -91,7 +91,8 @@ structureJS.done(function(){
 
     var component = Templar._components[cName],
         callback;
-    
+        
+    //CALLBACK
     callback = function(){
       var component = this.targetNode,
           container = document.createElement('div'),
@@ -124,13 +125,16 @@ structureJS.done(function(){
         beginBootstrap(scope);
       };
     };
+    //END CALLBACK
+    
     /*Fires off "threads" that fetch each component template. At the conclusion
     of template fetching, callback starts bootsrap process*/
     if(!_.isNullOrEmpty(component.templateURL)){
-      DOM.asynGetPartial(component.templateURL,callback, '', component);
+      DOM.asynGetPartial(component.templateURL, callback, '', component);
     }
   }
-  /*IF there are no components to fetch, start bootsrap*/
+  
+  /*IF there are no components to fetch, start bootstrap*/
   if(initComponentLength < 1){
     beginBootstrap(scope);
   }

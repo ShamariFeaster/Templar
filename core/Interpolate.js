@@ -357,11 +357,8 @@ return {
           updateObj.target = node;
           break;
         case 'REPEAT':
-          var TMP_newRepeatNode = null,
-              TMP_repeatedNode = null,
-              outerCtx = ctx,
-              baseNodes = null,
-              removedCnt = 0;
+          var TMP_repeatedNode = null,
+              baseNodes = null;
           ctx.endingIndex = 0;//ctx.target.length;
           
           /*cache and DOM housekeeping*/
@@ -377,14 +374,15 @@ return {
               _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode))
               && attributeVal.length > 0)
             {
-              
+              debugger;
               /*rebuild new one*/
               for(var i = 0; i < attributeVal.length; i++){
                 TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);
                 TMP_repeatedNode.scope = TMP_repeatBaseNode.scope;
                 Map.pushNodes(TMP_repeatedNode);
-                if(TMP_repeatedNode.hasNonTerminals == false)
+                if(TMP_repeatedNode.hasNonTerminals == false){
                   TMP_repeatedNode.node.innerHTML = attributeVal[i];
+                }
                 TMP_repeatBaseNode.node.parentNode.insertBefore(TMP_repeatedNode.node, TMP_repeatBaseNode.node);
                 Circular('Compile').compile(TMP_repeatedNode.node, TMP_repeatBaseNode.scope, i);
                 Interpolate.interpolateEmbeddedRepeats(TMP_repeatBaseNode, i);
@@ -396,7 +394,7 @@ return {
               updateObj.value = attributeVal;
             }
             TMP_repeatBaseNode.node.setAttribute('style','display:none;'); 
-            
+            Map.clearRepeatTable(modelName, attributeName);
           }
           
           /*Stop outter loop. We build the updated repeat nodes in one pass*/
