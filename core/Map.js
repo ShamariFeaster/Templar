@@ -51,7 +51,7 @@ return {
   },
   
   addRepeatBaseNode : function(tmp_node){
-      debugger;
+
     if(!_.isDef(_repeatTable[tmp_node.modelName])){
       _repeatTable[tmp_node.modelName] = Object.create(null);
     }
