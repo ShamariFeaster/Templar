@@ -94,7 +94,7 @@ frameworks, with a much flatter learning curve and more flexibility. There is no
 Clean DOM
 =========
 Templar's compiler does not inject unecessary junk into your DOM. In fact the only 
-element Templar injects into your DOM that wasn't there before are <span>s that wrap
+element Templar injects into your DOM that wasn't there before are spans that wrap
 variables bound to your data model.
 
 No Expressions In Your View
