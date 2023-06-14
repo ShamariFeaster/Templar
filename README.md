@@ -4,6 +4,26 @@ TemplarJS
 TemplarJS is a state-of-the-art, on-demand HTML compiler and single page 
 application (SPA)/Model-View-Whatever (MV*) framework.
 
+TemplarJs really shines as a rapid prototyping framework. It allows for almost total
+separation between the presentation layer and application layer. In practice this means 
+that once your prototype is finished, you can migrate to another front-end framework 
+with very little pain. Most of the TemplarJS-specific code in your HTML are 
+in `data` attributes (that can be left in as they will be ignored) 
+and handlebar template variables that are easy to search/remove. After that, you're left with clean 
+markup that you can plug into any other framework you wish.
+
+And because you application code just looks like regular JavaScript code, you don't have to 
+throw that away either once protyping is complete. TemplarJS is really unique among SPA 
+frameworks in this respect. It was designed very intentionally to be this way.
+
+Getting a complex UI up-and-running is exceptionally fast with TemplarJS, as there is very 
+little to learn: no crazy custom attributes, classes, programming paradigms. Just put 
+your handlebar variables in your markup where you want things to be dynamic, operate 
+on your models using plain old Javascript and TemplarJS will make your UI react.
+
+I can pretty much guarantee you won't find a similar framework with a smaller learning curve. 
+This does not mean that TemplarJS is not powerful. 
+
 Main Features:
  - Tiny API
  - 2-way data binding
@@ -235,6 +255,13 @@ maintenence and re-use of view components.
 
 For example if you are displaying the same list in multiple places, you can specify it as a 
 component of multiple UI states as opposed to copying and pasting the list template mutliple places.
+
+Also you can swap out different UI parts in a static grid depending on user context. For example, 
+if a user is logged in you can show a profile pane in the top left of the page. When they log out, 
+that same section can display a different partial HTML file (perhaps a login form). Once you configure 
+your Route object (shown above) that complex UI action is automatic, depending on where/what 
+your user clicks. A route, very easily, represents and present a specific combination of UI components 
+to your users using nothing but a simple JavaScipt object and hash links.
 
 Onload events
 =========
