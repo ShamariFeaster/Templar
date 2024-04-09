@@ -210,7 +210,22 @@ return {
         selectedValue = attributeVal._value_;
         
     Process.addCurrentSelectionToSelect(tmp_node.node, attributeVal);
-    
+
+    var attribExists = (attributeVal && attributeVal.length > -1);
+    var attribHasValProp = (attributeVal[0] && _.isDef(attributeVal[0].value));
+    //on initial construction selected value should be 0 index
+    if(!attributeVal._value_ && attribExists){
+
+      if(attribHasValProp){
+        attributeVal.current_selection = selectedValue = attributeVal[0].value;
+      }
+      //simple select
+      else{
+        attributeVal.current_selection = selectedValue = attributeVal[0];
+      }
+      
+    }
+
     if(run && _.isArray(attributeVal)){
       var isShittyIE = (modelAttribLength > 0 && tmp_node.node.children.length == 0);
       /* with IE clearing children on node taken out of DOM, we must repopulate the select */
