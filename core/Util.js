@@ -15,7 +15,7 @@ structureJS.module('Util', function(require){
   _.isNullOrEmpty = function(a){ return (!isDef(a) || (a === null || a === ''));};
   _.isArray = function(a){return (!isNull(a) && Array.isArray(a))};
   
-  _.log = function(a, printStack = true){
+  _.log = function(a, printStack = false){
                 console.log(a); 
                 if(printStack){
                     var err = new Error(); 
