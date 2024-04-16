@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<script id="structureJS" src="TemplarJS-0.11.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script id="structureJS" src="movieDB.js"></script>
+<script id="structureJS" src="App.js"></script>
+<style>
+.category-btn {
+    display: inline-block;
+    font-size: 21px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Movies</h1>
+<div>Click category below to filter by category</div>
+<h2>
+<div class="category-btn">action</div>
+<div class="category-btn">comedy</div>
+<div class="category-btn">drama</div>
+<div class="category-btn">dramedy</div>
+<div class="category-btn">music</div>
+<div class="category-btn">horror</div>
+<div class="category-btn">romcom</div>
+<div class="category-btn">scifi</div>
+<div class="category-btn">tv</div>
+<div class="category-btn">unknown</div>
+</h2>
+<input id="main-input" placeholder="Search movies" value="{{Movies.searchInput}}"/><button id="clear">Clear</button>
+<div data-apl-repeat="{{Movies.movieList}}" >{{Title}} <b style="padding-left:5px;">{{genre}}</b><div>
+
+
+</body></html>
