@@ -20,7 +20,7 @@ var movieJSON = [
     "genre": "scifi"
   },
   {
-    "Title": "and lies this",
+    "Title": "analyze this",
     "genre": "unknown"
   },
   {
@@ -445,7 +445,7 @@ movieJSON.forEach(function(movieItem){
     else{
         genreStr = genreList.join('');
     }
-    
+    movieItem.Title = movieItem.Title.toUpperCase();
     
     /* 
     use to list genres
@@ -458,6 +458,7 @@ movieJSON.forEach(function(movieItem){
     */
     
     movieItem.genre = genreStr;
-    movieItem.searchStr = movieItem.Title + ' ' + genreStr
-    
+    movieItem.searchStr = movieItem.Title + ' ' + genreStr;
+    var linkString = encodeURI(`site:https://en.wikipedia.org/ "${movieItem.Title} movie"`);
+    movieItem.searchLink = `https://google.com/search?q=${linkString}`;
 });
