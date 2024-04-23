@@ -17,10 +17,10 @@ var movieJSON = [
   },
   {
     "Title": "ender's there's game",
-    "genre": "scifi"
+    "genre": "sci-fi"
   },
   {
-    "Title": "analyze this",
+    "Title": "and lies this",
     "genre": "unknown"
   },
   {
@@ -37,7 +37,7 @@ var movieJSON = [
   },
   {
     "Title": "The forbidden kingdom",
-    "genre": "unknown"
+    "genre": ""
   },
   {
     "Title": "laser hawk",
@@ -53,7 +53,7 @@ var movieJSON = [
   },
   {
     "Title": "mystery men",
-    "genre": "unknown"
+    "genre": ""
   },
   {
     "Title": "training day",
@@ -85,7 +85,7 @@ var movieJSON = [
   },
   {
     "Title": "full metal jacket",
-    "genre": "drama comedy"
+    "genre": "dramedy"
   },
   {
     "Title": "Friday after next",
@@ -380,7 +380,7 @@ var movieJSON = [
     "genre": "comedy"
   },
   {
-    "Title": "son of sam",
+    "Title": "summer of sam",
     "genre": "drama"
   },
   {
@@ -430,35 +430,25 @@ var movieJSON = [
   {
     "Title": "The Hunt for Red October",
     "genre": "drama"
+  },
+  {
+    "Title": "Napoleon dynamite",
+    "genre": "comedy"
+  },
+  {
+    "Title": "Scrubs season 1",
+    "genre": "comedy tv"
+  },
+  {
+    "Title": "Office space",
+    "genre": "comedy"
+  },
+  {
+    "Title": "Scrubs season 2",
+    "genre": "comedy tv"
+  },
+  {
+    "Title": "Vietnam\: American history",
+    "genre": "tv"
   }
 ];
-
-//var listByCategory = {};
-
-movieJSON.forEach(function(movieItem){
-    var genreList = movieItem.genre.split(' ');
-    var genreStr = '';
-    if(genreList.length > 1){
-        genreList.sort();
-        genreStr = genreList.join('-');
-    }
-    else{
-        genreStr = genreList.join('');
-    }
-    movieItem.Title = movieItem.Title.toUpperCase();
-    
-    /* 
-    use to list genres
-    if(typeof listByCategory[genreStr] == 'undefined'){
-        listByCategory[genreStr] = [movieItem.Title];
-    }
-    else{
-        listByCategory[genreStr].push(movieItem.Title);
-    } 
-    */
-    
-    movieItem.genre = genreStr;
-    movieItem.searchStr = movieItem.Title + ' ' + genreStr;
-    var linkString = encodeURI(`site:https://en.wikipedia.org/ "${movieItem.Title} movie"`);
-    movieItem.searchLink = `https://google.com/search?q=${linkString}`;
-});

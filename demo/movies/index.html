@@ -10,6 +10,7 @@
 .category-btn {
     display: inline-block;
     font-size: 21px;
+    padding-left:8px;
 }
 </style>
 </head>
@@ -19,24 +20,18 @@
 <h1>Movies</h1>
 <div>Click category below to filter by category</div>
 <h2>
-<div class="category-btn">action</div>
-<div class="category-btn">comedy</div>
-<div class="category-btn">drama</div>
-<div class="category-btn">dramedy</div>
-<div class="category-btn">music</div>
-<div class="category-btn">horror</div>
-<div class="category-btn">romcom</div>
-<div class="category-btn">scifi</div>
-<div class="category-btn">tv</div>
-<div class="category-btn">unknown</div>
+
+<div data-apl-repeat="{{Movies.genreList}}" class="category-btn">{{}}</div>
+
 </h2>
 
 <input id="main-input" placeholder="Search movies" value="{{Movies.searchInput}}"/><button id="clear">Clear</button>
 
+<div showIf="{{Movies.searchResultCount}}">Search results: {{Movies.searchResultCount}}</div>
+
 <div data-apl-repeat="{{Movies.movieList}}" >
-    <a href="{{searchLink}}" target="_blank">{{Title}}</a>
+    <i><a href="{{searchLink}}" target="_blank">{{Title}}</a></i>
     <b style="padding-left:5px;">{{genre}}</b>
 <div>
-
 
 </body></html>
