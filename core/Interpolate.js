@@ -389,7 +389,6 @@ return {
               _.isArray(attributeVal = Map.dereferenceAttribute(TMP_repeatBaseNode))
               && attributeVal.length > 0)
             {
-              debugger;
               /*rebuild new one*/
               for(var i = 0; i < attributeVal.length; i++){
                 TMP_repeatedNode = Process.preProcessRepeatNode(TMP_repeatBaseNode, i);

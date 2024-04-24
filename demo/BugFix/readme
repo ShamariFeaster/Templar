@@ -1,0 +1,5 @@
+This scaffolding directory for fixing specific bugs as
+detailed via github issues
+
+structureJS (by default) looks for config.js and manifest.js
+in same directory as html file as that is called it to be executed 
