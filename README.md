@@ -42,10 +42,12 @@ Installation
 1. Download the repo [here](https://github.com/ShamariFeaster/Templar/archive/master.zip)
 2. Include `build/TemplarJS-0.11.min.js` as a script in an HTML file.
 
-[Docs & Examples](http://templar.bigfeastsoftware.com/#/custom-attributes)
+[Docs & Examples](https://shamari.crabdance.com/templar/demo/Basics/)
 
 First Use
 =========
+TemplarJS is designed create SPA applications by bringing HTML templates to life using plain Javascript.
+
 Create a file called `Model.js` and put the following in it.
 
 ```javascript
@@ -54,6 +56,8 @@ Templar.dataModel('Example',{
     items : [1,2,3]
 });
 ```
+Then create an HTML template and use that model to make the template 
+dynamic
 
 ```html
 <!DOCTYPE html>
@@ -77,6 +81,16 @@ Templar.dataModel('Example',{
 </body>
 </html>
 ```
+Change your model using plain javascript and the template will
+react
+
+```javascript
+let exampleModel = Templar.getModel('Example');
+exampleModel.banner = 'New Banner';
+```
+
+See more examples [here](https://shamari.crabdance.com/templar/demo/Basics/)
+
 Inspiration:
 =========
 After looking at the sometimes overwhelming complexity of the APIs of other MV*/SPA frameworks, I decided that someone should
