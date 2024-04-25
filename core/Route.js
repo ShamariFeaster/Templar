@@ -184,7 +184,7 @@ return {
       }
       _authorizationSet = true;
     }else{
-      _.log('ERROR: Authenticator already set');
+      _.log('ERROR: Authorization function already set');
     }
   },
   /*Authorizer function has access to object which acts as a cookie w/ session

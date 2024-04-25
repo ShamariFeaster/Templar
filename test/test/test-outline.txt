@@ -1,0 +1,62 @@
+REPEATS
+- {{}}
+- {{$index}}
+- {{propName}}
+embedded repeats
+- {{$item}}
+- scalar array {{}}
+- {{$index}}
+- array of object {{propName}}
+SELECTS
+- scalar array between select tag
+- name/value equiv on scalar arrays
+- object array between select tag (name/value props)
+- current_selection wis selected value
+- current_selection defaults to first in array
+BASIC INTERPOLATION
+- TESTING DATA TYPE OUTPUT
+-- string '0'
+-- int 0
+-- boolean
+-- object
+- double mustache {{{{}}}}
+- escape "\{" 
+COMPONENT
+- <content> is replaced
+- component attribute values set actual markup
+- changes made to attibutes via JS trigger templar interpolation
+- templat html is fetched
+- onCreate works
+CHANGE DETECTION
+- listen is called 
+-- for scalars, on assignment 
+-- for none  scalars, on update() 
+- event.value & event.text have diff vals with selects and checkboxes
+- event.type is correct
+- bind to array of objects, change sub-property (bound to checkbox or select)
+  make sure event.properties works 
+CUSTOM HTML ATTRIBUTES
+- onchange works
+- can change DOM using self
+- value passed to onchange is correct
+PAGING
+- limit property works
+- page decrement/increment operators works
+- set page to int works
+- set page to non-integer (what happens?)
+- totalPages prop is correct
+FILTERING
+- live filter works (see movie demo)
+- static filter works
+- live filter 
+- check chain functions: using, and, by, andBy
+ROUTING
+- success() fires for partial and compilation is completed
+- success() fires for route and compilation is completed
+- data-apl-default works
+- open() works
+- authenticator cannot be set twice
+- authorizor cannot be set twice
+PERSISTANCE
+- Model.save() and Model.load() work
+
