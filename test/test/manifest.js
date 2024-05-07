@@ -41,3 +41,4 @@ structureJS.declare('templar/Export',['templar/System']);
 structureJS.declare("data/Models");
 structureJS.declare("App");
 structureJS.declare("spec/Basic");
+structureJS.declare("spec/Repeats");

@@ -15,16 +15,4 @@ Templar.done(function(){
 
     });
 
-    describe('Complex Interpolation', function() {
-        beforeEach(function() {
-            
-        });
-
-        it('scalar model attribute', function() {
-            let greetingText = $('#greeting').text();
-            expect(greetingText).toBe(testModel.greeting);
-
-        });
-
-    });
 });
