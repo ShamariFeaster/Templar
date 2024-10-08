@@ -24,6 +24,9 @@
   <div style="display:none;" id="templar-dom-output">
         <div id="greeting">{{test.greeting}}</div>
         <div class="repeat-token" data-apl-repeat="{{test.scalar_repeats}}">{{}}</div>
+        <div class="repeat-index-only" data-apl-repeat="{{test.scalar_repeats}}">{{$index}}</div>
+        <div class="repeat-index-and-tokens" data-apl-repeat="{{test.scalar_repeats}}"> {{}} {{$index}} {{}}</div>
+        <div class="repeat-index-token-with-words" data-apl-repeat="{{test.scalar_repeats}}"> {{}} word {{$index}} word {{}}</div>
   </div>
   
 </body>

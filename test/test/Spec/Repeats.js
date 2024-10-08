@@ -28,6 +28,55 @@ Templar.done(function(){
             expect( result ).toBe(1);
         });
 
+        it('scalar, {{$index}} ', function() {
+            let result = 1;
+
+            $('.repeat-index-only').each(function(index, el){
+                //repeat template is last element so avoid making comparisson on that one
+                if(index < testModel.scalar_repeats.length){
+                    //repeats output values are wrapped in spans
+                    result &= (index == $(el).text().trim());
+                }
+                
+            })
+            
+            expect( result ).toBe(1);
+        });
+
+        it('scalar, {{$index}} w/ {{}} ', function() {
+            let result = 1;
+
+            $('.repeat-index-and-tokens').each(function(index, el){
+                //repeat template is last element so avoid making comparisson on that one
+                if(index < testModel.scalar_repeats.length){
+                    let tokenN = testModel.scalar_repeats[index];
+                    //debugger;
+                    //repeats output values are wrapped in spans
+                    result &= (`${tokenN} ${index} ${tokenN}` == $(el).text().trim());
+                }
+                
+            })
+            
+            expect( result ).toBe(1);
+        });
+
+        it('scalar, {{$index}} w/ {{}} and string', function() {
+            let result = 1;
+
+            $('.repeat-index-token-with-words').each(function(index, el){
+                //repeat template is last element so avoid making comparisson on that one
+                if(index < testModel.scalar_repeats.length){
+                    let tokenN = testModel.scalar_repeats[index];
+                    //debugger;
+                    //repeats output values are wrapped in spans
+                    result &= (`${tokenN} word ${index} word ${tokenN}` == $(el).text().trim());
+                }
+                
+            })
+            
+            expect( result ).toBe(1);
+        });
+
     });
 
 });
