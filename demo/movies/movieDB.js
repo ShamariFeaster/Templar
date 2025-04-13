@@ -25,7 +25,7 @@ var movieJSON = [
   },
   {
     "Title": "moon",
-    "genre": "scifi"
+    "genre": "sci-fi"
   },
   {
     "Title": "a midsummer night's dream",
@@ -49,7 +49,7 @@ var movieJSON = [
   },
   {
     "Title": "lawnmower man",
-    "genre": "scifi"
+    "genre": "sci-fi"
   },
   {
     "Title": "mystery men",
@@ -69,11 +69,11 @@ var movieJSON = [
   },
   {
     "Title": "animatrix",
-    "genre": "scifi"
+    "genre": "sci-fi"
   },
   {
     "Title": "constantine",
-    "genre": "scifi"
+    "genre": "sci-fi"
   },
   {
     "Title": "3:10 to yuma",
@@ -149,7 +149,7 @@ var movieJSON = [
   },
   {
     "Title": "Star wars revenge of the sith",
-    "genre": "scifi"
+    "genre": "sci-fi"
   },
   {
     "Title": "clerks",
@@ -209,7 +209,7 @@ var movieJSON = [
   },
   {
     "Title": "The Manchurian candidate",
-    "genre": "scifi"
+    "genre": "sci-fi"
   },
   {
     "Title": "hoodlum",
@@ -269,7 +269,7 @@ var movieJSON = [
   },
   {
     "Title": "ex machina",
-    "genre": "scifi"
+    "genre": "sci-fi"
   },
   {
     "Title": "super troopers",
@@ -405,7 +405,7 @@ var movieJSON = [
   },
   {
     "Title": "evolution",
-    "genre": "scifi"
+    "genre": "sci-fi"
   },
   {
     "Title": "mystic mystic River",
@@ -421,11 +421,11 @@ var movieJSON = [
   },
   {
     "Title": "Star Trek nemesis",
-    "genre": "scifi"
+    "genre": "sci-fi"
   },
   {
     "Title": "the cell",
-    "genre": "scifi"
+    "genre": "sci-fi"
   },
   {
     "Title": "The Hunt for Red October",
@@ -437,7 +437,7 @@ var movieJSON = [
   },
   {
     "Title": "Scrubs season 1",
-    "genre": "comedy tv"
+    "genre": "tv"
   },
   {
     "Title": "Office space",
@@ -445,10 +445,74 @@ var movieJSON = [
   },
   {
     "Title": "Scrubs season 2",
-    "genre": "comedy tv"
+    "genre": "tv"
   },
   {
-    "Title": "Vietnam\: American history",
+    "Title": "Vietnam - American history",
     "genre": "tv"
+  },
+  {
+    "Title": "As good as it gets",
+    "genre": "dramedy"
+  },
+  {
+    "Title": "Wall street money never sleeps",
+    "genre": "drama"
+  },
+  {
+    "Title": "Dredd",
+    "genre": "action"
+  },
+  {
+    "Title": "Castaway",
+    "genre": "drama"
+  },
+  {
+    "Title": "Ally McBeal season 1",
+    "genre": "TV"
+  },
+  {
+    "Title": "Ally McBeal season 5",
+    "genre": "TV"
+  },
+  {
+    "Title": "Eraser",
+    "genre": "action"
+  },
+  {
+    "Title": "Watchmen",
+    "genre": "action"
+  },
+  {
+    "Title": "Inglorious basterds",
+    "genre": "comedy action"
+  },
+  {
+    "Title": "Independence day",
+    "genre": "action"
+  },
+  {
+    "Title": "The fifth element",
+    "genre": "action"
+  },
+  {
+    "Title": "Titanic",
+    "genre": "drama"
+  },
+  {
+    "Title": "Arrested development season 1",
+    "genre": "TV"
+  },
+  {
+    "Title": "Dave Chapelle: For what it's worth",
+    "genre": "comedy"
+  },
+  {
+    "Title": "Natural born killers",
+    "genre": "drama"
+  },
+  {
+    "Title": "Scarface",
+    "genre": "drama"
   }
 ];
